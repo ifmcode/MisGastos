@@ -8,6 +8,7 @@
     - [x] Configurar entorno de desarrollo (Expo CLI + NativeWind) <!-- id: 5 -->
     - [x] Configurar Backend (Supabase/Firebase) para Auth y Base de Datos <!-- id: 10 -->
     - [x] Crear estructura base del proyecto (Navegación / Tabs) <!-- id: 6 -->
+    - [x] Subir código al repositorio de GitHub <!-- id: 17 -->
 - [/] Desarrollo MVP <!-- id: 7 -->
     - [ ] **Autenticación**: Login, Registro, Logout <!-- id: 11 -->
     - [ ] **Configuración**: Perfil de usuario <!-- id: 12 -->
