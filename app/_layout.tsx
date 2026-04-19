@@ -29,7 +29,7 @@ export default function RootLayout() {
     } else if (!user && inAuthGroup) {
       router.replace('/login');
     }
-  }, [user, loading, segments]);
+  }, [user, loading, segments, router]);
 
   if (loading) {
     return (
