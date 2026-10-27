@@ -1,1 +1,2 @@
-export { default } from "@/features/dashboard/components/dashboard-screen";
+import { DashboardScreen } from "@/features/dashboard/components/dashboard-screen";
+export default DashboardScreen;

@@ -6,7 +6,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/hooks/use-auth';
 import { logout } from '@/lib/auth';
 
-export default function DashboardScreen() {
+export function DashboardScreen() {
   const { user } = useAuth();
 
   return (

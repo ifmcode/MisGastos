@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { logout } from "@/lib/auth";
 import { Pressable, StyleSheet } from "react-native";
 
-export default function SettingsScreen() {
+export function SettingsScreen() {
   const { user } = useAuth();
 
   const handleLogout = () => {

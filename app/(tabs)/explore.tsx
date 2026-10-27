@@ -1,1 +1,2 @@
-export { default } from "@/features/explore/components/explore-screen";
+import { ExploreScreen } from "@/features/explore/components/explore-screen";
+export default ExploreScreen;

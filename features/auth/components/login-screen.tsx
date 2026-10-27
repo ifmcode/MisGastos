@@ -14,7 +14,7 @@ import {
   TextInput,
 } from "react-native";
 
-export default function LoginScreen() {
+export function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
