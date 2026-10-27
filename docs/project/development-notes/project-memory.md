@@ -21,6 +21,7 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 - Firebase as backend (Auth + Firestore). Security rules to be defined
 - Strict TypeScript
 - Tests target coverage >= 90% (see testing guide)
+- **Git**: Never commit automatically. Keep changes staged. Ask before creating a separate commit for unrelated changes.
 
 ## How to resume
 1. Read this file + `docs/project/development-notes/roadmap.md`

@@ -67,6 +67,7 @@ MisGastos/
 
 ## 5. Practical Rules
 - **Imports**: Use `@/` paths. **Named imports only**. Do not use `export { default } from ...` or `import X from ...` for re-exports. Always import the specific named export directly. Prefer explicit named exports from modules.
+- **Commits**: **NEVER commit automatically**. Keep all changes staged with `git add`. Only commit when explicitly instructed by the user. If a new task/change should go in a separate commit, suggest it to the user.
 - **Components**: Functional, `XProps` interface
 - **Hooks**: `useXxx`, correct deps
 - **No `any`**: Use `unknown` + type guards
