@@ -13,7 +13,7 @@
 - [ ] Configure test coverage >= 90%
 
 ## Phase 2: MVP Core
-- [ ] TICKET-001 Wallets
+- [x] TICKET-001 Wallets
 - [ ] TICKET-002 Transactions + history + filters
 - [ ] TICKET-003 Transfers + dashboard
 

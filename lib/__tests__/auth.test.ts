@@ -1,4 +1,4 @@
-import type { Email } from "@/common/types";
+import type { Email } from "@/shared/types/email.types";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import {
   logInWithEmailAndPassword,
@@ -39,7 +39,7 @@ jest.mock("firebase/firestore", () => ({
   where: (...args: unknown[]) => mockWhere(...args),
 }));
 
-jest.mock("./firebase", () => ({
+jest.mock("../firebase", () => ({
   auth: { currentUser: null },
   db: {},
 }));

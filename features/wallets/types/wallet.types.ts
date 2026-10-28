@@ -36,3 +36,18 @@ export interface UpdateWalletDto {
   includeInTotal?: boolean;
   description?: string;
 }
+
+/**
+ * Raw values handled by the wallet form. `initialBalance` is a string because
+ * users type decimals (and may use a comma as decimal separator).
+ */
+export interface WalletFormValues {
+  name: string;
+  currency: CurrencyCode;
+  icon: string;
+  color: string;
+  initialBalance: string;
+  type: WalletType;
+  includeInTotal: boolean;
+  description: string;
+}

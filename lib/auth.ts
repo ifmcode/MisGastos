@@ -1,4 +1,4 @@
-import { Email } from "@/common/types";
+import type { Email } from "@/shared/types/email.types";
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,

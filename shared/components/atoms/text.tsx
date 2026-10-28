@@ -1,6 +1,6 @@
-import { Text as RNText, TextProps } from "react-native";
+import { Text as RNText, TextProps as RNTextProps } from "react-native";
 
-export interface TextProps extends TextProps {
+export interface TextProps extends RNTextProps {
   variant?: "title" | "subtitle" | "body" | "caption";
 }
 

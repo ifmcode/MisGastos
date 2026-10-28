@@ -2,7 +2,7 @@
 
 ## 1. Security
 - **Env vars**: Use `EXPO_PUBLIC_*` only when necessary. Never commit `.env`
-- **Firebase**: Configure strict Firestore rules per user/group (pending)
+- **Firebase**: Strict Firestore rules per user/group in `firestore.rules` (deploy pending)
 - **Auth**: Verify authenticated user before sensitive operations
 - **Data**: Don't log sensitive info (tokens, passwords)
 - **Errors**: Show user-friendly messages, log details in dev
@@ -29,19 +29,17 @@ function validateAmount(amount: number): {ok: boolean, error?: string} {
 }
 ```
 
-## 4. Firestore Security (Guide)
-- users/{uid}: only owner
-- wallets/{id}: owner or members as per model
-- transactions/{id}: validated by membership
-- groups/{id}: only members
-- friends/*: controlled by requests
-
-*(Define real rules before deployment)*
+## 4. Firestore Security (Implemented)
+- Rules live in `firestore.rules` at the repository root.
+- `users/{uid}` documents are only readable/writable by their owner (the current auth flow stores the uid in a field).
+- `users/{uid}/wallets/{walletId}` is owner-only; writes must keep `ownerId == uid`.
+- Deploy with `npx firebase-tools login` and then `npx firebase-tools deploy --only firestore:rules`.
+- Keep `firestore.indexes.json` updated when new composite indexes are needed.
 
 ## 5. Security Checklist
 - [ ] No sensitive data in logs
 - [ ] Client + business validation
 - [ ] Auth/permission checks
-- [ ] Firestore rules considered
+- [x] Firestore rules considered (`firestore.rules`)
 - [ ] No excessive console.logs in production
 - [ ] Errors handled without exposing full stack to user
