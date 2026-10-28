@@ -7,9 +7,9 @@
 - Stack: Expo SDK 54, React Native 0.81.5, React 19.1.0, Expo Router 6, TypeScript 5.9, NativeWind 4, Firebase (Auth + Firestore), Jest 30
 - Auth implemented (email/password + Google)
 - Wallets MVP implemented: create/list, per-wallet balance, include-in-total, Firestore persistence
-- Routes: tabs (dashboard, wallets, explore, settings), login, modal
+- Routes: tabs (dashboard, wallets, settings), login, modal
 - Current structure: app/, components/, lib/, shared/, hooks/, assets/ + features/
-- New structure: features/ (auth, wallets, dashboard, explore, settings, modal), shared/
+- New structure: features/ (auth, wallets, dashboard, settings, modal), shared/
 
 ## Goal
 Build a hybrid app between a personal expense manager and Splitwise - personal finances + shared expenses with multi-wallet/multi-currency, history, filters, transfers between wallets, groups/friends with settlements.
@@ -42,3 +42,4 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 | 27/10/2026 | Feature-first auth migration | Created features/auth with repo/service/factory pattern |
 | 27/10/2026 | Added UI references | Copied Gestor de gastos and Splitwise screenshots to ui-references |
 | 28/10/2026 | Wallets MVP | Implemented features/wallets (repo/service/hooks/UI), Firestore persistence, tests, docs. Fixed remaining common→shared imports |
+| 28/10/2026 | Removed Explore tab | Deleted the template route, feature, unused components/assets and `expo-web-browser` dependency |
