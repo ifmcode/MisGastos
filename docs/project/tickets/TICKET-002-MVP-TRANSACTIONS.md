@@ -19,7 +19,7 @@ Create transactions (expense/income) associated to wallet, with history, filters
 - [x] Validations (amount > 0, wallet required)
 - [x] Persist in Firestore
 - [x] Tests for balance update rules
-- [ ] Currency inherited from wallet (not freely selectable)
+- [x] Currency inherited from wallet (fixed to the selected wallet's currency)
 - [x] Allow selecting which wallet will be affected when creating/editing a transaction
 
 ## Technical Notes
