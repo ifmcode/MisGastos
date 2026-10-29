@@ -15,7 +15,7 @@ Create and manage wallets where expenses/incomes will be associated. Each wallet
 - [x] List wallets
 - [x] Show balance per wallet
 - [x] Validations (name required, currency, initial balance >= 0)
-- [x] Persist in Firestore (users/{uid}/wallets or wallets with ownerId)
+- [x] Persist in Firestore (root `wallets` collection with `ownerId`)
 - [x] Follow features/wallets architecture
 - [x] Tests for critical logic
 
@@ -27,8 +27,8 @@ Create and manage wallets where expenses/incomes will be associated. Each wallet
 - "Include in total" toggle for dashboard
 
 ## Implementation Notes (28/10/2026)
-- Firestore path: `users/{uid}/wallets`; documents also store `ownerId`.
-- Firestore rules: owner-only access for `users/{uid}` and `users/{uid}/wallets` in `firestore.rules`.
+- Firestore path: root `wallets` collection (`wallets/{walletId}`); documents store `ownerId`.
+- Firestore rules: owner-only access for `users/{userId}` and `wallets/{walletId}` in `firestore.rules`.
 - Layers: `repositories` (Firestore + mapper), `services` (business validation), `hooks` (orchestration), `components` (UI).
 - Amounts are decimal numbers rounded to 2 decimals; input accepts comma or dot and rejects negatives/more than 2 decimals.
 - Dashboard total is grouped by currency (no conversion in MVP) and only sums wallets with `includeInTotal`.

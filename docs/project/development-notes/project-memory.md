@@ -23,7 +23,7 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 - Strict TypeScript
 - Tests target coverage >= 90% (see testing guide)
 - Money: decimal numbers rounded to 2 decimals (strict input validation), not integer cents, for MVP. Revisit when transactions/transfers are implemented
-- Wallets persisted at `users/{uid}/wallets` with `ownerId`; dashboard totals grouped by currency (no conversion in MVP)
+- Wallets persisted in the root `wallets` collection with `ownerId`; queried by owner and sorted client-side. Dashboard totals grouped by currency (no conversion in MVP)
 - **Git**: Never commit automatically. Keep changes staged. Ask before creating a separate commit for unrelated changes.
 
 ## How to resume
@@ -43,3 +43,4 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 | 27/10/2026 | Added UI references | Copied Gestor de gastos and Splitwise screenshots to ui-references |
 | 28/10/2026 | Wallets MVP | Implemented features/wallets (repo/service/hooks/UI), Firestore persistence, tests, docs. Fixed remaining common→shared imports |
 | 28/10/2026 | Removed Explore tab | Deleted the template route, feature, unused components/assets and `expo-web-browser` dependency |
+| 29/10/2026 | Moved wallets to root collection | Replaced `users/{uid}/wallets` with root `wallets` + `ownerId`, updated owner-only rules, tests and docs. Legacy test data pending manual deletion |

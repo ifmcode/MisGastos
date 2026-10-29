@@ -6,8 +6,8 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+    function isWalletOwner(data) {
+      return isSignedIn() && data.ownerId == request.auth.uid;
     }
 
     // The current auth flow creates user documents with an auto-generated id
@@ -18,20 +18,15 @@ service cloud.firestore {
 
       allow read, update, delete: if isSignedIn()
         && resource.data.uid == request.auth.uid;
+    }
 
-      match /wallets/{walletId} {
-        allow read: if isOwner(userId);
+    match /wallets/{walletId} {
+      allow read, delete: if isWalletOwner(resource.data);
 
-        allow create: if isOwner(userId)
-          && request.resource.data.ownerId == userId;
+      allow create: if isWalletOwner(request.resource.data);
 
-        allow update: if isOwner(userId)
-          && resource.data.ownerId == userId
-          && request.resource.data.ownerId == userId;
-
-        allow delete: if isOwner(userId)
-          && resource.data.ownerId == userId;
-      }
+      allow update: if isWalletOwner(resource.data)
+        && isWalletOwner(request.resource.data);
     }
   }
 }

@@ -6,15 +6,15 @@ import { FirebaseWalletRepository } from "../firebase-wallet.repository";
 const mockAddDoc = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 const mockCollection = jest.fn<(...args: unknown[]) => unknown>();
 const mockGetDocs = jest.fn<(...args: unknown[]) => Promise<unknown>>();
-const mockOrderBy = jest.fn<(...args: unknown[]) => unknown>();
 const mockQuery = jest.fn<(...args: unknown[]) => unknown>();
+const mockWhere = jest.fn<(...args: unknown[]) => unknown>();
 
 jest.mock("firebase/firestore", () => ({
   addDoc: (...args: unknown[]) => mockAddDoc(...args),
   collection: (...args: unknown[]) => mockCollection(...args),
   getDocs: (...args: unknown[]) => mockGetDocs(...args),
-  orderBy: (...args: unknown[]) => mockOrderBy(...args),
   query: (...args: unknown[]) => mockQuery(...args),
+  where: (...args: unknown[]) => mockWhere(...args),
 }));
 
 jest.mock("@/lib/firebase", () => ({ db: { name: "test-db" } }));
@@ -48,21 +48,33 @@ const validDocumentData: Record<string, unknown> = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockCollection.mockReturnValue({ path: "wallets-collection" });
-  mockOrderBy.mockReturnValue({ field: "createdAt" });
+  mockWhere.mockReturnValue({ field: "ownerId" });
   mockQuery.mockReturnValue({ path: "wallets-query" });
 });
 
 describe("FirebaseWalletRepository.getWallets", () => {
-  it("queries the user's wallets ordered by creation date", async () => {
+  it("queries the user's wallets and sorts them by creation date", async () => {
     mockGetDocs.mockResolvedValue({
       docs: [
         {
-          id: "wallet-1",
-          data: () => validDocumentData,
+          id: "wallet-older",
+          data: () => ({
+            ...validDocumentData,
+            createdAt: "2026-10-28T09:00:00.000Z",
+            updatedAt: "2026-10-28T09:00:00.000Z",
+          }),
         },
         {
           id: "broken",
           data: () => ({ name: "" }),
+        },
+        {
+          id: "wallet-newer",
+          data: () => ({
+            ...validDocumentData,
+            createdAt: "2026-10-28T11:00:00.000Z",
+            updatedAt: "2026-10-28T11:00:00.000Z",
+          }),
         },
       ],
     });
@@ -70,25 +82,21 @@ describe("FirebaseWalletRepository.getWallets", () => {
     const repository = new FirebaseWalletRepository();
     const wallets = await repository.getWallets("user-1");
 
-    expect(mockCollection).toHaveBeenCalledWith(
-      { name: "test-db" },
-      "users",
-      "user-1",
-      "wallets",
-    );
-    expect(mockOrderBy).toHaveBeenCalledWith("createdAt", "desc");
+    expect(mockCollection).toHaveBeenCalledWith({ name: "test-db" }, "wallets");
+    expect(mockWhere).toHaveBeenCalledWith("ownerId", "==", "user-1");
     expect(mockQuery).toHaveBeenCalledWith(
       { path: "wallets-collection" },
-      { field: "createdAt" },
+      { field: "ownerId" },
     );
     expect(mockGetDocs).toHaveBeenCalledWith({ path: "wallets-query" });
-    expect(wallets).toHaveLength(1);
+    expect(wallets).toHaveLength(2);
     expect(wallets[0]).toMatchObject({
-      id: "wallet-1",
+      id: "wallet-newer",
       name: "Cuenta principal",
       balance: 100.5,
       ownerId: "user-1",
     });
+    expect(wallets[1]?.id).toBe("wallet-older");
   });
 
   it("propagates Firestore failures", async () => {
@@ -108,6 +116,7 @@ describe("FirebaseWalletRepository.createWallet", () => {
     const repository = new FirebaseWalletRepository();
     const wallet = await repository.createWallet("user-1", validDto);
 
+    expect(mockCollection).toHaveBeenCalledWith({ name: "test-db" }, "wallets");
     expect(mockAddDoc).toHaveBeenCalledWith(
       { path: "wallets-collection" },
       expect.objectContaining({

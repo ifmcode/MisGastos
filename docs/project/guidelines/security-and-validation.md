@@ -32,7 +32,7 @@ function validateAmount(amount: number): {ok: boolean, error?: string} {
 ## 4. Firestore Security (Implemented)
 - Rules live in `firestore.rules` at the repository root.
 - `users/{uid}` documents are only readable/writable by their owner (the current auth flow stores the uid in a field).
-- `users/{uid}/wallets/{walletId}` is owner-only; writes must keep `ownerId == uid`.
+- The root `wallets/{walletId}` collection is owner-only; reads/deletes require `resource.data.ownerId == uid`, creates require `request.resource.data.ownerId == uid`, and updates cannot change `ownerId`.
 - Deploy with `npx firebase-tools login` and then `npx firebase-tools deploy --only firestore:rules`.
 - Keep `firestore.indexes.json` updated when new composite indexes are needed.
 

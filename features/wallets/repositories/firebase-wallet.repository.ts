@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, orderBy, query } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 
@@ -9,8 +9,10 @@ import { mapWalletDocument } from "./wallet.mapper";
 
 export class FirebaseWalletRepository implements IWalletRepository {
   async getWallets(ownerId: string): Promise<Wallet[]> {
-    const walletsRef = collection(db, "users", ownerId, "wallets");
-    const snapshot = await getDocs(query(walletsRef, orderBy("createdAt", "desc")));
+    const walletsRef = collection(db, "wallets");
+    const snapshot = await getDocs(
+      query(walletsRef, where("ownerId", "==", ownerId)),
+    );
 
     const wallets: Wallet[] = [];
 
@@ -19,7 +21,13 @@ export class FirebaseWalletRepository implements IWalletRepository {
       if (wallet) wallets.push(wallet);
     }
 
-    return wallets;
+    // Wallet lists are small; sorting here avoids a composite index for
+    // ownerId + createdAt. Revisit if pagination or shared wallets are added.
+    return wallets.sort(
+      (first, second) =>
+        new Date(second.createdAt).getTime() -
+        new Date(first.createdAt).getTime(),
+    );
   }
 
   async createWallet(ownerId: string, dto: CreateWalletDto): Promise<Wallet> {
@@ -41,7 +49,7 @@ export class FirebaseWalletRepository implements IWalletRepository {
       ...(dto.description ? { description: dto.description } : {}),
     };
 
-    const walletsRef = collection(db, "users", ownerId, "wallets");
+    const walletsRef = collection(db, "wallets");
     const reference = await addDoc(walletsRef, data);
 
     return { id: reference.id, ...data };
