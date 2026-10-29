@@ -28,5 +28,17 @@ service cloud.firestore {
       allow update: if isWalletOwner(resource.data)
         && isWalletOwner(request.resource.data);
     }
+
+    match /transactions/{transactionId} {
+      allow read: if isWalletOwner(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid;
+
+      allow update: if isWalletOwner(resource.data)
+        && request.resource.data.ownerId == resource.data.ownerId;
+
+      allow delete: if isWalletOwner(resource.data);
+    }
   }
 }

@@ -1,49 +1,45 @@
 import { CurrencyCode } from "@/shared/constants/currencies";
 import { BaseEntity } from "@/shared/types/common.types";
 
-export type TransactionType = "expense" | "income" | "transfer";
+export type TransactionType = "expense" | "income";
 
 export interface Transaction extends BaseEntity {
   type: TransactionType;
   amount: number;
   currency: CurrencyCode;
   walletId: string;
-  categoryId?: string;
+  categoryId: string;
   concept: string;
   notes?: string;
-  date: string | Date;
+  /** Calendar date stored as YYYY-MM-DD to avoid timezone shifts. */
+  date: string;
   ownerId: string;
-  // For transfers
-  fromWalletId?: string;
-  toWalletId?: string;
-  transferId?: string;
 }
 
 export interface CreateTransactionDto {
-  type: Exclude<TransactionType, "transfer">;
+  type: TransactionType;
   amount: number;
   currency: CurrencyCode;
   walletId: string;
-  categoryId?: string;
+  categoryId: string;
   concept: string;
   notes?: string;
-  date: string | Date;
+  date: string;
 }
 
-export interface UpdateTransactionDto {
-  amount?: number;
-  currency?: CurrencyCode;
-  categoryId?: string;
-  concept?: string;
-  notes?: string;
-  date?: string | Date;
-}
+export type UpdateTransactionDto = CreateTransactionDto;
 
-export interface CreateTransferDto {
-  fromWalletId: string;
-  toWalletId: string;
-  amount: number;
+/**
+ * Raw values handled by the transaction form. `amount` is a string because
+ * users type decimals (and may use a comma as decimal separator).
+ */
+export interface TransactionFormValues {
+  type: TransactionType;
+  amount: string;
+  walletId: string;
   currency: CurrencyCode;
-  notes?: string;
-  date: string | Date;
+  categoryId: string;
+  concept: string;
+  notes: string;
+  date: string;
 }
