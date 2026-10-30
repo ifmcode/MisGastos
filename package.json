@@ -9,7 +9,12 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest"
+    "test": "jest",
+    "firestore-update-rules": "npm run firebase-login && npm run firebase-deploy:rules",
+    "firebase-login": "firebase login",
+    "firebase-logout": "firebase logout",
+    "firebase-deploy:rules": "firebase deploy --only firestore:rules",
+    "firebase-deploy:indexes": "firebase deploy --only firestore:indexes"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -45,6 +50,7 @@
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "firebase-tools": "^15.34.2",
     "jest": "^30.3.0",
     "tailwindcss": "^3.4.17",
     "ts-jest": "^29.4.6",
