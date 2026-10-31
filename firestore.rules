@@ -40,5 +40,18 @@ service cloud.firestore {
 
       allow delete: if isWalletOwner(resource.data);
     }
+
+    // Transfers support edit and soft delete. Documents are never hard-deleted:
+    // deletedAt marks a transfer whose balances were already reverted.
+    match /transfers/{transferId} {
+      allow read: if isWalletOwner(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid;
+
+      allow update: if isWalletOwner(resource.data)
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
   }
 }
