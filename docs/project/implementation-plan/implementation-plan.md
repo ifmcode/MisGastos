@@ -19,10 +19,10 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 |---|---|---|---|---|
 | MVP-001 | Authentication | Email/password + Google login (exists) | ✅ Done | Improve validation/error handling |
 | MVP-002 | Wallet/Account | Create wallet with name, currency, icon, color, initial balance, type (cash/bank/other). Option **"Include in total"** toggle. If no initial balance -> 0 | ✅ Done | List, create, per-wallet balance, totals by currency |
-| MVP-003 | Expense/Income | Create transaction with amount, date, concept/category, wallet, notes, type (expense/income). Currency inherited from wallet by default but **selectable**. Creating/editing/deleting must update wallet balance | ⏳ Pending | CRUD |
-| MVP-004 | Transfer between wallets | Move money between own wallets (updates balances). Must be atomic | ⏳ Pending | Traceability |
-| MVP-005 | History with filters/sorting | List by date, filter by wallet/type/category, sort asc/desc | ⏳ Pending | Efficient FlatList |
-| MVP-006 | Dashboard/Summary | Total balance, per wallet, filter by wallet or all | ⏳ Pending | Main view |
+| MVP-003 | Expense/Income | Create transaction with amount, date, concept/category, wallet, notes, type (expense/income). Currency inherited from wallet by default but **selectable**. Creating/editing/deleting must update wallet balance | ✅ Done | CRUD, history, filters and sorting |
+| MVP-004 | Transfer between wallets | Move money between own wallets (updates balances). Must be atomic | ✅ Done | `transfers` collection, `runTransaction`, same currency only, editable and soft-deletable with balance reversion |
+| MVP-005 | History with filters/sorting | List by date, filter by wallet/type/category, sort asc/desc | ✅ Done | Efficient FlatList |
+| MVP-006 | Dashboard/Summary | Total balance, per wallet, filter by wallet or all | ✅ Done | Global/per-wallet totals, includes recent transfers |
 
 ## 3. Post-MVP
 ### 3.1 Profile and settings

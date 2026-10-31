@@ -14,8 +14,8 @@
 
 ## Phase 2: MVP Core
 - [x] TICKET-001 Wallets
-- [ ] TICKET-002 Transactions + history + filters
-- [ ] TICKET-003 Transfers + dashboard
+- [x] TICKET-002 Transactions + history + filters
+- [x] TICKET-003 Transfers + dashboard
 
 ## Phase 3: Post-MVP
 - [ ] Profile/settings

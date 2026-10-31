@@ -75,7 +75,17 @@ MisGastos/
 - **Names**: Clear English names
 - **Async**: try/catch, loading/error states
 - **Lists**: FlatList with keyExtractor
-- **Styles**: NativeWind preferred, StyleSheet if needed
+- **Styles**: NativeWind preferred, StyleSheet if needed. See §5.1 for extraction.
+
+### 5.1 File size & composition (HARD RULES)
+- **Soft limit: 150 lines per file** (components, hooks, utils, services). If a file grows past it, split it before adding more behavior. If a split is not reasonable, document why in the PR/session note.
+- **One component per file.** Each file exports a single component (plus its `Props` interface). Nested/auxiliary components go in their own file.
+- **One responsibility per function.** A function either fetches, transforms, validates, or renders — not several at once. Side effects (e.g. `Alert`) live in small dedicated helpers.
+- **Screens orchestrate, they don't render everything.** A screen wires hooks and state and composes extracted components: header, list header, section headers, footers, empty/loading/error states, modals.
+- **Derived data goes to a hook or pure util**, not inline in the screen (`useXOverview`, `getXDefaults`).
+- **Styles live in a dedicated file when a screen has more than a handful of styles**: `features/<feature>/styles/<name>.styles.ts`, exporting `<name>Styles` (a `StyleSheet.create`) plus a `palette`/token object. Style files MAY exceed 150 lines.
+- **Reuse styles, don't duplicate:** base style + variants applied via arrays (`[styles.chip, selected && styles.chipSelected]`), shared tokens instead of repeated hex colors, and `flex`/`gap` layouts instead of magic margins.
+- **No raw colors in components.** Import them from the styles module or `shared/constants`.
 
 ## 6. Incremental Migration
 1. Create `features/` and `shared/` without deleting existing
@@ -91,3 +101,5 @@ MisGastos/
 - [ ] Dependencies inverted if complex?
 - [ ] Testable?
 - [ ] Reusable or specific?
+- [ ] File ≤150 lines and one component per file?
+- [ ] Styles extracted to a styles module and reused (no duplicated colors)?
