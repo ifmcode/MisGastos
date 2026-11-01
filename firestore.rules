@@ -41,6 +41,21 @@ service cloud.firestore {
       allow delete: if isWalletOwner(resource.data);
     }
 
+    // User-defined categories. The type is fixed after creation so historical
+    // transaction/category type pairs stay consistent.
+    match /categories/{categoryId} {
+      allow read: if isWalletOwner(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid;
+
+      allow update: if isWalletOwner(resource.data)
+        && isWalletOwner(request.resource.data)
+        && request.resource.data.type == resource.data.type;
+
+      allow delete: if isWalletOwner(resource.data);
+    }
+
     // Transfers support edit and soft delete. Documents are never hard-deleted:
     // deletedAt marks a transfer whose balances were already reverted.
     match /transfers/{transferId} {

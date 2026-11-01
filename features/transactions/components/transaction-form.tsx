@@ -1,14 +1,12 @@
-import { Ionicons } from "@expo/vector-icons";
 import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
@@ -21,9 +19,10 @@ import { transactionFormStyles as styles } from "../styles/transaction-form.styl
 import { TransactionFormValues } from "../types/transaction.types";
 import { TransactionFormActions } from "./transaction-form-actions";
 import { TransactionFormAmountField } from "./transaction-form-amount-field";
-import { TransactionFormCategorySelector } from "./transaction-form-category-selector";
+import { TransactionFormCategoryField } from "./transaction-form-category-field";
 import { TransactionFormConceptField } from "./transaction-form-concept-field";
 import { TransactionFormDateField } from "./transaction-form-date-field";
+import { TransactionFormErrorBanner } from "./transaction-form-error-banner";
 import { TransactionFormHeader } from "./transaction-form-header";
 import { TransactionFormNotesField } from "./transaction-form-notes-field";
 import { TransactionFormTypeSelector } from "./transaction-form-type-selector";
@@ -34,11 +33,13 @@ export interface TransactionFormProps {
   error?: string | null;
   fieldErrors?: TransactionValidationErrors;
   wallets: Wallet[];
+  categories: readonly Category[];
   initialValues: TransactionFormValues;
   isEditing: boolean;
   onSubmit: (input: TransactionInput) => void;
   onCancel: () => void;
   onDelete?: () => void;
+  onCategoryCreated?: (category: Category) => void;
 }
 
 export function TransactionForm({
@@ -46,15 +47,17 @@ export function TransactionForm({
   error,
   fieldErrors = {},
   wallets,
+  categories,
   initialValues,
   isEditing,
   onSubmit,
   onCancel,
   onDelete,
+  onCategoryCreated,
 }: TransactionFormProps) {
   const theme = useFormTheme();
-  const { values, errors, categories, dateText, symbol, updateValue, changeDate, submit } =
-    useTransactionForm({ wallets, initialValues, fieldErrors, onSubmit });
+  const { values, errors, categories: typeCategories, dateText, symbol, updateValue, changeDate, submit } =
+    useTransactionForm({ wallets, categories, initialValues, fieldErrors, onSubmit });
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -78,16 +81,7 @@ export function TransactionForm({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            {error ? (
-              <View style={styles.errorBanner}>
-                <Ionicons
-                  name="alert-circle"
-                  size={20}
-                  color={theme.danger}
-                />
-                <ThemedText style={styles.errorBannerText}>{error}</ThemedText>
-              </View>
-            ) : null}
+            <TransactionFormErrorBanner error={error} />
 
             <TransactionFormTypeSelector
               value={values.type}
@@ -111,12 +105,14 @@ export function TransactionForm({
               onChange={(walletId) => updateValue("walletId", walletId)}
             />
 
-            <TransactionFormCategorySelector
-              categories={categories}
+            <TransactionFormCategoryField
+              categories={typeCategories}
               value={values.categoryId}
+              type={values.type}
               error={errors.categoryId}
               disabled={submitting}
               onChange={(categoryId) => updateValue("categoryId", categoryId)}
+              onCategoryCreated={onCategoryCreated}
             />
 
             <TransactionFormConceptField

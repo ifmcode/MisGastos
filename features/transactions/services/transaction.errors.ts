@@ -21,7 +21,9 @@ export type TransactionOperationCode =
   | "TRANSACTION_INVALID"
   | "WALLET_NOT_FOUND"
   | "WALLET_NOT_OWNED"
-  | "CURRENCY_MISMATCH";
+  | "CURRENCY_MISMATCH"
+  | "CATEGORY_NOT_FOUND"
+  | "CATEGORY_TYPE_MISMATCH";
 
 const OPERATION_MESSAGES: Record<TransactionOperationCode, string> = {
   TRANSACTION_NOT_FOUND: "El movimiento ya no existe.",
@@ -30,6 +32,9 @@ const OPERATION_MESSAGES: Record<TransactionOperationCode, string> = {
   WALLET_NOT_OWNED: "No tienes permisos sobre esta cartera.",
   CURRENCY_MISMATCH:
     "La moneda del movimiento debe coincidir con la de la cartera.",
+  CATEGORY_NOT_FOUND: "La categoría seleccionada ya no existe.",
+  CATEGORY_TYPE_MISMATCH:
+    "La categoría debe ser del mismo tipo que el movimiento.",
 };
 
 export class TransactionOperationError extends Error {

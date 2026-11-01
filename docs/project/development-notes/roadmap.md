@@ -18,6 +18,7 @@
 - [x] TICKET-003 Transfers + dashboard
 
 ## Phase 3: Post-MVP
+- [x] Categories management (TICKET-004)
 - [ ] Profile/settings
 - [ ] Friends
 - [ ] Groups (Splitwise-style)

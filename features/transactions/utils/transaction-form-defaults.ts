@@ -1,12 +1,14 @@
+import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 
 import {
   Transaction,
   TransactionFormValues,
-} from "../types/transaction.types";import {
-  getCategoriesForType,
+} from "../types/transaction.types";
+import {
+  findTransactionCategory,
   getDefaultCategoryId,
-} from "../utils/transaction-options";
+} from "./transaction-options";
 
 const DEFAULT_TYPE = "expense";
 
@@ -14,6 +16,7 @@ const DEFAULT_TYPE = "expense";
 export function buildTransactionFormValues(
   wallets: readonly Wallet[],
   editingTransaction: Transaction | null,
+  categories: readonly Category[],
 ): TransactionFormValues {
   if (editingTransaction) {
     return {
@@ -21,7 +24,9 @@ export function buildTransactionFormValues(
       amount: String(editingTransaction.amount),
       walletId: editingTransaction.walletId,
       currency: editingTransaction.currency,
-      categoryId: editingTransaction.categoryId,
+      categoryId:
+        findTransactionCategory(categories, editingTransaction.categoryId)
+          ?.id ?? editingTransaction.categoryId,
       concept: editingTransaction.concept,
       notes: editingTransaction.notes ?? "",
       date: editingTransaction.date,
@@ -33,9 +38,7 @@ export function buildTransactionFormValues(
     amount: "",
     walletId: wallets[0]?.id ?? "",
     currency: wallets[0]?.currency ?? "EUR",
-    categoryId:
-      getCategoriesForType(DEFAULT_TYPE)[0]?.id ??
-      getDefaultCategoryId(DEFAULT_TYPE),
+    categoryId: getDefaultCategoryId(categories, DEFAULT_TYPE),
     concept: "",
     notes: "",
     date: "",

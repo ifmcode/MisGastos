@@ -49,7 +49,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 ### 3.4 General improvements
 | ID | Feature | Description | Status |
 |---|---|---|---|
-| PM-010 | Categories | Create/edit with icon/color, type (expense/income), full CRUD | ⏳ Pending |
+| PM-010 | Categories | Create/edit with icon/color, type (expense/income), full CRUD | ✅ Done |
 | PM-011 | Budgets | Budget by category/wallet with alerts | ⏳ Pending |
 | PM-012 | Export data | CSV/PDF (evaluate later) | ⏳ Pending |
 | PM-013 | Dark mode | Polish existing support | ⏳ Pending |

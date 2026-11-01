@@ -13,6 +13,7 @@ export interface TransactionFormCategorySelectorProps {
   error?: string;
   disabled: boolean;
   onChange: (categoryId: string) => void;
+  onCreate?: () => void;
 }
 
 export function TransactionFormCategorySelector({
@@ -21,6 +22,7 @@ export function TransactionFormCategorySelector({
   error,
   disabled,
   onChange,
+  onCreate,
 }: TransactionFormCategorySelectorProps) {
   const theme = useFormTheme();
 
@@ -66,7 +68,33 @@ export function TransactionFormCategorySelector({
             </Pressable>
           );
         })}
+
+        {onCreate ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Crear categoría"
+            onPress={onCreate}
+            disabled={disabled}
+            style={[
+              styles.categoryItem,
+              styles.categoryAddItem,
+              { backgroundColor: theme.surface, borderColor: theme.border },
+            ]}
+          >
+            <Ionicons name="add" size={20} color={theme.primary} />
+            <ThemedText
+              style={[styles.categoryText, { color: theme.primary }]}
+            >
+              Nueva
+            </ThemedText>
+          </Pressable>
+        ) : null}
       </View>
+      {categories.length === 0 && !onCreate ? (
+        <ThemedText style={[styles.helper, { color: theme.muted }]}>
+          No hay categorías para este tipo.
+        </ThemedText>
+      ) : null}
       {error ? (
         <ThemedText style={styles.fieldError}>{error}</ThemedText>
       ) : null}

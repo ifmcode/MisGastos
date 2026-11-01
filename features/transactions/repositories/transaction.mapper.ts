@@ -7,12 +7,7 @@ import {
   toIsoDateValue,
   toIsoTimestamp,
 } from "../utils/transaction-date";
-import {
-  getDefaultCategoryId,
-  getTransactionCategory,
-  isTransactionCategoryId,
-  isTransactionType,
-} from "../utils/transaction-options";
+import { isTransactionType } from "../utils/transaction-options";
 
 const EPOCH_ISO = new Date(0).toISOString();
 
@@ -47,10 +42,7 @@ export function mapTransactionDocument(
   if (!date) return null;
 
   const categoryId =
-    isTransactionCategoryId(data.categoryId) &&
-    getTransactionCategory(data.categoryId).type === data.type
-      ? data.categoryId
-      : getDefaultCategoryId(data.type);
+    typeof data.categoryId === "string" ? data.categoryId.trim() : "";
 
   const notes =
     typeof data.notes === "string" && data.notes.trim().length > 0

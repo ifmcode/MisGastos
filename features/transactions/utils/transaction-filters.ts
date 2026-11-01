@@ -1,3 +1,5 @@
+import { Category } from "@/features/categories/types/category.types";
+
 import { Transaction, TransactionType } from "../types/transaction.types";
 import { parseDateInput } from "./transaction-date";
 
@@ -21,14 +23,40 @@ export const DEFAULT_TRANSACTION_FILTERS: TransactionFilters = {
   sort: "desc",
 };
 
+/**
+ * Categories created before this feature store a legacy id (for example
+ * "food"), while new ones store the Firestore document id. A filter must match
+ * both so historical movements stay visible.
+ */
+function getCategoryIds(
+  categoryId: string,
+  categories: readonly Category[],
+): ReadonlySet<string> {
+  const ids = new Set<string>([categoryId]);
+  const category = categories.find(
+    (item) => item.id === categoryId || item.legacyId === categoryId,
+  );
+
+  if (category) {
+    ids.add(category.id);
+    if (category.legacyId) ids.add(category.legacyId);
+  }
+
+  return ids;
+}
+
 export function filterTransactions(
   transactions: readonly Transaction[],
   filters: TransactionFilters,
+  categories: readonly Category[] = [],
 ): Transaction[] {
   const fromDate = filters.fromDate.trim()
     ? parseDateInput(filters.fromDate)
     : null;
   const toDate = filters.toDate.trim() ? parseDateInput(filters.toDate) : null;
+  const categoryIds = filters.categoryId
+    ? getCategoryIds(filters.categoryId, categories)
+    : null;
 
   return transactions.filter((transaction) => {
     if (filters.walletId && transaction.walletId !== filters.walletId) {
@@ -39,10 +67,7 @@ export function filterTransactions(
       return false;
     }
 
-    if (
-      filters.categoryId &&
-      transaction.categoryId !== filters.categoryId
-    ) {
+    if (categoryIds && !categoryIds.has(transaction.categoryId)) {
       return false;
     }
 

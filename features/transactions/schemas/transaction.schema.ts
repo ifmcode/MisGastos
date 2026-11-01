@@ -1,4 +1,5 @@
 import { Result } from "@/shared/types/common.types";
+import { Category } from "@/features/categories/types/category.types";
 import { parseAmountInput } from "@/features/wallets/schemas/wallet-amount";
 
 import {
@@ -26,8 +27,9 @@ export {
 
 export function validateTransactionInput(
   input: TransactionInput,
+  categories?: readonly Category[],
 ): Result<CreateTransactionDto, TransactionValidationIssue[]> {
-  const issues = getTransactionIssues(input);
+  const issues = getTransactionIssues(input, categories);
 
   if (issues.length > 0) {
     return { ok: false, error: issues };

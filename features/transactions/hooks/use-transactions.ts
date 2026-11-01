@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 
+import { Category } from "@/features/categories/types/category.types";
 import { useAuth } from "@/hooks/use-auth";
 import { useAsyncCollection } from "@/shared/hooks/use-async-collection";
 
@@ -43,8 +44,14 @@ export interface UseTransactionsResult {
   clearMutationState: () => void;
 }
 
+export interface UseTransactionsOptions {
+  categories?: readonly Category[];
+}
+
 /** Loads the owner's movements and exposes filtering plus mutations. */
-export function useTransactions(): UseTransactionsResult {
+export function useTransactions({
+  categories = [],
+}: UseTransactionsOptions = {}): UseTransactionsResult {
   const { user } = useAuth();
   const ownerId = user?.uid;
   const transactionService = useTransactionService();
@@ -85,10 +92,10 @@ export function useTransactions(): UseTransactionsResult {
   const filteredTransactions = useMemo(
     () =>
       sortTransactions(
-        filterTransactions(transactions, filters),
+        filterTransactions(transactions, filters, categories),
         filters.sort,
       ),
-    [transactions, filters],
+    [transactions, filters, categories],
   );
 
   const activeFilterCount = useMemo(

@@ -190,6 +190,9 @@ export const transactionFormStyles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
+  categoryAddItem: {
+    borderStyle: "dashed",
+  },
   descriptionFooter: {
     flexDirection: "row",
     justifyContent: "space-between",

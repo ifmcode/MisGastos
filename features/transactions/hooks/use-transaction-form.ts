@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { getCurrencySymbol } from "@/features/wallets/utils/money";
 
@@ -16,14 +17,14 @@ import {
   parseDateInput,
 } from "../utils/transaction-date";
 import {
+  findTransactionCategory,
   getCategoriesForType,
   getDefaultCategoryId,
-  getTransactionCategory,
-  TransactionCategory,
 } from "../utils/transaction-options";
 
 export interface UseTransactionFormOptions {
   wallets: Wallet[];
+  categories: readonly Category[];
   initialValues: TransactionFormValues;
   fieldErrors: TransactionValidationErrors;
   onSubmit: (input: TransactionInput) => void;
@@ -32,7 +33,7 @@ export interface UseTransactionFormOptions {
 export interface UseTransactionFormResult {
   values: TransactionFormValues;
   errors: TransactionValidationErrors;
-  categories: readonly TransactionCategory[];
+  categories: ReturnType<typeof getCategoriesForType>;
   dateText: string;
   symbol: string;
   updateValue: <K extends keyof TransactionFormValues>(
@@ -43,25 +44,18 @@ export interface UseTransactionFormResult {
   submit: () => void;
 }
 
-function getInitialFormValues(
-  initialValues: TransactionFormValues,
-): TransactionFormValues {
-  return {
-    ...initialValues,
-    date: initialValues.date || getTodayIsoDate(),
-  };
-}
-
 /** Owns the transaction form values, derived options and submit flow. */
 export function useTransactionForm({
   wallets,
+  categories,
   initialValues,
   fieldErrors,
   onSubmit,
 }: UseTransactionFormOptions): UseTransactionFormResult {
-  const [values, setValues] = useState<TransactionFormValues>(() =>
-    getInitialFormValues(initialValues),
-  );
+  const [values, setValues] = useState<TransactionFormValues>(() => ({
+    ...initialValues,
+    date: initialValues.date || getTodayIsoDate(),
+  }));
   const [localErrors, setLocalErrors] = useState<TransactionValidationErrors>(
     {},
   );
@@ -74,9 +68,9 @@ export function useTransactionForm({
     ...fieldErrors,
   };
 
-  const categories = useMemo(
-    () => getCategoriesForType(values.type),
-    [values.type],
+  const typeCategories = useMemo(
+    () => getCategoriesForType(categories, values.type),
+    [categories, values.type],
   );
 
   const selectedWallet = useMemo(
@@ -100,9 +94,12 @@ export function useTransactionForm({
 
       if (key === "type") {
         const typeValue = value as TransactionFormValues["type"];
-        const currentCategory = getTransactionCategory(next.categoryId);
-        if (currentCategory.type !== typeValue) {
-          next.categoryId = getDefaultCategoryId(typeValue);
+        const currentCategory = findTransactionCategory(
+          categories,
+          next.categoryId,
+        );
+        if (!currentCategory || currentCategory.type !== typeValue) {
+          next.categoryId = getDefaultCategoryId(categories, typeValue);
         }
       }
 
@@ -132,16 +129,19 @@ export function useTransactionForm({
   }
 
   function submit() {
-    const validation = validateTransactionInput({
-      type: values.type,
-      amount: values.amount,
-      currency: selectedWallet?.currency ?? values.currency,
-      walletId: values.walletId,
-      categoryId: values.categoryId,
-      concept: values.concept,
-      notes: values.notes,
-      date: values.date,
-    });
+    const validation = validateTransactionInput(
+      {
+        type: values.type,
+        amount: values.amount,
+        currency: selectedWallet?.currency ?? values.currency,
+        walletId: values.walletId,
+        categoryId: values.categoryId,
+        concept: values.concept,
+        notes: values.notes,
+        date: values.date,
+      },
+      categories,
+    );
 
     if (!validation.ok) {
       setLocalErrors(toTransactionFieldErrors(validation.error));
@@ -155,7 +155,7 @@ export function useTransactionForm({
   return {
     values,
     errors,
-    categories,
+    categories: typeCategories,
     dateText,
     symbol: getCurrencySymbol(selectedWallet?.currency ?? values.currency),
     updateValue,

@@ -1,3 +1,5 @@
+import { ICategoryRepository } from "@/features/categories/repositories/category.repository";
+
 import { ITransactionRepository } from "../repositories/transaction.repository";
 import {
   TransactionInput,
@@ -19,7 +21,10 @@ function ownerIssue(): TransactionValidationIssue {
 }
 
 export class TransactionService {
-  constructor(private readonly repository: ITransactionRepository) {}
+  constructor(
+    private readonly repository: ITransactionRepository,
+    private readonly categoryRepository: ICategoryRepository,
+  ) {}
 
   async getTransactions(ownerId: string): Promise<Transaction[]> {
     const normalizedOwnerId = ownerId.trim();
@@ -47,6 +52,12 @@ export class TransactionService {
     if (issues.length > 0) {
       throw new TransactionValidationError(issues);
     }
+
+    await this.ensureCategory(
+      normalizedOwnerId,
+      validation.value.categoryId,
+      validation.value.type,
+    );
 
     return this.repository.createTransaction(normalizedOwnerId, validation.value);
   }
@@ -77,6 +88,12 @@ export class TransactionService {
       throw new TransactionOperationError("TRANSACTION_NOT_FOUND");
     }
 
+    await this.ensureCategory(
+      normalizedOwnerId,
+      validation.value.categoryId,
+      validation.value.type,
+    );
+
     return this.repository.updateTransaction(
       normalizedOwnerId,
       normalizedTransactionId,
@@ -100,5 +117,25 @@ export class TransactionService {
       normalizedOwnerId,
       normalizedTransactionId,
     );
+  }
+
+  /** Ensures the category belongs to the owner and matches the movement type. */
+  private async ensureCategory(
+    ownerId: string,
+    categoryId: string,
+    type: string,
+  ): Promise<void> {
+    const category = await this.categoryRepository.getCategory(
+      ownerId,
+      categoryId,
+    );
+
+    if (!category) {
+      throw new TransactionOperationError("CATEGORY_NOT_FOUND");
+    }
+
+    if (category.type !== type) {
+      throw new TransactionOperationError("CATEGORY_TYPE_MISMATCH");
+    }
   }
 }

@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
@@ -16,10 +17,7 @@ import {
   TransactionFilters,
   TransactionSortOrder,
 } from "../utils/transaction-filters";
-import {
-  getCategoriesForType,
-  TRANSACTION_TYPE_OPTIONS,
-} from "../utils/transaction-options";
+import { TRANSACTION_TYPE_OPTIONS } from "../utils/transaction-options";
 import { TransactionType } from "../types/transaction.types";
 import { TransactionFiltersActions } from "./transaction-filters-actions";
 import { TransactionFiltersChipGroup } from "./transaction-filters-chip-group";
@@ -32,6 +30,7 @@ import {
 
 export interface TransactionFiltersModalProps {
   wallets: Wallet[];
+  categories: readonly Category[];
   filters: TransactionFilters;
   onApply: (filters: TransactionFilters) => void;
   onReset: () => void;
@@ -51,6 +50,7 @@ const TYPE_OPTIONS: ReadonlyArray<
 
 export function TransactionFiltersModal({
   wallets,
+  categories,
   filters,
   onApply,
   onReset,
@@ -67,9 +67,6 @@ export function TransactionFiltersModal({
     apply,
   } = useTransactionFiltersForm({ filters, onApply });
 
-  const categoryType =
-    localFilters.type === "all" ? ("expense" as const) : localFilters.type;
-
   const walletOptions: TransactionFiltersOption<string>[] = [
     { value: "", label: "Todas" },
     ...wallets.map((wallet) => ({ value: wallet.id, label: wallet.name })),
@@ -77,10 +74,15 @@ export function TransactionFiltersModal({
 
   const categoryOptions: TransactionFiltersOption<string>[] = [
     { value: "", label: "Todas" },
-    ...getCategoriesForType(categoryType).map((category) => ({
-      value: category.id,
-      label: category.label,
-    })),
+    ...categories
+      .filter(
+        (category) =>
+          localFilters.type === "all" || category.type === localFilters.type,
+      )
+      .map((category) => ({
+        value: category.id,
+        label: category.name,
+      })),
   ];
 
   return (

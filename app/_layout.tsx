@@ -22,11 +22,12 @@ export default function RootLayout() {
   useEffect(() => {
     if (loading) return;
 
-    const inAuthGroup = segments[0] === '(tabs)';
+    const inPrivateRoute =
+      segments[0] === '(tabs)' || segments[0] === 'categories';
 
-    if (user && !inAuthGroup) {
+    if (user && !inPrivateRoute) {
       router.replace('/(tabs)');
-    } else if (!user && inAuthGroup) {
+    } else if (!user && inPrivateRoute) {
       router.replace('/login');
     }
   }, [user, loading, segments, router]);
@@ -47,6 +48,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="categories" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />

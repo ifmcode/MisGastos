@@ -1,12 +1,10 @@
 import { isCurrencyCode } from "@/shared/constants/currencies";
+import { Category } from "@/features/categories/types/category.types";
 import { parseAmountInput } from "@/features/wallets/schemas/wallet-amount";
 
 import { parseDateInput } from "../utils/transaction-date";
-import {
-  getTransactionCategory,
-  isTransactionCategoryId,
-  isTransactionType,
-} from "../utils/transaction-options";
+import { isTransactionType } from "../utils/transaction-options";
+import { getTransactionCategoryIssue } from "./transaction-category-validation";
 import {
   TRANSACTION_AMOUNT_MAX,
   TRANSACTION_CONCEPT_MAX_LENGTH,
@@ -74,31 +72,6 @@ function getWalletIssue(
   };
 }
 
-function getCategoryIssue(
-  input: TransactionInput,
-): TransactionValidationIssue | null {
-  if (!isTransactionCategoryId(input.categoryId)) {
-    return {
-      field: "categoryId",
-      code: "INVALID_CATEGORY",
-      message: "Selecciona una categoría válida.",
-    };
-  }
-
-  if (
-    isTransactionType(input.type) &&
-    getTransactionCategory(input.categoryId).type !== input.type
-  ) {
-    return {
-      field: "categoryId",
-      code: "CATEGORY_TYPE_MISMATCH",
-      message: "La categoría no corresponde al tipo de movimiento.",
-    };
-  }
-
-  return null;
-}
-
 function getConceptIssue(
   input: TransactionInput,
 ): TransactionValidationIssue | null {
@@ -153,13 +126,14 @@ function getDateIssue(
 /** Collects every field issue of a transaction input in display order. */
 export function getTransactionIssues(
   input: TransactionInput,
+  categories?: readonly Category[],
 ): TransactionValidationIssue[] {
   return [
     getTypeIssue(input),
     getAmountIssue(input),
     getCurrencyIssue(input),
     getWalletIssue(input),
-    getCategoryIssue(input),
+    getTransactionCategoryIssue(input, categories),
     getConceptIssue(input),
     getNotesIssue(input),
     getDateIssue(input),

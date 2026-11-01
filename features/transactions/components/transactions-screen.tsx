@@ -1,34 +1,34 @@
-import { useMemo, useState } from "react";
-import { FlatList, View } from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
+import { useCategories } from "@/features/categories/hooks/use-categories";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
 
 import { useTransactionFormDialog } from "../hooks/use-transaction-form-dialog";
 import { useTransactions } from "../hooks/use-transactions";
 import { transactionsStyles as styles } from "../styles/transactions.styles";
-import { Transaction } from "../types/transaction.types";
 import { TransactionFilters } from "../utils/transaction-filters";
-import { getTransactionCategory } from "../utils/transaction-options";
-import { TransactionFiltersModal } from "./transaction-filters-modal";
-import { TransactionItem } from "./transaction-item";
-import { TransactionsActiveFiltersHeader } from "./transactions-active-filters-header";
-import { TransactionsEmptyState } from "./transactions-empty-state";
 import { TransactionsErrorState } from "./transactions-error-state";
 import { TransactionsFab } from "./transactions-fab";
 import { TransactionsFiltersDialog } from "./transactions-filters-dialog";
 import { TransactionsFormModal } from "./transactions-form-modal";
 import { TransactionsHeader } from "./transactions-header";
+import { TransactionsList } from "./transactions-list";
 import { TransactionsLoadingState } from "./transactions-loading-state";
-
-function TransactionSeparator() {
-  return <View style={styles.separator} />;
-}
 
 export function TransactionsScreen() {
   const insets = useSafeAreaInsets();
   const { wallets } = useWallets();
+  const {
+    categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+    reload: reloadCategories,
+    refresh: refreshCategories,
+    addCategory,
+  } = useCategories();
   const {
     filteredTransactions,
     filters,
@@ -47,9 +47,23 @@ export function TransactionsScreen() {
     updateTransaction,
     deleteTransaction,
     clearMutationState,
-  } = useTransactions();
+  } = useTransactions({ categories });
 
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
+  const hasFocusedOnce = useRef(false);
+
+  // Categories can change in the settings flow; refresh them when the tab is
+  // focused again so the form and filters never show stale options.
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasFocusedOnce.current) {
+        hasFocusedOnce.current = true;
+        return;
+      }
+
+      void refreshCategories();
+    }, [refreshCategories]),
+  );
 
   const walletMap = useMemo(
     () => new Map(wallets.map((wallet) => [wallet.id, wallet])),
@@ -66,17 +80,18 @@ export function TransactionsScreen() {
   });
 
   const hasFilters = activeFilterCount > 0;
-  const showChrome = !loading && !error;
+  const screenLoading = loading || categoriesLoading;
+  const screenError = error ?? categoriesError;
+  const showChrome = !screenLoading && !screenError;
 
-  function renderItem({ item }: { item: Transaction }) {
-    return (
-      <TransactionItem
-        transaction={item}
-        wallet={walletMap.get(item.walletId)}
-        category={getTransactionCategory(item.categoryId)}
-        onPress={() => dialog.openEdit(item)}
-      />
-    );
+  function retryLoad() {
+    void reload();
+    void reloadCategories();
+  }
+
+  function refreshAll() {
+    void refresh();
+    void refreshCategories();
   }
 
   function applyFilters(next: TransactionFilters) {
@@ -98,39 +113,22 @@ export function TransactionsScreen() {
         onCreate={dialog.openCreate}
       />
 
-      {loading ? (
+      {screenLoading ? (
         <TransactionsLoadingState />
-      ) : error ? (
-        <TransactionsErrorState message={error} onRetry={() => void reload()} />
+      ) : screenError ? (
+        <TransactionsErrorState message={screenError} onRetry={retryLoad} />
       ) : (
-        <FlatList
-          data={filteredTransactions}
-          keyExtractor={(transaction) => transaction.id}
-          renderItem={renderItem}
-          ItemSeparatorComponent={TransactionSeparator}
-          ListHeaderComponent={
-            hasFilters ? (
-              <TransactionsActiveFiltersHeader
-                resultCount={filteredTransactions.length}
-                activeFilterCount={activeFilterCount}
-                onClearFilters={resetFilters}
-              />
-            ) : null
-          }
-          ListEmptyComponent={
-            <TransactionsEmptyState
-              hasFilters={hasFilters}
-              onCreate={dialog.openCreate}
-              onClearFilters={resetFilters}
-            />
-          }
-          contentContainerStyle={[
-            styles.listContent,
-            filteredTransactions.length === 0 && styles.emptyListContent,
-          ]}
+        <TransactionsList
+          transactions={filteredTransactions}
+          walletMap={walletMap}
+          categories={categories}
+          hasFilters={hasFilters}
+          activeFilterCount={activeFilterCount}
           refreshing={refreshing}
-          onRefresh={() => void refresh()}
-          showsVerticalScrollIndicator={false}
+          onRefresh={refreshAll}
+          onEdit={dialog.openEdit}
+          onCreate={dialog.openCreate}
+          onClearFilters={resetFilters}
         />
       )}
 
@@ -147,15 +145,18 @@ export function TransactionsScreen() {
         error={mutationError}
         fieldErrors={mutationFieldErrors}
         wallets={wallets}
+        categories={categories}
         editingTransaction={dialog.editingTransaction}
         onSubmit={(input) => void dialog.submit(input)}
         onDelete={dialog.requestDelete}
         onClose={dialog.close}
+        onCategoryCreated={addCategory}
       />
 
       <TransactionsFiltersDialog
         visible={isFiltersVisible}
         wallets={wallets}
+        categories={categories}
         filters={filters}
         onApply={applyFilters}
         onReset={clearFilters}

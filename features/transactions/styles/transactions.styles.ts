@@ -190,10 +190,6 @@ export const transactionsStyles = StyleSheet.create({
     backgroundColor: transactionsPalette.primary,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
   },
 });

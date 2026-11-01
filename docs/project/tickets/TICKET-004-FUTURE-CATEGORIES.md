@@ -2,7 +2,7 @@
 
 **Type:** Feature  
 **Priority:** Medium  
-**Status:** ⏳ Future  
+**Status:** ✅ Done  
 **Related:** TICKET-002, TICKET-003  
 **Sprint:** Post-MVP  
 
@@ -10,15 +10,15 @@
 Improve category management to be fully user-configurable, reusable from transaction/transfer flows and aligned with mobile UX.
 
 ## Requirements
-- [ ] Create a "Categorías" section/screen to list current categories
-- [ ] Allow adding new categories
-- [ ] Allow editing existing categories (name, icon, color/type)
-- [ ] Allow deleting categories with validation (check if in use by transactions/transfers)
-- [ ] When creating a transaction or a transfer, allow creating a category from that flow without leaving it
-- [ ] Share the same category creation/edit modal between the categories section and the transaction/transfer creation flows
-- [ ] Persist categories in Firestore per user (`categories/{categoryId}` with `ownerId`) with sensible defaults for new users
-- [ ] Update category pickers to include user categories
-- [ ] Add tests for category CRUD and usage checks
+- [x] Create a "Categorías" section/screen to list current categories
+- [x] Allow adding new categories
+- [x] Allow editing existing categories (name, icon, color/type)
+- [x] Allow deleting categories with validation (blocked while used by transactions; transfers remain uncategorized)
+- [x] When creating a transaction, allow creating a category from that flow without leaving it
+- [x] Share the same category creation/edit modal between the categories section and the transaction creation flow
+- [x] Persist categories in Firestore per user (`categories/{categoryId}` with `ownerId`) with sensible defaults for new users
+- [x] Update category pickers to include user categories
+- [x] Add tests for category CRUD and usage checks
 
 ## Technical Notes
 - Start from current fixed categories but migrate to dynamic model
@@ -26,3 +26,18 @@ Improve category management to be fully user-configurable, reusable from transac
 - Keep backward compatibility for existing transactions
 - Consider soft delete or block deletion if category is used
 - Keep modal reusable (shared component) to avoid duplication
+
+## Implementation Notes
+- Categories live in the root `categories` collection and are scoped by `ownerId`.
+- Defaults are seeded lazily when an owner has zero categories. Deterministic ids
+  (`${ownerId}__${legacyId}`) keep seeding idempotent. Consequence: deleting the
+  last category re-seeds the defaults on the next load.
+- Deletion is a hard delete and is blocked when any transaction uses the
+  category. Checks match both the document id and the legacy id.
+- Existing transactions are not rewritten: seeded defaults keep their old ids in
+  `legacyId` and pickers/filters resolve either value.
+- Categories can be created from the transaction form through the shared modal;
+  the new category is selected automatically. Transfers intentionally remain
+  uncategorized (separate ticket decision).
+- Category `type` is locked after creation in the UI, service and Firestore rules.
+- Firestore rules for the `categories` collection still need to be deployed.
