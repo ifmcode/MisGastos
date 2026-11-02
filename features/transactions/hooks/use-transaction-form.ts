@@ -15,7 +15,7 @@ import {
   formatDateInput,
   getTodayIsoDate,
   parseDateInput,
-} from "../utils/transaction-date";
+} from "@/shared/utils/date";
 import {
   findTransactionCategory,
   getCategoriesForType,

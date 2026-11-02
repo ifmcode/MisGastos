@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { formatDateInput } from "@/features/transactions/utils/transaction-date";
+import { formatDateInput } from "@/shared/utils/date";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { formatMoney } from "@/features/wallets/utils/money";
 

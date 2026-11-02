@@ -4,7 +4,7 @@ import { roundMoney } from "@/features/wallets/utils/money";
 import {
   toIsoDateValue,
   toIsoTimestamp,
-} from "@/features/transactions/utils/transaction-date";
+} from "@/shared/utils/date";
 
 import { Transfer } from "../types/transfer.types";
 

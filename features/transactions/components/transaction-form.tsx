@@ -124,6 +124,7 @@ export function TransactionForm({
 
             <TransactionFormDateField
               text={dateText}
+              value={values.date}
               error={errors.date}
               disabled={submitting}
               onChange={changeDate}

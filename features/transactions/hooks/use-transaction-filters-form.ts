@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { parseDateInput } from "../utils/transaction-date";
+import { formatDateInput, parseDateInput } from "@/shared/utils/date";
+
 import { TransactionFilters } from "../utils/transaction-filters";
 
 export interface UseTransactionFiltersFormOptions {
@@ -12,9 +13,13 @@ export interface TransactionFiltersForm {
   localFilters: TransactionFilters;
   fromText: string;
   toText: string;
+  fromIso: string;
+  toIso: string;
   updateFilters: (patch: Partial<TransactionFilters>) => void;
   changeFromDate: (text: string) => void;
   changeToDate: (text: string) => void;
+  selectFromDate: (isoDate: string) => void;
+  selectToDate: (isoDate: string) => void;
   apply: () => void;
 }
 
@@ -42,6 +47,14 @@ export function useTransactionFiltersForm({
     updateFilters({ toDate: text });
   }
 
+  function selectFromDate(isoDate: string) {
+    changeFromDate(formatDateInput(isoDate));
+  }
+
+  function selectToDate(isoDate: string) {
+    changeToDate(formatDateInput(isoDate));
+  }
+
   function apply() {
     onApply({
       ...localFilters,
@@ -56,9 +69,13 @@ export function useTransactionFiltersForm({
     localFilters,
     fromText,
     toText,
+    fromIso: parseDateInput(fromText) ?? "",
+    toIso: parseDateInput(toText) ?? "",
     updateFilters,
     changeFromDate,
     changeToDate,
+    selectFromDate,
+    selectToDate,
     apply,
   };
 }

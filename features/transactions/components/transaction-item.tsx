@@ -8,7 +8,7 @@ import { Wallet } from "@/features/wallets/types/wallet.types";
 import { formatMoney } from "@/features/wallets/utils/money";
 
 import { Transaction } from "../types/transaction.types";
-import { formatDateInput } from "../utils/transaction-date";
+import { formatDateInput } from "@/shared/utils/date";
 import { TransactionCategory } from "../utils/transaction-options";
 
 export interface TransactionItemProps {

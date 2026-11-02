@@ -1,7 +1,7 @@
 import { Category } from "@/features/categories/types/category.types";
 
 import { Transaction, TransactionType } from "../types/transaction.types";
-import { parseDateInput } from "./transaction-date";
+import { parseDateInput } from "@/shared/utils/date";
 
 export type TransactionSortOrder = "asc" | "desc";
 

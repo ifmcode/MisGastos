@@ -3,7 +3,7 @@ import { Wallet } from "@/features/wallets/types/wallet.types";
 import { formatMoney, roundMoney } from "@/features/wallets/utils/money";
 import {
   getTodayIsoDate,
-} from "@/features/transactions/utils/transaction-date";
+} from "@/shared/utils/date";
 
 import { Transfer, TransferFormValues } from "../types/transfer.types";
 

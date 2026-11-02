@@ -132,6 +132,7 @@ export function TransferForm({
 
             <TransferFormDateField
               text={dateText}
+              value={values.date}
               error={errors.date}
               disabled={submitting}
               onChange={changeDate}

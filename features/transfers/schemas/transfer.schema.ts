@@ -2,7 +2,7 @@ import { isCurrencyCode } from "@/shared/constants/currencies";
 import { Result } from "@/shared/types/common.types";
 
 import { parseAmountInput } from "@/features/wallets/schemas/wallet.schema";
-import { parseDateInput } from "@/features/transactions/utils/transaction-date";
+import { parseDateInput } from "@/shared/utils/date";
 
 import { CreateTransferDto } from "../types/transfer.types";
 

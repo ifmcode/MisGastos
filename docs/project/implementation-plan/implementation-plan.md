@@ -54,6 +54,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 | PM-012 | Export data | CSV/PDF (evaluate later) | ⏳ Pending |
 | PM-013 | Dark mode | Polish existing support | ⏳ Pending |
 | PM-014 | Advanced search | By text/concept, date range, multiple filters | ⏳ Pending |
+| PM-015 | Date picker UX | Quick Hoy/Ayer chips, calendar button (native on mobile, in-app on web) and manual fallback in forms and filters | ✅ Done |
 
 ## 4. Key Business Rules
 - **No photos initially**: No avatar/photo uploads. Use initials/icons

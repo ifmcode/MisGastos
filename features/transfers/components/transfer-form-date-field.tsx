@@ -1,12 +1,12 @@
-import { TextInput } from "react-native";
-
 import { ThemedText } from "@/components/themed-text";
-import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { DateQuickSelector } from "@/shared/components/molecules/date-quick-selector";
+import { formatDateInput } from "@/shared/utils/date";
 
 import { transferFormStyles as styles } from "../styles/transfer-form.styles";
 
 export interface TransferFormDateFieldProps {
   text: string;
+  value: string;
   error?: string;
   disabled: boolean;
   onChange: (text: string) => void;
@@ -14,38 +14,24 @@ export interface TransferFormDateFieldProps {
 
 export function TransferFormDateField({
   text,
+  value,
   error,
   disabled,
   onChange,
 }: TransferFormDateFieldProps) {
-  const theme = useFormTheme();
-
   return (
     <>
       <ThemedText style={styles.label}>Fecha</ThemedText>
-      <TextInput
-        value={text}
-        onChangeText={onChange}
-        placeholder="DD/MM/AAAA"
-        placeholderTextColor={theme.muted}
-        editable={!disabled}
+      <DateQuickSelector
+        text={text}
+        valueIso={value}
+        error={error}
+        disabled={disabled}
+        helperText="Toca Hoy o Ayer, o elige otra fecha."
         accessibilityLabel="Fecha de la transferencia"
-        style={[
-          styles.input,
-          {
-            backgroundColor: theme.surface,
-            borderColor: error ? theme.danger : theme.border,
-            color: theme.text,
-          },
-        ]}
+        onChangeText={onChange}
+        onSelectDate={(isoDate) => onChange(formatDateInput(isoDate))}
       />
-      {error ? (
-        <ThemedText style={styles.fieldError}>{error}</ThemedText>
-      ) : (
-        <ThemedText style={[styles.helper, { color: theme.muted }]}>
-          Por defecto se usa hoy.
-        </ThemedText>
-      )}
     </>
   );
 }

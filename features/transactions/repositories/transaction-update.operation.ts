@@ -6,7 +6,7 @@ import { roundMoney } from "@/features/wallets/utils/money";
 
 import { TransactionOperationError } from "../services/transaction.errors";
 import { UpdateTransactionDto } from "../types/transaction.types";
-import { toIsoTimestamp } from "../utils/transaction-date";
+import { toIsoTimestamp } from "@/shared/utils/date";
 import {
   buildTransaction,
   getMappedWallet,

@@ -4,7 +4,7 @@ import { db } from "@/lib/firebase";
 import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { roundMoney } from "@/features/wallets/utils/money";
-import { toIsoTimestamp } from "@/features/transactions/utils/transaction-date";
+import { toIsoTimestamp } from "@/shared/utils/date";
 
 import { TransferOperationError } from "../services/transfer.errors";
 import { Transfer, UpdateTransferDto } from "../types/transfer.types";

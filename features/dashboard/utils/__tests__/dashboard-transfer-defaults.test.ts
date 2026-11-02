@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { getTodayIsoDate } from "@/features/transactions/utils/transaction-date";
+import { getTodayIsoDate } from "@/shared/utils/date";
 import { Transfer } from "@/features/transfers/types/transfer.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 

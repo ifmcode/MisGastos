@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { formatDateInput, parseDateInput } from "@/features/transactions/utils/transaction-date";
+import { formatDateInput, parseDateInput } from "@/shared/utils/date";
 import { CurrencyCode } from "@/shared/constants/currencies";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { getCurrencySymbol, formatMoney } from "@/features/wallets/utils/money";

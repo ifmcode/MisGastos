@@ -34,13 +34,37 @@ function buildIsoDate(
   return `${year}-${pad(month)}-${pad(day)}`;
 }
 
-function dateToLocalIsoDate(date: Date): string | null {
+export function toLocalIsoDate(date: Date): string | null {
   if (Number.isNaN(date.getTime())) return null;
   return buildIsoDate(
     date.getFullYear(),
     date.getMonth() + 1,
     date.getDate(),
   );
+}
+
+/**
+ * Converts a YYYY-MM-DD value into a Date at local midnight, so pickers and
+ * comparisons always operate on the user's calendar day.
+ */
+export function parseIsoDateToLocalDate(value: string): Date | null {
+  const match = ISO_DATE_PATTERN.exec(value);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return date;
 }
 
 /**
@@ -76,8 +100,8 @@ export function parseDateInput(value: string | null | undefined): string | null 
 
 export function toIsoDateValue(value: unknown): string | null {
   if (typeof value === "string") return parseDateInput(value);
-  if (value instanceof Date) return dateToLocalIsoDate(value);
-  if (isTimestampLike(value)) return dateToLocalIsoDate(value.toDate());
+  if (value instanceof Date) return toLocalIsoDate(value);
+  if (isTimestampLike(value)) return toLocalIsoDate(value.toDate());
   return null;
 }
 
@@ -107,10 +131,10 @@ export function formatDateInput(isoDate: string): string {
 }
 
 export function getTodayDateInput(date = new Date()): string {
-  const isoDate = dateToLocalIsoDate(date);
+  const isoDate = toLocalIsoDate(date);
   return isoDate ? formatDateInput(isoDate) : "";
 }
 
 export function getTodayIsoDate(date = new Date()): string {
-  return dateToLocalIsoDate(date) ?? "";
+  return toLocalIsoDate(date) ?? "";
 }

@@ -89,17 +89,13 @@ export const transactionFiltersStyles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
-  dateRow: {
-    flexDirection: "row",
-    gap: 10,
+  dateFields: {
+    gap: 4,
   },
-  dateInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    minHeight: 48,
-    fontSize: 15,
+  dateFieldLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    marginTop: 6,
   },
 
   // Actions

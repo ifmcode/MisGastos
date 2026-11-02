@@ -6,7 +6,7 @@ import {
   CreateTransactionDto,
   TransactionType,
 } from "../types/transaction.types";
-import { parseDateInput } from "../utils/transaction-date";
+import { parseDateInput } from "@/shared/utils/date";
 import { getTransactionIssues } from "./transaction-field-validation";
 import {
   TransactionInput,

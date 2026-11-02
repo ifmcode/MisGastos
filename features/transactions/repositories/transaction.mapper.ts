@@ -6,7 +6,7 @@ import { Transaction } from "../types/transaction.types";
 import {
   toIsoDateValue,
   toIsoTimestamp,
-} from "../utils/transaction-date";
+} from "@/shared/utils/date";
 import { isTransactionType } from "../utils/transaction-options";
 
 const EPOCH_ISO = new Date(0).toISOString();

@@ -2,7 +2,7 @@ import { isCurrencyCode } from "@/shared/constants/currencies";
 import { Category } from "@/features/categories/types/category.types";
 import { parseAmountInput } from "@/features/wallets/schemas/wallet-amount";
 
-import { parseDateInput } from "../utils/transaction-date";
+import { parseDateInput } from "@/shared/utils/date";
 import { isTransactionType } from "../utils/transaction-options";
 import { getTransactionCategoryIssue } from "./transaction-category-validation";
 import {

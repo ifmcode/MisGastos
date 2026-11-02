@@ -19,6 +19,7 @@
 
 ## Phase 3: Post-MVP
 - [x] Categories management (TICKET-004)
+- [x] Date picker UX (TICKET-005)
 - [ ] Profile/settings
 - [ ] Friends
 - [ ] Groups (Splitwise-style)

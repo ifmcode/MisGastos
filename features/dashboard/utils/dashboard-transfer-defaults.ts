@@ -1,4 +1,4 @@
-import { getTodayIsoDate } from "@/features/transactions/utils/transaction-date";
+import { getTodayIsoDate } from "@/shared/utils/date";
 import {
   Transfer,
   TransferFormValues,

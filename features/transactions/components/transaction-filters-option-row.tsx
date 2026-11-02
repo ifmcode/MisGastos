@@ -4,11 +4,7 @@ import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { transactionFiltersStyles as styles } from "../styles/transaction-filters.styles";
-
-export interface TransactionFiltersOption<T extends string> {
-  value: T;
-  label: string;
-}
+import { TransactionFiltersOption } from "../utils/transaction-filters-options";
 
 export interface TransactionFiltersOptionRowProps<T extends string> {
   options: ReadonlyArray<TransactionFiltersOption<T>>;

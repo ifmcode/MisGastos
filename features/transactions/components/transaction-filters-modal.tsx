@@ -13,20 +13,17 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useTransactionFiltersForm } from "../hooks/use-transaction-filters-form";
 import { transactionFiltersStyles as styles } from "../styles/transaction-filters.styles";
+import { TransactionFilters } from "../utils/transaction-filters";
 import {
-  TransactionFilters,
-  TransactionSortOrder,
-} from "../utils/transaction-filters";
-import { TRANSACTION_TYPE_OPTIONS } from "../utils/transaction-options";
-import { TransactionType } from "../types/transaction.types";
+  TRANSACTION_SORT_OPTIONS,
+  TRANSACTION_TYPE_FILTER_OPTIONS,
+  TransactionFiltersOption,
+} from "../utils/transaction-filters-options";
 import { TransactionFiltersActions } from "./transaction-filters-actions";
 import { TransactionFiltersChipGroup } from "./transaction-filters-chip-group";
 import { TransactionFiltersDateRange } from "./transaction-filters-date-range";
 import { TransactionFiltersHeader } from "./transaction-filters-header";
-import {
-  TransactionFiltersOption,
-  TransactionFiltersOptionRow,
-} from "./transaction-filters-option-row";
+import { TransactionFiltersOptionRow } from "./transaction-filters-option-row";
 
 export interface TransactionFiltersModalProps {
   wallets: Wallet[];
@@ -36,17 +33,6 @@ export interface TransactionFiltersModalProps {
   onReset: () => void;
   onCancel: () => void;
 }
-
-const SORT_OPTIONS: ReadonlyArray<
-  TransactionFiltersOption<TransactionSortOrder>
-> = [
-  { value: "desc", label: "Más recientes primero" },
-  { value: "asc", label: "Más antiguos primero" },
-];
-
-const TYPE_OPTIONS: ReadonlyArray<
-  TransactionFiltersOption<TransactionType | "all">
-> = [{ value: "all", label: "Todos" }, ...TRANSACTION_TYPE_OPTIONS];
 
 export function TransactionFiltersModal({
   wallets,
@@ -61,9 +47,13 @@ export function TransactionFiltersModal({
     localFilters,
     fromText,
     toText,
+    fromIso,
+    toIso,
     updateFilters,
     changeFromDate,
     changeToDate,
+    selectFromDate,
+    selectToDate,
     apply,
   } = useTransactionFiltersForm({ filters, onApply });
 
@@ -105,14 +95,14 @@ export function TransactionFiltersModal({
           >
             <ThemedText style={styles.label}>Orden</ThemedText>
             <TransactionFiltersOptionRow
-              options={SORT_OPTIONS}
+              options={TRANSACTION_SORT_OPTIONS}
               selectedValue={localFilters.sort}
               onSelect={(sort) => updateFilters({ sort })}
             />
 
             <ThemedText style={styles.label}>Tipo</ThemedText>
             <TransactionFiltersOptionRow
-              options={TYPE_OPTIONS}
+              options={TRANSACTION_TYPE_FILTER_OPTIONS}
               selectedValue={localFilters.type}
               onSelect={(type) => updateFilters({ type })}
             />
@@ -134,9 +124,13 @@ export function TransactionFiltersModal({
             <ThemedText style={styles.label}>Rango de fechas</ThemedText>
             <TransactionFiltersDateRange
               fromText={fromText}
+              fromIso={fromIso}
               toText={toText}
+              toIso={toIso}
               onChangeFrom={changeFromDate}
               onChangeTo={changeToDate}
+              onSelectFrom={selectFromDate}
+              onSelectTo={selectToDate}
             />
 
             <TransactionFiltersActions onReset={onReset} onApply={apply} />

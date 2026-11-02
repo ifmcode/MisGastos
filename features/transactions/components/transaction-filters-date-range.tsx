@@ -1,47 +1,49 @@
-import { TextInput, View } from "react-native";
+import { View } from "react-native";
 
-import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { ThemedText } from "@/components/themed-text";
+import { DateQuickSelector } from "@/shared/components/molecules/date-quick-selector";
 
 import { transactionFiltersStyles as styles } from "../styles/transaction-filters.styles";
 
 export interface TransactionFiltersDateRangeProps {
   fromText: string;
+  fromIso: string;
   toText: string;
+  toIso: string;
   onChangeFrom: (text: string) => void;
   onChangeTo: (text: string) => void;
+  onSelectFrom: (isoDate: string) => void;
+  onSelectTo: (isoDate: string) => void;
 }
 
 export function TransactionFiltersDateRange({
   fromText,
+  fromIso,
   toText,
+  toIso,
   onChangeFrom,
   onChangeTo,
+  onSelectFrom,
+  onSelectTo,
 }: TransactionFiltersDateRangeProps) {
-  const theme = useFormTheme();
-  const inputStyle = [
-    styles.dateInput,
-    {
-      backgroundColor: theme.surface,
-      borderColor: theme.border,
-      color: theme.text,
-    },
-  ];
-
   return (
-    <View style={styles.dateRow}>
-      <TextInput
-        value={fromText}
+    <View style={styles.dateFields}>
+      <ThemedText style={styles.dateFieldLabel}>Desde</ThemedText>
+      <DateQuickSelector
+        text={fromText}
+        valueIso={fromIso}
+        accessibilityLabel="Fecha desde"
         onChangeText={onChangeFrom}
-        placeholder="Desde DD/MM/AAAA"
-        placeholderTextColor={theme.muted}
-        style={inputStyle}
+        onSelectDate={onSelectFrom}
       />
-      <TextInput
-        value={toText}
+
+      <ThemedText style={styles.dateFieldLabel}>Hasta</ThemedText>
+      <DateQuickSelector
+        text={toText}
+        valueIso={toIso}
+        accessibilityLabel="Fecha hasta"
         onChangeText={onChangeTo}
-        placeholder="Hasta DD/MM/AAAA"
-        placeholderTextColor={theme.muted}
-        style={inputStyle}
+        onSelectDate={onSelectTo}
       />
     </View>
   );
