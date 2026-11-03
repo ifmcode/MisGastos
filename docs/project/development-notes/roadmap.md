@@ -20,10 +20,23 @@
 ## Phase 3: Post-MVP
 - [x] Categories management (TICKET-004)
 - [x] Date picker UX (TICKET-005)
-- [ ] Profile/settings
-- [ ] Friends
-- [ ] Groups (Splitwise-style)
-- [ ] UX improvements
+- [ ] Profile + preferred currency (TICKET-006)
+- [ ] Friends (TICKET-007)
+- [ ] Groups (TICKET-008)
+- [ ] Shared expenses (TICKET-009)
+- [ ] Group balances + settlements (TICKET-010)
+- [ ] Group history (TICKET-011)
+- [ ] Budgets (TICKET-012)
+- [ ] Data export (TICKET-013)
+- [ ] Dark mode polish (TICKET-014)
+- [ ] Advanced search (TICKET-015)
+- [ ] Statistics + charts (TICKET-016)
+- [ ] History grouped by day/month (TICKET-017)
+- [ ] Wallet management (TICKET-018)
+- [ ] Dashboard quick add (TICKET-019)
+- [ ] Inline auth errors (TICKET-020)
+- [ ] Email verification on signup (TICKET-021)
+- [ ] Discoverable edit/delete actions (TICKET-022)
 
 ## Rules
 - Always update implementation plan when changing status

@@ -12,6 +12,7 @@
 - Dashboard MVP implemented: global/per-wallet totals, wallet filter, recent transfers
 - Categories implemented: user-defined expense/income categories with CRUD, lazy defaults, legacy transaction compatibility and inline creation from the transaction form
 - Date picker UX implemented: quick Hoy/Ayer chips, an optional session-scoped "Último" chip in movement/transfer forms, native calendar picker and manual fallback across transaction/transfer forms and date filters
+- Implementation plan reviewed on 03/11/2026: MVP, categories and date picker verified as done; future work tracked in TICKET-006..TICKET-022
 - Routes: tabs (dashboard, wallets, transactions, settings), login, categories, modal
 - Current structure: app/, components/, lib/, shared/, hooks/, assets/ + features/
 - New structure: features/ (auth, wallets, transactions, transfers, dashboard, categories, settings, modal), shared/
@@ -60,3 +61,5 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 | 01/11/2026 | Categories management | Added `features/categories` (model, Firestore repo, service, hooks, CRUD screen, shared form modal), categories route from Settings, dynamic transaction pickers/filters with legacy-id resolution, inline category creation from the transaction form, categories Firestore rules and tests. Firestore rules deployment pending |
 | 02/11/2026 | Date picker UX | Added shared `DateQuickSelector` (Hoy/Ayer chips, calendar button at the right of the chips, native picker on mobile, in-app calendar on web, manual fallback) to transaction/transfer forms and both date filters. Moved date utilities to `shared/utils/date.ts`, added `shared/utils/date-calendar.ts` and tests |
 | 03/11/2026 | Date picker follow-up | Calendar button moved next to the chips. Added a session-scoped `Último DD/MM` chip to movement/transfer forms, preselected for new records, updated after a successful save, hidden when it matches Hoy/Ayer and excluded from filters. Added `last-used-date-store`, date defaults and tests |
+| 03/11/2026 | Implementation plan review | Verified done scope, documented partial implementations (dark mode, advanced search, profile) and created TICKET-006..TICKET-019 for profile, friends, groups, shared expenses, balances, settlements, group history, budgets, export, dark mode, advanced search, statistics, history grouping, wallet management and dashboard quick add |
+| 03/11/2026 | Auth and movement UX tickets | Added TICKET-020 (inline auth errors), TICKET-021 (email verification on signup) and TICKET-022 (discoverable edit/delete actions). Edit/delete logic already exists for transactions and transfers; the ticket focuses on visibility and accessibility |
