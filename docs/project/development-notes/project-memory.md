@@ -3,7 +3,7 @@
 > Living document to continue development from any machine with OpenCode/Claude. Update after each milestone.
 
 ## Current State
-- Date: 02/11/2026
+- Date: 03/11/2026
 - Stack: Expo SDK 54, React Native 0.81.5, React 19.1.0, Expo Router 6, TypeScript 5.9, NativeWind 4, Firebase (Auth + Firestore), Jest 30
 - Auth implemented (email/password + Google)
 - Wallets MVP implemented: create/list, per-wallet balance, include-in-total, Firestore persistence
@@ -11,7 +11,7 @@
 - Transfers MVP implemented: atomic moves between same-currency wallets, editable transfers and soft-delete with balance reversion
 - Dashboard MVP implemented: global/per-wallet totals, wallet filter, recent transfers
 - Categories implemented: user-defined expense/income categories with CRUD, lazy defaults, legacy transaction compatibility and inline creation from the transaction form
-- Date picker UX implemented: quick Hoy/Ayer chips, native calendar picker and manual fallback across transaction/transfer forms and date filters
+- Date picker UX implemented: quick Hoy/Ayer chips, an optional session-scoped "Último" chip in movement/transfer forms, native calendar picker and manual fallback across transaction/transfer forms and date filters
 - Routes: tabs (dashboard, wallets, transactions, settings), login, categories, modal
 - Current structure: app/, components/, lib/, shared/, hooks/, assets/ + features/
 - New structure: features/ (auth, wallets, transactions, transfers, dashboard, categories, settings, modal), shared/
@@ -32,7 +32,7 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 - Transfers persisted in a dedicated root `transfers` collection with `ownerId`. Only same-currency wallets can be linked; balances update atomically with `runTransaction`. Transfers are editable and use soft delete (`deletedAt`) with atomic balance reversion; hard deletes are denied in rules
 - Dashboard global totals only include wallets with `includeInTotal`; selecting a wallet always shows its real balance and flags whether it contributes to the global total
 - Categories live in the root `categories` collection scoped by `ownerId`. Defaults are seeded lazily when the owner has none, using deterministic ids (`${ownerId}__${legacyId}`); deleting the last category re-seeds them on the next load. Deletion is hard and blocked while transactions use the category. Seeded defaults keep their old transaction ids in `legacyId`, and forms/filters resolve either id so existing movements are never rewritten. Category type is locked after creation. Transfers remain uncategorized.
-- **Dates**: Shared date utilities live in `shared/utils/date.ts` (moved from the transactions feature) and calendar-grid helpers in `shared/utils/date-calendar.ts`. All date inputs use the shared `DateQuickSelector` (Hoy/Ayer chips, a calendar button at the right of the chips, and manual fallback). iOS/Android use `@react-native-community/datetimepicker`; web uses a lightweight in-app calendar grid because that library has no web support.
+- **Dates**: Shared date utilities live in `shared/utils/date.ts` (moved from the transactions feature) and calendar-grid helpers in `shared/utils/date-calendar.ts`. All date inputs use the shared `DateQuickSelector` (Hoy/Ayer chips, a calendar button contiguous to them, and manual fallback). Movement/transfer forms also show an `Último DD/MM` chip after a successful save in the current session; it is preselected for new records, hidden when it matches Hoy/Ayer and not shown in filters. The session value lives in `shared/utils/last-used-date-store.ts` (in memory, not persisted). iOS/Android use `@react-native-community/datetimepicker`; web uses a lightweight in-app calendar grid because that library has no web support.
 - **Git**: Never commit automatically. Keep changes staged. Ask before creating a separate commit for unrelated changes.
 - **Code size & composition**: Files target ≤150 lines, one component per file, one responsibility per function. Screens only orchestrate: header, list header, footers, states and modals are separate components; derived data lives in hooks/pure utils. Styles go to `features/<feature>/styles/<name>.styles.ts` (style files may exceed 150 lines) with shared tokens and reusable base+variant styles. See `docs/project/guidelines/architecture-and-solid.md` §5.1
 
@@ -59,3 +59,4 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 | 30/10/2026 | File size rules + dashboard split | Documented the ≤150-line/one-component/one-responsibility rules and styles-module convention. Split `dashboard-screen.tsx` (643 lines) into header, wallet filter chip/filters, section header, list header, loading/error/empty states, transfers section, transfer modal and a styles module; added `useDashboardOverview`, `useDashboardTransferForm`, `getDefaultTransferWallets`/`buildTransferFormValues` and tests. Firestore rules deployed |
 | 01/11/2026 | Categories management | Added `features/categories` (model, Firestore repo, service, hooks, CRUD screen, shared form modal), categories route from Settings, dynamic transaction pickers/filters with legacy-id resolution, inline category creation from the transaction form, categories Firestore rules and tests. Firestore rules deployment pending |
 | 02/11/2026 | Date picker UX | Added shared `DateQuickSelector` (Hoy/Ayer chips, calendar button at the right of the chips, native picker on mobile, in-app calendar on web, manual fallback) to transaction/transfer forms and both date filters. Moved date utilities to `shared/utils/date.ts`, added `shared/utils/date-calendar.ts` and tests |
+| 03/11/2026 | Date picker follow-up | Calendar button moved next to the chips. Added a session-scoped `Último DD/MM` chip to movement/transfer forms, preselected for new records, updated after a successful save, hidden when it matches Hoy/Ayer and excluded from filters. Added `last-used-date-store`, date defaults and tests |

@@ -1,9 +1,7 @@
 import { CurrencyCode } from "@/shared/constants/currencies";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { formatMoney, roundMoney } from "@/features/wallets/utils/money";
-import {
-  getTodayIsoDate,
-} from "@/shared/utils/date";
+import { getDefaultMovementIsoDate } from "@/shared/utils/date-defaults";
 
 import { Transfer, TransferFormValues } from "../types/transfer.types";
 
@@ -13,7 +11,7 @@ export function getInitialTransferFormValues(
 ): TransferFormValues {
   return {
     ...initialValues,
-    date: initialValues.date || getTodayIsoDate(),
+    date: initialValues.date || getDefaultMovementIsoDate(),
   };
 }
 

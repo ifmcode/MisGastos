@@ -1,5 +1,6 @@
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { getDefaultMovementIsoDate } from "@/shared/utils/date-defaults";
 
 import {
   Transaction,
@@ -41,6 +42,6 @@ export function buildTransactionFormValues(
     categoryId: getDefaultCategoryId(categories, DEFAULT_TYPE),
     concept: "",
     notes: "",
-    date: "",
+    date: getDefaultMovementIsoDate(),
   };
 }

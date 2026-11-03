@@ -28,6 +28,7 @@ export function TransferFormDateField({
         error={error}
         disabled={disabled}
         helperText="Toca Hoy o Ayer, o elige otra fecha."
+        showLastUsedDate
         accessibilityLabel="Fecha de la transferencia"
         onChangeText={onChange}
         onSelectDate={(isoDate) => onChange(formatDateInput(isoDate))}

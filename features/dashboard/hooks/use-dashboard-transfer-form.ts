@@ -3,6 +3,7 @@ import { useState } from "react";
 import { TransferInput } from "@/features/transfers/schemas/transfer.schema";
 import { Transfer } from "@/features/transfers/types/transfer.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { rememberLastUsedDate } from "@/shared/utils/last-used-date-store";
 
 import { showDeleteTransferDialog } from "../utils/transfer-delete-dialog";
 
@@ -73,6 +74,7 @@ export function useDashboardTransferForm({
 
     if (!saved) return;
 
+    rememberLastUsedDate(input.date);
     finish();
   }
 

@@ -4,6 +4,7 @@ export const dateQuickSelectorStyles = StyleSheet.create({
   quickRow: {
     flexDirection: "row",
     flexWrap: "wrap",
+    alignItems: "center",
     gap: 8,
   },
   chip: {

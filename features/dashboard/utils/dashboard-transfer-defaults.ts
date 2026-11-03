@@ -1,9 +1,9 @@
-import { getTodayIsoDate } from "@/shared/utils/date";
 import {
   Transfer,
   TransferFormValues,
 } from "@/features/transfers/types/transfer.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { getDefaultMovementIsoDate } from "@/shared/utils/date-defaults";
 
 export interface DefaultTransferWallets {
   fromWallet: Wallet | null;
@@ -61,7 +61,7 @@ export function buildTransferFormValues(
     toWalletId: toWallet?.id ?? "",
     amount: "",
     currency: fromWallet?.currency ?? "EUR",
-    date: getTodayIsoDate(),
+    date: getDefaultMovementIsoDate(),
     notes: "",
   };
 }

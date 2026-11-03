@@ -4,7 +4,11 @@ import { Pressable, TextInput, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
-import { getDateQuickOptions } from "@/shared/utils/date-quick-options";
+import { useLastUsedDate } from "@/shared/hooks/use-last-used-date";
+import {
+  getDateQuickOptions,
+  getLastUsedDateOption,
+} from "@/shared/utils/date-quick-options";
 
 import { DATE_PICKER_SUPPORTED, DatePickerModal } from "./date-picker-modal";
 import { DateQuickChip } from "./date-quick-chip";
@@ -16,6 +20,7 @@ export interface DateQuickSelectorProps {
   error?: string;
   disabled?: boolean;
   helperText?: string;
+  showLastUsedDate?: boolean;
   accessibilityLabel: string;
   onChangeText: (text: string) => void;
   onSelectDate: (isoDate: string) => void;
@@ -27,14 +32,21 @@ export function DateQuickSelector({
   error,
   disabled = false,
   helperText,
+  showLastUsedDate = false,
   accessibilityLabel,
   onChangeText,
   onSelectDate,
 }: DateQuickSelectorProps) {
   const theme = useFormTheme();
   const [pickerVisible, setPickerVisible] = useState(false);
+  const lastUsedDate = useLastUsedDate();
   const quickOptions = getDateQuickOptions();
-  const options = [quickOptions.today, quickOptions.yesterday];
+  const lastOption = showLastUsedDate
+    ? getLastUsedDateOption(lastUsedDate)
+    : null;
+  const options = lastOption
+    ? [lastOption, quickOptions.today, quickOptions.yesterday]
+    : [quickOptions.today, quickOptions.yesterday];
 
   function selectDate(isoDate: string) {
     setPickerVisible(false);
@@ -66,7 +78,6 @@ export function DateQuickSelector({
               {
                 backgroundColor: theme.surface,
                 borderColor: error ? theme.danger : theme.border,
-                marginLeft: "auto",
               },
               disabled && styles.disabled,
             ]}

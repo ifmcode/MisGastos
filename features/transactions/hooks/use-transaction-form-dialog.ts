@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { rememberLastUsedDate } from "@/shared/utils/last-used-date-store";
 
 import {
   TransactionInput,
@@ -72,6 +73,7 @@ export function useTransactionFormDialog({
 
     if (!saved) return;
 
+    rememberLastUsedDate(input.date);
     finish();
   }
 

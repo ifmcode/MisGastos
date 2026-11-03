@@ -11,11 +11,8 @@ import {
   TransactionValidationErrors,
 } from "../schemas/transaction.schema";
 import { TransactionFormValues } from "../types/transaction.types";
-import {
-  formatDateInput,
-  getTodayIsoDate,
-  parseDateInput,
-} from "@/shared/utils/date";
+import { formatDateInput, parseDateInput } from "@/shared/utils/date";
+import { getDefaultMovementIsoDate } from "@/shared/utils/date-defaults";
 import {
   findTransactionCategory,
   getCategoriesForType,
@@ -54,7 +51,7 @@ export function useTransactionForm({
 }: UseTransactionFormOptions): UseTransactionFormResult {
   const [values, setValues] = useState<TransactionFormValues>(() => ({
     ...initialValues,
-    date: initialValues.date || getTodayIsoDate(),
+    date: initialValues.date || getDefaultMovementIsoDate(),
   }));
   const [localErrors, setLocalErrors] = useState<TransactionValidationErrors>(
     {},

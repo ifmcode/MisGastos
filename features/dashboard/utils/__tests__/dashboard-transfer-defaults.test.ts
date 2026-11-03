@@ -1,8 +1,12 @@
-import { describe, expect, it } from "@jest/globals";
+import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import { getTodayIsoDate } from "@/shared/utils/date";
 import { Transfer } from "@/features/transfers/types/transfer.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import {
+  rememberLastUsedDate,
+  resetLastUsedDate,
+} from "@/shared/utils/last-used-date-store";
 
 import {
   buildTransferFormValues,
@@ -76,6 +80,10 @@ describe("getDefaultTransferWallets", () => {
 });
 
 describe("buildTransferFormValues", () => {
+  beforeEach(() => {
+    resetLastUsedDate();
+  });
+
   it("maps the edited transfer into form values", () => {
     const values = buildTransferFormValues([], buildTransfer({}));
 
@@ -114,6 +122,17 @@ describe("buildTransferFormValues", () => {
       date: getTodayIsoDate(),
       notes: "",
     });
+  });
+
+  it("uses the last used date for a new transfer", () => {
+    rememberLastUsedDate("2020-01-15");
+
+    const wallets = [
+      buildWallet({ id: "wallet-eur" }),
+      buildWallet({ id: "wallet-eur-2" }),
+    ];
+
+    expect(buildTransferFormValues(wallets, null).date).toBe("2020-01-15");
   });
 
   it("defaults to EUR without wallets", () => {

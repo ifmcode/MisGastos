@@ -16,6 +16,8 @@ Standardize date selection across the app with quick actions optimized for mobil
 - [x] Ensure consistent formatting (DD/MM/AAAA or display as DD/MM) and timezone-safe handling (use local date logic already present)
 - [x] Update transaction form and any future transfer/filter date inputs
 - [x] Consider dark/light theme and mobile-friendly hit areas
+- [x] Keep the calendar button contiguous to the quick chips instead of pinned to the right edge
+- [x] Add an "Último (DD/MM)" chip before "Hoy" in movement/transfer forms after a successful save in the current session, preselected for new records (hidden when it matches Hoy/Ayer; not shown in filters)
 
 ## Technical Notes
 - Reference: expense manager style quick date buttons + calendar icon (see attached reference)
@@ -41,3 +43,16 @@ Standardize date selection across the app with quick actions optimized for mobil
   `shared/utils/date-calendar.ts`.
 - Manual `DD/MM/AAAA` input is still supported and remains the fallback; schema
   validation is unchanged.
+- The calendar button now follows the chips in the same row (no `marginLeft:
+  "auto"`), so it stays visually attached to Hoy/Ayer on every platform.
+- `shared/utils/last-used-date-store.ts` keeps the last saved movement date in
+  memory for the current app session. Successful transaction/transfer saves call
+  `rememberLastUsedDate`, and `shared/hooks/use-last-used-date.ts` exposes the
+  value through `useSyncExternalStore`.
+- `DateQuickSelector` accepts an opt-in `showLastUsedDate` prop, used only by the
+  transaction/transfer forms. `getLastUsedDateOption` hides invalid values and
+  dates that duplicate Hoy/Ayer, and filters keep their existing two-chip row.
+- New movement/transfer forms start with `getDefaultMovementIsoDate`, which
+  returns the last used date while its chip is visible and today otherwise. The
+  `Último` chip therefore starts selected on create; editing keeps the record's
+  own date and only marks the chip if it matches.

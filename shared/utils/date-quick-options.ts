@@ -1,7 +1,7 @@
-import { toLocalIsoDate } from "./date";
+import { parseDateInput, toLocalIsoDate } from "./date";
 
 export interface DateQuickOption {
-  key: "today" | "yesterday";
+  key: "last" | "today" | "yesterday";
   label: string;
   isoDate: string;
   displayDate: string;
@@ -41,4 +41,23 @@ export function getDateQuickOptions(reference = new Date()): DateQuickOptions {
     today: buildOption("today", "Hoy", todayIso),
     yesterday: buildOption("yesterday", "Ayer", yesterdayIso),
   };
+}
+
+/**
+ * Last used date formatted as DD/MM. Returns null when the value is invalid or
+ * already covered by the Hoy/Ayer quick options, so the row never duplicates.
+ */
+export function getLastUsedDateOption(
+  isoDate: string | null | undefined,
+  reference = new Date(),
+): DateQuickOption | null {
+  const normalized = parseDateInput(isoDate);
+  if (!normalized) return null;
+
+  const { today, yesterday } = getDateQuickOptions(reference);
+  if (normalized === today.isoDate || normalized === yesterday.isoDate) {
+    return null;
+  }
+
+  return buildOption("last", "Último", normalized);
 }
