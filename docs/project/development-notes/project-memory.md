@@ -12,7 +12,8 @@
 - Dashboard MVP implemented: global/per-wallet totals, wallet filter, recent transfers
 - Categories implemented: user-defined expense/income categories with CRUD, lazy defaults, legacy transaction compatibility and inline creation from the transaction form
 - Date picker UX implemented: quick Hoy/Ayer chips, an optional session-scoped "Último" chip in movement/transfer forms, native calendar picker and manual fallback across transaction/transfer forms and date filters
-- Implementation plan reviewed on 03/11/2026: MVP, categories and date picker verified as done; future work tracked in TICKET-006..TICKET-022
+- Implementation plan reviewed on 03/11/2026: MVP, categories and date picker verified as done; future work tracked in TICKET-006..TICKET-024
+- Recommended execution order documented in implementation plan §8 (04/11/2026). Offline-first is an architecture spike before groups and a full implementation phase; agent/skill specialization is tracked as a workflow epic
 - Routes: tabs (dashboard, wallets, transactions, settings), login, categories, modal
 - Current structure: app/, components/, lib/, shared/, hooks/, assets/ + features/
 - New structure: features/ (auth, wallets, transactions, transfers, dashboard, categories, settings, modal), shared/
@@ -63,3 +64,4 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 | 03/11/2026 | Date picker follow-up | Calendar button moved next to the chips. Added a session-scoped `Último DD/MM` chip to movement/transfer forms, preselected for new records, updated after a successful save, hidden when it matches Hoy/Ayer and excluded from filters. Added `last-used-date-store`, date defaults and tests |
 | 03/11/2026 | Implementation plan review | Verified done scope, documented partial implementations (dark mode, advanced search, profile) and created TICKET-006..TICKET-019 for profile, friends, groups, shared expenses, balances, settlements, group history, budgets, export, dark mode, advanced search, statistics, history grouping, wallet management and dashboard quick add |
 | 03/11/2026 | Auth and movement UX tickets | Added TICKET-020 (inline auth errors), TICKET-021 (email verification on signup) and TICKET-022 (discoverable edit/delete actions). Edit/delete logic already exists for transactions and transfers; the ticket focuses on visibility and accessibility |
+| 04/11/2026 | Execution order and platform epics | Added §8 to the implementation plan with the recommended phase order. Added TICKET-023 for offline-first and sync (design spike before groups, full implementation after the social slice) and TICKET-024 for project-specific agents and skills, including routing and permissions guidance |

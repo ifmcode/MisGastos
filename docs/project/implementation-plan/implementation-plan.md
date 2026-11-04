@@ -1,7 +1,7 @@
 # Implementation Plan: MisGastos (Expense Manager + Splitwise)
 
 > Living document. Update with each agreed feature. Always start from MVP.
-> **Last reviewed:** 03/11/2026
+> **Last reviewed:** 04/11/2026
 
 ## 1. Inspiration: Expense Manager + Splitwise
 **References:** `docs/project/ui-references/expense-manager-reference.png` and `docs/project/ui-references/splitwise-reference.png`
@@ -73,6 +73,12 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 | PM-021 | Email verification | Send a verification email when an email/password account is created | ⏳ Pending | TICKET-021 |
 | PM-022 | Discoverable movement actions | Make edit/delete for expenses, incomes and transfers visible and accessible (core logic already exists) | ⏳ Pending | TICKET-022 |
 
+### 3.7 Platform and workflow epics
+| ID | Feature | Description | Status | Ticket |
+|---|---|---|---|---|
+| PM-023 | Offline-first and sync | Use the app without internet and sync local changes with Firebase when connectivity returns, including personal and shared movements | ⏳ Pending | TICKET-023 |
+| PM-024 | Agent and skill specialization | Define project-specific agents and skills so each task is routed to the right specialist | ⏳ Pending | TICKET-024 |
+
 ## 4. Key Business Rules
 - **No photos initially**: No avatar/photo uploads. Use initials/icons
 - **Multi-wallet**: Every expense/income must be associated to a wallet
@@ -110,4 +116,49 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - **Not implemented:** friends, groups, shared expenses, balances, settlements, group history, budgets, data export.
 - **New gaps identified:** statistics/charts, history grouping, wallet editing/archiving and dashboard quick add. They were added as PM-016..PM-019.
 - **Auth and movement UX gaps:** login/register currently use `alert()` instead of inline feedback; no verification email is sent on signup; transaction and transfer edit/delete already work through the form modal but the list items do not expose the action clearly. They were added as PM-020..PM-022.
-- **Tickets created:** TICKET-006..TICKET-022 cover every pending item above.
+- **Tickets created:** TICKET-006..TICKET-022 cover the pending product items above. TICKET-023 and TICKET-024 add the platform and workflow epics agreed on 04/11/2026.
+
+## 8. Recommended Execution Order (04/11/2026)
+
+> Guiding principle: validate the social value before deep visual polish, but fix high-friction UX and take the offline/architecture decisions before building shared ledgers.
+
+### Phase A - Short product polish (3-7 days)
+- TICKET-020: inline auth errors.
+- TICKET-021: email verification.
+- TICKET-022: visible and accessible edit/delete actions.
+- TICKET-014: dark mode and shared visual tokens.
+- TICKET-018: wallet editing/archiving, if there is time.
+- Build only the UI primitives needed next: button, input, list row, avatar, banner, empty state and modal.
+
+### Phase B - Architecture and workflow spike (2-4 days)
+- TICKET-023 (design spike only): decide local database, outbox, idempotency and conflict policy before groups.
+- TICKET-024: define the first 3-4 agents and their skills; avoid agent sprawl.
+- Record the decisions in ADRs or development notes.
+
+### Phase C - Social vertical slice (1-2 weeks)
+- TICKET-007: friends and requests.
+- Minimal subset of TICKET-009: 1:1 shared expense.
+- Minimal subset of TICKET-010: balance and settlement between two people.
+- Validate with 3-5 real users.
+- Do not build a friends list without shared expenses; it does not validate the product.
+
+### Phase D - Groups
+- TICKET-008: create groups.
+- Full TICKET-009: equal, percentage, fixed-amount and share splits.
+- TICKET-010: group balances and settlements.
+- TICKET-011: group history.
+
+### Phase E - Offline-first implementation
+- Full TICKET-023: local persistence, offline mutations, sync queue, conflict handling and offline group/friend movements.
+- If offline is a launch requirement, move this phase before Phase D.
+- Do not retrofit offline after groups without the Phase B decisions; the current Firestore transaction-based balance model may need to change.
+
+### Phase F - Retention and final polish
+- TICKET-012 budgets, TICKET-016 statistics, TICKET-015 advanced search, TICKET-013 export, TICKET-017 history grouping and TICKET-019 dashboard quick add.
+- Then invest in final visual polish with real social screens.
+
+### Decision rules
+- **Validate the Splitwise side:** Phase A -> B -> C -> D.
+- **Offline-first launch:** Phase A -> B -> E -> C -> D.
+- **Polished personal-finance MVP:** Phase A -> F, and delay social features.
+- **Never** implement full offline after groups without the Phase B spike.
