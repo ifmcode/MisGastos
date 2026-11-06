@@ -13,6 +13,9 @@ export const mockSendPasswordResetEmail = jest.fn<
   (...args: unknown[]) => Promise<unknown>
 >();
 export const mockSignOut = jest.fn<(...args: unknown[]) => unknown>();
+export const mockSendEmailVerification = jest.fn<
+  (...args: unknown[]) => Promise<unknown>
+>();
 export const mockGetDocs = jest.fn<
   (...args: unknown[]) => Promise<unknown>
 >();
@@ -20,6 +23,8 @@ export const mockAddDoc = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 export const mockQuery = jest.fn<(...args: unknown[]) => unknown>();
 export const mockCollection = jest.fn<(...args: unknown[]) => unknown>();
 export const mockWhere = jest.fn<(...args: unknown[]) => unknown>();
+
+export const mockAuth: { currentUser: unknown } = { currentUser: null };
 
 jest.mock("firebase/auth", () => ({
   GoogleAuthProvider: jest.fn(),
@@ -30,6 +35,8 @@ jest.mock("firebase/auth", () => ({
     mockCreateUserWithEmailAndPassword(...args),
   sendPasswordResetEmail: (...args: unknown[]) =>
     mockSendPasswordResetEmail(...args),
+  sendEmailVerification: (...args: unknown[]) =>
+    mockSendEmailVerification(...args),
   signOut: (...args: unknown[]) => mockSignOut(...args),
 }));
 
@@ -42,11 +49,12 @@ jest.mock("firebase/firestore", () => ({
 }));
 
 jest.mock("@/lib/firebase", () => ({
-  auth: { currentUser: null },
+  auth: mockAuth,
   db: {},
 }));
 
 /** Clears the Firebase mocks between repository tests. */
 export function setupAuthMocks() {
   jest.clearAllMocks();
+  mockAuth.currentUser = null;
 }

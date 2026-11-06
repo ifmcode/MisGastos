@@ -15,6 +15,8 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.",
   "auth/network-request-failed":
     "No hay conexión. Comprueba tu red e inténtalo de nuevo.",
+  "auth/requires-recent-login":
+    "Por seguridad, cierra sesión, vuelve a entrar e inténtalo de nuevo.",
   "auth/operation-not-allowed":
     "Este método de inicio de sesión no está disponible.",
   "auth/popup-closed-by-user": "Se canceló el inicio de sesión con Google.",

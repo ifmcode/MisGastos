@@ -35,7 +35,7 @@
 - [ ] Wallet management (TICKET-018)
 - [ ] Dashboard quick add (TICKET-019)
 - [x] Inline auth errors (TICKET-020)
-- [ ] Email verification on signup (TICKET-021)
+- [x] Email verification on signup (TICKET-021)
 - [ ] Discoverable edit/delete actions (TICKET-022)
 
 ## Phase 4: Platform and Workflow

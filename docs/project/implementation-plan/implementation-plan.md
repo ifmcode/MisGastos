@@ -1,7 +1,7 @@
 # Implementation Plan: MisGastos (Expense Manager + Splitwise)
 
 > Living document. Update with each agreed feature. Always start from MVP.
-> **Last reviewed:** 04/11/2026
+> **Last reviewed:** 06/11/2026
 
 ## 1. Inspiration: Expense Manager + Splitwise
 **References:** `docs/project/ui-references/expense-manager-reference.png` and `docs/project/ui-references/splitwise-reference.png`
@@ -70,7 +70,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 | ID | Feature | Description | Status | Ticket |
 |---|---|---|---|---|
 | PM-020 | Inline auth errors | Replace dialogs/alerts in login and registration with messages next to the action that failed | ✅ Done | TICKET-020; field + action inline feedback, Firebase error mapping, password reset feedback |
-| PM-021 | Email verification | Send a verification email when an email/password account is created | ⏳ Pending | TICKET-021 |
+| PM-021 | Email verification | Send a verification email when an email/password account is created | ✅ Done | TICKET-021; private routes blocked until verified, dedicated `/verify-email` screen with resend, manual refresh and controlled polling |
 | PM-022 | Discoverable movement actions | Make edit/delete for expenses, incomes and transfers visible and accessible (core logic already exists) | ⏳ Pending | TICKET-022 |
 
 ### 3.7 Platform and workflow epics

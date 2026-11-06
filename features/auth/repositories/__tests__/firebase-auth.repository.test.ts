@@ -60,6 +60,7 @@ describe("FirebaseAuthRepository.email", () => {
   it("returns the signed-in user", async () => {
     const user = { uid: "456", email };
     mockSignInWithEmailAndPassword.mockResolvedValue({ user });
+    mockGetDocs.mockResolvedValue({ docs: [{ id: "existing" }] });
 
     const result = await new FirebaseAuthRepository().signInWithEmail(
       email,
@@ -82,6 +83,7 @@ describe("FirebaseAuthRepository.email", () => {
   it("creates the auth user and the profile on registration", async () => {
     const user = { uid: "789", email };
     mockCreateUserWithEmailAndPassword.mockResolvedValue({ user });
+    mockGetDocs.mockResolvedValue({ docs: [] });
     mockAddDoc.mockResolvedValue({});
 
     const result = await new FirebaseAuthRepository().registerWithEmail(
@@ -97,6 +99,33 @@ describe("FirebaseAuthRepository.email", () => {
       authProvider: "local",
       email,
     });
+  });
+
+  it("repairs a missing profile on email sign-in", async () => {
+    const user = { uid: "456", email, displayName: null };
+    mockSignInWithEmailAndPassword.mockResolvedValue({ user });
+    mockGetDocs.mockResolvedValue({ docs: [] });
+    mockAddDoc.mockResolvedValue({});
+
+    await new FirebaseAuthRepository().signInWithEmail(email, "secret123");
+
+    expect(mockAddDoc).toHaveBeenCalledWith(undefined, {
+      uid: "456",
+      name: null,
+      authProvider: "local",
+      email,
+    });
+  });
+
+  it("keeps the session when profile creation fails after registration", async () => {
+    const user = { uid: "790", email };
+    mockCreateUserWithEmailAndPassword.mockResolvedValue({ user });
+    mockGetDocs.mockResolvedValue({ docs: [] });
+    mockAddDoc.mockRejectedValue(new Error("Offline"));
+
+    await expect(
+      new FirebaseAuthRepository().registerWithEmail("User", email, "secret123"),
+    ).resolves.toBe(user);
   });
 
   it("propagates registration failures", async () => {

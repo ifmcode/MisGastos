@@ -1,6 +1,10 @@
 import { Email } from "../types/auth.types";
 import { IAuthRepository } from "../repositories/auth.repository";
 import { User } from "firebase/auth";
+import {
+  markPendingVerificationEmail,
+  resetPendingVerificationEmail,
+} from "../utils/verification-email-store";
 
 export class AuthService {
   constructor(private authRepository: IAuthRepository) {}
@@ -14,7 +18,19 @@ export class AuthService {
   }
 
   async register(name: string, email: Email, password: string): Promise<User | null> {
-    return this.authRepository.registerWithEmail(name, email, password);
+    const user = await this.authRepository.registerWithEmail(
+      name,
+      email,
+      password,
+    );
+
+    // The verification screen sends the first email so any rate-limit or
+    // network failure is reported inline where the user can retry it.
+    if (user) {
+      markPendingVerificationEmail(user.uid);
+    }
+
+    return user;
   }
 
   async resetPassword(email: Email): Promise<void> {
@@ -22,6 +38,7 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
+    resetPendingVerificationEmail();
     return this.authRepository.signOut();
   }
 }
