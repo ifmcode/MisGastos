@@ -34,7 +34,7 @@ Send a verification email when a user creates an email/password account and give
 - `features/auth/repositories/firebase-auth.repository.ts` creates the auth user and the Firestore profile. If profile creation fails after the auth user exists, define how to retry or recover.
 - Configure the verification email template and sender in the Firebase console.
 - Coordinate the gating decision with `app/_layout.tsx`, which currently redirects only by authentication state.
-- Reuse the inline feedback component from TICKET-020 for resend and verification errors.
+- Reuse `features/auth/components/auth-feedback.tsx` from TICKET-020 for resend and verification errors.
 
 ## Open Questions
 - Should unverified email/password users be blocked from private routes, or only shown a banner?

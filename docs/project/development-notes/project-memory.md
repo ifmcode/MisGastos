@@ -3,9 +3,9 @@
 > Living document to continue development from any machine with OpenCode/Claude. Update after each milestone.
 
 ## Current State
-- Date: 03/11/2026
+- Date: 05/11/2026
 - Stack: Expo SDK 54, React Native 0.81.5, React 19.1.0, Expo Router 6, TypeScript 5.9, NativeWind 4, Firebase (Auth + Firestore), Jest 30
-- Auth implemented (email/password + Google)
+- Auth implemented (email/password + Google) with inline field/action errors, mapped Firebase messages and password-reset feedback in the login screen
 - Wallets MVP implemented: create/list, per-wallet balance, include-in-total, Firestore persistence
 - Transactions MVP implemented: expenses/incomes, history with filters/sorting, atomic wallet balance updates
 - Transfers MVP implemented: atomic moves between same-currency wallets, editable transfers and soft-delete with balance reversion
@@ -65,3 +65,4 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 | 03/11/2026 | Implementation plan review | Verified done scope, documented partial implementations (dark mode, advanced search, profile) and created TICKET-006..TICKET-019 for profile, friends, groups, shared expenses, balances, settlements, group history, budgets, export, dark mode, advanced search, statistics, history grouping, wallet management and dashboard quick add |
 | 03/11/2026 | Auth and movement UX tickets | Added TICKET-020 (inline auth errors), TICKET-021 (email verification on signup) and TICKET-022 (discoverable edit/delete actions). Edit/delete logic already exists for transactions and transfers; the ticket focuses on visibility and accessibility |
 | 04/11/2026 | Execution order and platform epics | Added §8 to the implementation plan with the recommended phase order. Added TICKET-023 for offline-first and sync (design spike before groups, full implementation after the social slice) and TICKET-024 for project-specific agents and skills, including routing and permissions guidance |
+| 05/11/2026 | Inline auth errors (Phase A) | Replaced auth alerts with reusable inline feedback, field validation and mapped Firebase messages. Added password-reset feedback, a pure login form reducer with single-flight requests, light/dark theming for login fields and tests. Removed `lib/auth.ts`; Settings logs out through `AuthService` |

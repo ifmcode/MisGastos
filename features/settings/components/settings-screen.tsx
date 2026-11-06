@@ -4,19 +4,20 @@ import { Pressable } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { useAuthService } from "@/features/auth/hooks/use-auth-service";
 import { useAuth } from "@/hooks/use-auth";
-import { logout } from "@/lib/auth";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { settingsStyles as styles } from "../styles/settings.styles";
 
 export function SettingsScreen() {
   const { user } = useAuth();
+  const authService = useAuthService();
   const router = useRouter();
   const theme = useFormTheme();
 
   const handleLogout = () => {
-    logout();
+    void authService.logout();
   };
 
   return (

@@ -1,0 +1,130 @@
+import { beforeEach, describe, expect, it } from "@jest/globals";
+
+import type { Email } from "../../types/auth.types";
+
+import {
+  mockAddDoc,
+  mockCreateUserWithEmailAndPassword,
+  mockGetDocs,
+  mockSendPasswordResetEmail,
+  mockSignInWithEmailAndPassword,
+  mockSignInWithPopup,
+  mockSignOut,
+  setupAuthMocks,
+} from "./auth.test-helpers";
+import { FirebaseAuthRepository } from "../firebase-auth.repository";
+
+beforeEach(setupAuthMocks);
+
+const email = "user@example.com" as Email;
+
+describe("FirebaseAuthRepository.google", () => {
+  it("creates a user profile when the Google user has none", async () => {
+    const user = { uid: "123", displayName: "Test", email };
+    mockSignInWithPopup.mockResolvedValue({ user });
+    mockGetDocs.mockResolvedValue({ docs: [] });
+    mockAddDoc.mockResolvedValue({});
+
+    const result = await new FirebaseAuthRepository().signInWithGoogle();
+
+    expect(result).toBe(user);
+    expect(mockAddDoc).toHaveBeenCalledWith(undefined, {
+      uid: "123",
+      name: "Test",
+      authProvider: "google",
+      email,
+    });
+  });
+
+  it("does not duplicate an existing Google profile", async () => {
+    mockSignInWithPopup.mockResolvedValue({
+      user: { uid: "123", displayName: "Test", email },
+    });
+    mockGetDocs.mockResolvedValue({ docs: [{ id: "existing" }] });
+
+    await new FirebaseAuthRepository().signInWithGoogle();
+
+    expect(mockAddDoc).not.toHaveBeenCalled();
+  });
+
+  it("propagates provider failures without showing UI", async () => {
+    mockSignInWithPopup.mockRejectedValue(new Error("Google failed"));
+
+    await expect(
+      new FirebaseAuthRepository().signInWithGoogle(),
+    ).rejects.toThrow("Google failed");
+  });
+});
+
+describe("FirebaseAuthRepository.email", () => {
+  it("returns the signed-in user", async () => {
+    const user = { uid: "456", email };
+    mockSignInWithEmailAndPassword.mockResolvedValue({ user });
+
+    const result = await new FirebaseAuthRepository().signInWithEmail(
+      email,
+      "secret123",
+    );
+
+    expect(result).toBe(user);
+  });
+
+  it("propagates login failures", async () => {
+    mockSignInWithEmailAndPassword.mockRejectedValue(
+      new Error("Invalid credentials"),
+    );
+
+    await expect(
+      new FirebaseAuthRepository().signInWithEmail(email, "wrong"),
+    ).rejects.toThrow("Invalid credentials");
+  });
+
+  it("creates the auth user and the profile on registration", async () => {
+    const user = { uid: "789", email };
+    mockCreateUserWithEmailAndPassword.mockResolvedValue({ user });
+    mockAddDoc.mockResolvedValue({});
+
+    const result = await new FirebaseAuthRepository().registerWithEmail(
+      "New User",
+      email,
+      "secret123",
+    );
+
+    expect(result).toBe(user);
+    expect(mockAddDoc).toHaveBeenCalledWith(undefined, {
+      uid: "789",
+      name: "New User",
+      authProvider: "local",
+      email,
+    });
+  });
+
+  it("propagates registration failures", async () => {
+    mockCreateUserWithEmailAndPassword.mockRejectedValue(
+      new Error("Email already in use"),
+    );
+
+    await expect(
+      new FirebaseAuthRepository().registerWithEmail("User", email, "secret123"),
+    ).rejects.toThrow("Email already in use");
+  });
+});
+
+describe("FirebaseAuthRepository.session", () => {
+  it("sends the password reset email", async () => {
+    mockSendPasswordResetEmail.mockResolvedValue(undefined);
+
+    await new FirebaseAuthRepository().sendPasswordReset(email);
+
+    expect(mockSendPasswordResetEmail).toHaveBeenCalledWith(
+      { currentUser: null },
+      email,
+    );
+  });
+
+  it("signs out", async () => {
+    await new FirebaseAuthRepository().signOut();
+
+    expect(mockSignOut).toHaveBeenCalledWith({ currentUser: null });
+  });
+});

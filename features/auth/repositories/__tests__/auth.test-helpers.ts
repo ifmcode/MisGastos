@@ -41,14 +41,12 @@ jest.mock("firebase/firestore", () => ({
   where: (...args: unknown[]) => mockWhere(...args),
 }));
 
-jest.mock("../firebase", () => ({
+jest.mock("@/lib/firebase", () => ({
   auth: { currentUser: null },
   db: {},
 }));
 
-/** Clears spies and stubs the browser globals used by the auth helpers. */
+/** Clears the Firebase mocks between repository tests. */
 export function setupAuthMocks() {
   jest.clearAllMocks();
-  jest.spyOn(console, "error").mockImplementation(() => {});
-  global.alert = jest.fn();
 }

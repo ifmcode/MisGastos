@@ -29,7 +29,7 @@ Allow users to review and edit their account data and choose a preferred currenc
 ## Technical Notes
 - The current auth flow creates user documents with auto-generated ids and stores the Firebase uid in a `uid` field. Normalise this to `users/{uid}` or keep querying by `uid`, but never duplicate profile documents.
 - Create `features/profile/` with `repositories/`, `services/`, `schemas/`, `hooks/` and `components/`.
-- `lib/auth.ts` and `features/auth/repositories/firebase-auth.repository.ts` currently duplicate auth persistence logic. Reuse one implementation before adding profile writes.
+- Auth persistence now lives only in `features/auth` after TICKET-020 removed the duplicate `lib/auth.ts`. Extend that single implementation for profile writes.
 - Preferred currency is a default/display preference, not a conversion feature. Totals in different currencies must remain grouped by currency.
 - Update `firestore.rules` so the profile is readable and writable only by its owner.
 

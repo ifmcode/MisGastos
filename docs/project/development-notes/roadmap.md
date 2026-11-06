@@ -34,7 +34,7 @@
 - [ ] History grouped by day/month (TICKET-017)
 - [ ] Wallet management (TICKET-018)
 - [ ] Dashboard quick add (TICKET-019)
-- [ ] Inline auth errors (TICKET-020)
+- [x] Inline auth errors (TICKET-020)
 - [ ] Email verification on signup (TICKET-021)
 - [ ] Discoverable edit/delete actions (TICKET-022)
 
