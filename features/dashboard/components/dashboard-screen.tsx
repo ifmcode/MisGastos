@@ -129,7 +129,7 @@ export function DashboardScreen() {
                 onRetry={() => void reloadTransfers()}
                 onPressTransfer={transferForm.openEdit}
               />
-            ) : null
+            ) : undefined
           }
           ListEmptyComponent={<DashboardEmptyWalletsState />}
           contentContainerStyle={[

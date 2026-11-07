@@ -1,5 +1,7 @@
 import { StyleSheet } from "react-native";
 
+import { absoluteFill } from "@/shared/styles/absolute-fill";
+
 /** Shared tokens so components never repeat raw color values. */
 export const datePickerModalPalette = {
   backdrop: "rgba(0, 0, 0, 0.4)",
@@ -11,7 +13,7 @@ export const datePickerModalStyles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...absoluteFill,
     backgroundColor: datePickerModalPalette.backdrop,
   },
   sheet: {

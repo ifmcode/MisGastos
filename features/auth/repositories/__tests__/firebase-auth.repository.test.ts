@@ -8,7 +8,7 @@ import {
   mockGetDocs,
   mockSendPasswordResetEmail,
   mockSignInWithEmailAndPassword,
-  mockSignInWithPopup,
+  mockSignInWithGoogle,
   mockSignOut,
   setupAuthMocks,
 } from "./auth.test-helpers";
@@ -21,7 +21,7 @@ const email = "user@example.com" as Email;
 describe("FirebaseAuthRepository.google", () => {
   it("creates a user profile when the Google user has none", async () => {
     const user = { uid: "123", displayName: "Test", email };
-    mockSignInWithPopup.mockResolvedValue({ user });
+    mockSignInWithGoogle.mockResolvedValue(user);
     mockGetDocs.mockResolvedValue({ docs: [] });
     mockAddDoc.mockResolvedValue({});
 
@@ -37,8 +37,10 @@ describe("FirebaseAuthRepository.google", () => {
   });
 
   it("does not duplicate an existing Google profile", async () => {
-    mockSignInWithPopup.mockResolvedValue({
-      user: { uid: "123", displayName: "Test", email },
+    mockSignInWithGoogle.mockResolvedValue({
+      uid: "123",
+      displayName: "Test",
+      email,
     });
     mockGetDocs.mockResolvedValue({ docs: [{ id: "existing" }] });
 
@@ -48,7 +50,7 @@ describe("FirebaseAuthRepository.google", () => {
   });
 
   it("propagates provider failures without showing UI", async () => {
-    mockSignInWithPopup.mockRejectedValue(new Error("Google failed"));
+    mockSignInWithGoogle.mockRejectedValue(new Error("Google failed"));
 
     await expect(
       new FirebaseAuthRepository().signInWithGoogle(),

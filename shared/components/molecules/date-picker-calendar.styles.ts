@@ -1,5 +1,7 @@
 import { StyleSheet } from "react-native";
 
+import { absoluteFill } from "@/shared/styles/absolute-fill";
+
 export const datePickerCalendarWebPalette = {
   backdrop: "rgba(0, 0, 0, 0.4)",
 } as const;
@@ -10,7 +12,7 @@ export const datePickerCalendarStyles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...absoluteFill,
     backgroundColor: datePickerCalendarWebPalette.backdrop,
   },
   sheet: {

@@ -1,12 +1,11 @@
 // Fallback for using MaterialIcons on Android and web.
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
+import { SymbolWeight } from 'expo-symbols';
 import { ComponentProps } from 'react';
-import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
+import { type ColorValue, type StyleProp, type TextStyle } from 'react-native';
 
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
-type IconSymbolName = keyof typeof MAPPING;
+type MaterialIconName = ComponentProps<typeof MaterialIcons>['name'];
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
@@ -16,7 +15,11 @@ type IconSymbolName = keyof typeof MAPPING;
 const MAPPING = {
   'house.fill': 'home',
   'creditcard.fill': 'account-balance-wallet',
-} as IconMapping;
+  'list.bullet': 'list',
+  gear: 'settings',
+} as const satisfies Record<string, MaterialIconName>;
+
+type IconSymbolName = keyof typeof MAPPING;
 
 /**
  * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
@@ -31,9 +34,13 @@ export function IconSymbol({
 }: {
   name: IconSymbolName;
   size?: number;
-  color: string | OpaqueColorValue;
+  color: ColorValue;
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
 }) {
-  return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
+  // MaterialIcons only accepts processed color strings, not RN's numeric color ids.
+  const iconColor =
+    typeof color === "number" || color === null ? undefined : color;
+
+  return <MaterialIcons color={iconColor} size={size} name={MAPPING[name]} style={style} />;
 }

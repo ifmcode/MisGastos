@@ -59,7 +59,7 @@ export function TransactionsList({
             activeFilterCount={activeFilterCount}
             onClearFilters={onClearFilters}
           />
-        ) : null
+        ) : undefined
       }
       ListEmptyComponent={
         <TransactionsEmptyState

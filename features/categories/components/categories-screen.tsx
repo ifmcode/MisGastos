@@ -88,7 +88,7 @@ export function CategoriesScreen() {
                 selected={typeFilter}
                 onSelect={setTypeFilter}
               />
-            ) : null
+            ) : undefined
           }
           ListEmptyComponent={
             <CategoriesEmptyState

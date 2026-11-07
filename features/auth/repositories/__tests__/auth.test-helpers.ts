@@ -3,6 +3,7 @@ import { jest } from "@jest/globals";
 export const mockSignInWithPopup = jest.fn<
   (...args: unknown[]) => Promise<unknown>
 >();
+export const mockSignInWithGoogle = jest.fn<() => Promise<unknown>>();
 export const mockSignInWithEmailAndPassword = jest.fn<
   (...args: unknown[]) => Promise<unknown>
 >();
@@ -51,6 +52,10 @@ jest.mock("firebase/firestore", () => ({
 jest.mock("@/lib/firebase", () => ({
   auth: mockAuth,
   db: {},
+}));
+
+jest.mock("@/features/auth/services/google-signin.service", () => ({
+  signInWithGoogle: () => mockSignInWithGoogle(),
 }));
 
 /** Clears the Firebase mocks between repository tests. */

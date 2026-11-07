@@ -4,7 +4,7 @@
 
 ## Current State
 - Date: 06/11/2026
-- Stack: Expo SDK 54, React Native 0.81.5, React 19.1.0, Expo Router 6, TypeScript 5.9, NativeWind 4, Firebase (Auth + Firestore), Jest 30
+- Stack: Expo SDK 58, React Native 0.88.1, React 19.3.0, Expo Router 58, TypeScript 6.0, NativeWind 4, Firebase (Auth + Firestore), Jest 30
 - Auth implemented (email/password + Google) with inline field/action errors, mapped Firebase messages and password-reset feedback in the login screen
 - Email verification implemented: unverified email/password accounts are blocked from private routes until they confirm the address; `/verify-email` shows the email, resend, manual refresh and controlled polling. Google accounts are never asked to verify
 - Wallets MVP implemented: create/list, per-wallet balance, include-in-total, Firestore persistence

@@ -81,7 +81,7 @@ export function WalletsScreen() {
           renderItem={renderWallet}
           ItemSeparatorComponent={WalletSeparator}
           ListHeaderComponent={
-            totals.length > 0 ? <WalletSummary totals={totals} /> : null
+            totals.length > 0 ? <WalletSummary totals={totals} /> : undefined
           }
           ListEmptyComponent={<WalletsEmptyState onCreate={openForm} />}
           contentContainerStyle={[

@@ -1,19 +1,16 @@
 import { Email } from "../types/auth.types";
 import {
-  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
-  signInWithPopup,
   signOut,
   User,
 } from "firebase/auth";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import { signInWithGoogle as requestGoogleSignIn } from "../services/google-signin.service";
 import { IAuthRepository } from "./auth.repository";
-
-const googleProvider = new GoogleAuthProvider();
 
 interface UserProfile {
   name: string | null;
@@ -40,8 +37,7 @@ async function ensureUserProfile(
 
 export class FirebaseAuthRepository implements IAuthRepository {
   async signInWithGoogle(): Promise<User | null> {
-    const res = await signInWithPopup(auth, googleProvider);
-    const user = res.user;
+    const user = await requestGoogleSignIn();
 
     await ensureUserProfile(user, {
       name: user.displayName,

@@ -19,6 +19,18 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
     "Por seguridad, cierra sesión, vuelve a entrar e inténtalo de nuevo.",
   "auth/operation-not-allowed":
     "Este método de inicio de sesión no está disponible.",
+  "auth/operation-not-supported-in-this-environment":
+    "El inicio de sesión con Google necesita la app instalada; no funciona en Expo Go.",
+  "auth/play-services-not-available":
+    "Actualiza Google Play Services para iniciar sesión con Google.",
+  "auth/missing-google-id-token":
+    "Google no devolvió los datos necesarios. Inténtalo de nuevo.",
+  "auth/google-missing-client-id":
+    "El inicio de sesión con Google no está configurado en esta compilación.",
+  "auth/unauthorized-domain":
+    "Este dominio no está autorizado en Firebase para iniciar sesión con Google.",
+  "auth/configuration-not-found":
+    "El inicio de sesión con Google no está configurado en Firebase.",
   "auth/popup-closed-by-user": "Se canceló el inicio de sesión con Google.",
   "auth/cancelled-popup-request":
     "Se canceló el inicio de sesión con Google.",

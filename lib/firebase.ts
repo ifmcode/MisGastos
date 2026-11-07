@@ -1,5 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import * as firebaseAuth from "firebase/auth";
+import type { Auth, Persistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -13,6 +15,28 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-// getAnalytics(app);
-export const auth = getAuth(app);
+
+type AuthWithNativePersistence = typeof firebaseAuth & {
+  getReactNativePersistence: (storage: typeof AsyncStorage) => Persistence;
+};
+
+/**
+ * `getReactNativePersistence` only exists in the React Native build of the
+ * Firebase Auth SDK, so it is read defensively to keep Fast Refresh and web
+ * tooling from crashing.
+ */
+function createAuth(): Auth {
+  const { getAuth, initializeAuth, getReactNativePersistence } =
+    firebaseAuth as AuthWithNativePersistence;
+
+  try {
+    return initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  } catch {
+    return getAuth(app);
+  }
+}
+
+export const auth = createAuth();
 export const db = getFirestore(app);

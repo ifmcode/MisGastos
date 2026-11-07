@@ -1,3 +1,5 @@
+import { describe, expect, it } from "@jest/globals";
+
 import type { CalendarDay } from "../date-calendar";
 import {
   buildCalendarMonth,
