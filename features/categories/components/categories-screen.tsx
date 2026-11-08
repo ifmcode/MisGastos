@@ -47,7 +47,7 @@ export function CategoriesScreen() {
     openEdit,
     close,
     submit,
-    requestDelete,
+    deleteEditing,
   } = useCategoriesScreen();
 
   const canAdd = !loading && !error;
@@ -127,7 +127,7 @@ export function CategoriesScreen() {
         fieldErrors={mutationFieldErrors}
         onSubmit={(input) => void submit(input)}
         onClose={close}
-        onDelete={requestDelete}
+        onDelete={deleteEditing}
       />
     </ThemedView>
   );

@@ -1,16 +1,11 @@
 import { useState } from "react";
 
-import { Wallet } from "@/features/wallets/types/wallet.types";
 import { rememberLastUsedDate } from "@/shared/utils/last-used-date-store";
 
-import {
-  TransactionInput,
-} from "../schemas/transaction.schema";
+import { TransactionInput } from "../schemas/transaction.schema";
 import { Transaction } from "../types/transaction.types";
-import { showDeleteTransactionDialog } from "../utils/transaction-delete-dialog";
 
 export interface UseTransactionFormDialogOptions {
-  walletMap: ReadonlyMap<string, Wallet>;
   mutating: boolean;
   createTransaction: (input: TransactionInput) => Promise<boolean>;
   updateTransaction: (
@@ -28,12 +23,11 @@ export interface TransactionFormDialog {
   openEdit: (transaction: Transaction) => void;
   close: () => void;
   submit: (input: TransactionInput) => Promise<void>;
-  requestDelete: () => void;
+  deleteEditing: () => Promise<void>;
 }
 
 /** Owns the open/edit/delete lifecycle of the movement form modal. */
 export function useTransactionFormDialog({
-  walletMap,
   mutating,
   createTransaction,
   updateTransaction,
@@ -77,18 +71,13 @@ export function useTransactionFormDialog({
     finish();
   }
 
-  function requestDelete() {
+  async function deleteEditing() {
     if (!editingTransaction) return;
 
-    showDeleteTransactionDialog({
-      transaction: editingTransaction,
-      walletMap,
-      onConfirm: async () => {
-        const deleted = await deleteTransaction(editingTransaction.id);
-        if (!deleted) return;
-        finish();
-      },
-    });
+    const deleted = await deleteTransaction(editingTransaction.id);
+    if (!deleted) return;
+
+    finish();
   }
 
   return {
@@ -98,6 +87,6 @@ export function useTransactionFormDialog({
     openEdit,
     close,
     submit,
-    requestDelete,
+    deleteEditing,
   };
 }

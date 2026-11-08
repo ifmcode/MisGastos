@@ -2,13 +2,9 @@ import { useState } from "react";
 
 import { TransferInput } from "@/features/transfers/schemas/transfer.schema";
 import { Transfer } from "@/features/transfers/types/transfer.types";
-import { Wallet } from "@/features/wallets/types/wallet.types";
 import { rememberLastUsedDate } from "@/shared/utils/last-used-date-store";
 
-import { showDeleteTransferDialog } from "../utils/transfer-delete-dialog";
-
 export interface UseDashboardTransferFormOptions {
-  walletMap: ReadonlyMap<string, Wallet>;
   mutating: boolean;
   createTransfer: (input: TransferInput) => Promise<boolean>;
   updateTransfer: (
@@ -27,12 +23,11 @@ export interface DashboardTransferForm {
   openEdit: (transfer: Transfer) => void;
   close: () => void;
   submit: (input: TransferInput) => Promise<void>;
-  requestDelete: () => void;
+  deleteEditing: () => Promise<void>;
 }
 
 /** Owns the open/edit/delete lifecycle of the dashboard transfer modal. */
 export function useDashboardTransferForm({
-  walletMap,
   mutating,
   createTransfer,
   updateTransfer,
@@ -78,18 +73,13 @@ export function useDashboardTransferForm({
     finish();
   }
 
-  function requestDelete() {
+  async function deleteEditing() {
     if (!editingTransfer) return;
 
-    showDeleteTransferDialog({
-      transfer: editingTransfer,
-      walletMap,
-      onConfirm: async () => {
-        const deleted = await deleteTransfer(editingTransfer.id);
-        if (!deleted) return;
-        finish();
-      },
-    });
+    const deleted = await deleteTransfer(editingTransfer.id);
+    if (!deleted) return;
+
+    finish();
   }
 
   return {
@@ -99,6 +89,6 @@ export function useDashboardTransferForm({
     openEdit,
     close,
     submit,
-    requestDelete,
+    deleteEditing,
   };
 }

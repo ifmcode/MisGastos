@@ -1,0 +1,58 @@
+import { StyleSheet } from "react-native";
+
+/** Shared tokens so the transfer card never repeats raw color values. */
+export const transferItemPalette = {
+  primary: "#0A7EA4",
+  primarySoft: "rgba(10, 126, 164, 0.12)",
+  borderLight: "#E4ECEF",
+  borderDark: "#2B3438",
+} as const;
+
+export const transferItemStyles = StyleSheet.create({
+  pressable: {
+    borderRadius: 16,
+  },
+  pressed: {
+    opacity: 0.7,
+  },
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  iconWrapper: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: transferItemPalette.primarySoft,
+  },
+  details: {
+    flex: 1,
+    marginLeft: 12,
+    marginRight: 10,
+  },
+  meta: {
+    fontSize: 13,
+    lineHeight: 18,
+    opacity: 0.65,
+    marginTop: 2,
+  },
+  amount: {
+    fontSize: 15,
+    fontVariant: ["tabular-nums"],
+  },
+  editAffordance: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 8,
+    backgroundColor: transferItemPalette.primarySoft,
+  },
+});

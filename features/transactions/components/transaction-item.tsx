@@ -1,21 +1,29 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { formatMoney } from "@/features/wallets/utils/money";
-
-import { Transaction } from "../types/transaction.types";
 import { formatDateInput } from "@/shared/utils/date";
+
+import {
+  transactionItemPalette as palette,
+  transactionItemStyles as styles,
+} from "../styles/transaction-item.styles";
+import { Transaction } from "../types/transaction.types";
+import {
+  EDIT_TRANSACTION_HINT,
+  getTransactionEditLabel,
+} from "../utils/transaction-item-accessibility";
 import { TransactionCategory } from "../utils/transaction-options";
 
 export interface TransactionItemProps {
   transaction: Transaction;
   wallet?: Wallet;
   category: TransactionCategory;
-  onPress?: () => void;
+  onPress: () => void;
 }
 
 export function TransactionItem({
@@ -25,85 +33,65 @@ export function TransactionItem({
   onPress,
 }: TransactionItemProps) {
   const colorScheme = useColorScheme() ?? "light";
-  const borderColor = colorScheme === "dark" ? "#2B3438" : "#E4ECEF";
+  const borderColor =
+    colorScheme === "dark" ? palette.borderDark : palette.borderLight;
   const isIncome = transaction.type === "income";
-  const amountColor = isIncome ? "#2E7D32" : "#C62828";
+  const amountColor = isIncome ? palette.income : palette.expense;
   const amountPrefix = isIncome ? "+" : "-";
 
   return (
-    <ThemedView
-      onTouchEnd={onPress}
-      style={[styles.card, { borderColor }]}
-      lightColor="#FFFFFF"
-      darkColor="#1C2225"
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={getTransactionEditLabel(
+        transaction,
+        category.label,
+        wallet?.name,
+      )}
+      accessibilityHint={EDIT_TRANSACTION_HINT}
+      onPress={onPress}
+      style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
     >
-      <View style={styles.iconWrapper}>
-        <Ionicons name={category.icon} size={20} color="#0A7EA4" />
-      </View>
+      <ThemedView
+        style={[styles.card, { borderColor }]}
+        lightColor="#FFFFFF"
+        darkColor="#1C2225"
+      >
+        <View style={styles.iconWrapper}>
+          <Ionicons name={category.icon} size={20} color={palette.primary} />
+        </View>
 
-      <View style={styles.details}>
-        <ThemedText type="defaultSemiBold" numberOfLines={1}>
-          {transaction.concept}
-        </ThemedText>
-        <ThemedText style={styles.meta} numberOfLines={1}>
-          {formatDateInput(transaction.date)} · {category.label}
-          {wallet ? ` · ${wallet.name}` : ""}
-        </ThemedText>
-      </View>
+        <View style={styles.details}>
+          <ThemedText type="defaultSemiBold" numberOfLines={1}>
+            {transaction.concept}
+          </ThemedText>
+          <ThemedText style={styles.meta} numberOfLines={1}>
+            {formatDateInput(transaction.date)} · {category.label}
+            {wallet ? ` · ${wallet.name}` : ""}
+          </ThemedText>
+        </View>
 
-      <View style={styles.amountColumn}>
-        <ThemedText
-          type="defaultSemiBold"
-          style={[styles.amount, { color: amountColor }]}
-          numberOfLines={1}
+        <View style={styles.amountColumn}>
+          <ThemedText
+            type="defaultSemiBold"
+            style={[styles.amount, { color: amountColor }]}
+            numberOfLines={1}
+          >
+            {amountPrefix}
+            {formatMoney(transaction.amount, transaction.currency)}
+          </ThemedText>
+          <ThemedText style={styles.currency}>
+            {transaction.currency}
+          </ThemedText>
+        </View>
+
+        <View
+          style={styles.editAffordance}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
         >
-          {amountPrefix}
-          {formatMoney(transaction.amount, transaction.currency)}
-        </ThemedText>
-        <ThemedText style={styles.currency}>{transaction.currency}</ThemedText>
-      </View>
-    </ThemedView>
+          <Ionicons name="pencil-outline" size={15} color={palette.primary} />
+        </View>
+      </ThemedView>
+    </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  iconWrapper: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(10, 126, 164, 0.12)",
-  },
-  details: {
-    flex: 1,
-    marginLeft: 12,
-    marginRight: 10,
-  },
-  meta: {
-    fontSize: 13,
-    lineHeight: 18,
-    opacity: 0.65,
-    marginTop: 2,
-  },
-  amountColumn: {
-    alignItems: "flex-end",
-  },
-  amount: {
-    fontSize: 15,
-    fontVariant: ["tabular-nums"],
-  },
-  currency: {
-    fontSize: 12,
-    opacity: 0.6,
-    marginTop: 2,
-  },
-});

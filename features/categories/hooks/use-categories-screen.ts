@@ -8,7 +8,6 @@ import {
   CategoryType,
   CategoryTypeFilter,
 } from "../types/category.types";
-import { showDeleteCategoryDialog } from "../utils/category-delete-dialog";
 import { filterCategoriesByType } from "../utils/category-filters";
 
 /** Orchestrates the categories screen state without rendering concerns. */
@@ -71,17 +70,12 @@ export function useCategoriesScreen() {
     if (saved) setFormCategory(undefined);
   }
 
-  function requestDelete() {
+  async function deleteEditing() {
     const target = formCategory;
     if (!target) return;
 
-    showDeleteCategoryDialog({
-      category: target,
-      onConfirm: async () => {
-        const deleted = await deleteCategory(target.id);
-        if (deleted) setFormCategory(undefined);
-      },
-    });
+    const deleted = await deleteCategory(target.id);
+    if (deleted) setFormCategory(undefined);
   }
 
   return {
@@ -104,6 +98,6 @@ export function useCategoriesScreen() {
     openEdit,
     close,
     submit,
-    requestDelete,
+    deleteEditing,
   };
 }

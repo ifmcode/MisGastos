@@ -1,10 +1,15 @@
-import { Modal } from "react-native";
+import { Modal, View } from "react-native";
+
+import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
+import { confirmDialogStyles } from "@/shared/components/molecules/confirm-dialog.styles";
+import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
 
 import {
   CategoryInput,
   CategoryValidationErrors,
 } from "../schemas/category.schema";
 import { Category, CategoryType } from "../types/category.types";
+import { getDeleteCategoryConfirmation } from "../utils/category-delete-dialog";
 import { CategoryForm } from "./category-form";
 
 export interface CategoryFormModalProps {
@@ -35,25 +40,60 @@ export function CategoryFormModal({
   onClose,
   onDelete,
 }: CategoryFormModalProps) {
+  const deleteDialog = useConfirmDialog();
+  const deleteConfirmation = category
+    ? getDeleteCategoryConfirmation(category)
+    : null;
+
+  function requestDelete() {
+    if (!deleteConfirmation || !onDelete) return;
+
+    deleteDialog.open({
+      ...deleteConfirmation,
+      onConfirm: onDelete,
+    });
+  }
+
+  function handleRequestClose() {
+    if (deleteDialog.visible) {
+      deleteDialog.close();
+      return;
+    }
+
+    onClose();
+  }
+
   return (
     <Modal
       visible={visible}
       animationType="slide"
       presentationStyle={presentationStyle}
-      onRequestClose={onClose}
+      onRequestClose={handleRequestClose}
+      onDismiss={deleteDialog.close}
     >
       {visible ? (
-        <CategoryForm
-          category={category}
-          defaultType={defaultType}
-          lockType={lockType}
-          submitting={submitting}
-          error={error}
-          fieldErrors={fieldErrors}
-          onSubmit={onSubmit}
-          onCancel={onClose}
-          onDelete={category ? onDelete : undefined}
-        />
+        <View style={confirmDialogStyles.modalRoot}>
+          <CategoryForm
+            category={category}
+            defaultType={defaultType}
+            lockType={lockType}
+            submitting={submitting}
+            error={error}
+            fieldErrors={fieldErrors}
+            onSubmit={onSubmit}
+            onCancel={onClose}
+            onDelete={category && onDelete ? requestDelete : undefined}
+          />
+          <ConfirmDialog
+            visible={deleteDialog.visible}
+            title={deleteDialog.title}
+            message={deleteDialog.message}
+            confirmLabel={deleteDialog.confirmLabel}
+            cancelLabel={deleteDialog.cancelLabel}
+            onConfirm={deleteDialog.confirm}
+            onCancel={deleteDialog.close}
+          />
+        </View>
       ) : null}
     </Modal>
   );

@@ -3,7 +3,7 @@
 > Living document to continue development from any machine with OpenCode/Claude. Update after each milestone.
 
 ## Current State
-- Date: 06/11/2026
+- Date: 08/11/2026
 - Stack: Expo SDK 58, React Native 0.88.1, React 19.3.0, Expo Router 58, TypeScript 6.0, NativeWind 4, Firebase (Auth + Firestore), Jest 30
 - Auth implemented (email/password + Google) with inline field/action errors, mapped Firebase messages and password-reset feedback in the login screen
 - Email verification implemented: unverified email/password accounts are blocked from private routes until they confirm the address; `/verify-email` shows the email, resend, manual refresh and controlled polling. Google accounts are never asked to verify
@@ -11,6 +11,7 @@
 - Transactions MVP implemented: expenses/incomes, history with filters/sorting, atomic wallet balance updates
 - Transfers MVP implemented: atomic moves between same-currency wallets, editable transfers and soft-delete with balance reversion
 - Dashboard MVP implemented: global/per-wallet totals, wallet filter, recent transfers
+- Movement actions UX implemented: movement and recent-transfer cards use `Pressable` with a visible pencil affordance, pressed feedback and screen-reader role/label/hint; delete remains inside the edit form with a project-owned `ConfirmDialog` (no `Alert`/`window.confirm`, works on web)
 - Categories implemented: user-defined expense/income categories with CRUD, lazy defaults, legacy transaction compatibility and inline creation from the transaction form
 - Date picker UX implemented: quick Hoy/Ayer chips, an optional session-scoped "Último" chip in movement/transfer forms, native calendar picker and manual fallback across transaction/transfer forms and date filters
 - Implementation plan reviewed on 03/11/2026: MVP, categories and date picker verified as done; future work tracked in TICKET-006..TICKET-024
@@ -69,3 +70,4 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 | 04/11/2026 | Execution order and platform epics | Added §8 to the implementation plan with the recommended phase order. Added TICKET-023 for offline-first and sync (design spike before groups, full implementation after the social slice) and TICKET-024 for project-specific agents and skills, including routing and permissions guidance |
 | 05/11/2026 | Inline auth errors (Phase A) | Replaced auth alerts with reusable inline feedback, field validation and mapped Firebase messages. Added password-reset feedback, a pure login form reducer with single-flight requests, light/dark theming for login fields and tests. Removed `lib/auth.ts`; Settings logs out through `AuthService` |
 | 06/11/2026 | Email verification (Phase A) | Added shared auth state via `AuthProvider`, verification service/repository methods, `/verify-email` with resend/manual refresh/controlled polling, private-route gating for unverified email/password accounts, Google bypass, profile recovery on email sign-in, tests and docs. Firebase console template setup pending |
+| 08/11/2026 | Movement actions UX (TICKET-022) | Replaced `onTouchEnd` with `Pressable` in movement and transfer cards, added pressed feedback, pencil affordance and accessibility role/label/hint, extracted card styles, added label utility tests and manual-platform checklist. Replaced native/browser confirmation alerts with a project-owned `ConfirmDialog` inside the form modals, fixing delete on web. Added pure delete-message builders and tests |

@@ -64,7 +64,6 @@ export function DashboardScreen() {
   } = useDashboardOverview(wallets, transfers, selectedWalletId);
 
   const transferForm = useDashboardTransferForm({
-    walletMap,
     mutating,
     createTransfer,
     updateTransfer,
@@ -150,7 +149,7 @@ export function DashboardScreen() {
         error={createError}
         fieldErrors={createFieldErrors}
         onSubmit={(input) => void transferForm.submit(input)}
-        onDelete={transferForm.requestDelete}
+        onDelete={transferForm.deleteEditing}
         onClose={transferForm.close}
       />
     </ThemedView>

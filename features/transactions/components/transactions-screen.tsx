@@ -71,7 +71,6 @@ export function TransactionsScreen() {
   );
 
   const dialog = useTransactionFormDialog({
-    walletMap,
     mutating,
     createTransaction,
     updateTransaction,
@@ -148,7 +147,7 @@ export function TransactionsScreen() {
         categories={categories}
         editingTransaction={dialog.editingTransaction}
         onSubmit={(input) => void dialog.submit(input)}
-        onDelete={dialog.requestDelete}
+        onDelete={dialog.deleteEditing}
         onClose={dialog.close}
         onCategoryCreated={addCategory}
       />

@@ -32,7 +32,7 @@ Replace the native dialogs used by login, registration and Google sign-in with i
 - `lib/auth.ts` catches Firebase errors and displays them with `alert()`. Move these flows to the `features/auth` service/repository and return typed results or errors instead of showing UI from the data layer.
 - `LoginActions` owns the email and Google buttons; add an error slot above each one. `LoginFields` can receive per-field errors.
 - Use `accessibilityRole="alert"` / `accessibilityLiveRegion="polite"` and the shared danger colour tokens.
-- Keep native confirmation dialogs for destructive actions such as deleting a movement. This ticket only changes authentication feedback.
+- Keep a confirmation step for destructive actions such as deleting a movement. The movement and category flows use the shared in-app `ConfirmDialog` because `Alert.alert` is a no-op on web. This ticket only changes authentication feedback.
 
 ## Implementation Notes (05/11/2026)
 - `features/auth/components/auth-feedback.tsx` is the reusable inline feedback

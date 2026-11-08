@@ -71,7 +71,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 |---|---|---|---|---|
 | PM-020 | Inline auth errors | Replace dialogs/alerts in login and registration with messages next to the action that failed | ✅ Done | TICKET-020; field + action inline feedback, Firebase error mapping, password reset feedback |
 | PM-021 | Email verification | Send a verification email when an email/password account is created | ✅ Done | TICKET-021; private routes blocked until verified, dedicated `/verify-email` screen with resend, manual refresh and controlled polling |
-| PM-022 | Discoverable movement actions | Make edit/delete for expenses, incomes and transfers visible and accessible (core logic already exists) | ⏳ Pending | TICKET-022 |
+| PM-022 | Discoverable movement actions | Make edit/delete for expenses, incomes and transfers visible and accessible (core logic already exists) | ✅ Done | TICKET-022; Pressable cards, pencil affordance, accessibility labels/hints and tests. Delete stays in the edit form with a project-owned `ConfirmDialog` that works on web |
 
 ### 3.7 Platform and workflow epics
 | ID | Feature | Description | Status | Ticket |

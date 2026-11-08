@@ -36,7 +36,7 @@
 - [ ] Dashboard quick add (TICKET-019)
 - [x] Inline auth errors (TICKET-020)
 - [x] Email verification on signup (TICKET-021)
-- [ ] Discoverable edit/delete actions (TICKET-022)
+- [x] Discoverable edit/delete actions (TICKET-022)
 
 ## Phase 4: Platform and Workflow
 - [ ] Offline-first design spike + sync (TICKET-023)

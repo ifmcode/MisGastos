@@ -1,31 +1,25 @@
-import { Alert } from "react-native";
-
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { formatMoney } from "@/features/wallets/utils/money";
 
 import { Transaction } from "../types/transaction.types";
 
-export interface DeleteTransactionDialogOptions {
-  transaction: Transaction;
-  walletMap: ReadonlyMap<string, Wallet>;
-  onConfirm: () => void;
+export interface DeleteTransactionConfirmation {
+  title: string;
+  message: string;
 }
 
-/** Asks for confirmation before deleting a movement and reverting its balance. */
-export function showDeleteTransactionDialog({
-  transaction,
-  walletMap,
-  onConfirm,
-}: DeleteTransactionDialogOptions): void {
-  const walletName = walletMap.get(transaction.walletId)?.name ?? "esta cartera";
+/** Builds the copy shown before deleting a movement and reverting its balance. */
+export function getDeleteTransactionConfirmation(
+  transaction: Transaction,
+  wallets: readonly Wallet[],
+): DeleteTransactionConfirmation {
+  const walletName =
+    wallets.find((wallet) => wallet.id === transaction.walletId)?.name ??
+    "esta cartera";
   const amount = formatMoney(transaction.amount, transaction.currency);
 
-  Alert.alert(
-    "Eliminar movimiento",
-    `Se eliminará "${transaction.concept}" (${amount}) de ${walletName} y se revertirá el saldo.`,
-    [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Eliminar", style: "destructive", onPress: onConfirm },
-    ],
-  );
+  return {
+    title: "Eliminar movimiento",
+    message: `Se eliminará "${transaction.concept}" (${amount}) de ${walletName} y se revertirá el saldo.`,
+  };
 }
