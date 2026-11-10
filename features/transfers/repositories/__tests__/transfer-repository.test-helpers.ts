@@ -17,6 +17,7 @@ export const mockWhere = jest.fn<(...args: unknown[]) => unknown>();
 
 jest.mock("firebase/firestore", () => ({
   collection: (...args: unknown[]) => mockCollection(...args),
+  deleteField: () => ({ kind: "delete-field" }),
   doc: (...args: unknown[]) => mockDoc(...args),
   getDoc: (...args: unknown[]) => mockGetDoc(...args),
   getDocs: (...args: unknown[]) => mockGetDocs(...args),

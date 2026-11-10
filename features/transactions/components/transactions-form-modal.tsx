@@ -21,6 +21,8 @@ export interface TransactionsFormModalProps {
   error: string | null;
   fieldErrors: TransactionValidationErrors;
   wallets: Wallet[];
+  /** All wallets, including archived ones, used only for history labels. */
+  walletLookup?: readonly Wallet[];
   categories: readonly Category[];
   editingTransaction: Transaction | null;
   onSubmit: (input: TransactionInput) => void;
@@ -35,6 +37,7 @@ export function TransactionsFormModal({
   error,
   fieldErrors,
   wallets,
+  walletLookup = wallets,
   categories,
   editingTransaction,
   onSubmit,
@@ -44,7 +47,7 @@ export function TransactionsFormModal({
 }: TransactionsFormModalProps) {
   const deleteDialog = useConfirmDialog();
   const deleteConfirmation = editingTransaction
-    ? getDeleteTransactionConfirmation(editingTransaction, wallets)
+    ? getDeleteTransactionConfirmation(editingTransaction, walletLookup)
     : null;
 
   function requestDelete() {

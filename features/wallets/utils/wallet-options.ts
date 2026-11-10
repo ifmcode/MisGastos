@@ -1,4 +1,4 @@
-import { WalletFormValues, WalletType } from "../types/wallet.types";
+import { Wallet, WalletFormValues, WalletType } from "../types/wallet.types";
 
 /**
  * Predefined icon names from Ionicons. Keeping the set closed avoids
@@ -60,6 +60,20 @@ export const DEFAULT_WALLET_FORM_VALUES: WalletFormValues = {
   includeInTotal: true,
   description: "",
 };
+
+/** Converts a stored wallet into the raw values handled by the edit form. */
+export function buildWalletFormValues(wallet: Wallet): WalletFormValues {
+  return {
+    name: wallet.name,
+    currency: wallet.currency,
+    icon: wallet.icon,
+    color: wallet.color,
+    initialBalance: wallet.initialBalance.toFixed(2).replace(".", ","),
+    type: wallet.type,
+    includeInTotal: wallet.includeInTotal,
+    description: wallet.description ?? "",
+  };
+}
 
 export function isWalletIcon(value: unknown): value is WalletIcon {
   return (

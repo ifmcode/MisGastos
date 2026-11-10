@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedView } from "@/components/themed-view";
 import { useCategories } from "@/features/categories/hooks/use-categories";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
+import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
 
 import { useTransactionFormDialog } from "../hooks/use-transaction-form-dialog";
 import { useTransactions } from "../hooks/use-transactions";
@@ -69,6 +70,7 @@ export function TransactionsScreen() {
     () => new Map(wallets.map((wallet) => [wallet.id, wallet])),
     [wallets],
   );
+  const activeWallets = useMemo(() => getActiveWallets(wallets), [wallets]);
 
   const dialog = useTransactionFormDialog({
     mutating,
@@ -143,7 +145,8 @@ export function TransactionsScreen() {
         mutating={mutating}
         error={mutationError}
         fieldErrors={mutationFieldErrors}
-        wallets={wallets}
+        wallets={activeWallets}
+        walletLookup={wallets}
         categories={categories}
         editingTransaction={dialog.editingTransaction}
         onSubmit={(input) => void dialog.submit(input)}
@@ -154,7 +157,7 @@ export function TransactionsScreen() {
 
       <TransactionsFiltersDialog
         visible={isFiltersVisible}
-        wallets={wallets}
+        wallets={activeWallets}
         categories={categories}
         filters={filters}
         onApply={applyFilters}

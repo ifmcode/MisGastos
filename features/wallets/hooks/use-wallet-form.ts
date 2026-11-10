@@ -11,6 +11,7 @@ import { DEFAULT_WALLET_FORM_VALUES } from "../utils/wallet-options";
 
 export interface UseWalletFormOptions {
   fieldErrors: WalletValidationErrors;
+  initialValues?: WalletFormValues;
   onSubmit: (input: WalletInput) => void;
 }
 
@@ -27,10 +28,11 @@ export interface UseWalletFormResult {
 /** Owns the wallet form values, validations and submit flow. */
 export function useWalletForm({
   fieldErrors,
+  initialValues,
   onSubmit,
 }: UseWalletFormOptions): UseWalletFormResult {
   const [values, setValues] = useState<WalletFormValues>(
-    DEFAULT_WALLET_FORM_VALUES,
+    initialValues ?? DEFAULT_WALLET_FORM_VALUES,
   );
   const [localErrors, setLocalErrors] = useState<WalletValidationErrors>({});
 

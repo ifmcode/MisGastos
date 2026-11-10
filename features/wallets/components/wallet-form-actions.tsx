@@ -6,23 +6,27 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { walletFormStyles as styles } from "../styles/wallet-form.styles";
 
 export interface WalletFormActionsProps {
+  mode?: "create" | "edit";
   submitting: boolean;
   onCancel: () => void;
   onSubmit: () => void;
 }
 
 export function WalletFormActions({
+  mode = "create",
   submitting,
   onCancel,
   onSubmit,
 }: WalletFormActionsProps) {
   const theme = useFormTheme();
+  const isEditing = mode === "edit";
+  const submitLabel = isEditing ? "Guardar cambios" : "Crear cartera";
 
   return (
     <View style={styles.actions}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Cancelar creación de cartera"
+        accessibilityLabel={isEditing ? "Cancelar edición" : "Cancelar creación de cartera"}
         onPress={onCancel}
         disabled={submitting}
         style={[
@@ -36,7 +40,7 @@ export function WalletFormActions({
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Crear cartera"
+        accessibilityLabel={submitLabel}
         onPress={onSubmit}
         disabled={submitting}
         style={[styles.primaryButton, submitting && styles.disabled]}
@@ -44,7 +48,7 @@ export function WalletFormActions({
         {submitting ? (
           <ActivityIndicator color={theme.onPrimary} />
         ) : (
-          <ThemedText style={styles.primaryButtonText}>Crear cartera</ThemedText>
+          <ThemedText style={styles.primaryButtonText}>{submitLabel}</ThemedText>
         )}
       </Pressable>
     </View>

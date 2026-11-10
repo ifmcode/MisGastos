@@ -62,4 +62,17 @@ describe("getDeleteTransactionConfirmation", () => {
 
     expect(confirmation.message).toContain("de esta cartera");
   });
+
+  it("explains that orphaned movements have no balance to revert", () => {
+    const confirmation = getDeleteTransactionConfirmation(
+      buildTransaction({
+        walletId: "-1",
+        walletName: "[Eliminada] Cuenta principal",
+      }),
+      [],
+    );
+
+    expect(confirmation.message).toContain("no hay saldo que revertir");
+    expect(confirmation.message).toContain("[Eliminada]");
+  });
 });

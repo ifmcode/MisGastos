@@ -2,33 +2,31 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "@/hooks/use-auth";
 
-import {
-  WalletInput,
-  WalletValidationErrors,
-} from "../schemas/wallet.schema";
-import {
-  getWalletErrorMessage,
-  WalletValidationError,
-} from "../services/wallet.errors";
+import { getWalletErrorMessage } from "../services/wallet.errors";
 import { Wallet } from "../types/wallet.types";
 import { calculateWalletTotals, WalletTotal } from "../utils/money";
+import {
+  getActiveWallets,
+  getArchivedWallets,
+} from "../utils/wallet-status";
+import {
+  useWalletMutations,
+  WalletMutations,
+} from "./use-wallet-mutations";
 import { useWalletService } from "./use-wallet-service";
 
 type LoadMode = "initial" | "refresh";
 
-export interface UseWalletsResult {
+export interface UseWalletsResult extends WalletMutations {
   wallets: Wallet[];
+  activeWallets: Wallet[];
+  archivedWallets: Wallet[];
   totals: WalletTotal[];
   loading: boolean;
   refreshing: boolean;
-  creating: boolean;
   error: string | null;
-  createError: string | null;
-  createFieldErrors: WalletValidationErrors;
   reload: () => Promise<void>;
   refresh: () => Promise<void>;
-  createWallet: (input: WalletInput) => Promise<boolean>;
-  clearCreateState: () => void;
 }
 
 export function useWallets(): UseWalletsResult {
@@ -39,10 +37,6 @@ export function useWallets(): UseWalletsResult {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [createFieldErrors, setCreateFieldErrors] =
-    useState<WalletValidationErrors>({});
 
   const loadWallets = useCallback(
     async (mode: LoadMode) => {
@@ -90,61 +84,25 @@ export function useWallets(): UseWalletsResult {
   const reload = useCallback(() => loadWallets("initial"), [loadWallets]);
   const refresh = useCallback(() => loadWallets("refresh"), [loadWallets]);
 
-  const createWallet = useCallback(
-    async (input: WalletInput): Promise<boolean> => {
-      if (!user) {
-        setCreateError("Debes iniciar sesión para crear una cartera.");
-        return false;
-      }
-
-      setCreating(true);
-      setCreateError(null);
-      setCreateFieldErrors({});
-
-      try {
-        const wallet = await walletService.createWallet(user.uid, input);
-        setWallets((current) => [wallet, ...current]);
-        return true;
-      } catch (createFailure: unknown) {
-        if (createFailure instanceof WalletValidationError) {
-          setCreateFieldErrors(createFailure.fieldErrors);
-          setCreateError(createFailure.message);
-        } else {
-          setCreateError(
-            getWalletErrorMessage(
-              createFailure,
-              "No se pudo crear la cartera. Inténtalo de nuevo.",
-            ),
-          );
-        }
-
-        return false;
-      } finally {
-        setCreating(false);
-      }
-    },
-    [user, walletService],
-  );
-
-  const clearCreateState = useCallback(() => {
-    setCreateError(null);
-    setCreateFieldErrors({});
-  }, []);
+  const mutations = useWalletMutations({ ownerId: user?.uid, setWallets });
 
   const totals = useMemo(() => calculateWalletTotals(wallets), [wallets]);
+  const activeWallets = useMemo(() => getActiveWallets(wallets), [wallets]);
+  const archivedWallets = useMemo(
+    () => getArchivedWallets(wallets),
+    [wallets],
+  );
 
   return {
     wallets,
+    activeWallets,
+    archivedWallets,
     totals,
     loading,
     refreshing,
-    creating,
     error,
-    createError,
-    createFieldErrors,
     reload,
     refresh,
-    createWallet,
-    clearCreateState,
+    ...mutations,
   };
 }

@@ -1,117 +1,131 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import { FlatList, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
+import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
-import { useWallets } from "../hooks/use-wallets";
-import { WalletInput } from "../schemas/wallet.schema";
+import { useWalletScreen } from "../hooks/use-wallet-screen";
+import { walletManagementStyles as managementStyles } from "../styles/wallet-management.styles";
 import { walletsPalette, walletsStyles } from "../styles/wallets.styles";
-import { Wallet } from "../types/wallet.types";
-import { WalletCard } from "./wallet-card";
-import { WalletSummary } from "./wallet-summary";
-import { WalletsEmptyState } from "./wallets-empty-state";
-import { WalletsErrorState } from "./wallets-error-state";
+import { buildWalletFormValues } from "../utils/wallet-options";
+import { WalletActionsModal } from "./wallet-actions-modal";
+import { WalletDeleteModal } from "./wallet-delete-modal";
 import { WalletsFormModal } from "./wallets-form-modal";
 import { WalletsHeader } from "./wallets-header";
-import { WalletsLoadingState } from "./wallets-loading-state";
-
-function WalletSeparator() {
-  return <View style={walletsStyles.separator} />;
-}
+import { WalletsList } from "./wallets-list";
 
 export function WalletsScreen() {
   const insets = useSafeAreaInsets();
-  const {
-    wallets,
-    totals,
-    loading,
-    refreshing,
-    creating,
-    error,
-    createError,
-    createFieldErrors,
-    reload,
-    refresh,
-    createWallet,
-    clearCreateState,
-  } = useWallets();
-
-  const [isFormVisible, setIsFormVisible] = useState(false);
-
-  const canAddWallet = !loading && !error && wallets.length > 0;
-
-  function openForm() {
-    clearCreateState();
-    setIsFormVisible(true);
-  }
-
-  function closeForm() {
-    if (creating) return;
-    setIsFormVisible(false);
-  }
-
-  async function handleCreate(input: WalletInput) {
-    const created = await createWallet(input);
-    if (created) setIsFormVisible(false);
-  }
-
-  function renderWallet({ item }: { item: Wallet }) {
-    return <WalletCard wallet={item} />;
-  }
+  const theme = useFormTheme();
+  const screen = useWalletScreen();
+  const { wallets, management, archiveDialog } = screen;
 
   return (
     <ThemedView
       style={[walletsStyles.container, { paddingTop: insets.top + 16 }]}
     >
       <WalletsHeader
-        showAddButton={canAddWallet}
-        onAddPress={openForm}
+        showAddButton={screen.canAddWallet}
+        onAddPress={screen.openCreate}
       />
 
-      {loading ? (
-        <WalletsLoadingState />
-      ) : error ? (
-        <WalletsErrorState message={error} onRetry={() => void reload()} />
-      ) : (
-        <FlatList
-          data={wallets}
-          keyExtractor={(wallet) => wallet.id}
-          renderItem={renderWallet}
-          ItemSeparatorComponent={WalletSeparator}
-          ListHeaderComponent={
-            totals.length > 0 ? <WalletSummary totals={totals} /> : undefined
-          }
-          ListEmptyComponent={<WalletsEmptyState onCreate={openForm} />}
-          contentContainerStyle={[
-            walletsStyles.listContent,
-            wallets.length === 0 && walletsStyles.emptyListContent,
+      {screen.showScreenError ? (
+        <View
+          style={[
+            managementStyles.errorBanner,
+            {
+              backgroundColor: theme.dangerSurface,
+              marginHorizontal: 24,
+              marginBottom: 12,
+            },
           ]}
-          refreshing={refreshing}
-          onRefresh={() => void refresh()}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+        >
+          <ThemedText
+            style={[managementStyles.errorText, { color: theme.dangerText }]}
+          >
+            {wallets.mutationError}
+          </ThemedText>
+        </View>
+      ) : null}
 
-      {canAddWallet ? (
+      <WalletsList
+        wallets={wallets.wallets}
+        activeWallets={wallets.activeWallets}
+        archivedWallets={wallets.archivedWallets}
+        totals={wallets.totals}
+        loading={wallets.loading}
+        refreshing={wallets.refreshing}
+        error={wallets.error}
+        onReload={() => void wallets.reload()}
+        onRefresh={() => void wallets.refresh()}
+        onCreate={screen.openCreate}
+        onWalletPress={screen.openActions}
+      />
+
+      {screen.canAddWallet ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Añadir cartera"
-          onPress={openForm}
+          onPress={screen.openCreate}
           style={[walletsStyles.fab, { bottom: insets.bottom + 24 }]}
         >
           <Ionicons name="add" size={30} color={walletsPalette.onPrimary} />
         </Pressable>
       ) : null}
 
+      <WalletActionsModal
+        wallet={management.actionsWallet}
+        onEdit={() => {
+          if (management.actionsWallet) screen.openEdit(management.actionsWallet);
+        }}
+        onToggleArchive={screen.requestArchiveToggle}
+        onDelete={() => {
+          if (management.actionsWallet) screen.openDelete(management.actionsWallet);
+        }}
+        onClose={management.closeActions}
+      />
+
       <WalletsFormModal
-        visible={isFormVisible}
-        submitting={creating}
-        error={createError}
-        fieldErrors={createFieldErrors}
-        onSubmit={(input) => void handleCreate(input)}
-        onClose={closeForm}
+        visible={management.formMode !== null}
+        mode={management.formMode ?? "create"}
+        initialValues={
+          management.editingWallet
+            ? buildWalletFormValues(management.editingWallet)
+            : undefined
+        }
+        initialBalanceLocked={
+          management.usageLoading ||
+          Boolean(management.editingUsage?.hasMovements)
+        }
+        submitting={wallets.mutating}
+        error={wallets.mutationError}
+        fieldErrors={wallets.mutationFieldErrors}
+        onSubmit={(input) => void screen.submitForm(input)}
+        onClose={screen.closeForm}
+      />
+
+      <WalletDeleteModal
+        wallet={management.deleteTarget}
+        usage={management.deleteUsage}
+        wallets={wallets.activeWallets}
+        submitting={wallets.mutating}
+        error={wallets.mutationError}
+        onConfirm={(options) => void screen.confirmDelete(options)}
+        onClose={screen.closeDelete}
+      />
+
+      <ConfirmDialog
+        visible={archiveDialog.visible}
+        title={archiveDialog.title}
+        message={archiveDialog.message}
+        confirmLabel={archiveDialog.confirmLabel}
+        cancelLabel={archiveDialog.cancelLabel}
+        tone="primary"
+        onConfirm={archiveDialog.confirm}
+        onCancel={archiveDialog.close}
       />
     </ThemedView>
   );

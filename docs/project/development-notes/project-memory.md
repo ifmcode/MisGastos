@@ -3,11 +3,12 @@
 > Living document to continue development from any machine with OpenCode/Claude. Update after each milestone.
 
 ## Current State
-- Date: 09/11/2026
+- Date: 10/11/2026
 - Stack: Expo SDK 58, React Native 0.88.1, React 19.3.0, Expo Router 58, TypeScript 6.0, NativeWind 4, Firebase (Auth + Firestore), Jest 30
 - Auth implemented (email/password + Google) with inline field/action errors, mapped Firebase messages and password-reset feedback in the login screen
 - Email verification implemented: unverified email/password accounts are blocked from private routes until they confirm the address; `/verify-email` shows the email, resend, manual refresh and controlled polling. Google accounts are never asked to verify
 - Wallets MVP implemented: create/list, per-wallet balance, include-in-total, Firestore persistence
+- Wallet management implemented: edit with locked currency and usage-guarded initial balance, archive/restore with `archivedAt`, and deletion with reassignment or an `[Eliminada]` placeholder. Archived wallets leave selectors/totals while history keeps stored names
 - Transactions MVP implemented: expenses/incomes, history with filters/sorting, atomic wallet balance updates
 - Transfers MVP implemented: atomic moves between same-currency wallets, editable transfers and soft-delete with balance reversion
 - Dashboard MVP implemented: global/per-wallet totals, wallet filter, recent transfers
@@ -33,7 +34,7 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 - Strict TypeScript
 - Tests target coverage >= 90% (see testing guide)
 - Money: decimal numbers rounded to 2 decimals (strict input validation), not integer cents, for MVP. Revisit when transactions/transfers are implemented
-- Wallets persisted in the root `wallets` collection with `ownerId`; queried by owner and sorted client-side. Dashboard totals grouped by currency (no conversion in MVP)
+- Wallets persisted in the root `wallets` collection with `ownerId`; queried by owner and sorted client-side. Dashboard totals grouped by currency (no conversion in MVP). `archivedAt` marks soft-deleted wallets: they leave selectors, filters and totals but keep their history and stored names. Permanent deletion either reassigns movements to a compatible active wallet (same currency, atomic target balance) or keeps them under the virtual `walletId: "-1"` with `[Eliminada] <name>` labels; transfers orphan only the deleted side
 - Transfers persisted in a dedicated root `transfers` collection with `ownerId`. Only same-currency wallets can be linked; balances update atomically with `runTransaction`. Transfers are editable and use soft delete (`deletedAt`) with atomic balance reversion; hard deletes are denied in rules
 - Dashboard global totals only include wallets with `includeInTotal`; selecting a wallet always shows its real balance and flags whether it contributes to the global total
 - Categories live in the root `categories` collection scoped by `ownerId`. Defaults are seeded lazily when the owner has none, using deterministic ids (`${ownerId}__${legacyId}`); deleting the last category re-seeds them on the next load. Deletion is hard and blocked while transactions use the category. Seeded defaults keep their old transaction ids in `legacyId`, and forms/filters resolve either id so existing movements are never rewritten. Category type is locked after creation. Transfers remain uncategorized.
@@ -76,3 +77,4 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 | 08/11/2026 | Movement actions UX (TICKET-022) | Replaced `onTouchEnd` with `Pressable` in movement and transfer cards, added pressed feedback, pencil affordance and accessibility role/label/hint, extracted card styles, added label utility tests and manual-platform checklist. Replaced native/browser confirmation alerts with a project-owned `ConfirmDialog` inside the form modals, fixing delete on web. Added pure delete-message builders and tests |
 | 08/11/2026 | Ticket workflow + TICKET-014 scope | Added the `[DONE] ` prefix convention to ticket filenames and H1, applied it to TICKET-000..005 and 020..022, added implementation plan §0 Current Focus and §8 phase checkboxes, and documented the close-ticket checklist in `AGENTS.md`, roadmap and memory. TICKET-014 now includes a Settings toggle to enable/disable dark mode |
 | 09/11/2026 | Dark mode polish (TICKET-014) | Added `AppThemeProvider` with system/manual preference resolution and AsyncStorage persistence, a Settings **Modo oscuro** switch, and shared theme tokens across login, settings, forms, filters, calendars, dialogs and dashboard surfaces. Added resolver/storage tests, visual checks and screenshots, and renamed the ticket with the `[DONE] ` prefix. Next Phase A ticket is TICKET-018; next platform ticket is TICKET-023 |
+| 10/11/2026 | Wallet management (TICKET-018) | Added wallet editing with locked currency and usage-guarded initial balance, archive/restore with `archivedAt`, owner-only guards, and permanent deletion with movement reassignment or a `[Eliminada]` placeholder (`walletId: "-1"`). Archived wallets leave selectors and totals while history keeps stored names; transfers orphan only the deleted side. Split repositories/hooks/styles to respect the 150-line rule, added deletion/balance/archive tests and renamed the ticket with the `[DONE] ` prefix. Phase A is complete; next ticket is TICKET-023 |

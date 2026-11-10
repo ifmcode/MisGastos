@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -8,6 +8,7 @@ import { useTransfers } from "@/features/transfers/hooks/use-transfers";
 import { WalletCard } from "@/features/wallets/components/wallet-card";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
 
 import { useDashboardOverview } from "../hooks/use-dashboard-overview";
 import { useDashboardTransferForm } from "../hooks/use-dashboard-transfer-form";
@@ -53,6 +54,8 @@ export function DashboardScreen() {
 
   const [selectedWalletId, setSelectedWalletId] = useState("");
 
+  const activeWallets = useMemo(() => getActiveWallets(wallets), [wallets]);
+
   const {
     effectiveSelectedWalletId,
     selectedWallet,
@@ -61,7 +64,7 @@ export function DashboardScreen() {
     walletMap,
     recentTransfers,
     canTransfer,
-  } = useDashboardOverview(wallets, transfers, selectedWalletId);
+  } = useDashboardOverview(activeWallets, transfers, selectedWalletId, wallets);
 
   const transferForm = useDashboardTransferForm({
     mutating,
@@ -109,7 +112,7 @@ export function DashboardScreen() {
           ItemSeparatorComponent={WalletSeparator}
           ListHeaderComponent={
             <DashboardListHeader
-              wallets={wallets}
+              wallets={activeWallets}
               selectedWalletId={effectiveSelectedWalletId}
               selectedWallet={selectedWallet}
               totals={totals}
@@ -133,7 +136,7 @@ export function DashboardScreen() {
           ListEmptyComponent={<DashboardEmptyWalletsState />}
           contentContainerStyle={[
             dashboardStyles.listContent,
-            wallets.length === 0 && dashboardStyles.emptyListContent,
+            activeWallets.length === 0 && dashboardStyles.emptyListContent,
           ]}
           refreshing={refreshing}
           onRefresh={handleRefresh}
@@ -143,7 +146,8 @@ export function DashboardScreen() {
 
       <DashboardTransferModal
         visible={transferForm.visible}
-        wallets={wallets}
+        wallets={activeWallets}
+        walletLookup={wallets}
         editingTransfer={transferForm.editingTransfer}
         submitting={mutating}
         error={createError}

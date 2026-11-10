@@ -1,15 +1,37 @@
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 
-import { CreateWalletDto, Wallet } from "../types/wallet.types";
-import { roundMoney } from "../utils/money";
-import { IWalletRepository } from "./wallet.repository";
+import {
+  CreateWalletDto,
+  DeleteWalletOptions,
+  UpdateWalletDto,
+  Wallet,
+  WalletDeletionResult,
+  WalletUsage,
+} from "../types/wallet.types";
+import { deleteWalletDocument } from "./wallet-deletion.operation";
 import { mapWalletDocument } from "./wallet.mapper";
+import { loadWalletMovements, toWalletUsage } from "./wallet-movements";
+import { IWalletRepository } from "./wallet.repository";
+import {
+  createWalletDocument,
+  setWalletArchivedDocument,
+  updateWalletDocument,
+} from "./wallet-write.operations";
+
+const WALLET_COLLECTION = "wallets";
 
 export class FirebaseWalletRepository implements IWalletRepository {
   async getWallets(ownerId: string): Promise<Wallet[]> {
-    const walletsRef = collection(db, "wallets");
+    const walletsRef = collection(db, WALLET_COLLECTION);
     const snapshot = await getDocs(
       query(walletsRef, where("ownerId", "==", ownerId)),
     );
@@ -30,28 +52,49 @@ export class FirebaseWalletRepository implements IWalletRepository {
     );
   }
 
+  async getWallet(ownerId: string, walletId: string): Promise<Wallet | null> {
+    const snapshot = await getDoc(doc(db, WALLET_COLLECTION, walletId));
+    if (!snapshot.exists()) return null;
+
+    const data = snapshot.data() as Record<string, unknown>;
+    if (data.ownerId !== ownerId) return null;
+
+    return mapWalletDocument(snapshot.id, data, ownerId);
+  }
+
   async createWallet(ownerId: string, dto: CreateWalletDto): Promise<Wallet> {
-    const now = new Date().toISOString();
-    const initialBalance = roundMoney(dto.initialBalance);
+    return createWalletDocument(ownerId, dto);
+  }
 
-    const data = {
-      name: dto.name,
-      currency: dto.currency,
-      icon: dto.icon,
-      color: dto.color,
-      initialBalance,
-      balance: initialBalance,
-      type: dto.type,
-      includeInTotal: dto.includeInTotal,
-      ownerId,
-      createdAt: now,
-      updatedAt: now,
-      ...(dto.description ? { description: dto.description } : {}),
-    };
+  async updateWallet(
+    ownerId: string,
+    walletId: string,
+    dto: UpdateWalletDto,
+  ): Promise<Wallet> {
+    return updateWalletDocument(ownerId, walletId, dto);
+  }
 
-    const walletsRef = collection(db, "wallets");
-    const reference = await addDoc(walletsRef, data);
+  async setWalletArchived(
+    ownerId: string,
+    walletId: string,
+    archivedAt: string | null,
+  ): Promise<Wallet> {
+    return setWalletArchivedDocument(ownerId, walletId, archivedAt);
+  }
 
-    return { id: reference.id, ...data };
+  async getWalletUsage(
+    ownerId: string,
+    walletId: string,
+  ): Promise<WalletUsage> {
+    const movements = await loadWalletMovements(ownerId, walletId);
+    return toWalletUsage(movements);
+  }
+
+  async deleteWallet(
+    ownerId: string,
+    walletId: string,
+    options: DeleteWalletOptions,
+  ): Promise<WalletDeletionResult> {
+    return deleteWalletDocument(ownerId, walletId, options);
   }
 }

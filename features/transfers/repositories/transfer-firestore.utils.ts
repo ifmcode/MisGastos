@@ -2,6 +2,7 @@ import { doc, Transaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { roundMoney } from "@/features/wallets/utils/money";
+import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 
 import { TransferOperationError } from "../services/transfer.errors";
 import { CreateTransferDto, Transfer } from "../types/transfer.types";
@@ -70,6 +71,8 @@ export function addBalanceAdjustment(
   walletId: string,
   amount: number,
 ): void {
+  if (isOrphanedWalletId(walletId)) return;
+
   adjustments.set(
     walletId,
     roundMoney((adjustments.get(walletId) ?? 0) + amount),
@@ -99,6 +102,9 @@ export async function loadTransferWallets({
   const walletDataById = new Map<string, Record<string, unknown>>();
 
   for (const walletId of walletIds) {
+    // Orphaned movement sides have no real wallet to load or adjust.
+    if (isOrphanedWalletId(walletId)) continue;
+
     const walletSnapshot = await transaction.get(doc(db, "wallets", walletId));
 
     if (!walletSnapshot.exists()) {

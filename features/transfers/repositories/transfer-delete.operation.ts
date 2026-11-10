@@ -3,6 +3,7 @@ import { doc, runTransaction } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 import { roundMoney } from "@/features/wallets/utils/money";
 
 import { TransferOperationError } from "../services/transfer.errors";
@@ -41,64 +42,69 @@ export async function deleteTransferOperation(
       throw new TransferOperationError("TRANSFER_NOT_FOUND");
     }
 
-    const fromWalletRef = doc(db, "wallets", previous.fromWalletId);
-    const toWalletRef = doc(db, "wallets", previous.toWalletId);
+    updatedWallets = [];
 
-    const fromWalletSnapshot = await firestoreTransaction.get(fromWalletRef);
-    if (!fromWalletSnapshot.exists()) {
-      throw new TransferOperationError("FROM_WALLET_NOT_FOUND");
+    if (!isOrphanedWalletId(previous.fromWalletId)) {
+      const fromWalletRef = doc(db, "wallets", previous.fromWalletId);
+      const fromWalletSnapshot = await firestoreTransaction.get(fromWalletRef);
+      if (!fromWalletSnapshot.exists()) {
+        throw new TransferOperationError("FROM_WALLET_NOT_FOUND");
+      }
+
+      const fromWalletData =
+        fromWalletSnapshot.data() as Record<string, unknown>;
+      if (fromWalletData.ownerId !== ownerId) {
+        throw new TransferOperationError("WALLET_NOT_OWNED");
+      }
+
+      const fromBalance = roundMoney(
+        toWalletBalance(fromWalletData) + previous.amount,
+      );
+      firestoreTransaction.update(fromWalletRef, {
+        balance: fromBalance,
+        updatedAt: now,
+      });
+
+      const updatedFromWallet = mapWalletDocument(
+        previous.fromWalletId,
+        { ...fromWalletData, balance: fromBalance, updatedAt: now },
+        ownerId,
+      );
+      if (updatedFromWallet) updatedWallets.push(updatedFromWallet);
     }
 
-    const toWalletSnapshot = await firestoreTransaction.get(toWalletRef);
-    if (!toWalletSnapshot.exists()) {
-      throw new TransferOperationError("TO_WALLET_NOT_FOUND");
+    if (!isOrphanedWalletId(previous.toWalletId)) {
+      const toWalletRef = doc(db, "wallets", previous.toWalletId);
+      const toWalletSnapshot = await firestoreTransaction.get(toWalletRef);
+      if (!toWalletSnapshot.exists()) {
+        throw new TransferOperationError("TO_WALLET_NOT_FOUND");
+      }
+
+      const toWalletData = toWalletSnapshot.data() as Record<string, unknown>;
+      if (toWalletData.ownerId !== ownerId) {
+        throw new TransferOperationError("WALLET_NOT_OWNED");
+      }
+
+      const toBalance = roundMoney(
+        toWalletBalance(toWalletData) - previous.amount,
+      );
+      firestoreTransaction.update(toWalletRef, {
+        balance: toBalance,
+        updatedAt: now,
+      });
+
+      const updatedToWallet = mapWalletDocument(
+        previous.toWalletId,
+        { ...toWalletData, balance: toBalance, updatedAt: now },
+        ownerId,
+      );
+      if (updatedToWallet) updatedWallets.push(updatedToWallet);
     }
 
-    const fromWalletData =
-      fromWalletSnapshot.data() as Record<string, unknown>;
-    const toWalletData = toWalletSnapshot.data() as Record<string, unknown>;
-
-    if (
-      fromWalletData.ownerId !== ownerId ||
-      toWalletData.ownerId !== ownerId
-    ) {
-      throw new TransferOperationError("WALLET_NOT_OWNED");
-    }
-
-    const fromBalance = roundMoney(
-      toWalletBalance(fromWalletData) + previous.amount,
-    );
-    const toBalance = roundMoney(
-      toWalletBalance(toWalletData) - previous.amount,
-    );
-
-    firestoreTransaction.update(fromWalletRef, {
-      balance: fromBalance,
-      updatedAt: now,
-    });
-    firestoreTransaction.update(toWalletRef, {
-      balance: toBalance,
-      updatedAt: now,
-    });
     firestoreTransaction.update(transferRef, {
       deletedAt: now,
       updatedAt: now,
     });
-
-    const updatedFromWallet = mapWalletDocument(
-      previous.fromWalletId,
-      { ...fromWalletData, balance: fromBalance, updatedAt: now },
-      ownerId,
-    );
-    const updatedToWallet = mapWalletDocument(
-      previous.toWalletId,
-      { ...toWalletData, balance: toBalance, updatedAt: now },
-      ownerId,
-    );
-
-    updatedWallets = [];
-    if (updatedFromWallet) updatedWallets.push(updatedFromWallet);
-    if (updatedToWallet) updatedWallets.push(updatedToWallet);
 
     deletedTransfer = { ...previous, deletedAt: now, updatedAt: now };
   });

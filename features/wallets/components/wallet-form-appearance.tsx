@@ -16,6 +16,7 @@ export interface WalletFormAppearanceProps {
   values: WalletFormValues;
   errors: WalletValidationErrors;
   disabled: boolean;
+  currencyLocked?: boolean;
   onChange: <K extends keyof WalletFormValues>(
     key: K,
     value: WalletFormValues[K],
@@ -26,6 +27,7 @@ export function WalletFormAppearance({
   values,
   errors,
   disabled,
+  currencyLocked = false,
   onChange,
 }: WalletFormAppearanceProps) {
   const theme = useFormTheme();
@@ -35,12 +37,17 @@ export function WalletFormAppearance({
       <ThemedText style={styles.label}>Moneda</ThemedText>
       <WalletFormCurrencySelector
         value={values.currency}
-        disabled={disabled}
+        disabled={disabled || currencyLocked}
         onChange={(currency) => onChange("currency", currency)}
       />
       {errors.currency ? (
         <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
           {errors.currency}
+        </ThemedText>
+      ) : currencyLocked ? (
+        <ThemedText style={[styles.helper, { color: theme.muted }]}>
+          La moneda no se puede cambiar para no alterar los movimientos
+          existentes.
         </ThemedText>
       ) : null}
 

@@ -4,6 +4,9 @@ import { BaseEntity } from "@/shared/types/common.types";
 export interface Transfer extends BaseEntity {
   fromWalletId: string;
   toWalletId: string;
+  /** Display names kept when either wallet was permanently deleted. */
+  fromWalletName?: string;
+  toWalletName?: string;
   amount: number;
   currency: CurrencyCode;
   /** Calendar date stored as YYYY-MM-DD to avoid timezone shifts. */

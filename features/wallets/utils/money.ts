@@ -66,7 +66,7 @@ export function calculateWalletTotals(
   const totals = new Map<CurrencyCode, number>();
 
   for (const wallet of wallets) {
-    if (!wallet.includeInTotal) continue;
+    if (wallet.archivedAt || !wallet.includeInTotal) continue;
 
     const current = totals.get(wallet.currency) ?? 0;
     totals.set(wallet.currency, roundMoney(current + wallet.balance));

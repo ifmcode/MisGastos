@@ -30,6 +30,7 @@ export function useDashboardOverview(
   wallets: readonly Wallet[],
   transfers: readonly Transfer[],
   selectedWalletId: string,
+  allWallets: readonly Wallet[] = wallets,
 ): DashboardOverview {
   const effectiveSelectedWalletId = wallets.some(
     (wallet) => wallet.id === selectedWalletId,
@@ -54,8 +55,8 @@ export function useDashboardOverview(
   );
 
   const walletMap = useMemo(
-    () => new Map(wallets.map((wallet) => [wallet.id, wallet])),
-    [wallets],
+    () => new Map(allWallets.map((wallet) => [wallet.id, wallet])),
+    [allWallets],
   );
 
   const recentTransfers = useMemo(

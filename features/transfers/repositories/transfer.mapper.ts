@@ -1,5 +1,6 @@
 import { isCurrencyCode } from "@/shared/constants/currencies";
 
+import { ORPHANED_WALLET_ID } from "@/features/wallets/utils/deleted-wallet";
 import { roundMoney } from "@/features/wallets/utils/money";
 import {
   toIsoDateValue,
@@ -25,7 +26,19 @@ export function mapTransferDocument(
     typeof data.toWalletId === "string" ? data.toWalletId.trim() : "";
 
   if (fromWalletId.length === 0 || toWalletId.length === 0) return null;
-  if (fromWalletId === toWalletId) return null;
+  if (fromWalletId === toWalletId && fromWalletId !== ORPHANED_WALLET_ID) {
+    return null;
+  }
+
+  const fromWalletName =
+    typeof data.fromWalletName === "string" &&
+    data.fromWalletName.trim().length > 0
+      ? data.fromWalletName.trim()
+      : undefined;
+  const toWalletName =
+    typeof data.toWalletName === "string" && data.toWalletName.trim().length > 0
+      ? data.toWalletName.trim()
+      : undefined;
 
   const amount =
     typeof data.amount === "number" && Number.isFinite(data.amount)
@@ -56,6 +69,8 @@ export function mapTransferDocument(
     id,
     fromWalletId,
     toWalletId,
+    ...(fromWalletName ? { fromWalletName } : {}),
+    ...(toWalletName ? { toWalletName } : {}),
     amount,
     currency: data.currency,
     date,

@@ -14,6 +14,8 @@ export interface Wallet extends BaseEntity {
   includeInTotal: boolean;
   ownerId: string;
   description?: string;
+  /** Soft-delete marker. Archived wallets keep their history but leave selectors. */
+  archivedAt?: string;
 }
 
 export interface CreateWalletDto {
@@ -27,14 +29,19 @@ export interface CreateWalletDto {
   description?: string;
 }
 
+/**
+ * Currency is intentionally absent: changing it would break every movement
+ * already stored with the wallet's original currency.
+ */
 export interface UpdateWalletDto {
   name?: string;
-  currency?: CurrencyCode;
   icon?: string;
   color?: string;
   type?: WalletType;
   includeInTotal?: boolean;
   description?: string;
+  /** Only sent when the wallet has no movements and the user edits it. */
+  initialBalance?: number;
 }
 
 /**
@@ -50,4 +57,23 @@ export interface WalletFormValues {
   type: WalletType;
   includeInTotal: boolean;
   description: string;
+}
+
+export interface WalletUsage {
+  transactionCount: number;
+  transferCount: number;
+  hasMovements: boolean;
+}
+
+export type WalletDeleteMode = "keep" | "reassign";
+
+export interface DeleteWalletOptions {
+  mode: WalletDeleteMode;
+  targetWalletId?: string;
+}
+
+export interface WalletDeletionResult {
+  deletedWalletId: string;
+  /** Target wallet whose balance changed after reassigning movements. */
+  targetWallet?: Wallet;
 }

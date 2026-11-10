@@ -89,6 +89,7 @@ export function mapWalletDocument(
 
   const createdAt = toIsoDate(data.createdAt) ?? EPOCH_ISO;
   const updatedAt = toIsoDate(data.updatedAt) ?? createdAt;
+  const archivedAt = toIsoDate(data.archivedAt) ?? undefined;
 
   return {
     id,
@@ -104,5 +105,6 @@ export function mapWalletDocument(
     createdAt,
     updatedAt,
     ...(description ? { description } : {}),
+    ...(archivedAt ? { archivedAt } : {}),
   };
 }

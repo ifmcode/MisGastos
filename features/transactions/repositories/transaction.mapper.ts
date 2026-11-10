@@ -38,6 +38,11 @@ export function mapTransactionDocument(
     typeof data.concept === "string" ? data.concept.trim() : "";
   if (concept.length === 0) return null;
 
+  const walletName =
+    typeof data.walletName === "string" && data.walletName.trim().length > 0
+      ? data.walletName.trim()
+      : undefined;
+
   const date = toIsoDateValue(data.date);
   if (!date) return null;
 
@@ -63,6 +68,7 @@ export function mapTransactionDocument(
     amount,
     currency: data.currency,
     walletId,
+    ...(walletName ? { walletName } : {}),
     categoryId,
     concept,
     ...(notes ? { notes } : {}),

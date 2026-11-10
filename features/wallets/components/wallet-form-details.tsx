@@ -15,6 +15,7 @@ export interface WalletFormDetailsProps {
   values: WalletFormValues;
   errors: WalletValidationErrors;
   disabled: boolean;
+  initialBalanceLocked?: boolean;
   onChange: <K extends keyof WalletFormValues>(
     key: K,
     value: WalletFormValues[K],
@@ -25,6 +26,7 @@ export function WalletFormDetails({
   values,
   errors,
   disabled,
+  initialBalanceLocked = false,
   onChange,
 }: WalletFormDetailsProps) {
   const theme = useFormTheme();
@@ -75,9 +77,13 @@ export function WalletFormDetails({
           placeholderTextColor={theme.muted}
           keyboardType="decimal-pad"
           inputMode="decimal"
-          editable={!disabled}
+          editable={!disabled && !initialBalanceLocked}
           accessibilityLabel="Saldo inicial"
-          style={[styles.balanceInput, { color: theme.text }]}
+          style={[
+            styles.balanceInput,
+            { color: theme.text },
+            initialBalanceLocked && styles.disabled,
+          ]}
         />
       </View>
       {errors.initialBalance ? (
@@ -86,7 +92,9 @@ export function WalletFormDetails({
         </ThemedText>
       ) : (
         <ThemedText style={[styles.helper, { color: theme.muted }]}>
-          Si lo dejas vacío se usará 0.
+          {initialBalanceLocked
+            ? "No puedes editar el saldo inicial porque la cartera ya tiene movimientos."
+            : "Si lo dejas vacío se usará 0."}
         </ThemedText>
       )}
     </View>

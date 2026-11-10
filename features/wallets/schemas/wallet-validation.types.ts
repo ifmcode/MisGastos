@@ -4,6 +4,7 @@ export const WALLET_MAX_AMOUNT = 999_999_999_999.99;
 
 export type WalletFormField =
   | "ownerId"
+  | "walletId"
   | "name"
   | "currency"
   | "icon"
@@ -15,6 +16,7 @@ export type WalletFormField =
 
 export type WalletValidationCode =
   | "OWNER_REQUIRED"
+  | "WALLET_REQUIRED"
   | "NAME_REQUIRED"
   | "NAME_TOO_LONG"
   | "INVALID_CURRENCY"

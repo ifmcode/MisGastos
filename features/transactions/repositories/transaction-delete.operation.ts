@@ -2,6 +2,7 @@ import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 import { roundMoney } from "@/features/wallets/utils/money";
 
 import { TransactionOperationError } from "../services/transaction.errors";
@@ -57,6 +58,14 @@ export async function deleteTransactionOperation(
     }
 
     const walletRef = doc(db, "wallets", walletId);
+
+    // Movements orphaned by a permanent wallet deletion have no wallet
+    // document to adjust; deleting them only removes the history entry.
+    if (isOrphanedWalletId(walletId)) {
+      firestoreTransaction.delete(transactionRef);
+      return;
+    }
+
     const walletSnapshot = await firestoreTransaction.get(walletRef);
     if (!walletSnapshot.exists()) {
       throw new TransactionOperationError("WALLET_NOT_FOUND");

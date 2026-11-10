@@ -32,6 +32,27 @@ describe("mapTransferDocument", () => {
     );
   });
 
+  it("maps the stored names of orphaned wallets", () => {
+    const transfer = mapTransferDocument(
+      "transfer-1",
+      {
+        ...baseData,
+        fromWalletId: "-1",
+        fromWalletName: "  [Eliminada] Cuenta principal  ",
+        toWalletId: "-1",
+        toWalletName: "[Eliminada] Ahorros",
+      },
+      "user-1",
+    );
+
+    expect(transfer).toMatchObject({
+      fromWalletId: "-1",
+      fromWalletName: "[Eliminada] Cuenta principal",
+      toWalletId: "-1",
+      toWalletName: "[Eliminada] Ahorros",
+    });
+  });
+
   it("rejects documents without two different wallets", () => {
     expect(
       mapTransferDocument(

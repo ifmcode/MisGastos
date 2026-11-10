@@ -1,7 +1,8 @@
-import { doc, runTransaction } from "firebase/firestore";
+import { deleteField, doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 import { roundMoney } from "@/features/wallets/utils/money";
 
 import { TransactionOperationError } from "../services/transaction.errors";
@@ -67,70 +68,83 @@ export async function updateTransactionOperation({
       throw new TransactionOperationError("TRANSACTION_INVALID");
     }
 
-    const walletSnapshot = await firestoreTransaction.get(newWalletRef);
-    if (!walletSnapshot.exists()) {
-      throw new TransactionOperationError("WALLET_NOT_FOUND");
-    }
+    const previousIsOrphaned = isOrphanedWalletId(previousWalletId);
+    const sameWallet = previousWalletId === dto.walletId;
 
-    const walletData = walletSnapshot.data() as Record<string, unknown>;
-    if (walletData.ownerId !== ownerId) {
-      throw new TransactionOperationError("WALLET_NOT_OWNED");
-    }
-    if (walletData.currency !== dto.currency) {
-      throw new TransactionOperationError("CURRENCY_MISMATCH");
-    }
-
-    if (previousWalletId === dto.walletId) {
-      const currentBalance = toWalletBalance(walletData);
-      const revertedBalance = roundMoney(
-        currentBalance -
-          getSignedTransactionAmount(previousType, previousAmount),
-      );
-      const nextBalance = roundMoney(
-        revertedBalance + getSignedTransactionAmount(dto),
-      );
-
-      firestoreTransaction.update(newWalletRef, {
-        balance: nextBalance,
-        updatedAt: now,
-      });
-    } else {
-      const previousWalletRef = doc(db, "wallets", previousWalletId);
-      const previousWalletSnapshot =
-        await firestoreTransaction.get(previousWalletRef);
-      if (!previousWalletSnapshot.exists()) {
+    if (!(sameWallet && previousIsOrphaned)) {
+      const walletSnapshot = await firestoreTransaction.get(newWalletRef);
+      if (!walletSnapshot.exists()) {
         throw new TransactionOperationError("WALLET_NOT_FOUND");
       }
-      const previousWalletData =
-        previousWalletSnapshot.data() as Record<string, unknown>;
-      if (previousWalletData.ownerId !== ownerId) {
+
+      const walletData = walletSnapshot.data() as Record<string, unknown>;
+      if (walletData.ownerId !== ownerId) {
         throw new TransactionOperationError("WALLET_NOT_OWNED");
       }
+      if (walletData.currency !== dto.currency) {
+        throw new TransactionOperationError("CURRENCY_MISMATCH");
+      }
 
-      const currentPreviousBalance = toWalletBalance(previousWalletData);
-      const nextPreviousBalance = roundMoney(
-        currentPreviousBalance -
-          getSignedTransactionAmount(previousType, previousAmount),
-      );
-      firestoreTransaction.update(previousWalletRef, {
-        balance: nextPreviousBalance,
-        updatedAt: now,
-      });
+      if (sameWallet) {
+        const currentBalance = toWalletBalance(walletData);
+        const revertedBalance = roundMoney(
+          currentBalance -
+            getSignedTransactionAmount(previousType, previousAmount),
+        );
+        const nextBalance = roundMoney(
+          revertedBalance + getSignedTransactionAmount(dto),
+        );
 
-      const currentNewBalance = toWalletBalance(walletData);
-      const nextNewBalance = roundMoney(
-        currentNewBalance + getSignedTransactionAmount(dto),
-      );
-      firestoreTransaction.update(newWalletRef, {
-        balance: nextNewBalance,
-        updatedAt: now,
-      });
+        firestoreTransaction.update(newWalletRef, {
+          balance: nextBalance,
+          updatedAt: now,
+        });
+      } else {
+        if (!previousIsOrphaned) {
+          const previousWalletRef = doc(db, "wallets", previousWalletId);
+          const previousWalletSnapshot =
+            await firestoreTransaction.get(previousWalletRef);
+          if (!previousWalletSnapshot.exists()) {
+            throw new TransactionOperationError("WALLET_NOT_FOUND");
+          }
+          const previousWalletData =
+            previousWalletSnapshot.data() as Record<string, unknown>;
+          if (previousWalletData.ownerId !== ownerId) {
+            throw new TransactionOperationError("WALLET_NOT_OWNED");
+          }
+
+          const currentPreviousBalance = toWalletBalance(previousWalletData);
+          const nextPreviousBalance = roundMoney(
+            currentPreviousBalance -
+              getSignedTransactionAmount(previousType, previousAmount),
+          );
+          firestoreTransaction.update(previousWalletRef, {
+            balance: nextPreviousBalance,
+            updatedAt: now,
+          });
+        }
+
+        const currentNewBalance = toWalletBalance(walletData);
+        const nextNewBalance = roundMoney(
+          currentNewBalance + getSignedTransactionAmount(dto),
+        );
+        firestoreTransaction.update(newWalletRef, {
+          balance: nextNewBalance,
+          updatedAt: now,
+        });
+      }
     }
 
-    firestoreTransaction.update(transactionRef, {
+    const patch: Record<string, unknown> = {
       ...toTransactionData(ownerId, dto, now),
       createdAt: toIsoTimestamp(transactionData.createdAt) ?? now,
-    });
+    };
+
+    if (!(sameWallet && previousIsOrphaned)) {
+      patch.walletName = deleteField();
+    }
+
+    firestoreTransaction.update(transactionRef, patch);
   });
 
   const updatedWallet = await getMappedWallet(newWalletRef, ownerId);

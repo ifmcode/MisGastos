@@ -17,6 +17,8 @@ import { getDeleteTransferConfirmation } from "../utils/transfer-delete-dialog";
 export interface DashboardTransferModalProps {
   visible: boolean;
   wallets: Wallet[];
+  /** All wallets, including archived ones, used only for history labels. */
+  walletLookup?: readonly Wallet[];
   editingTransfer: Transfer | null;
   submitting: boolean;
   error: string | null;
@@ -29,6 +31,7 @@ export interface DashboardTransferModalProps {
 export function DashboardTransferModal({
   visible,
   wallets,
+  walletLookup = wallets,
   editingTransfer,
   submitting,
   error,
@@ -39,7 +42,7 @@ export function DashboardTransferModal({
 }: DashboardTransferModalProps) {
   const deleteDialog = useConfirmDialog();
   const deleteConfirmation = editingTransfer
-    ? getDeleteTransferConfirmation(editingTransfer, wallets)
+    ? getDeleteTransferConfirmation(editingTransfer, walletLookup)
     : null;
 
   function requestDelete() {

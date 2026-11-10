@@ -16,6 +16,46 @@ export class WalletValidationError extends Error {
   }
 }
 
+export type WalletOperationCode =
+  | "WALLET_NOT_FOUND"
+  | "CURRENCY_LOCKED"
+  | "INITIAL_BALANCE_LOCKED"
+  | "TARGET_WALLET_REQUIRED"
+  | "TARGET_WALLET_NOT_FOUND"
+  | "TARGET_WALLET_SAME"
+  | "TARGET_WALLET_ARCHIVED"
+  | "TARGET_WALLET_CURRENCY_MISMATCH"
+  | "TARGET_WALLET_INSUFFICIENT_BALANCE"
+  | "TOO_MANY_MOVEMENTS";
+
+const OPERATION_MESSAGES: Record<WalletOperationCode, string> = {
+  WALLET_NOT_FOUND: "La cartera ya no existe.",
+  CURRENCY_LOCKED:
+    "No puedes cambiar la moneda de una cartera que ya tiene movimientos.",
+  INITIAL_BALANCE_LOCKED:
+    "Solo puedes editar el saldo inicial de una cartera sin movimientos.",
+  TARGET_WALLET_REQUIRED: "Selecciona la cartera que recibirá los movimientos.",
+  TARGET_WALLET_NOT_FOUND: "La cartera de destino ya no existe.",
+  TARGET_WALLET_SAME: "La cartera de destino debe ser distinta de la eliminada.",
+  TARGET_WALLET_ARCHIVED: "No puedes mover movimientos a una cartera archivada.",
+  TARGET_WALLET_CURRENCY_MISMATCH:
+    "La cartera de destino debe tener la misma moneda.",
+  TARGET_WALLET_INSUFFICIENT_BALANCE:
+    "La cartera de destino no tiene saldo suficiente para asumir las transferencias.",
+  TOO_MANY_MOVEMENTS:
+    "Esta cartera tiene demasiados movimientos para eliminarla de una vez.",
+};
+
+export class WalletOperationError extends Error {
+  readonly code: WalletOperationCode;
+
+  constructor(code: WalletOperationCode) {
+    super(OPERATION_MESSAGES[code]);
+    this.name = "WalletOperationError";
+    this.code = code;
+  }
+}
+
 function getErrorCode(error: Error): string | null {
   const code = (error as { code?: unknown }).code;
   return typeof code === "string" ? code : null;
@@ -30,6 +70,10 @@ export function getWalletErrorMessage(
   fallback: string,
 ): string {
   if (error instanceof WalletValidationError) {
+    return error.message;
+  }
+
+  if (error instanceof WalletOperationError) {
     return error.message;
   }
 

@@ -1,8 +1,9 @@
-import { doc, runTransaction } from "firebase/firestore";
+import { deleteField, doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 import { roundMoney } from "@/features/wallets/utils/money";
 import { toIsoTimestamp } from "@/shared/utils/date";
 
@@ -112,7 +113,10 @@ export async function updateTransferOperation({
       );
     }
 
-    if ((finalBalances.get(dto.fromWalletId) ?? 0) < 0) {
+    if (
+      !isOrphanedWalletId(dto.fromWalletId) &&
+      (finalBalances.get(dto.fromWalletId) ?? 0) < 0
+    ) {
       throw new TransferOperationError("INSUFFICIENT_FUNDS");
     }
 
@@ -141,6 +145,8 @@ export async function updateTransferOperation({
 
     firestoreTransaction.update(transferRef, {
       ...toTransferData(ownerId, dto, now),
+      fromWalletName: deleteField(),
+      toWalletName: deleteField(),
       createdAt: previousCreatedAt,
     });
 

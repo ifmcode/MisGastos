@@ -57,4 +57,29 @@ describe("getDeleteTransferConfirmation", () => {
 
     expect(confirmation.message).toContain("de la cartera a la cartera");
   });
+
+  it("uses stored names and clarifies orphaned wallet balances", () => {
+    const confirmation = getDeleteTransferConfirmation(
+      buildTransfer({
+        fromWalletId: "-1",
+        fromWalletName: "[Eliminada] Cuenta principal",
+        toWalletId: "wallet-2",
+      }),
+      [buildWallet({ id: "wallet-2", name: "Ahorros" })],
+    );
+
+    expect(confirmation.message).toContain("[Eliminada] Cuenta principal");
+    expect(confirmation.message).toContain(
+      "Solo se revertirá el saldo de la cartera que sigue existiendo",
+    );
+  });
+
+  it("explains when both wallets were deleted", () => {
+    const confirmation = getDeleteTransferConfirmation(
+      buildTransfer({ fromWalletId: "-1", toWalletId: "-1" }),
+      [],
+    );
+
+    expect(confirmation.message).toContain("no hay saldos que revertir");
+  });
 });

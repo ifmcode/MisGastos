@@ -1,7 +1,7 @@
 # Implementation Plan: MisGastos (Expense Manager + Splitwise)
 
 > Living document. Update with each agreed feature. Always start from MVP.
-> **Last reviewed:** 09/11/2026
+> **Last reviewed:** 10/11/2026
 
 ## 0. Current Focus
 > Keep this block up to date at the start and end of every session. It is the
@@ -9,11 +9,11 @@
 
 | Field | Value |
 |---|---|
-| **Phase** | A - Short product polish |
-| **Current ticket** | TICKET-018 - Wallet Management (optional Phase A) |
+| **Phase** | A - Short product polish ✅ Complete; next: B - Architecture and workflow spike |
+| **Current ticket** | TICKET-023 - Offline-first design spike (Phase B) |
 | **Current status** | ⏳ Pending |
-| **Last completed** | TICKET-014 - Dark Mode Polish (09/11/2026) |
-| **Next after current** | TICKET-023 - Offline-first design spike (Phase B) |
+| **Last completed** | TICKET-018 - Wallet Management (10/11/2026) |
+| **Next after current** | TICKET-024 - Agent and skill specialization |
 
 ## 1. Inspiration: Expense Manager + Splitwise
 **References:** `docs/project/ui-references/expense-manager-reference.png` and `docs/project/ui-references/splitwise-reference.png`
@@ -31,7 +31,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 | ID | Feature | Description | Status | Notes |
 |---|---|---|---|---|
 | MVP-001 | Authentication | Email/password + Google login (exists) | ✅ Done | TICKET-000; improve validation/error handling |
-| MVP-002 | Wallet/Account | Create wallet with name, currency, icon, color, initial balance, type (cash/bank/other). Option **"Include in total"** toggle. If no initial balance -> 0 | ✅ Done | TICKET-001; list, create, per-wallet balance, totals by currency. Edit/archive tracked in PM-018 |
+| MVP-002 | Wallet/Account | Create wallet with name, currency, icon, color, initial balance, type (cash/bank/other). Option **"Include in total"** toggle. If no initial balance -> 0 | ✅ Done | TICKET-001; list, create, per-wallet balance, totals by currency. Edit/archive/deletion completed in TICKET-018 |
 | MVP-003 | Expense/Income | Create transaction with amount, date, concept/category, wallet, notes, type (expense/income). Currency inherited from wallet by default but **selectable**. Creating/editing/deleting must update wallet balance | ✅ Done | TICKET-002; CRUD, history, filters and sorting |
 | MVP-004 | Transfer between wallets | Move money between own wallets (updates balances). Must be atomic | ✅ Done | TICKET-003; `transfers` collection, `runTransaction`, same currency only, editable and soft-deletable with balance reversion |
 | MVP-005 | History with filters/sorting | List by date, filter by wallet/type/category, sort asc/desc | ✅ Done | TICKET-002; efficient FlatList |
@@ -75,7 +75,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 |---|---|---|---|---|
 | PM-016 | Statistics and charts | Income vs expense, category breakdown and monthly trend | ⏳ Pending | TICKET-016 |
 | PM-017 | History grouped by day/month | Grouped movements with period totals and sticky headers | ⏳ Pending | TICKET-017 |
-| PM-018 | Wallet management | Edit wallet data and archive/delete safely when unused | ⏳ Pending | TICKET-018 |
+| PM-018 | Wallet management | Edit wallet data and archive/delete safely when unused | ✅ Done | TICKET-018; edit form with locked currency, archive/restore, and deletion with reassignment or `[Eliminada]` placeholder |
 | PM-019 | Dashboard quick add | Create expense/income directly from the dashboard reusing the transaction form | ⏳ Pending | TICKET-019 |
 
 ### 3.6 Auth and movement UX (03/11/2026)
@@ -144,6 +144,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - **Tickets created:** TICKET-006..TICKET-022 cover the pending product items above. TICKET-023 and TICKET-024 add the platform and workflow epics agreed on 04/11/2026.
 - **08/11/2026:** TICKET-020, TICKET-021 and TICKET-022 verified as done and renamed with the `[DONE] ` prefix. TICKET-014 (dark mode + Settings toggle) is the next Phase A ticket.
 - **09/11/2026:** TICKET-014 verified as done and renamed with the `[DONE] ` prefix. PM-013 is complete: the theme provider, persisted manual override and shared tokens cover login, settings, forms, filters, calendars, modals and dashboard surfaces. Visual checks are documented in `docs/project/testing/dark-mode-visual-checks.md`.
+- **10/11/2026:** TICKET-018 verified as done and renamed with the `[DONE] ` prefix. PM-018 is complete and Phase A is closed: wallets can be edited with a locked currency, archived/restored, and deleted with reassignment or a `[Eliminada]` placeholder. Archived wallets leave selectors and totals while history keeps its stored names.
 
 ## 8. Recommended Execution Order (04/11/2026)
 
@@ -155,8 +156,9 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - [x] TICKET-021: email verification. ✅ Done 06/11/2026
 - [x] TICKET-022: visible and accessible edit/delete actions. ✅ Done 08/11/2026
 - [x] TICKET-014: dark mode, shared visual tokens and a Settings toggle. ✅ Done 09/11/2026
-- [ ] TICKET-018: wallet editing/archiving, if there is time. ⏳ Next
+- [x] TICKET-018: wallet editing/archiving, deletion with reassignment and archived history. ✅ Done 10/11/2026
 - Build only the UI primitives needed next: button, input, list row, avatar, banner, empty state and modal.
+- Phase A is complete. Move to Phase B with TICKET-023 before starting the social slice.
 
 ### Phase B - Architecture and workflow spike (2-4 days)
 - [ ] TICKET-023 (design spike only): decide local database, outbox, idempotency and conflict policy before groups. ⏳ Pending

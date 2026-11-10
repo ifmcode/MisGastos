@@ -6,12 +6,15 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { confirmDialogStyles as styles } from "./confirm-dialog.styles";
 
+export type ConfirmDialogTone = "danger" | "primary";
+
 export interface ConfirmDialogProps {
   visible: boolean;
   title: string;
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  tone?: ConfirmDialogTone;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -23,10 +26,12 @@ export function ConfirmDialog({
   message,
   confirmLabel = "Eliminar",
   cancelLabel = "Cancelar",
+  tone = "danger",
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
   const theme = useFormTheme();
+  const confirmColor = tone === "primary" ? theme.primary : theme.danger;
 
   useEffect(() => {
     if (visible) Keyboard.dismiss();
@@ -80,7 +85,7 @@ export function ConfirmDialog({
             style={({ pressed }) => [
               styles.button,
               styles.confirmButton,
-              { backgroundColor: theme.danger },
+              { backgroundColor: confirmColor },
               pressed && styles.pressed,
             ]}
           >

@@ -33,8 +33,9 @@ export function TransferItem({
 }: TransferItemProps) {
   const theme = useFormTheme();
 
-  const fromName = fromWallet?.name ?? "Cartera eliminada";
-  const toName = toWallet?.name ?? "Cartera eliminada";
+  const fromName =
+    fromWallet?.name ?? transfer.fromWalletName ?? "Cartera eliminada";
+  const toName = toWallet?.name ?? transfer.toWalletName ?? "Cartera eliminada";
 
   return (
     <Pressable

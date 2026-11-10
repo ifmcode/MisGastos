@@ -95,6 +95,22 @@ describe("mapWalletDocument", () => {
     expect(wallet?.balance).toBe(100.25);
   });
 
+  it("maps the archived marker when present", () => {
+    const wallet = mapWalletDocument(
+      "wallet-1",
+      { ...baseData, archivedAt: "2026-11-01T10:00:00.000Z" },
+      "user-1",
+    );
+
+    expect(wallet?.archivedAt).toBe("2026-11-01T10:00:00.000Z");
+  });
+
+  it("omits the archived marker for active wallets", () => {
+    const wallet = mapWalletDocument("wallet-1", baseData, "user-1");
+
+    expect(wallet && "archivedAt" in wallet).toBe(false);
+  });
+
   it("supports Date and Firestore Timestamp-like values", () => {
     const createdAt = new Date("2026-10-28T09:00:00.000Z");
     const updatedAt = { toDate: () => new Date("2026-10-28T12:00:00.000Z") };

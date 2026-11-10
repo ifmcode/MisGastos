@@ -7,24 +7,29 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { walletFormStyles as styles } from "../styles/wallet-form.styles";
 
 export interface WalletFormHeaderProps {
+  mode?: "create" | "edit";
   disabled: boolean;
   onClose: () => void;
 }
 
 export function WalletFormHeader({
+  mode = "create",
   disabled,
   onClose,
 }: WalletFormHeaderProps) {
   const theme = useFormTheme();
+  const isEditing = mode === "edit";
 
   return (
     <View style={styles.header}>
       <View style={styles.headerText}>
         <ThemedText type="title" style={styles.title}>
-          Nueva cartera
+          {isEditing ? "Editar cartera" : "Nueva cartera"}
         </ThemedText>
         <ThemedText style={[styles.subtitle, { color: theme.muted }]}>
-          Configura dónde guardarás tu dinero.
+          {isEditing
+            ? "Actualiza los datos sin perder tu historial."
+            : "Configura dónde guardarás tu dinero."}
         </ThemedText>
       </View>
       <Pressable

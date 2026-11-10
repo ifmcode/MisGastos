@@ -1,7 +1,11 @@
 import { IWalletRepository } from "@/features/wallets/repositories/wallet.repository";
 import {
   CreateWalletDto,
+  DeleteWalletOptions,
+  UpdateWalletDto,
   Wallet,
+  WalletDeletionResult,
+  WalletUsage,
 } from "@/features/wallets/types/wallet.types";
 
 import {
@@ -21,10 +25,45 @@ export class FakeWalletRepository implements IWalletRepository {
     return this.wallets;
   }
 
+  async getWallet(_ownerId: string, _walletId: string): Promise<Wallet | null> {
+    return this.wallets.find((wallet) => wallet.id === _walletId) ?? null;
+  }
+
   async createWallet(
     _ownerId: string,
     _dto: CreateWalletDto,
   ): Promise<Wallet> {
+    throw new Error("Not used in transfer tests");
+  }
+
+  async updateWallet(
+    _ownerId: string,
+    _walletId: string,
+    _dto: UpdateWalletDto,
+  ): Promise<Wallet> {
+    throw new Error("Not used in transfer tests");
+  }
+
+  async setWalletArchived(
+    _ownerId: string,
+    _walletId: string,
+    _archivedAt: string | null,
+  ): Promise<Wallet> {
+    throw new Error("Not used in transfer tests");
+  }
+
+  async getWalletUsage(
+    _ownerId: string,
+    _walletId: string,
+  ): Promise<WalletUsage> {
+    return { transactionCount: 0, transferCount: 0, hasMovements: false };
+  }
+
+  async deleteWallet(
+    _ownerId: string,
+    _walletId: string,
+    _options: DeleteWalletOptions,
+  ): Promise<WalletDeletionResult> {
     throw new Error("Not used in transfer tests");
   }
 }

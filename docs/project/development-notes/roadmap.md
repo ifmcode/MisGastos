@@ -1,10 +1,10 @@
 # Roadmap - MisGastos
 
 ## Current Focus
-- **Phase:** 3 - Post-MVP
-- **Current ticket:** TICKET-018 - Wallet Management (optional Phase A)
-- **Last completed:** TICKET-014 - Dark Mode Polish (09/11/2026)
-- **Next:** TICKET-023 - Offline-first design spike (Phase B)
+- **Phase:** 3 - Post-MVP (Phase A complete)
+- **Current ticket:** TICKET-023 - Offline-first design spike (Phase B)
+- **Last completed:** TICKET-018 - Wallet Management (10/11/2026)
+- **Next:** TICKET-024 - Agent and skill specialization
 - **Source of truth:** `docs/project/implementation-plan/implementation-plan.md` §0
 
 ## Phase 0: Organization (COMPLETED)
@@ -39,7 +39,7 @@
 - [ ] Advanced search (TICKET-015)
 - [ ] Statistics + charts (TICKET-016)
 - [ ] History grouped by day/month (TICKET-017)
-- [ ] Wallet management (TICKET-018) ← NEXT
+- [x] Wallet management (TICKET-018) ✅ 10/11/2026
 - [ ] Dashboard quick add (TICKET-019)
 - [x] Inline auth errors (TICKET-020)
 - [x] Email verification on signup (TICKET-021)

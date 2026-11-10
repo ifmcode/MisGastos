@@ -36,6 +36,7 @@ export function TransactionItem({
   const isIncome = transaction.type === "income";
   const amountColor = isIncome ? theme.success : theme.danger;
   const amountPrefix = isIncome ? "+" : "-";
+  const walletName = wallet?.name ?? transaction.walletName;
 
   return (
     <Pressable
@@ -43,7 +44,7 @@ export function TransactionItem({
       accessibilityLabel={getTransactionEditLabel(
         transaction,
         category.label,
-        wallet?.name,
+        walletName,
       )}
       accessibilityHint={EDIT_TRANSACTION_HINT}
       onPress={onPress}
@@ -65,7 +66,7 @@ export function TransactionItem({
           </ThemedText>
           <ThemedText style={styles.meta} numberOfLines={1}>
             {formatDateInput(transaction.date)} · {category.label}
-            {wallet ? ` · ${wallet.name}` : ""}
+            {walletName ? ` · ${walletName}` : ""}
           </ThemedText>
         </View>
 

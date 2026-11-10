@@ -8,6 +8,8 @@ export interface Transaction extends BaseEntity {
   amount: number;
   currency: CurrencyCode;
   walletId: string;
+  /** Display name kept when the wallet was permanently deleted. */
+  walletName?: string;
   categoryId: string;
   concept: string;
   notes?: string;

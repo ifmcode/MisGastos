@@ -103,6 +103,19 @@ describe("calculateWalletTotals", () => {
     expect(totals).toEqual([{ currency: "EUR", total: -25 }]);
   });
 
+  it("ignores archived wallets even when they are included", () => {
+    const totals = calculateWalletTotals([
+      buildWallet({ id: "1", balance: 100 }),
+      buildWallet({
+        id: "2",
+        balance: 500,
+        archivedAt: "2026-11-01T10:00:00.000Z",
+      }),
+    ]);
+
+    expect(totals).toEqual([{ currency: "EUR", total: 100 }]);
+  });
+
   it("returns no totals when there are no included wallets", () => {
     expect(calculateWalletTotals([])).toEqual([]);
     expect(
