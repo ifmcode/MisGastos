@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { Wallet } from "../types/wallet.types";
 import { formatMoney } from "../utils/money";
@@ -14,15 +14,15 @@ export interface WalletCardProps {
 }
 
 export function WalletCard({ wallet }: WalletCardProps) {
-  const colorScheme = useColorScheme() ?? "light";
-  const borderColor = colorScheme === "dark" ? "#2B3438" : "#E4ECEF";
+  const theme = useFormTheme();
   const isNegative = wallet.balance < 0;
 
   return (
     <ThemedView
-      style={[styles.card, { borderColor }]}
-      lightColor="#FFFFFF"
-      darkColor="#1C2225"
+      style={[
+        styles.card,
+        { borderColor: theme.border, backgroundColor: theme.surface },
+      ]}
     >
       <View
         style={[styles.iconWrapper, { backgroundColor: `${wallet.color}1A` }]}
@@ -46,7 +46,7 @@ export function WalletCard({ wallet }: WalletCardProps) {
 
       <ThemedText
         type="defaultSemiBold"
-        style={[styles.balance, isNegative && styles.negativeBalance]}
+        style={[styles.balance, isNegative && { color: theme.danger }]}
         numberOfLines={1}
       >
         {formatMoney(wallet.balance, wallet.currency)}
@@ -86,8 +86,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontVariant: ["tabular-nums"],
     textAlign: "right",
-  },
-  negativeBalance: {
-    color: "#C62828",
   },
 });

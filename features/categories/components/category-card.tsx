@@ -3,7 +3,7 @@ import { Pressable } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { categoriesStyles } from "../styles/categories.styles";
 import { Category } from "../types/category.types";
@@ -18,8 +18,7 @@ export interface CategoryCardProps {
 }
 
 export function CategoryCard({ category, onPress }: CategoryCardProps) {
-  const colorScheme = useColorScheme() ?? "light";
-  const borderColor = colorScheme === "dark" ? "#2B3438" : "#E4ECEF";
+  const theme = useFormTheme();
 
   return (
     <Pressable
@@ -28,9 +27,10 @@ export function CategoryCard({ category, onPress }: CategoryCardProps) {
       onPress={onPress}
     >
       <ThemedView
-        style={[categoriesStyles.card, { borderColor }]}
-        lightColor="#FFFFFF"
-        darkColor="#1C2225"
+        style={[
+          categoriesStyles.card,
+          { borderColor: theme.border, backgroundColor: theme.surface },
+        ]}
       >
         <ThemedView
           style={[

@@ -42,7 +42,9 @@ export function CategoryFormNameField({
         ]}
       />
       {error ? (
-        <ThemedText style={styles.fieldError}>{error}</ThemedText>
+        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+          {error}
+        </ThemedText>
       ) : null}
     </View>
   );

@@ -52,7 +52,9 @@ export function TransferFormAmountField({
         />
       </View>
       {error ? (
-        <ThemedText style={styles.fieldError}>{error}</ThemedText>
+        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+          {error}
+        </ThemedText>
       ) : helper ? (
         <ThemedText style={[styles.helper, { color: theme.muted }]}>
           {helper}

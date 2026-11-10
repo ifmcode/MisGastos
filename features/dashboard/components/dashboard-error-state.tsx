@@ -2,8 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
-import { dashboardPalette, dashboardStyles } from "../styles/dashboard.styles";
+import { dashboardStyles } from "../styles/dashboard.styles";
 
 export interface DashboardErrorStateProps {
   message: string;
@@ -14,12 +15,14 @@ export function DashboardErrorState({
   message,
   onRetry,
 }: DashboardErrorStateProps) {
+  const theme = useFormTheme();
+
   return (
     <View style={dashboardStyles.centered}>
       <Ionicons
         name="cloud-offline-outline"
         size={42}
-        color={dashboardPalette.danger}
+        color={theme.danger}
       />
       <ThemedText type="defaultSemiBold" style={dashboardStyles.errorTitle}>
         No se pudo cargar el resumen

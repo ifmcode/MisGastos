@@ -1,4 +1,4 @@
-# TICKET-020 - Future: Inline Auth Error Feedback
+# [DONE] TICKET-020 - Future: Inline Auth Error Feedback
 
 **Type:** Improvement  
 **Priority:** High  

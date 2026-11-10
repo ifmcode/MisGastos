@@ -4,8 +4,6 @@ import { StyleSheet } from "react-native";
 export const transferItemPalette = {
   primary: "#0A7EA4",
   primarySoft: "rgba(10, 126, 164, 0.12)",
-  borderLight: "#E4ECEF",
-  borderDark: "#2B3438",
 } as const;
 
 export const transferItemStyles = StyleSheet.create({

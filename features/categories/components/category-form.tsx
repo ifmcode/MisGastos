@@ -81,13 +81,22 @@ export function CategoryForm({
             showsVerticalScrollIndicator={false}
           >
             {error ? (
-              <View style={styles.errorBanner}>
+              <View
+                style={[
+                  styles.errorBanner,
+                  { backgroundColor: theme.dangerSurface },
+                ]}
+              >
                 <Ionicons
                   name="alert-circle"
                   size={20}
                   color={theme.danger}
                 />
-                <ThemedText style={styles.errorBannerText}>{error}</ThemedText>
+                <ThemedText
+                  style={[styles.errorBannerText, { color: theme.dangerText }]}
+                >
+                  {error}
+                </ThemedText>
               </View>
             ) : null}
 
@@ -106,7 +115,9 @@ export function CategoryForm({
               onChange={(type) => updateValue("type", type)}
             />
             {errors.type ? (
-              <ThemedText style={styles.fieldError}>{errors.type}</ThemedText>
+              <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+                {errors.type}
+              </ThemedText>
             ) : null}
             {typeLocked ? (
               <ThemedText style={[styles.helper, { color: theme.muted }]}>
@@ -121,7 +132,9 @@ export function CategoryForm({
               onChange={(icon) => updateValue("icon", icon)}
             />
             {errors.icon ? (
-              <ThemedText style={styles.fieldError}>{errors.icon}</ThemedText>
+              <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+                {errors.icon}
+              </ThemedText>
             ) : null}
 
             <ThemedText style={styles.label}>Color</ThemedText>
@@ -131,7 +144,9 @@ export function CategoryForm({
               onChange={(color) => updateValue("color", color)}
             />
             {errors.color ? (
-              <ThemedText style={styles.fieldError}>{errors.color}</ThemedText>
+              <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+                {errors.color}
+              </ThemedText>
             ) : null}
 
             <CategoryFormActions

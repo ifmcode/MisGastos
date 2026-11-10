@@ -1,5 +1,12 @@
 # Roadmap - MisGastos
 
+## Current Focus
+- **Phase:** 3 - Post-MVP
+- **Current ticket:** TICKET-018 - Wallet Management (optional Phase A)
+- **Last completed:** TICKET-014 - Dark Mode Polish (09/11/2026)
+- **Next:** TICKET-023 - Offline-first design spike (Phase B)
+- **Source of truth:** `docs/project/implementation-plan/implementation-plan.md` §0
+
 ## Phase 0: Organization (COMPLETED)
 - [x] Create folder structure
 - [x] Create memory, guidelines, plan, tickets
@@ -28,11 +35,11 @@
 - [ ] Group history (TICKET-011)
 - [ ] Budgets (TICKET-012)
 - [ ] Data export (TICKET-013)
-- [ ] Dark mode polish (TICKET-014)
+- [x] Dark mode polish + Settings toggle (TICKET-014) ✅ 09/11/2026
 - [ ] Advanced search (TICKET-015)
 - [ ] Statistics + charts (TICKET-016)
 - [ ] History grouped by day/month (TICKET-017)
-- [ ] Wallet management (TICKET-018)
+- [ ] Wallet management (TICKET-018) ← NEXT
 - [ ] Dashboard quick add (TICKET-019)
 - [x] Inline auth errors (TICKET-020)
 - [x] Email verification on signup (TICKET-021)
@@ -43,7 +50,9 @@
 - [ ] Agents and skills specialization (TICKET-024)
 
 ## Rules
-- Always update implementation plan when changing status
+- Always update implementation plan §0 Current Focus when starting or finishing a ticket
+- Update the phase checkbox in implementation plan §8 when a ticket is done
+- When a ticket is fully done, rename its file and H1 with the `[DONE] ` prefix
 - Document in development-notes after each session
 - Follow guidelines
 - Write tests for critical business logic

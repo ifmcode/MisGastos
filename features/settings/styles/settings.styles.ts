@@ -32,6 +32,11 @@ export const settingsStyles = StyleSheet.create({
   menuLabel: {
     flex: 1,
   },
+  helper: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 2,
+  },
   logoutButton: {
     backgroundColor: settingsPalette.danger,
     padding: 12,

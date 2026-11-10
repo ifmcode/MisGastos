@@ -3,7 +3,7 @@
 > Living document to continue development from any machine with OpenCode/Claude. Update after each milestone.
 
 ## Current State
-- Date: 08/11/2026
+- Date: 09/11/2026
 - Stack: Expo SDK 58, React Native 0.88.1, React 19.3.0, Expo Router 58, TypeScript 6.0, NativeWind 4, Firebase (Auth + Firestore), Jest 30
 - Auth implemented (email/password + Google) with inline field/action errors, mapped Firebase messages and password-reset feedback in the login screen
 - Email verification implemented: unverified email/password accounts are blocked from private routes until they confirm the address; `/verify-email` shows the email, resend, manual refresh and controlled polling. Google accounts are never asked to verify
@@ -14,6 +14,7 @@
 - Movement actions UX implemented: movement and recent-transfer cards use `Pressable` with a visible pencil affordance, pressed feedback and screen-reader role/label/hint; delete remains inside the edit form with a project-owned `ConfirmDialog` (no `Alert`/`window.confirm`, works on web)
 - Categories implemented: user-defined expense/income categories with CRUD, lazy defaults, legacy transaction compatibility and inline creation from the transaction form
 - Date picker UX implemented: quick Hoy/Ayer chips, an optional session-scoped "Último" chip in movement/transfer forms, native calendar picker and manual fallback across transaction/transfer forms and date filters
+- Dark mode implemented: a shared `AppThemeProvider` resolves the system theme until the user changes the Settings toggle, persists the manual `light`/`dark` override with AsyncStorage and exposes the effective scheme to navigation, screens, cards, forms, filters, calendars and modals. Visual checks and screenshots live in `docs/project/testing/dark-mode-visual-checks.md`
 - Implementation plan reviewed on 03/11/2026: MVP, categories and date picker verified as done; future work tracked in TICKET-006..TICKET-024
 - Recommended execution order documented in implementation plan §8 (04/11/2026). Offline-first is an architecture spike before groups and a full implementation phase; agent/skill specialization is tracked as a workflow epic
 - Routes: tabs (dashboard, wallets, transactions, settings), login, verify-email, categories, modal
@@ -38,15 +39,17 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 - Categories live in the root `categories` collection scoped by `ownerId`. Defaults are seeded lazily when the owner has none, using deterministic ids (`${ownerId}__${legacyId}`); deleting the last category re-seeds them on the next load. Deletion is hard and blocked while transactions use the category. Seeded defaults keep their old transaction ids in `legacyId`, and forms/filters resolve either id so existing movements are never rewritten. Category type is locked after creation. Transfers remain uncategorized.
 - **Dates**: Shared date utilities live in `shared/utils/date.ts` (moved from the transactions feature) and calendar-grid helpers in `shared/utils/date-calendar.ts`. All date inputs use the shared `DateQuickSelector` (Hoy/Ayer chips, a calendar button contiguous to them, and manual fallback). Movement/transfer forms also show an `Último DD/MM` chip after a successful save in the current session; it is preselected for new records, hidden when it matches Hoy/Ayer and not shown in filters. The session value lives in `shared/utils/last-used-date-store.ts` (in memory, not persisted). iOS/Android use `@react-native-community/datetimepicker`; web uses a lightweight in-app calendar grid because that library has no web support.
 - **Email verification**: unverified email/password accounts are blocked from private routes and redirected to `/verify-email`; Google and unknown-provider accounts keep access. The screen shows the registered email, an explicit resend (no automatic resend after failed logins), a manual refresh and controlled polling (10s, max 6). The first email is sent once after registration from the screen so errors render inline. Existing accounts can resend, verify or sign out. Provider detection uses Firebase `providerData`, with no Firestore migration. Auth state is shared through `AuthProvider`, which exposes `refreshUser` so `user.reload()` updates navigation.
+- **Theming**: `AppThemeProvider` owns the effective color scheme. It follows the system scheme until the user changes the Settings toggle, then persists the manual `light`/`dark` override under `misgastos.theme.preference` in AsyncStorage. Screens and components consume `useAppColorScheme`, `useFormTheme` or `useThemeColor`; raw colours stay in `shared/constants/theme-tokens.ts` (and feature palettes only for brand colours). `useFormTheme` is the preferred token source for forms, cards, filters and modals because it also exposes danger/success surfaces and text tokens for both schemes.
+- **Ticket workflow**: implementation plan §0 is the source of truth for the current and next ticket. Start by marking the ticket `🚧 In progress` and updating §0. When a ticket is fully done, tick all requirements/acceptance criteria, set `✅ Done (DD/MM/YYYY)`, rename the file and H1 with the `[DONE] ` prefix (keeping the ticket id), update the plan feature status + §8 phase checkbox + §0 next ticket, update the roadmap and add a session entry here.
 - **Git**: Never commit automatically. Keep changes staged. Ask before creating a separate commit for unrelated changes.
 - **Code size & composition**: Files target ≤150 lines, one component per file, one responsibility per function. Screens only orchestrate: header, list header, footers, states and modals are separate components; derived data lives in hooks/pure utils. Styles go to `features/<feature>/styles/<name>.styles.ts` (style files may exceed 150 lines) with shared tokens and reusable base+variant styles. See `docs/project/guidelines/architecture-and-solid.md` §5.1
 
 ## How to resume
-1. Read this file + `docs/project/development-notes/roadmap.md`
-2. Review `docs/project/implementation-plan/implementation-plan.md`
-3. Check `docs/project/tickets/` for next task
+1. Read `docs/project/implementation-plan/implementation-plan.md` §0 Current Focus (current/next ticket and phase)
+2. Read this file + `docs/project/development-notes/roadmap.md`
+3. Review the active ticket in `docs/project/tickets/` (completed tickets use the `[DONE] ` prefix)
 4. Follow `docs/project/guidelines/` for all changes
-5. Document in `docs/project/development-notes/` after each session
+5. Document in `docs/project/development-notes/` after each session and update §0 when the ticket changes
 
 ## Session History
 | Date | Change | Notes |
@@ -71,3 +74,5 @@ See `docs/project/guidelines/architecture-and-solid.md`. Migrate incrementally t
 | 05/11/2026 | Inline auth errors (Phase A) | Replaced auth alerts with reusable inline feedback, field validation and mapped Firebase messages. Added password-reset feedback, a pure login form reducer with single-flight requests, light/dark theming for login fields and tests. Removed `lib/auth.ts`; Settings logs out through `AuthService` |
 | 06/11/2026 | Email verification (Phase A) | Added shared auth state via `AuthProvider`, verification service/repository methods, `/verify-email` with resend/manual refresh/controlled polling, private-route gating for unverified email/password accounts, Google bypass, profile recovery on email sign-in, tests and docs. Firebase console template setup pending |
 | 08/11/2026 | Movement actions UX (TICKET-022) | Replaced `onTouchEnd` with `Pressable` in movement and transfer cards, added pressed feedback, pencil affordance and accessibility role/label/hint, extracted card styles, added label utility tests and manual-platform checklist. Replaced native/browser confirmation alerts with a project-owned `ConfirmDialog` inside the form modals, fixing delete on web. Added pure delete-message builders and tests |
+| 08/11/2026 | Ticket workflow + TICKET-014 scope | Added the `[DONE] ` prefix convention to ticket filenames and H1, applied it to TICKET-000..005 and 020..022, added implementation plan §0 Current Focus and §8 phase checkboxes, and documented the close-ticket checklist in `AGENTS.md`, roadmap and memory. TICKET-014 now includes a Settings toggle to enable/disable dark mode |
+| 09/11/2026 | Dark mode polish (TICKET-014) | Added `AppThemeProvider` with system/manual preference resolution and AsyncStorage persistence, a Settings **Modo oscuro** switch, and shared theme tokens across login, settings, forms, filters, calendars, dialogs and dashboard surfaces. Added resolver/storage tests, visual checks and screenshots, and renamed the ticket with the `[DONE] ` prefix. Next Phase A ticket is TICKET-018; next platform ticket is TICKET-023 |

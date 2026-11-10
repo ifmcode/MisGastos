@@ -4,10 +4,6 @@ import { StyleSheet } from "react-native";
 export const transactionItemPalette = {
   primary: "#0A7EA4",
   primarySoft: "rgba(10, 126, 164, 0.12)",
-  income: "#2E7D32",
-  expense: "#C62828",
-  borderLight: "#E4ECEF",
-  borderDark: "#2B3438",
 } as const;
 
 export const transactionItemStyles = StyleSheet.create({

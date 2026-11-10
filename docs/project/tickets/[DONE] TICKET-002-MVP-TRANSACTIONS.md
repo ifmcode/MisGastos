@@ -1,4 +1,4 @@
-# TICKET-002 - MVP: Expenses, Incomes and History
+# [DONE] TICKET-002 - MVP: Expenses, Incomes and History
 
 **Type:** Feature  
 **Priority:** High  

@@ -1,6 +1,7 @@
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { WalletValidationErrors } from "../schemas/wallet.schema";
 import { walletFormStyles as styles } from "../styles/wallet-form.styles";
@@ -27,6 +28,8 @@ export function WalletFormAppearance({
   disabled,
   onChange,
 }: WalletFormAppearanceProps) {
+  const theme = useFormTheme();
+
   return (
     <View>
       <ThemedText style={styles.label}>Moneda</ThemedText>
@@ -36,7 +39,9 @@ export function WalletFormAppearance({
         onChange={(currency) => onChange("currency", currency)}
       />
       {errors.currency ? (
-        <ThemedText style={styles.fieldError}>{errors.currency}</ThemedText>
+        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+          {errors.currency}
+        </ThemedText>
       ) : null}
 
       <ThemedText style={styles.label}>Tipo</ThemedText>
@@ -46,7 +51,9 @@ export function WalletFormAppearance({
         onChange={(type) => onChange("type", type)}
       />
       {errors.type ? (
-        <ThemedText style={styles.fieldError}>{errors.type}</ThemedText>
+        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+          {errors.type}
+        </ThemedText>
       ) : null}
 
       <ThemedText style={styles.label}>Icono</ThemedText>
@@ -56,7 +63,9 @@ export function WalletFormAppearance({
         onChange={(icon) => onChange("icon", icon)}
       />
       {errors.icon ? (
-        <ThemedText style={styles.fieldError}>{errors.icon}</ThemedText>
+        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+          {errors.icon}
+        </ThemedText>
       ) : null}
 
       <ThemedText style={styles.label}>Color</ThemedText>
@@ -66,7 +75,9 @@ export function WalletFormAppearance({
         onChange={(color) => onChange("color", color)}
       />
       {errors.color ? (
-        <ThemedText style={styles.fieldError}>{errors.color}</ThemedText>
+        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+          {errors.color}
+        </ThemedText>
       ) : null}
 
       <WalletFormIncludeInTotalSwitch

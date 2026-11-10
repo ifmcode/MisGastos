@@ -18,9 +18,13 @@ export function TransactionFormErrorBanner({
   if (!error) return null;
 
   return (
-    <View style={styles.errorBanner}>
+    <View
+      style={[styles.errorBanner, { backgroundColor: theme.dangerSurface }]}
+    >
       <Ionicons name="alert-circle" size={20} color={theme.danger} />
-      <ThemedText style={styles.errorBannerText}>{error}</ThemedText>
+      <ThemedText style={[styles.errorBannerText, { color: theme.dangerText }]}>
+        {error}
+      </ThemedText>
     </View>
   );
 }

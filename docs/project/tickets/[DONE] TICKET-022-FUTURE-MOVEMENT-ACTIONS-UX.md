@@ -1,4 +1,4 @@
-# TICKET-022 - Future: Discoverable Edit/Delete Actions for Movements
+# [DONE] TICKET-022 - Future: Discoverable Edit/Delete Actions for Movements
 
 **Type:** Improvement  
 **Priority:** Medium  

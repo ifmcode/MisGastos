@@ -82,3 +82,8 @@ Run `npm run test:coverage`. If below 90%, fix before merge.
 - [ ] Isolated mocks
 - [ ] Coverage >= 90%
 - [ ] Fast tests
+
+## 10. Visual Checks
+Use `docs/project/testing/dark-mode-visual-checks.md` for the light/dark
+screenshots and computed-style results. Keep visual evidence in
+`docs/project/testing/visual-checks/` when a ticket changes appearance.

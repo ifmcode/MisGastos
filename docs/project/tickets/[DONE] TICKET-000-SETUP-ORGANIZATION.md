@@ -1,4 +1,4 @@
-# TICKET-000 - Project Organization Setup
+# [DONE] TICKET-000 - Project Organization Setup
 
 **Type:** Chore  
 **Priority:** High  

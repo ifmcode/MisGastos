@@ -47,7 +47,9 @@ export function TransferFormNotesField({
       />
       <View style={styles.descriptionFooter}>
         {error ? (
-          <ThemedText style={styles.fieldError}>{error}</ThemedText>
+          <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+            {error}
+          </ThemedText>
         ) : (
           <View />
         )}

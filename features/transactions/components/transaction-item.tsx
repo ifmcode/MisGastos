@@ -3,9 +3,9 @@ import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { formatMoney } from "@/features/wallets/utils/money";
+import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { formatDateInput } from "@/shared/utils/date";
 
 import {
@@ -32,11 +32,9 @@ export function TransactionItem({
   category,
   onPress,
 }: TransactionItemProps) {
-  const colorScheme = useColorScheme() ?? "light";
-  const borderColor =
-    colorScheme === "dark" ? palette.borderDark : palette.borderLight;
+  const theme = useFormTheme();
   const isIncome = transaction.type === "income";
-  const amountColor = isIncome ? palette.income : palette.expense;
+  const amountColor = isIncome ? theme.success : theme.danger;
   const amountPrefix = isIncome ? "+" : "-";
 
   return (
@@ -52,9 +50,10 @@ export function TransactionItem({
       style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
     >
       <ThemedView
-        style={[styles.card, { borderColor }]}
-        lightColor="#FFFFFF"
-        darkColor="#1C2225"
+        style={[
+          styles.card,
+          { borderColor: theme.border, backgroundColor: theme.surface },
+        ]}
       >
         <View style={styles.iconWrapper}>
           <Ionicons name={category.icon} size={20} color={palette.primary} />

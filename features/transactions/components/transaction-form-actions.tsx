@@ -34,10 +34,18 @@ export function TransactionFormActions({
           accessibilityLabel="Eliminar movimiento"
           onPress={onDelete}
           disabled={submitting}
-          style={[styles.deleteButton, submitting && styles.disabled]}
+          style={[
+            styles.deleteButton,
+            { backgroundColor: theme.dangerSurface },
+            submitting && styles.disabled,
+          ]}
         >
           <Ionicons name="trash-outline" size={18} color={theme.danger} />
-          <ThemedText style={styles.deleteButtonText}>Eliminar</ThemedText>
+          <ThemedText
+            style={[styles.deleteButtonText, { color: theme.danger }]}
+          >
+            Eliminar
+          </ThemedText>
         </Pressable>
       ) : null}
 

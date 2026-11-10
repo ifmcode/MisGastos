@@ -4,6 +4,7 @@ import { ThemedText } from "@/components/themed-text";
 import { TransferItem } from "@/features/transfers/components/transfer-item";
 import { Transfer } from "@/features/transfers/types/transfer.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { dashboardPalette, dashboardStyles } from "../styles/dashboard.styles";
 import { DashboardSectionHeader } from "./dashboard-section-header";
@@ -27,6 +28,8 @@ export function DashboardTransfersSection({
   onRetry,
   onPressTransfer,
 }: DashboardTransfersSectionProps) {
+  const theme = useFormTheme();
+
   return (
     <View style={dashboardStyles.footer}>
       <DashboardSectionHeader title="Transferencias recientes" />
@@ -39,8 +42,15 @@ export function DashboardTransfersSection({
           </ThemedText>
         </View>
       ) : error ? (
-        <View style={dashboardStyles.inlineError}>
-          <ThemedText style={dashboardStyles.inlineErrorText}>
+        <View
+          style={[
+            dashboardStyles.inlineError,
+            { backgroundColor: theme.dangerSurface },
+          ]}
+        >
+          <ThemedText
+            style={[dashboardStyles.inlineErrorText, { color: theme.dangerText }]}
+          >
             {error}
           </ThemedText>
           <Pressable
@@ -48,7 +58,9 @@ export function DashboardTransfersSection({
             accessibilityLabel="Reintentar carga de transferencias"
             onPress={onRetry}
           >
-            <ThemedText style={dashboardStyles.inlineRetryText}>
+            <ThemedText
+              style={[dashboardStyles.inlineRetryText, { color: theme.danger }]}
+            >
               Reintentar
             </ThemedText>
           </Pressable>

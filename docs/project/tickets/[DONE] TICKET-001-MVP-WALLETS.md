@@ -1,4 +1,4 @@
-# TICKET-001 - MVP: Wallets
+# [DONE] TICKET-001 - MVP: Wallets
 
 **Type:** Feature  
 **Priority:** High  

@@ -60,13 +60,22 @@ export function WalletForm({
             showsVerticalScrollIndicator={false}
           >
             {error ? (
-              <View style={styles.errorBanner}>
+              <View
+                style={[
+                  styles.errorBanner,
+                  { backgroundColor: theme.dangerSurface },
+                ]}
+              >
                 <Ionicons
                   name="alert-circle"
                   size={20}
                   color={theme.danger}
                 />
-                <ThemedText style={styles.errorBannerText}>{error}</ThemedText>
+                <ThemedText
+                  style={[styles.errorBannerText, { color: theme.dangerText }]}
+                >
+                  {error}
+                </ThemedText>
               </View>
             ) : null}
 

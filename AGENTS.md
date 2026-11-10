@@ -3,10 +3,21 @@
 Instructions for AI agents (OpenCode, Claude, etc.) working on MisGastos.
 
 ## Read first
-1. `docs/project/development-notes/project-memory.md`
-2. `docs/project/guidelines/architecture-and-solid.md`
-3. `docs/project/guidelines/security-and-validation.md`
-4. `docs/project/testing/test-guide.md`
+1. `docs/project/implementation-plan/implementation-plan.md` §0 Current Focus
+2. `docs/project/development-notes/project-memory.md`
+3. `docs/project/guidelines/architecture-and-solid.md`
+4. `docs/project/guidelines/security-and-validation.md`
+5. `docs/project/testing/test-guide.md`
+
+## Ticket workflow
+- **Before starting**: set the ticket `Status` to `🚧 In progress` and update implementation plan §0 with the phase, current ticket and status.
+- **When fully done**:
+  1. Tick every requirement and acceptance criterion and add an `Implemented` section.
+  2. Set the ticket `Status` to `✅ Done (DD/MM/YYYY)`.
+  3. Rename the ticket file with the `[DONE] ` prefix and update its H1, keeping the ticket id: `[DONE] TICKET-022-...md` and `# [DONE] TICKET-022 - ...`.
+  4. Update the implementation plan: feature status, the phase checkbox in §8 and §0 Current Focus (next ticket).
+  5. Update `docs/project/development-notes/roadmap.md` and the session history in `project-memory.md`.
+- **Never** rename or mark a ticket as done when any requirement or acceptance criterion is still open.
 
 ## Hard rules
 - **File size**: soft limit of **150 lines** per `.ts`/`.tsx` file. Split before adding more behavior. Style files are exempt.

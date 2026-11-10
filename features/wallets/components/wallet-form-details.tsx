@@ -50,7 +50,9 @@ export function WalletFormDetails({
         ]}
       />
       {errors.name ? (
-        <ThemedText style={styles.fieldError}>{errors.name}</ThemedText>
+        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+          {errors.name}
+        </ThemedText>
       ) : null}
 
       <ThemedText style={styles.label}>Saldo inicial</ThemedText>
@@ -79,7 +81,7 @@ export function WalletFormDetails({
         />
       </View>
       {errors.initialBalance ? (
-        <ThemedText style={styles.fieldError}>
+        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
           {errors.initialBalance}
         </ThemedText>
       ) : (

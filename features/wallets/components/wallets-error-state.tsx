@@ -2,8 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
-import { walletsPalette, walletsStyles } from "../styles/wallets.styles";
+import { walletsStyles } from "../styles/wallets.styles";
 
 export interface WalletsErrorStateProps {
   message: string;
@@ -11,12 +12,14 @@ export interface WalletsErrorStateProps {
 }
 
 export function WalletsErrorState({ message, onRetry }: WalletsErrorStateProps) {
+  const theme = useFormTheme();
+
   return (
     <View style={walletsStyles.centered}>
       <Ionicons
         name="cloud-offline-outline"
         size={42}
-        color={walletsPalette.danger}
+        color={theme.danger}
       />
       <ThemedText type="defaultSemiBold" style={walletsStyles.errorTitle}>
         No se pudieron cargar las carteras

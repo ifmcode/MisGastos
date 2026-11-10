@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { transferFormStyles as styles } from "../styles/transfer-form.styles";
 import { TransferFormWalletList } from "./transfer-form-wallet-list";
@@ -19,6 +20,8 @@ export function TransferFormSourceSelector({
   disabled,
   onSelect,
 }: TransferFormSourceSelectorProps) {
+  const theme = useFormTheme();
+
   return (
     <>
       <ThemedText style={styles.label}>Desde</ThemedText>
@@ -31,7 +34,9 @@ export function TransferFormSourceSelector({
         onSelect={onSelect}
       />
       {error ? (
-        <ThemedText style={styles.fieldError}>{error}</ThemedText>
+        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+          {error}
+        </ThemedText>
       ) : null}
     </>
   );

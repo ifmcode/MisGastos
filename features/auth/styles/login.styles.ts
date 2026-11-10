@@ -6,13 +6,6 @@ export const loginPalette = {
   primarySoft: "rgba(10, 126, 164, 0.12)",
   google: "#DB4437",
   onPrimary: "#FFFFFF",
-  border: "#CCCCCC",
-  text: "#333333",
-  surface: "#FFFFFF",
-  placeholder: "#999999",
-  danger: "#C62828",
-  dangerSurface: "#FDECEA",
-  dangerText: "#8A1C1C",
 } as const;
 
 export const loginStyles = StyleSheet.create({
@@ -41,17 +34,13 @@ export const loginStyles = StyleSheet.create({
     width: "100%",
     height: 48,
     borderWidth: 1,
-    borderColor: loginPalette.border,
     borderRadius: 8,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: loginPalette.text,
-    backgroundColor: loginPalette.surface,
   },
   fieldError: {
     fontSize: 13,
     lineHeight: 18,
-    color: loginPalette.danger,
   },
 
   // Feedback

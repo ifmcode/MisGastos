@@ -22,6 +22,11 @@ Una vez tengas el contexto claro, trabaja **únicamente** en la siguiente tarea:
 
 **Tarea:** [INSERTAR DESCRIPCIÓN DE LA TAREA AQUÍ]
 
+## 4) Flujo de tickets
+- **Antes de empezar:** lee `docs/project/implementation-plan/implementation-plan.md` §0 (foco actual) y marca el ticket como `🚧 In progress` en su fichero y en el plan.
+- **Al terminar completamente un ticket:** marca todos los requisitos y criterios de aceptación, añade la sección `Implemented`, pon `✅ Done (DD/MM/YYYY)`, renombra el fichero y su H1 con el prefijo `[DONE] ` (manteniendo el id) y actualiza el plan (estado, checkbox de fase y §0 con la siguiente tarea), el roadmap y `project-memory.md`.
+- No marques un ticket como completado si queda algún requisito o criterio de aceptación abierto.
+
 ## Reglas
 - Sé fiel al código existente. No introduzcas nuevos patrones si ya hay uno establecido en el proyecto.
 - Prioriza la consistencia sobre la optimización prematura.

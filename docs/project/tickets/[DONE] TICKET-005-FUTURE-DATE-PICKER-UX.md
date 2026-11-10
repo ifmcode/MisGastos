@@ -1,4 +1,4 @@
-# TICKET-005 - Future: Date Picker UX
+# [DONE] TICKET-005 - Future: Date Picker UX
 
 **Type:** Enhancement  
 **Priority:** Medium  

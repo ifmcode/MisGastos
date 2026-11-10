@@ -1,4 +1,4 @@
-# TICKET-003 - MVP: Transfers between wallets and Dashboard
+# [DONE] TICKET-003 - MVP: Transfers between wallets and Dashboard
 
 **Type:** Feature  
 **Priority:** High  

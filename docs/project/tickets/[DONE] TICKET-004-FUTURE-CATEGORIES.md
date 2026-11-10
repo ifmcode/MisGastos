@@ -1,4 +1,4 @@
-# TICKET-004 - Future: Categories Management
+# [DONE] TICKET-004 - Future: Categories Management
 
 **Type:** Feature  
 **Priority:** Medium  

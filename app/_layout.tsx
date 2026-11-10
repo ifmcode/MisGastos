@@ -5,21 +5,32 @@ import '../global.css';
 
 import { AuthNavigator } from '@/features/auth/components/auth-navigator';
 import { AuthProvider } from '@/features/auth/providers/auth-provider';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAppColorScheme } from '@/shared/hooks/use-app-color-scheme';
+import { useAppTheme } from '@/shared/hooks/use-app-theme';
+import { AppThemeProvider } from '@/shared/providers/theme-provider';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+function RootNavigator() {
+  const colorScheme = useAppColorScheme();
+  const { isDark } = useAppTheme();
 
   return (
-    <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <AuthNavigator />
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <AuthNavigator />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+    </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AppThemeProvider>
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
+    </AppThemeProvider>
   );
 }

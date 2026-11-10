@@ -2,11 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
-import {
-  transactionsPalette,
-  transactionsStyles as styles,
-} from "../styles/transactions.styles";
+import { transactionsStyles as styles } from "../styles/transactions.styles";
 
 export interface TransactionsErrorStateProps {
   message: string;
@@ -17,12 +15,14 @@ export function TransactionsErrorState({
   message,
   onRetry,
 }: TransactionsErrorStateProps) {
+  const theme = useFormTheme();
+
   return (
     <View style={styles.centered}>
       <Ionicons
         name="cloud-offline-outline"
         size={42}
-        color={transactionsPalette.danger}
+        color={theme.danger}
       />
       <ThemedText type="defaultSemiBold" style={styles.errorTitle}>
         No se pudieron cargar los movimientos

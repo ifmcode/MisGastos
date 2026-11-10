@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { settingsStyles as styles } from "../styles/settings.styles";
+import { SettingsThemeToggle } from "./settings-theme-toggle";
 
 export function SettingsScreen() {
   const { user } = useAuth();
@@ -50,10 +51,17 @@ export function SettingsScreen() {
           </ThemedText>
           <Ionicons name="chevron-forward" size={18} color={theme.muted} />
         </Pressable>
+
+        <SettingsThemeToggle />
       </ThemedView>
 
-      <Pressable style={styles.logoutButton} onPress={handleLogout}>
-        <ThemedText style={styles.logoutText}>Cerrar Sesión</ThemedText>
+      <Pressable
+        style={[styles.logoutButton, { backgroundColor: theme.danger }]}
+        onPress={handleLogout}
+      >
+        <ThemedText style={[styles.logoutText, { color: theme.onPrimary }]}>
+          Cerrar Sesión
+        </ThemedText>
       </Pressable>
     </ThemedView>
   );

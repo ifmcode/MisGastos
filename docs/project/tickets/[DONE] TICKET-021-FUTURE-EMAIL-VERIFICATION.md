@@ -1,4 +1,4 @@
-# TICKET-021 - Future: Email Verification on Signup
+# [DONE] TICKET-021 - Future: Email Verification on Signup
 
 **Type:** Feature  
 **Priority:** High  

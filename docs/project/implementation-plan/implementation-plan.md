@@ -1,7 +1,19 @@
 # Implementation Plan: MisGastos (Expense Manager + Splitwise)
 
 > Living document. Update with each agreed feature. Always start from MVP.
-> **Last reviewed:** 06/11/2026
+> **Last reviewed:** 09/11/2026
+
+## 0. Current Focus
+> Keep this block up to date at the start and end of every session. It is the
+> first thing an agent must read to know which ticket is active and what comes next.
+
+| Field | Value |
+|---|---|
+| **Phase** | A - Short product polish |
+| **Current ticket** | TICKET-018 - Wallet Management (optional Phase A) |
+| **Current status** | ⏳ Pending |
+| **Last completed** | TICKET-014 - Dark Mode Polish (09/11/2026) |
+| **Next after current** | TICKET-023 - Offline-first design spike (Phase B) |
 
 ## 1. Inspiration: Expense Manager + Splitwise
 **References:** `docs/project/ui-references/expense-manager-reference.png` and `docs/project/ui-references/splitwise-reference.png`
@@ -54,7 +66,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 | PM-010 | Categories | Create/edit with icon/color, type (expense/income), full CRUD | ✅ Done | TICKET-004 |
 | PM-011 | Budgets | Budget by category/wallet with alerts | ⏳ Pending | TICKET-012 |
 | PM-012 | Export data | CSV/PDF (evaluate later) | ⏳ Pending | TICKET-013 |
-| PM-013 | Dark mode | Polish existing support | ⏳ Pending | TICKET-014 |
+| PM-013 | Dark mode | Polish existing support and add a Settings toggle to enable/disable dark mode | ✅ Done | TICKET-014 |
 | PM-014 | Advanced search | By text/concept, date range, multiple filters | ⏳ Pending | TICKET-015 |
 | PM-015 | Date picker UX | Quick Hoy/Ayer chips, calendar button (native on mobile, in-app on web) and manual fallback in forms and filters | ✅ Done | TICKET-005 |
 
@@ -99,62 +111,78 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - Icons per category/wallet
 - Strong amount validations (> 0)
 
-## 6. Checklist Before Each Feature
-- [ ] Update implementation plan status
-- [ ] Create/update ticket in docs/project/tickets/
+## 6. Ticket Workflow Checklist
+
+### Before starting a ticket
+- [ ] Update §0 Current Focus with the phase, ticket and status `🚧 In progress`
+- [ ] Set the ticket `Status` to `🚧 In progress`
+- [ ] Read the ticket, related tickets, guidelines and development notes
+- [ ] Create/update the ticket in `docs/project/tickets/` if it does not exist
+
+### While working
 - [ ] Follow architecture/SOLID guidelines
 - [ ] Add tests if business logic
-- [ ] Document in development-notes
-- [ ] Update memory if important decision
+- [ ] Document decisions in `docs/project/development-notes/`
+- [ ] Update memory if an important decision changes
 
-## 7. Review Notes (03/11/2026)
-- **Verified as done:** MVP-001..MVP-006, PM-010 and PM-015. Their tickets exist and match the current implementation.
+### When the ticket is fully done
+- [ ] Tick every requirement and acceptance criterion in the ticket
+- [ ] Set the ticket `Status` to `✅ Done (DD/MM/YYYY)` and add an `Implemented` section
+- [ ] Rename the ticket file with the `[DONE] ` prefix and update its H1, keeping the ticket id (for example `[DONE] TICKET-022-...md` and `# [DONE] TICKET-022 - ...`)
+- [ ] Update the implementation plan: feature status, phase checkbox and §0 Current Focus (next ticket)
+- [ ] Update `docs/project/development-notes/roadmap.md`
+- [ ] Add the session entry to `docs/project/development-notes/project-memory.md`
+
+## 7. Review Notes (03/11/2026, updated 09/11/2026)
+- **Verified as done:** MVP-001..MVP-006, PM-010, PM-015 and PM-020..PM-022. Their tickets exist and match the current implementation.
 - **Partially implemented, still pending:**
-  - PM-013: the system light/dark theme is wired through `ThemedView`, `ThemedText` and `useFormTheme`, but the login screen and parts of settings still use fixed light colours.
   - PM-014: filters already cover wallet, type, category, date range and sorting; free-text/concept search is missing.
   - PM-001/PM-002: Settings only shows account data and logout; editing the profile and choosing a preferred currency are missing.
 - **Not implemented:** friends, groups, shared expenses, balances, settlements, group history, budgets, data export.
 - **New gaps identified:** statistics/charts, history grouping, wallet editing/archiving and dashboard quick add. They were added as PM-016..PM-019.
 - **Auth and movement UX gaps:** login/register currently use `alert()` instead of inline feedback; no verification email is sent on signup; transaction and transfer edit/delete already work through the form modal but the list items do not expose the action clearly. They were added as PM-020..PM-022.
 - **Tickets created:** TICKET-006..TICKET-022 cover the pending product items above. TICKET-023 and TICKET-024 add the platform and workflow epics agreed on 04/11/2026.
+- **08/11/2026:** TICKET-020, TICKET-021 and TICKET-022 verified as done and renamed with the `[DONE] ` prefix. TICKET-014 (dark mode + Settings toggle) is the next Phase A ticket.
+- **09/11/2026:** TICKET-014 verified as done and renamed with the `[DONE] ` prefix. PM-013 is complete: the theme provider, persisted manual override and shared tokens cover login, settings, forms, filters, calendars, modals and dashboard surfaces. Visual checks are documented in `docs/project/testing/dark-mode-visual-checks.md`.
 
 ## 8. Recommended Execution Order (04/11/2026)
 
 > Guiding principle: validate the social value before deep visual polish, but fix high-friction UX and take the offline/architecture decisions before building shared ledgers.
+> Check a box only when the ticket is fully done and its file has been renamed with the `[DONE] ` prefix.
 
 ### Phase A - Short product polish (3-7 days)
-- TICKET-020: inline auth errors.
-- TICKET-021: email verification.
-- TICKET-022: visible and accessible edit/delete actions.
-- TICKET-014: dark mode and shared visual tokens.
-- TICKET-018: wallet editing/archiving, if there is time.
+- [x] TICKET-020: inline auth errors. ✅ Done 05/11/2026
+- [x] TICKET-021: email verification. ✅ Done 06/11/2026
+- [x] TICKET-022: visible and accessible edit/delete actions. ✅ Done 08/11/2026
+- [x] TICKET-014: dark mode, shared visual tokens and a Settings toggle. ✅ Done 09/11/2026
+- [ ] TICKET-018: wallet editing/archiving, if there is time. ⏳ Next
 - Build only the UI primitives needed next: button, input, list row, avatar, banner, empty state and modal.
 
 ### Phase B - Architecture and workflow spike (2-4 days)
-- TICKET-023 (design spike only): decide local database, outbox, idempotency and conflict policy before groups.
-- TICKET-024: define the first 3-4 agents and their skills; avoid agent sprawl.
+- [ ] TICKET-023 (design spike only): decide local database, outbox, idempotency and conflict policy before groups. ⏳ Pending
+- [ ] TICKET-024: define the first 3-4 agents and their skills; avoid agent sprawl. ⏳ Pending
 - Record the decisions in ADRs or development notes.
 
 ### Phase C - Social vertical slice (1-2 weeks)
-- TICKET-007: friends and requests.
-- Minimal subset of TICKET-009: 1:1 shared expense.
-- Minimal subset of TICKET-010: balance and settlement between two people.
+- [ ] TICKET-007: friends and requests. ⏳ Pending
+- [ ] Minimal subset of TICKET-009: 1:1 shared expense. ⏳ Pending
+- [ ] Minimal subset of TICKET-010: balance and settlement between two people. ⏳ Pending
 - Validate with 3-5 real users.
 - Do not build a friends list without shared expenses; it does not validate the product.
 
 ### Phase D - Groups
-- TICKET-008: create groups.
-- Full TICKET-009: equal, percentage, fixed-amount and share splits.
-- TICKET-010: group balances and settlements.
-- TICKET-011: group history.
+- [ ] TICKET-008: create groups. ⏳ Pending
+- [ ] Full TICKET-009: equal, percentage, fixed-amount and share splits. ⏳ Pending
+- [ ] TICKET-010: group balances and settlements. ⏳ Pending
+- [ ] TICKET-011: group history. ⏳ Pending
 
 ### Phase E - Offline-first implementation
-- Full TICKET-023: local persistence, offline mutations, sync queue, conflict handling and offline group/friend movements.
+- [ ] Full TICKET-023: local persistence, offline mutations, sync queue, conflict handling and offline group/friend movements. ⏳ Pending
 - If offline is a launch requirement, move this phase before Phase D.
 - Do not retrofit offline after groups without the Phase B decisions; the current Firestore transaction-based balance model may need to change.
 
 ### Phase F - Retention and final polish
-- TICKET-012 budgets, TICKET-016 statistics, TICKET-015 advanced search, TICKET-013 export, TICKET-017 history grouping and TICKET-019 dashboard quick add.
+- [ ] TICKET-012 budgets, TICKET-016 statistics, TICKET-015 advanced search, TICKET-013 export, TICKET-017 history grouping and TICKET-019 dashboard quick add. ⏳ Pending
 - Then invest in final visual polish with real social screens.
 
 ### Decision rules
