@@ -1,10 +1,10 @@
 # Roadmap - MisGastos
 
 ## Current Focus
-- **Phase:** 3 - Post-MVP (Phase A complete)
-- **Current ticket:** TICKET-023 - Offline-first design spike (Phase B)
+- **Phase:** 3 - Post-MVP (Phase A complete; Phase A.1 next)
+- **Current ticket:** TICKET-025 - Movement Detail View (Phase A.1)
 - **Last completed:** TICKET-018 - Wallet Management (10/11/2026)
-- **Next:** TICKET-024 - Agent and skill specialization
+- **Next:** TICKET-026 - Transfer History (Phase A.1)
 - **Source of truth:** `docs/project/implementation-plan/implementation-plan.md` §0
 
 ## Phase 0: Organization (COMPLETED)
@@ -44,6 +44,13 @@
 - [x] Inline auth errors (TICKET-020)
 - [x] Email verification on signup (TICKET-021)
 - [x] Discoverable edit/delete actions (TICKET-022)
+
+## Phase 3.1: Personal Finance UX Follow-up (NEXT)
+- [ ] Movement detail view with edit/delete actions (TICKET-025) ← NEXT
+- [ ] Transfer history from accounts (TICKET-026)
+- [ ] Home recent movements and transfers (TICKET-027)
+- [ ] Compact category selector (TICKET-028)
+- [ ] Compact wallet selector + missing wallet fix (TICKET-029)
 
 ## Phase 4: Platform and Workflow
 - [ ] Offline-first design spike + sync (TICKET-023)

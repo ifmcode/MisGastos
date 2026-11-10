@@ -9,11 +9,11 @@
 
 | Field | Value |
 |---|---|
-| **Phase** | A - Short product polish ✅ Complete; next: B - Architecture and workflow spike |
-| **Current ticket** | TICKET-023 - Offline-first design spike (Phase B) |
+| **Phase** | A.1 - Personal finance UX follow-up (next); then B - Architecture and workflow spike |
+| **Current ticket** | TICKET-025 - Movement Detail View |
 | **Current status** | ⏳ Pending |
 | **Last completed** | TICKET-018 - Wallet Management (10/11/2026) |
-| **Next after current** | TICKET-024 - Agent and skill specialization |
+| **Next after current** | TICKET-026 - Transfer History |
 
 ## 1. Inspiration: Expense Manager + Splitwise
 **References:** `docs/project/ui-references/expense-manager-reference.png` and `docs/project/ui-references/splitwise-reference.png`
@@ -91,6 +91,15 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 | PM-023 | Offline-first and sync | Use the app without internet and sync local changes with Firebase when connectivity returns, including personal and shared movements | ⏳ Pending | TICKET-023 |
 | PM-024 | Agent and skill specialization | Define project-specific agents and skills so each task is routed to the right specialist | ⏳ Pending | TICKET-024 |
 
+### 3.8 Personal finance UX follow-up (10/11/2026)
+| ID | Feature | Description | Status | Ticket |
+|---|---|---|---|---|
+| PM-025 | Movement detail view | Open a read-only movement detail with edit and delete actions in the top-right corner | ⏳ Pending | TICKET-025 |
+| PM-026 | Transfer history | Dedicated transfer history reachable from the accounts tab | ⏳ Pending | TICKET-026 |
+| PM-027 | Home recent movements and transfers | Remove wallet cards, show up to 3 recent movements and 3 recent transfers with history links | ⏳ Pending | TICKET-027 |
+| PM-028 | Compact category selector | Three category chips plus `+` opening a **Seleccionar categoría** popup with all categories and inline creation | ⏳ Pending | TICKET-028 |
+| PM-029 | Compact wallet selector | Compact wallet chips plus a **Seleccionar cartera** popup, no creation, and fix the missing third wallet | ⏳ Pending | TICKET-029 |
+
 ## 4. Key Business Rules
 - **No photos initially**: No avatar/photo uploads. Use initials/icons
 - **Multi-wallet**: Every expense/income must be associated to a wallet
@@ -145,6 +154,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - **08/11/2026:** TICKET-020, TICKET-021 and TICKET-022 verified as done and renamed with the `[DONE] ` prefix. TICKET-014 (dark mode + Settings toggle) is the next Phase A ticket.
 - **09/11/2026:** TICKET-014 verified as done and renamed with the `[DONE] ` prefix. PM-013 is complete: the theme provider, persisted manual override and shared tokens cover login, settings, forms, filters, calendars, modals and dashboard surfaces. Visual checks are documented in `docs/project/testing/dark-mode-visual-checks.md`.
 - **10/11/2026:** TICKET-018 verified as done and renamed with the `[DONE] ` prefix. PM-018 is complete and Phase A is closed: wallets can be edited with a locked currency, archived/restored, and deleted with reassignment or a `[Eliminada]` placeholder. Archived wallets leave selectors and totals while history keeps its stored names.
+- **10/11/2026:** Reviewed the new personal-finance UX requests against existing tickets. TICKET-022 already covered discoverable edit/delete actions, but not a movement detail view, so TICKET-025 extends it. TICKET-019 covers dashboard quick add only, so home layout, transfer history and compact selectors were split into TICKET-026..TICKET-029. No existing ticket duplicated these requests.
 
 ## 8. Recommended Execution Order (04/11/2026)
 
@@ -158,7 +168,15 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - [x] TICKET-014: dark mode, shared visual tokens and a Settings toggle. ✅ Done 09/11/2026
 - [x] TICKET-018: wallet editing/archiving, deletion with reassignment and archived history. ✅ Done 10/11/2026
 - Build only the UI primitives needed next: button, input, list row, avatar, banner, empty state and modal.
-- Phase A is complete. Move to Phase B with TICKET-023 before starting the social slice.
+- Phase A is complete. Phase A.1 runs next, then Phase B with TICKET-023 before starting the social slice.
+
+### Phase A.1 - Personal finance UX follow-up (next)
+- [ ] TICKET-025: movement detail view with top-right edit and delete actions. ⏳ Next
+- [ ] TICKET-026: dedicated transfer history from the accounts tab. ⏳ Pending
+- [ ] TICKET-027: home without wallet cards, with 3 recent movements and 3 recent transfers. ⏳ Pending
+- [ ] TICKET-028: compact category selector with a full-category popup and inline creation. ⏳ Pending
+- [ ] TICKET-029: compact wallet selector, no creation, and fix the missing third wallet (Juanilla). ⏳ Pending
+- Prioritise TICKET-029 if the missing wallet blocks creating or editing movements.
 
 ### Phase B - Architecture and workflow spike (2-4 days)
 - [ ] TICKET-023 (design spike only): decide local database, outbox, idempotency and conflict policy before groups. ⏳ Pending
