@@ -24,12 +24,3 @@ export function getDashboardTotals(
     { currency: selectedWallet.currency, total: selectedWallet.balance },
   ];
 }
-
-export function getVisibleWallets(
-  wallets: readonly Wallet[],
-  selectedWalletId: string,
-): Wallet[] {
-  if (selectedWalletId.length === 0) return [...wallets];
-
-  return wallets.filter((wallet) => wallet.id === selectedWalletId);
-}

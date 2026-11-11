@@ -5,7 +5,6 @@ export const dashboardPalette = {
   primary: "#0A7EA4",
   primarySoft: "rgba(10, 126, 164, 0.06)",
   primarySoftStrong: "rgba(10, 126, 164, 0.08)",
-  primarySoftIcon: "rgba(10, 126, 164, 0.12)",
   primaryBorder: "rgba(10, 126, 164, 0.25)",
   onPrimary: "#FFFFFF",
   danger: "#C62828",
@@ -18,16 +17,9 @@ export const dashboardStyles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  listContent: {
+  scrollContent: {
     paddingHorizontal: 24,
     paddingBottom: 120,
-  },
-  emptyListContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
-  separator: {
-    height: 10,
   },
 
   // Header
@@ -128,8 +120,8 @@ export const dashboardStyles = StyleSheet.create({
     opacity: 0.6,
   },
 
-  // Footer / recent transfers
-  footer: {
+  // Recent sections
+  recentSection: {
     marginTop: 24,
   },
   transferList: {
@@ -205,23 +197,5 @@ export const dashboardStyles = StyleSheet.create({
     color: dashboardPalette.onPrimary,
     fontSize: 15,
     fontWeight: "700",
-  },
-  emptyState: {
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingBottom: 40,
-  },
-  emptyIcon: {
-    width: 74,
-    height: 74,
-    borderRadius: 24,
-    backgroundColor: dashboardPalette.primarySoftIcon,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 19,
-    textAlign: "center",
   },
 });

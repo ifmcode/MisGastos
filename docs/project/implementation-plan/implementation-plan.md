@@ -10,10 +10,10 @@
 | Field | Value |
 |---|---|
 | **Phase** | A.1 - Personal finance UX follow-up (in progress); then B - Architecture and workflow spike |
-| **Current ticket** | TICKET-027 - Home recent movements and transfers |
+| **Current ticket** | TICKET-028 - Compact category selector |
 | **Current status** | ⏳ Pending |
-| **Last completed** | TICKET-026 - Transfer History (11/11/2026) |
-| **Next after current** | TICKET-028 - Compact category selector |
+| **Last completed** | TICKET-027 - Home recent movements and transfers (11/11/2026) |
+| **Next after current** | TICKET-029 - Compact wallet selector |
 
 ## 1. Inspiration: Expense Manager + Splitwise
 **References:** `docs/project/ui-references/expense-manager-reference.png` and `docs/project/ui-references/splitwise-reference.png`
@@ -35,7 +35,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 | MVP-003 | Expense/Income | Create transaction with amount, date, concept/category, wallet, notes, type (expense/income). Currency inherited from wallet by default but **selectable**. Creating/editing/deleting must update wallet balance | ✅ Done | TICKET-002; CRUD, history, filters and sorting |
 | MVP-004 | Transfer between wallets | Move money between own wallets (updates balances). Must be atomic | ✅ Done | TICKET-003; `transfers` collection, `runTransaction`, same currency only, editable and soft-deletable with balance reversion |
 | MVP-005 | History with filters/sorting | List by date, filter by wallet/type/category, sort asc/desc | ✅ Done | TICKET-002; efficient FlatList |
-| MVP-006 | Dashboard/Summary | Total balance, per wallet, filter by wallet or all | ✅ Done | TICKET-003; global/per-wallet totals, includes recent transfers |
+| MVP-006 | Dashboard/Summary | Total balance, per wallet, filter by wallet or all | ✅ Done | TICKET-003 + TICKET-027; global/per-wallet totals, recent movements and recent transfers |
 
 ## 3. Post-MVP
 
@@ -96,7 +96,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 |---|---|---|---|---|
 | PM-025 | Movement detail view | Open a read-only movement detail with edit and delete actions in the top-right corner | ✅ Done | TICKET-025; detail modal resolves live movements, reuses the edit form and confirmation dialog, and handles missing movements |
 | PM-026 | Transfer history | Dedicated transfer history reachable from the accounts tab | ✅ Done | TICKET-026; protected `/transfers` route, accounts and dashboard entry points, shared transfer form, ordering/dedupe and archived/deleted wallet-name tests |
-| PM-027 | Home recent movements and transfers | Remove wallet cards, show up to 3 recent movements and 3 recent transfers with history links | ⏳ Pending | TICKET-027 |
+| PM-027 | Home recent movements and transfers | Remove wallet cards, show up to 3 recent movements and 3 recent transfers with history links | ✅ Done | TICKET-027; home summary, conditional history actions and independent section states |
 | PM-028 | Compact category selector | Three category chips plus `+` opening a **Seleccionar categoría** popup with all categories and inline creation | ⏳ Pending | TICKET-028 |
 | PM-029 | Compact wallet selector | Compact wallet chips plus a **Seleccionar cartera** popup, no creation, and fix the missing third wallet | ⏳ Pending | TICKET-029 |
 
@@ -157,6 +157,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - **10/11/2026:** Reviewed the new personal-finance UX requests against existing tickets. TICKET-022 already covered discoverable edit/delete actions, but not a movement detail view, so TICKET-025 extends it. TICKET-019 covers dashboard quick add only, so home layout, transfer history and compact selectors were split into TICKET-026..TICKET-029. No existing ticket duplicated these requests.
 - **11/11/2026:** TICKET-025 verified as done and renamed with the `[DONE] ` prefix. PM-025 is complete: tapping a movement opens a read-only detail view with top-right edit/delete actions, live wallet-name resolution for archived/deleted wallets, the existing form and confirmation flow, and a missing-movement state. Phase A.1 continues with TICKET-026.
 - **11/11/2026:** TICKET-026 verified as done and renamed with the `[DONE] ` prefix. PM-026 is complete: the protected `/transfers` route lists every non-deleted transfer once, newest first, with pull-to-refresh, empty/error states and archived/deleted wallet names. The accounts screen and dashboard recent-transfers header both link to it. The transfer form modal, defaults and delete confirmation moved into the transfers feature so the dashboard and history share one form. Phase A.1 continues with TICKET-027.
+- **11/11/2026:** TICKET-027 verified as done and renamed with the `[DONE] ` prefix. PM-027 is complete: the home tab is now a scrollable summary with wallet filters, totals, three recent movements and three recent transfers. History actions only appear when the full collections exceed three, pull-to-refresh reloads both collections, and the movement/transfer sections own their loading, error and empty states. Totals still use active wallets and ignore archived ones. Phase A.1 continues with TICKET-028.
 
 ## 8. Recommended Execution Order (04/11/2026)
 
@@ -175,7 +176,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 ### Phase A.1 - Personal finance UX follow-up (in progress)
 - [x] TICKET-025: movement detail view with top-right edit and delete actions. ✅ Done 11/11/2026
 - [x] TICKET-026: dedicated transfer history from the accounts tab. ✅ Done 11/11/2026
-- [ ] TICKET-027: home without wallet cards, with 3 recent movements and 3 recent transfers. ⏳ Pending
+- [x] TICKET-027: home without wallet cards, with 3 recent movements and 3 recent transfers. ✅ Done 11/11/2026
 - [ ] TICKET-028: compact category selector with a full-category popup and inline creation. ⏳ Pending
 - [ ] TICKET-029: compact wallet selector, no creation, and fix the missing third wallet (Juanilla). ⏳ Pending
 - Prioritise TICKET-029 if the missing wallet blocks creating or editing movements.

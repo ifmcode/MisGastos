@@ -1,79 +1,78 @@
 import { useMemo, useState } from "react";
-import { useRouter, type Href } from "expo-router";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
 import { useAuth } from "@/hooks/use-auth";
+import { useCategories } from "@/features/categories/hooks/use-categories";
 import { TransferFormModal } from "@/features/transfers/components/transfer-form-modal";
 import { useTransferFormDialog } from "@/features/transfers/hooks/use-transfer-form-dialog";
 import { useTransfers } from "@/features/transfers/hooks/use-transfers";
+import { useTransactions } from "@/features/transactions/hooks/use-transactions";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
 import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
 
 import { useDashboardOverview } from "../hooks/use-dashboard-overview";
 import { dashboardStyles } from "../styles/dashboard.styles";
+import { createDashboardNavigationActions } from "../utils/dashboard-navigation";
 import { DashboardErrorState } from "./dashboard-error-state";
 import { DashboardHeader } from "./dashboard-header";
 import { DashboardLoadingState } from "./dashboard-loading-state";
-import { DashboardWalletsList } from "./dashboard-wallets-list";
+import { DashboardOverviewScroll } from "./dashboard-overview-scroll";
 
 export function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useAuth();
-  const {
-    wallets,
-    loading: walletsLoading,
-    refreshing: walletsRefreshing,
-    error: walletsError,
-    reload: reloadWallets,
-    refresh: refreshWallets,
-  } = useWallets();
-  const {
-    transfers,
-    loading: transfersLoading,
-    refreshing: transfersRefreshing,
-    mutating,
-    error: transfersError,
-    createError,
-    createFieldErrors,
-    reload: reloadTransfers,
-    refresh: refreshTransfers,
-    createTransfer,
-    updateTransfer,
-    deleteTransfer,
-    clearCreateState,
-  } = useTransfers();
-
-  const [selectedWalletId, setSelectedWalletId] = useState("");
-
-  const activeWallets = useMemo(() => getActiveWallets(wallets), [wallets]);
-
-  const {
-    effectiveSelectedWalletId,
-    selectedWallet,
-    totals,
-    visibleWallets,
-    walletMap,
-    recentTransfers,
-    canTransfer,
-  } = useDashboardOverview(activeWallets, transfers, selectedWalletId, wallets);
-
-  const transferForm = useTransferFormDialog({
-    mutating,
-    createTransfer,
-    updateTransfer,
-    deleteTransfer,
-    clearCreateState,
-    onWalletsChanged: () => void reloadWallets(),
+  const walletsState = useWallets();
+  const transfersState = useTransfers();
+  const categoriesState = useCategories();
+  const transactionsState = useTransactions({
+    categories: categoriesState.categories,
   });
 
-  const refreshing = walletsRefreshing || transfersRefreshing;
+  const [selectedWalletId, setSelectedWalletId] = useState("");
+  const activeWallets = useMemo(
+    () => getActiveWallets(walletsState.wallets),
+    [walletsState.wallets],
+  );
+  const overview = useDashboardOverview({
+    wallets: activeWallets,
+    allWallets: walletsState.wallets,
+    transfers: transfersState.transfers,
+    transactions: transactionsState.transactions,
+    selectedWalletId,
+  });
+  const navigation = useMemo(
+    () => createDashboardNavigationActions(router),
+    [router],
+  );
+  const transferForm = useTransferFormDialog({
+    mutating: transfersState.mutating,
+    createTransfer: transfersState.createTransfer,
+    updateTransfer: transfersState.updateTransfer,
+    deleteTransfer: transfersState.deleteTransfer,
+    clearCreateState: transfersState.clearCreateState,
+    onWalletsChanged: () => void walletsState.reload(),
+  });
+
+  const refreshing =
+    walletsState.refreshing ||
+    transfersState.refreshing ||
+    transactionsState.refreshing ||
+    categoriesState.refreshing;
   const greeting = user?.displayName ?? user?.email ?? "Usuario";
 
   function handleRefresh() {
-    void refreshWallets();
-    void refreshTransfers();
+    void walletsState.refresh();
+    void transfersState.refresh();
+    void transactionsState.refresh();
+    void categoriesState.refresh();
+  }
+
+  function retryMovements() {
+    void transactionsState.reload();
+    void categoriesState.reload();
   }
 
   return (
@@ -82,47 +81,65 @@ export function DashboardScreen() {
     >
       <DashboardHeader
         greeting={`Hola, ${greeting}`}
-        showTransferButton={!walletsLoading && !walletsError && canTransfer}
+        showTransferButton={
+          !walletsState.loading && !walletsState.error && overview.canTransfer
+        }
         onTransferPress={transferForm.openCreate}
       />
 
-      {walletsLoading ? (
+      {walletsState.loading ? (
         <DashboardLoadingState />
-      ) : walletsError ? (
+      ) : walletsState.error ? (
         <DashboardErrorState
-          message={walletsError}
-          onRetry={() => void reloadWallets()}
+          message={walletsState.error}
+          onRetry={() => void walletsState.reload()}
         />
       ) : (
-        <DashboardWalletsList
-          wallets={wallets}
-          activeWallets={activeWallets}
-          visibleWallets={visibleWallets}
-          selectedWalletId={effectiveSelectedWalletId}
-          selectedWallet={selectedWallet}
-          totals={totals}
+        <DashboardOverviewScroll
+          filters={{
+            wallets: activeWallets,
+            selectedWalletId: overview.effectiveSelectedWalletId,
+            onSelect: setSelectedWalletId,
+          }}
+          summary={{
+            totals: overview.totals,
+            selectedWallet: overview.selectedWallet,
+          }}
+          movements={{
+            movements: overview.recentMovements,
+            categories: categoriesState.categories,
+            walletMap: overview.walletMap,
+            loading: transactionsState.loading || categoriesState.loading,
+            error: transactionsState.error ?? categoriesState.error,
+            hasMore: overview.hasMoreMovements,
+            onRetry: retryMovements,
+            onOpenMovements: navigation.openMovements,
+            onPressMovement: navigation.openMovements,
+          }}
+          transfers={{
+            transfers: overview.recentTransfers,
+            loading: transfersState.loading,
+            error: transfersState.error,
+            hasMore: overview.hasMoreTransfers,
+            canTransfer: overview.canTransfer,
+            walletMap: overview.walletMap,
+            onRetry: () => void transfersState.reload(),
+            onOpenHistory: navigation.openTransferHistory,
+            onPressTransfer: transferForm.openEdit,
+          }}
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          onSelectWallet={setSelectedWalletId}
-          transfers={recentTransfers}
-          transfersLoading={transfersLoading}
-          transfersError={transfersError}
-          canTransfer={canTransfer}
-          walletMap={walletMap}
-          onRetryTransfers={() => void reloadTransfers()}
-          onOpenHistory={() => router.push("/transfers" as Href)}
-          onPressTransfer={transferForm.openEdit}
         />
       )}
 
       <TransferFormModal
         visible={transferForm.visible}
         wallets={activeWallets}
-        walletLookup={wallets}
+        walletLookup={walletsState.wallets}
         editingTransfer={transferForm.editingTransfer}
-        submitting={mutating}
-        error={createError}
-        fieldErrors={createFieldErrors}
+        submitting={transfersState.mutating}
+        error={transfersState.createError}
+        fieldErrors={transfersState.createFieldErrors}
         onSubmit={(input) => void transferForm.submit(input)}
         onDelete={transferForm.deleteEditing}
         onClose={transferForm.close}

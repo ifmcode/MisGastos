@@ -1,37 +1,48 @@
 import { useMemo } from "react";
 
+import { Transaction } from "@/features/transactions/types/transaction.types";
 import { Transfer } from "@/features/transfers/types/transfer.types";
 import { canTransferBetweenWallets } from "@/features/transfers/utils/transfer-wallets";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { WalletTotal } from "@/features/wallets/utils/money";
 
+import { getDashboardTotals } from "../utils/dashboard-summary";
 import {
-  getDashboardTotals,
-  getVisibleWallets,
-} from "../utils/dashboard-summary";
+  getRecentMovements,
+  getRecentTransfers,
+} from "../utils/dashboard-recent";
 
-const RECENT_TRANSFERS_LIMIT = 3;
+export interface DashboardOverviewParams {
+  wallets: readonly Wallet[];
+  allWallets?: readonly Wallet[];
+  transfers: readonly Transfer[];
+  transactions: readonly Transaction[];
+  selectedWalletId: string;
+}
 
 export interface DashboardOverview {
   effectiveSelectedWalletId: string;
   selectedWallet: Wallet | null;
   totals: WalletTotal[];
-  visibleWallets: Wallet[];
   walletMap: ReadonlyMap<string, Wallet>;
+  recentMovements: Transaction[];
+  hasMoreMovements: boolean;
   recentTransfers: Transfer[];
+  hasMoreTransfers: boolean;
   canTransfer: boolean;
 }
 
 /**
- * Derives everything the dashboard renders from the raw wallet/transfer lists.
- * Keeps the screen free of memoization details.
+ * Derives everything the dashboard renders from the raw collections.
+ * Keeps the screen free of memoization and capping details.
  */
-export function useDashboardOverview(
-  wallets: readonly Wallet[],
-  transfers: readonly Transfer[],
-  selectedWalletId: string,
-  allWallets: readonly Wallet[] = wallets,
-): DashboardOverview {
+export function useDashboardOverview({
+  wallets,
+  allWallets = wallets,
+  transfers,
+  transactions,
+  selectedWalletId,
+}: DashboardOverviewParams): DashboardOverview {
   const effectiveSelectedWalletId = wallets.some(
     (wallet) => wallet.id === selectedWalletId,
   )
@@ -49,18 +60,18 @@ export function useDashboardOverview(
     [wallets, effectiveSelectedWalletId],
   );
 
-  const visibleWallets = useMemo(
-    () => getVisibleWallets(wallets, effectiveSelectedWalletId),
-    [wallets, effectiveSelectedWalletId],
-  );
-
   const walletMap = useMemo(
     () => new Map(allWallets.map((wallet) => [wallet.id, wallet])),
     [allWallets],
   );
 
+  const recentMovements = useMemo(
+    () => getRecentMovements(transactions),
+    [transactions],
+  );
+
   const recentTransfers = useMemo(
-    () => transfers.slice(0, RECENT_TRANSFERS_LIMIT),
+    () => getRecentTransfers(transfers),
     [transfers],
   );
 
@@ -73,9 +84,11 @@ export function useDashboardOverview(
     effectiveSelectedWalletId,
     selectedWallet,
     totals,
-    visibleWallets,
     walletMap,
-    recentTransfers,
+    recentMovements: recentMovements.items,
+    hasMoreMovements: recentMovements.hasMore,
+    recentTransfers: recentTransfers.items,
+    hasMoreTransfers: recentTransfers.hasMore,
     canTransfer,
   };
 }

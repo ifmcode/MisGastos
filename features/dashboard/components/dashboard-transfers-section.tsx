@@ -13,6 +13,7 @@ export interface DashboardTransfersSectionProps {
   transfers: readonly Transfer[];
   loading: boolean;
   error: string | null;
+  hasMore: boolean;
   canTransfer: boolean;
   walletMap: ReadonlyMap<string, Wallet>;
   onRetry: () => void;
@@ -24,6 +25,7 @@ export function DashboardTransfersSection({
   transfers,
   loading,
   error,
+  hasMore,
   canTransfer,
   walletMap,
   onRetry,
@@ -33,11 +35,11 @@ export function DashboardTransfersSection({
   const theme = useFormTheme();
 
   return (
-    <View style={dashboardStyles.footer}>
+    <View style={dashboardStyles.recentSection}>
       <DashboardSectionHeader
         title="Transferencias recientes"
-        actionLabel="Ver historial"
-        onActionPress={onOpenHistory}
+        actionLabel={hasMore ? "Ver historial" : undefined}
+        onActionPress={hasMore ? onOpenHistory : undefined}
       />
 
       {loading ? (

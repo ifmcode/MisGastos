@@ -2,7 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import { Wallet } from "@/features/wallets/types/wallet.types";
 
-import { getDashboardTotals, getVisibleWallets } from "../dashboard-summary";
+import { getDashboardTotals } from "../dashboard-summary";
 
 function buildWallet(overrides: Partial<Wallet>): Wallet {
   return {
@@ -71,22 +71,5 @@ describe("getDashboardTotals", () => {
 
   it("returns no totals for an unknown selected wallet", () => {
     expect(getDashboardTotals(wallets, "wallet-missing")).toEqual([]);
-  });
-});
-
-describe("getVisibleWallets", () => {
-  it("returns every wallet when there is no filter", () => {
-    const visible = getVisibleWallets(wallets, "");
-
-    expect(visible).toEqual(wallets);
-    expect(visible).not.toBe(wallets);
-  });
-
-  it("returns only the selected wallet", () => {
-    expect(getVisibleWallets(wallets, "wallet-usd")).toEqual([wallets[1]]);
-  });
-
-  it("returns an empty list when the selected wallet does not exist", () => {
-    expect(getVisibleWallets(wallets, "wallet-missing")).toEqual([]);
   });
 });

@@ -23,6 +23,8 @@ export interface TransactionItemProps {
   transaction: Transaction;
   wallet?: Wallet;
   category: TransactionCategory;
+  /** Overrides the default detail-view hint when the row opens another screen. */
+  accessibilityHint?: string;
   onPress: () => void;
 }
 
@@ -30,6 +32,7 @@ export function TransactionItem({
   transaction,
   wallet,
   category,
+  accessibilityHint = OPEN_TRANSACTION_DETAIL_HINT,
   onPress,
 }: TransactionItemProps) {
   const theme = useFormTheme();
@@ -46,7 +49,7 @@ export function TransactionItem({
         category.label,
         walletName,
       )}
-      accessibilityHint={OPEN_TRANSACTION_DETAIL_HINT}
+      accessibilityHint={accessibilityHint}
       onPress={onPress}
       style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
     >
