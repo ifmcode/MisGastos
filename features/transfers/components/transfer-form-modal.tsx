@@ -11,10 +11,10 @@ import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { confirmDialogStyles } from "@/shared/components/molecules/confirm-dialog.styles";
 import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
 
-import { buildTransferFormValues } from "../utils/dashboard-transfer-defaults";
+import { buildTransferFormValues } from "../utils/transfer-form-defaults";
 import { getDeleteTransferConfirmation } from "../utils/transfer-delete-dialog";
 
-export interface DashboardTransferModalProps {
+export interface TransferFormModalProps {
   visible: boolean;
   wallets: Wallet[];
   /** All wallets, including archived ones, used only for history labels. */
@@ -28,7 +28,7 @@ export interface DashboardTransferModalProps {
   onClose: () => void;
 }
 
-export function DashboardTransferModal({
+export function TransferFormModal({
   visible,
   wallets,
   walletLookup = wallets,
@@ -39,7 +39,7 @@ export function DashboardTransferModal({
   onSubmit,
   onDelete,
   onClose,
-}: DashboardTransferModalProps) {
+}: TransferFormModalProps) {
   const deleteDialog = useConfirmDialog();
   const deleteConfirmation = editingTransfer
     ? getDeleteTransferConfirmation(editingTransfer, walletLookup)

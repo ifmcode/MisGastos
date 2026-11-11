@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 
@@ -8,18 +8,37 @@ export interface DashboardSectionHeaderProps {
   title: string;
   /** Optional counter rendered on the right side. */
   count?: number;
+  /** Optional action rendered instead of the counter. */
+  actionLabel?: string;
+  onActionPress?: () => void;
 }
 
 export function DashboardSectionHeader({
   title,
   count,
+  actionLabel,
+  onActionPress,
 }: DashboardSectionHeaderProps) {
   return (
     <View style={dashboardStyles.sectionHeader}>
       <ThemedText type="subtitle" style={dashboardStyles.sectionTitle}>
         {title}
       </ThemedText>
-      {typeof count === "number" ? (
+      {actionLabel && onActionPress ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={actionLabel}
+          onPress={onActionPress}
+          style={({ pressed }) => [
+            dashboardStyles.sectionActionPressable,
+            pressed && dashboardStyles.sectionActionPressed,
+          ]}
+        >
+          <ThemedText style={dashboardStyles.sectionAction}>
+            {actionLabel}
+          </ThemedText>
+        </Pressable>
+      ) : typeof count === "number" ? (
         <ThemedText style={dashboardStyles.sectionCount}>{count}</ThemedText>
       ) : null}
     </View>

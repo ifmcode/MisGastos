@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter, type Href } from "expo-router";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -16,9 +17,11 @@ import { WalletDeleteModal } from "./wallet-delete-modal";
 import { WalletsFormModal } from "./wallets-form-modal";
 import { WalletsHeader } from "./wallets-header";
 import { WalletsList } from "./wallets-list";
+import { WalletsTransferHistoryLink } from "./wallets-transfer-history-link";
 
 export function WalletsScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const theme = useFormTheme();
   const screen = useWalletScreen();
   const { wallets, management, archiveDialog } = screen;
@@ -31,6 +34,12 @@ export function WalletsScreen() {
         showAddButton={screen.canAddWallet}
         onAddPress={screen.openCreate}
       />
+
+      {!wallets.loading && !wallets.error ? (
+        <WalletsTransferHistoryLink
+          onPress={() => router.push("/transfers" as Href)}
+        />
+      ) : null}
 
       {screen.showScreenError ? (
         <View

@@ -17,6 +17,7 @@ import {
   EDIT_TRANSFER_HINT,
   getTransferEditLabel,
 } from "../utils/transfer-item-accessibility";
+import { getTransferWalletNames } from "../utils/transfer-wallet-names";
 
 export interface TransferItemProps {
   transfer: Transfer;
@@ -33,9 +34,11 @@ export function TransferItem({
 }: TransferItemProps) {
   const theme = useFormTheme();
 
-  const fromName =
-    fromWallet?.name ?? transfer.fromWalletName ?? "Cartera eliminada";
-  const toName = toWallet?.name ?? transfer.toWalletName ?? "Cartera eliminada";
+  const { fromName, toName } = getTransferWalletNames(
+    transfer,
+    fromWallet,
+    toWallet,
+  );
 
   return (
     <Pressable

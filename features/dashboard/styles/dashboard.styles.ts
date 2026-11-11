@@ -115,6 +115,18 @@ export const dashboardStyles = StyleSheet.create({
     fontSize: 13,
     opacity: 0.65,
   },
+  sectionAction: {
+    color: dashboardPalette.primary,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  sectionActionPressable: {
+    paddingVertical: 6,
+    paddingLeft: 10,
+  },
+  sectionActionPressed: {
+    opacity: 0.6,
+  },
 
   // Footer / recent transfers
   footer: {

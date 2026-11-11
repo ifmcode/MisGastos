@@ -10,10 +10,10 @@
 | Field | Value |
 |---|---|
 | **Phase** | A.1 - Personal finance UX follow-up (in progress); then B - Architecture and workflow spike |
-| **Current ticket** | TICKET-026 - Transfer History |
+| **Current ticket** | TICKET-027 - Home recent movements and transfers |
 | **Current status** | ⏳ Pending |
-| **Last completed** | TICKET-025 - Movement Detail View (11/11/2026) |
-| **Next after current** | TICKET-027 - Home recent movements and transfers |
+| **Last completed** | TICKET-026 - Transfer History (11/11/2026) |
+| **Next after current** | TICKET-028 - Compact category selector |
 
 ## 1. Inspiration: Expense Manager + Splitwise
 **References:** `docs/project/ui-references/expense-manager-reference.png` and `docs/project/ui-references/splitwise-reference.png`
@@ -95,7 +95,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 | ID | Feature | Description | Status | Ticket |
 |---|---|---|---|---|
 | PM-025 | Movement detail view | Open a read-only movement detail with edit and delete actions in the top-right corner | ✅ Done | TICKET-025; detail modal resolves live movements, reuses the edit form and confirmation dialog, and handles missing movements |
-| PM-026 | Transfer history | Dedicated transfer history reachable from the accounts tab | ⏳ Pending | TICKET-026 |
+| PM-026 | Transfer history | Dedicated transfer history reachable from the accounts tab | ✅ Done | TICKET-026; protected `/transfers` route, accounts and dashboard entry points, shared transfer form, ordering/dedupe and archived/deleted wallet-name tests |
 | PM-027 | Home recent movements and transfers | Remove wallet cards, show up to 3 recent movements and 3 recent transfers with history links | ⏳ Pending | TICKET-027 |
 | PM-028 | Compact category selector | Three category chips plus `+` opening a **Seleccionar categoría** popup with all categories and inline creation | ⏳ Pending | TICKET-028 |
 | PM-029 | Compact wallet selector | Compact wallet chips plus a **Seleccionar cartera** popup, no creation, and fix the missing third wallet | ⏳ Pending | TICKET-029 |
@@ -142,7 +142,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - [ ] Update `docs/project/development-notes/roadmap.md`
 - [ ] Add the session entry to `docs/project/development-notes/project-memory.md`
 
-## 7. Review Notes (03/11/2026, updated 09/11/2026)
+## 7. Review Notes (03/11/2026, updated 11/11/2026)
 - **Verified as done:** MVP-001..MVP-006, PM-010, PM-015 and PM-020..PM-022. Their tickets exist and match the current implementation.
 - **Partially implemented, still pending:**
   - PM-014: filters already cover wallet, type, category, date range and sorting; free-text/concept search is missing.
@@ -156,6 +156,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - **10/11/2026:** TICKET-018 verified as done and renamed with the `[DONE] ` prefix. PM-018 is complete and Phase A is closed: wallets can be edited with a locked currency, archived/restored, and deleted with reassignment or a `[Eliminada]` placeholder. Archived wallets leave selectors and totals while history keeps its stored names.
 - **10/11/2026:** Reviewed the new personal-finance UX requests against existing tickets. TICKET-022 already covered discoverable edit/delete actions, but not a movement detail view, so TICKET-025 extends it. TICKET-019 covers dashboard quick add only, so home layout, transfer history and compact selectors were split into TICKET-026..TICKET-029. No existing ticket duplicated these requests.
 - **11/11/2026:** TICKET-025 verified as done and renamed with the `[DONE] ` prefix. PM-025 is complete: tapping a movement opens a read-only detail view with top-right edit/delete actions, live wallet-name resolution for archived/deleted wallets, the existing form and confirmation flow, and a missing-movement state. Phase A.1 continues with TICKET-026.
+- **11/11/2026:** TICKET-026 verified as done and renamed with the `[DONE] ` prefix. PM-026 is complete: the protected `/transfers` route lists every non-deleted transfer once, newest first, with pull-to-refresh, empty/error states and archived/deleted wallet names. The accounts screen and dashboard recent-transfers header both link to it. The transfer form modal, defaults and delete confirmation moved into the transfers feature so the dashboard and history share one form. Phase A.1 continues with TICKET-027.
 
 ## 8. Recommended Execution Order (04/11/2026)
 
@@ -173,7 +174,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 
 ### Phase A.1 - Personal finance UX follow-up (in progress)
 - [x] TICKET-025: movement detail view with top-right edit and delete actions. ✅ Done 11/11/2026
-- [ ] TICKET-026: dedicated transfer history from the accounts tab. ⏳ Next
+- [x] TICKET-026: dedicated transfer history from the accounts tab. ✅ Done 11/11/2026
 - [ ] TICKET-027: home without wallet cards, with 3 recent movements and 3 recent transfers. ⏳ Pending
 - [ ] TICKET-028: compact category selector with a full-category popup and inline creation. ⏳ Pending
 - [ ] TICKET-029: compact wallet selector, no creation, and fix the missing third wallet (Juanilla). ⏳ Pending

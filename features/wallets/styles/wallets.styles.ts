@@ -60,6 +60,42 @@ export const walletsStyles = StyleSheet.create({
     fontWeight: "700",
   },
 
+  // Transfer history entry point
+  transferHistoryLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginHorizontal: 24,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  transferHistoryLinkPressed: {
+    opacity: 0.7,
+  },
+  transferHistoryLinkIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: walletsPalette.primarySoftIcon,
+  },
+  transferHistoryLinkText: {
+    flex: 1,
+  },
+  transferHistoryLinkTitle: {
+    fontSize: 15,
+  },
+  transferHistoryLinkSubtitle: {
+    fontSize: 12,
+    lineHeight: 17,
+    opacity: 0.65,
+    marginTop: 2,
+  },
+
   // Feedback states
   centered: {
     flex: 1,

@@ -4,7 +4,7 @@ import { TransferInput } from "@/features/transfers/schemas/transfer.schema";
 import { Transfer } from "@/features/transfers/types/transfer.types";
 import { rememberLastUsedDate } from "@/shared/utils/last-used-date-store";
 
-export interface UseDashboardTransferFormOptions {
+export interface UseTransferFormDialogOptions {
   mutating: boolean;
   createTransfer: (input: TransferInput) => Promise<boolean>;
   updateTransfer: (
@@ -16,7 +16,7 @@ export interface UseDashboardTransferFormOptions {
   onWalletsChanged: () => void;
 }
 
-export interface DashboardTransferForm {
+export interface TransferFormDialog {
   visible: boolean;
   editingTransfer: Transfer | null;
   openCreate: () => void;
@@ -26,15 +26,15 @@ export interface DashboardTransferForm {
   deleteEditing: () => Promise<void>;
 }
 
-/** Owns the open/edit/delete lifecycle of the dashboard transfer modal. */
-export function useDashboardTransferForm({
+/** Owns the open/edit/delete lifecycle of the transfer form modal. */
+export function useTransferFormDialog({
   mutating,
   createTransfer,
   updateTransfer,
   deleteTransfer,
   clearCreateState,
   onWalletsChanged,
-}: UseDashboardTransferFormOptions): DashboardTransferForm {
+}: UseTransferFormDialogOptions): TransferFormDialog {
   const [visible, setVisible] = useState(false);
   const [editingTransfer, setEditingTransfer] = useState<Transfer | null>(null);
 

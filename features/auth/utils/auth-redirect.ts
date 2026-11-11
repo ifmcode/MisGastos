@@ -1,7 +1,7 @@
 import type { AuthUser } from "../types/auth.types";
 import { needsEmailVerification } from "./email-verification";
 
-const PRIVATE_SEGMENTS = new Set(["(tabs)", "categories"]);
+const PRIVATE_SEGMENTS = new Set(["(tabs)", "categories", "transfers"]);
 const VERIFY_SEGMENT = "verify-email";
 
 export type AuthRedirectTarget = "/login" | "/verify-email" | "/(tabs)";

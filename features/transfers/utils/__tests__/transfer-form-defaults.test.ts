@@ -11,7 +11,7 @@ import {
 import {
   buildTransferFormValues,
   getDefaultTransferWallets,
-} from "../dashboard-transfer-defaults";
+} from "../transfer-form-defaults";
 
 function buildWallet(overrides: Partial<Wallet>): Wallet {
   return {
