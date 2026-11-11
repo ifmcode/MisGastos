@@ -14,8 +14,8 @@ import {
 } from "../styles/transaction-item.styles";
 import { Transaction } from "../types/transaction.types";
 import {
-  EDIT_TRANSACTION_HINT,
-  getTransactionEditLabel,
+  getTransactionDetailLabel,
+  OPEN_TRANSACTION_DETAIL_HINT,
 } from "../utils/transaction-item-accessibility";
 import { TransactionCategory } from "../utils/transaction-options";
 
@@ -41,12 +41,12 @@ export function TransactionItem({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={getTransactionEditLabel(
+      accessibilityLabel={getTransactionDetailLabel(
         transaction,
         category.label,
         walletName,
       )}
-      accessibilityHint={EDIT_TRANSACTION_HINT}
+      accessibilityHint={OPEN_TRANSACTION_DETAIL_HINT}
       onPress={onPress}
       style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
     >
@@ -85,11 +85,11 @@ export function TransactionItem({
         </View>
 
         <View
-          style={styles.editAffordance}
+          style={styles.detailAffordance}
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
         >
-          <Ionicons name="pencil-outline" size={15} color={palette.primary} />
+          <Ionicons name="chevron-forward" size={16} color={palette.primary} />
         </View>
       </ThemedView>
     </Pressable>

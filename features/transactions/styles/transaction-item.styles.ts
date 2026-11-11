@@ -52,7 +52,7 @@ export const transactionItemStyles = StyleSheet.create({
     opacity: 0.6,
     marginTop: 2,
   },
-  editAffordance: {
+  detailAffordance: {
     width: 30,
     height: 30,
     borderRadius: 15,

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 
+import { Category } from "@/features/categories/types/category.types";
+import { Wallet } from "@/features/wallets/types/wallet.types";
 import { getTodayIsoDate } from "@/shared/utils/date";
 import {
   rememberLastUsedDate,
@@ -22,6 +24,38 @@ function buildTransaction(overrides: Partial<Transaction>): Transaction {
     ownerId: "user-1",
     createdAt: "2026-10-20T10:00:00.000Z",
     updatedAt: "2026-10-20T10:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function buildWallet(overrides: Partial<Wallet>): Wallet {
+  return {
+    id: "wallet-1",
+    name: "Cuenta principal",
+    currency: "EUR",
+    icon: "wallet",
+    color: "#0A7EA4",
+    initialBalance: 0,
+    balance: 0,
+    type: "bank",
+    includeInTotal: true,
+    ownerId: "user-1",
+    createdAt: "2026-10-29T10:00:00.000Z",
+    updatedAt: "2026-10-29T10:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function buildCategory(overrides: Partial<Category>): Category {
+  return {
+    id: "category-1",
+    name: "Alimentación",
+    icon: "fast-food-outline",
+    color: "#0A7EA4",
+    type: "expense",
+    ownerId: "user-1",
+    createdAt: "2026-10-29T10:00:00.000Z",
+    updatedAt: "2026-10-29T10:00:00.000Z",
     ...overrides,
   };
 }
@@ -53,5 +87,33 @@ describe("buildTransactionFormValues", () => {
     expect(buildTransactionFormValues([], null, []).date).toBe(
       getTodayIsoDate(),
     );
+  });
+
+  it("prefills every field when editing a movement from its detail view", () => {
+    expect(
+      buildTransactionFormValues(
+        [buildWallet({})],
+        buildTransaction({
+          type: "income",
+          amount: 1500,
+          walletId: "wallet-1",
+          currency: "EUR",
+          categoryId: "category-1",
+          concept: "Nómina",
+          notes: "Octubre",
+          date: "2026-10-31",
+        }),
+        [buildCategory({ id: "category-1", type: "income" })],
+      ),
+    ).toEqual({
+      type: "income",
+      amount: "1500",
+      walletId: "wallet-1",
+      currency: "EUR",
+      categoryId: "category-1",
+      concept: "Nómina",
+      notes: "Octubre",
+      date: "2026-10-31",
+    });
   });
 });

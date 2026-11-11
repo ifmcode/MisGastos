@@ -7,10 +7,13 @@ import { useCategories } from "@/features/categories/hooks/use-categories";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
 import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
 
+import { useTransactionDetailDialog } from "../hooks/use-transaction-detail-dialog";
 import { useTransactionFormDialog } from "../hooks/use-transaction-form-dialog";
 import { useTransactions } from "../hooks/use-transactions";
 import { transactionsStyles as styles } from "../styles/transactions.styles";
+import { Transaction } from "../types/transaction.types";
 import { TransactionFilters } from "../utils/transaction-filters";
+import { TransactionDetailModal } from "./transaction-detail-modal";
 import { TransactionsErrorState } from "./transactions-error-state";
 import { TransactionsFab } from "./transactions-fab";
 import { TransactionsFiltersDialog } from "./transactions-filters-dialog";
@@ -31,6 +34,7 @@ export function TransactionsScreen() {
     addCategory,
   } = useCategories();
   const {
+    transactions,
     filteredTransactions,
     filters,
     activeFilterCount,
@@ -79,6 +83,7 @@ export function TransactionsScreen() {
     deleteTransaction,
     clearMutationState,
   });
+  const detail = useTransactionDetailDialog(transactions);
 
   const hasFilters = activeFilterCount > 0;
   const screenLoading = loading || categoriesLoading;
@@ -105,6 +110,16 @@ export function TransactionsScreen() {
     setIsFiltersVisible(false);
   }
 
+  function openDetail(transaction: Transaction) {
+    clearMutationState();
+    detail.open(transaction);
+  }
+
+  function editFromDetail(transaction: Transaction) {
+    detail.close();
+    dialog.openEdit(transaction);
+  }
+
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + 16 }]}>
       <TransactionsHeader
@@ -127,7 +142,7 @@ export function TransactionsScreen() {
           activeFilterCount={activeFilterCount}
           refreshing={refreshing}
           onRefresh={refreshAll}
-          onEdit={dialog.openEdit}
+          onOpenDetail={openDetail}
           onCreate={dialog.openCreate}
           onClearFilters={resetFilters}
         />
@@ -139,6 +154,18 @@ export function TransactionsScreen() {
           onPress={dialog.openCreate}
         />
       ) : null}
+
+      <TransactionDetailModal
+        visible={detail.visible}
+        transaction={detail.transaction}
+        wallets={wallets}
+        categories={categories}
+        mutating={mutating}
+        error={mutationError}
+        onEdit={editFromDetail}
+        onDelete={deleteTransaction}
+        onClose={detail.close}
+      />
 
       <TransactionsFormModal
         visible={dialog.visible}

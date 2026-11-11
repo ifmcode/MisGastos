@@ -2,8 +2,8 @@ import { describe, expect, it } from "@jest/globals";
 
 import { Transaction } from "../../types/transaction.types";
 import {
-  EDIT_TRANSACTION_HINT,
-  getTransactionEditLabel,
+  getTransactionDetailLabel,
+  OPEN_TRANSACTION_DETAIL_HINT,
 } from "../transaction-item-accessibility";
 
 function buildTransaction(overrides: Partial<Transaction>): Transaction {
@@ -23,32 +23,33 @@ function buildTransaction(overrides: Partial<Transaction>): Transaction {
   };
 }
 
-describe("getTransactionEditLabel", () => {
-  it("summarizes an expense and announces the edit action", () => {
+describe("getTransactionDetailLabel", () => {
+  it("summarizes an expense and announces the detail action", () => {
     expect(
-      getTransactionEditLabel(
+      getTransactionDetailLabel(
         buildTransaction({ concept: "Supermercado" }),
         "Alimentación",
         "Cuenta principal",
       ),
     ).toBe(
-      "Editar gasto: Supermercado, 1.234,50 €, 20/10/2026, Alimentación, Cuenta principal",
+      "Ver detalle del gasto: Supermercado, 1.234,50 €, 20/10/2026, Alimentación, Cuenta principal",
     );
   });
 
   it("announces an income and omits a missing wallet", () => {
     expect(
-      getTransactionEditLabel(
+      getTransactionDetailLabel(
         buildTransaction({ type: "income", concept: "Nómina" }),
         "Salario",
       ),
-    ).toBe("Editar ingreso: Nómina, 1.234,50 €, 20/10/2026, Salario");
+    ).toBe("Ver detalle del ingreso: Nómina, 1.234,50 €, 20/10/2026, Salario");
   });
 });
 
-describe("EDIT_TRANSACTION_HINT", () => {
-  it("explains that the form also allows deleting", () => {
-    expect(EDIT_TRANSACTION_HINT).toContain("editar");
-    expect(EDIT_TRANSACTION_HINT).toContain("eliminar");
+describe("OPEN_TRANSACTION_DETAIL_HINT", () => {
+  it("explains that the detail view allows editing and deleting", () => {
+    expect(OPEN_TRANSACTION_DETAIL_HINT).toContain("detalle");
+    expect(OPEN_TRANSACTION_DETAIL_HINT).toContain("editar");
+    expect(OPEN_TRANSACTION_DETAIL_HINT).toContain("eliminar");
   });
 });

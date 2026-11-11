@@ -18,7 +18,7 @@ export interface TransactionsListProps {
   activeFilterCount: number;
   refreshing: boolean;
   onRefresh: () => void;
-  onEdit: (transaction: Transaction) => void;
+  onOpenDetail: (transaction: Transaction) => void;
   onCreate: () => void;
   onClearFilters: () => void;
 }
@@ -35,7 +35,7 @@ export function TransactionsList({
   activeFilterCount,
   refreshing,
   onRefresh,
-  onEdit,
+  onOpenDetail,
   onCreate,
   onClearFilters,
 }: TransactionsListProps) {
@@ -48,7 +48,7 @@ export function TransactionsList({
           transaction={item}
           wallet={walletMap.get(item.walletId)}
           category={getTransactionCategory(categories, item.categoryId)}
-          onPress={() => onEdit(item)}
+          onPress={() => onOpenDetail(item)}
         />
       )}
       ItemSeparatorComponent={TransactionSeparator}
