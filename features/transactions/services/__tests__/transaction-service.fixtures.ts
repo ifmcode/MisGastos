@@ -1,17 +1,12 @@
 import { ICategoryRepository } from "@/features/categories/repositories/category.repository";
-import {
-  Category,
-  CreateCategoryDto,
-  UpdateCategoryDto,
-} from "@/features/categories/types/category.types";
+import { Category } from "@/features/categories/types/category.types";
 
-import { ITransactionRepository } from "../../repositories/transaction.repository";
-import {
-  CreateTransactionDto,
-  Transaction,
-  UpdateTransactionDto,
-} from "../../types/transaction.types";
+import { Transaction } from "../../types/transaction.types";
 import { TransactionService } from "../transaction.service";
+import {
+  FakeCategoryRepository,
+  FakeTransactionRepository,
+} from "./transaction-service.fakes";
 
 export const categories: Category[] = [
   {
@@ -46,93 +41,6 @@ export function buildTransaction(
   };
 }
 
-export class FakeCategoryRepository implements ICategoryRepository {
-  async getCategories(): Promise<Category[]> {
-    return categories;
-  }
-
-  async getCategory(
-    _ownerId: string,
-    categoryId: string,
-  ): Promise<Category | null> {
-    return (
-      categories.find(
-        (category) =>
-          category.id === categoryId || category.legacyId === categoryId,
-      ) ?? null
-    );
-  }
-
-  async createCategory(
-    _ownerId: string,
-    _dto: CreateCategoryDto,
-  ): Promise<Category> {
-    throw new Error("not used");
-  }
-
-  async updateCategory(
-    _ownerId: string,
-    _categoryId: string,
-    _dto: UpdateCategoryDto,
-  ): Promise<Category> {
-    throw new Error("not used");
-  }
-
-  async deleteCategory(): Promise<void> {
-    throw new Error("not used");
-  }
-
-  async updateCategoryOrders(): Promise<void> {
-    throw new Error("not used");
-  }
-
-  async seedDefaultCategories(): Promise<Category[]> {
-    return categories;
-  }
-
-  async countTransactionsUsingCategory(): Promise<number> {
-    return 0;
-  }
-}
-
-export class FakeTransactionRepository implements ITransactionRepository {
-  createCalls: CreateTransactionDto[] = [];
-  updateCalls: Array<{ id: string; dto: UpdateTransactionDto }> = [];
-
-  async getTransactions(): Promise<Transaction[]> {
-    return [];
-  }
-
-  async createTransaction(_ownerId: string, dto: CreateTransactionDto) {
-    this.createCalls.push(dto);
-    return { transaction: buildTransaction(), wallets: [] };
-  }
-
-  async updateTransaction(
-    _ownerId: string,
-    transactionId: string,
-    dto: UpdateTransactionDto,
-  ) {
-    this.updateCalls.push({ id: transactionId, dto });
-    return {
-      transaction: buildTransaction({ id: transactionId }),
-      wallets: [],
-    };
-  }
-
-  async deleteTransaction() {
-    return { transaction: buildTransaction(), wallets: [] };
-  }
-}
-
-export function createService() {
-  const repository = new FakeTransactionRepository();
-  const categoryRepository = new FakeCategoryRepository();
-  const service = new TransactionService(repository, categoryRepository);
-
-  return { repository, service };
-}
-
 export const validInput = {
   type: "expense",
   amount: "10,50",
@@ -143,6 +51,27 @@ export const validInput = {
   notes: "",
   date: "30/10/2026",
 };
+
+export const expenseCategory = categories[0];
+
+export function createService() {
+  const repository = new FakeTransactionRepository();
+  const categoryRepository = new FakeCategoryRepository();
+  const service = new TransactionService(repository, categoryRepository);
+
+  return { repository, service };
+}
+
+/** Builds a service whose category lookup returns the given category. */
+export function createServiceWithCategory(category: Category | null) {
+  const repository = new FakeTransactionRepository();
+  const categoryRepository = {
+    getCategory: async () => category,
+  } as unknown as ICategoryRepository;
+  const service = new TransactionService(repository, categoryRepository);
+
+  return { repository, service };
+}
 
 export async function captureError(
   promise: Promise<unknown>,
