@@ -96,4 +96,32 @@ describe("reassignWalletMovementsAndDelete", () => {
     });
     expect(result.balance).toBe(125);
   });
+
+  it("orphans the side whose counterpart is the target wallet", async () => {
+    const movements = {
+      transactions: [],
+      transfers: [
+        movement("transfer", "tr-to", {
+          fromWalletId: "wallet-2",
+          toWalletId: "wallet-1",
+          amount: 30,
+        }),
+      ],
+    };
+
+    await reassignWalletMovementsAndDelete(
+      "user-1",
+      sourceWallet,
+      targetWallet,
+      movements,
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(
+      { kind: "transfer", id: "tr-to" },
+      expect.objectContaining({
+        toWalletId: "-1",
+        toWalletName: "[Eliminada] Cartera wallet-1",
+      }),
+    );
+  });
 });

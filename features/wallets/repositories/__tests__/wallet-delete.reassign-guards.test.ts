@@ -28,6 +28,15 @@ function reassign(
 }
 
 describe("reassignWalletMovementsAndDelete guards", () => {
+  it("rejects targets that no longer exist", async () => {
+    mockTransactionGet.mockResolvedValue({ exists: () => false });
+
+    await expect(reassign()).rejects.toMatchObject({
+      code: "WALLET_NOT_FOUND",
+    });
+    expect(mockTransactionDelete).not.toHaveBeenCalled();
+  });
+
   it("rejects archived targets before touching any movement", async () => {
     mockTransactionGet.mockResolvedValue(
       targetSnapshot({ archivedAt: "2026-11-01T10:00:00.000Z" }),
