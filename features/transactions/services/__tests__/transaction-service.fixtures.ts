@@ -82,6 +82,10 @@ export class FakeCategoryRepository implements ICategoryRepository {
     throw new Error("not used");
   }
 
+  async updateCategoryOrders(): Promise<void> {
+    throw new Error("not used");
+  }
+
   async seedDefaultCategories(): Promise<Category[]> {
     return categories;
   }

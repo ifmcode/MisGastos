@@ -90,4 +90,21 @@ describe("mapCategoryDocument", () => {
     expect(category?.createdAt).toBe(new Date(0).toISOString());
     expect(category?.updatedAt).toBe(new Date(0).toISOString());
   });
+
+  it("maps a valid sortOrder and ignores invalid values", () => {
+    expect(
+      mapCategoryDocument("category-1", { ...baseData, sortOrder: 3 }, "u")
+        ?.sortOrder,
+    ).toBe(3);
+    expect(
+      mapCategoryDocument("category-1", { ...baseData, sortOrder: 2.7 }, "u")
+        ?.sortOrder,
+    ).toBe(2);
+
+    for (const sortOrder of [-1, "3", Number.NaN, null]) {
+      expect(
+        mapCategoryDocument("category-1", { ...baseData, sortOrder }, "u"),
+      ).not.toHaveProperty("sortOrder");
+    }
+  });
 });

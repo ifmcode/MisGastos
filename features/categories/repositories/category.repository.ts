@@ -3,6 +3,7 @@ import {
   CreateCategoryDto,
   UpdateCategoryDto,
 } from "../types/category.types";
+import { CategoryOrderUpdate } from "../utils/category-order";
 
 export interface ICategoryRepository {
   getCategories(ownerId: string): Promise<Category[]>;
@@ -14,6 +15,11 @@ export interface ICategoryRepository {
     categoryId: string,
     dto: UpdateCategoryDto,
   ): Promise<Category>;
+  /** Persists explicit display positions, usually after a manual reorder. */
+  updateCategoryOrders(
+    ownerId: string,
+    updates: readonly CategoryOrderUpdate[],
+  ): Promise<void>;
   deleteCategory(ownerId: string, categoryId: string): Promise<void>;
   seedDefaultCategories(ownerId: string): Promise<Category[]>;
   countTransactionsUsingCategory(

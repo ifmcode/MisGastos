@@ -1,34 +1,29 @@
 import { ScrollView } from "react-native";
 
 import { categoriesStyles } from "../styles/categories.styles";
-import { CategoryTypeFilter } from "../types/category.types";
+import { CategoryType } from "../types/category.types";
 import { CategoriesTypeFilterChip } from "./categories-type-filter-chip";
 
-const TYPE_FILTER_OPTIONS: ReadonlyArray<{
-  value: CategoryTypeFilter;
+const TYPE_FILTER_OPTIONS: readonly {
+  value: CategoryType;
   label: string;
   accessibilityLabel: string;
-}> = [
-  {
-    value: "all",
-    label: "Todas",
-    accessibilityLabel: "Todas las categorías",
-  },
+}[] = [
   {
     value: "expense",
     label: "Gastos",
-    accessibilityLabel: "Filtrar categorías de gasto",
+    accessibilityLabel: "Ver categorías de gasto",
   },
   {
     value: "income",
     label: "Ingresos",
-    accessibilityLabel: "Filtrar categorías de ingreso",
+    accessibilityLabel: "Ver categorías de ingreso",
   },
 ];
 
 export interface CategoriesTypeFilterProps {
-  selected: CategoryTypeFilter;
-  onSelect: (filter: CategoryTypeFilter) => void;
+  selected: CategoryType;
+  onSelect: (filter: CategoryType) => void;
 }
 
 export function CategoriesTypeFilter({

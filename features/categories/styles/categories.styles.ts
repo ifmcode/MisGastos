@@ -71,9 +71,17 @@ export const categoriesStyles = StyleSheet.create({
   },
 
   // Type filters
-  filterRow: {
+  filterArea: {
+    flex: 1,
+  },
+  listHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     paddingBottom: 16,
+  },
+  filterRow: {
+    gap: 8,
   },
   filterChip: {
     flexDirection: "row",
@@ -129,6 +137,65 @@ export const categoriesStyles = StyleSheet.create({
     lineHeight: 18,
     opacity: 0.65,
     marginTop: 2,
+  },
+
+  // Reordering
+  reorderToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderColor: categoriesPalette.primaryBorder,
+    backgroundColor: categoriesPalette.primarySoftStrong,
+  },
+  reorderToggleActive: {
+    backgroundColor: categoriesPalette.primary,
+    borderColor: categoriesPalette.primary,
+  },
+  reorderToggleDisabled: {
+    opacity: 0.5,
+  },
+  reorderToggleText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: categoriesPalette.primary,
+  },
+  reorderToggleTextActive: {
+    color: categoriesPalette.onPrimary,
+  },
+  reorderHint: {
+    fontSize: 13,
+    lineHeight: 18,
+    opacity: 0.65,
+    marginTop: -8,
+    marginBottom: 14,
+  },
+  reorderError: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: categoriesPalette.danger,
+    marginTop: -8,
+    marginBottom: 14,
+  },
+  reorderActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  reorderButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: categoriesPalette.primaryBorder,
+    backgroundColor: categoriesPalette.primarySoftStrong,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  reorderButtonDisabled: {
+    opacity: 0.35,
   },
 
   // Feedback states

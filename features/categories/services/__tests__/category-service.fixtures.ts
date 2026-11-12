@@ -34,6 +34,10 @@ export class FakeCategoryRepository implements ICategoryRepository {
   createCalls: CreateCategoryDto[] = [];
   updateCalls: UpdateCategoryDto[] = [];
   deleteCalls: string[] = [];
+  orderCalls: Array<{
+    ownerId: string;
+    updates: Array<{ id: string; sortOrder: number }>;
+  }> = [];
 
   async getCategories(ownerId: string): Promise<Category[]> {
     return this.categories.filter((item) => item.ownerId === ownerId);
@@ -76,6 +80,17 @@ export class FakeCategoryRepository implements ICategoryRepository {
   async deleteCategory(_ownerId: string, categoryId: string): Promise<void> {
     this.deleteCalls.push(categoryId);
     this.categories = this.categories.filter((item) => item.id !== categoryId);
+  }
+
+  async updateCategoryOrders(
+    ownerId: string,
+    updates: readonly { id: string; sortOrder: number }[],
+  ): Promise<void> {
+    this.orderCalls.push({ ownerId, updates: [...updates] });
+    this.categories = this.categories.map((item) => {
+      const update = updates.find((entry) => entry.id === item.id);
+      return update ? { ...item, sortOrder: update.sortOrder } : item;
+    });
   }
 
   async seedDefaultCategories(ownerId: string): Promise<Category[]> {

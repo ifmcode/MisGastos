@@ -2,15 +2,18 @@ import { BaseEntity } from "@/shared/types/common.types";
 
 export type CategoryType = "expense" | "income";
 
-/** Type filter used by the categories screen. */
-export type CategoryTypeFilter = CategoryType | "all";
-
 export interface Category extends BaseEntity {
   name: string;
   icon: string;
   color: string;
   type: CategoryType;
   ownerId: string;
+  /**
+   * Manual display order chosen by the owner. Ascending, lower first.
+   * Optional for documents created before ordering existed; those fall back
+   * to `createdAt` and `name` until the owner reorders the list.
+   */
+  sortOrder?: number;
   /**
    * Id used by transactions created before categories moved to Firestore.
    * Kept so historical transactions can still be resolved.

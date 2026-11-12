@@ -64,6 +64,13 @@ export function mapCategoryDocument(
       ? data.legacyId.trim()
       : undefined;
 
+  const sortOrder =
+    typeof data.sortOrder === "number" &&
+    Number.isFinite(data.sortOrder) &&
+    data.sortOrder >= 0
+      ? Math.floor(data.sortOrder)
+      : undefined;
+
   const storedOwnerId =
     typeof data.ownerId === "string" && data.ownerId.trim().length > 0
       ? data.ownerId
@@ -81,6 +88,7 @@ export function mapCategoryDocument(
     ownerId: storedOwnerId,
     createdAt,
     updatedAt,
+    ...(sortOrder !== undefined ? { sortOrder } : {}),
     ...(legacyId ? { legacyId } : {}),
   };
 }

@@ -13,6 +13,7 @@ import {
   CategoryOperationError,
   CategoryValidationError,
 } from "./category.errors";
+import { applyCategoryOrder } from "../utils/category-order";
 
 function ownerIssue(): CategoryValidationIssue {
   return {
@@ -84,6 +85,19 @@ export class CategoryService {
       existing.id,
       update,
     );
+  }
+
+  async reorderCategories(
+    ownerId: string,
+    orderedIds: readonly string[],
+  ): Promise<void> {
+    const normalizedOwnerId = this.normalizeOwner(ownerId);
+    const categories = await this.repository.getCategories(normalizedOwnerId);
+    if (categories.length === 0) return;
+
+    const { changed } = applyCategoryOrder(categories, orderedIds);
+    if (changed.length === 0) return;
+    await this.repository.updateCategoryOrders(normalizedOwnerId, changed);
   }
 
   async deleteCategory(

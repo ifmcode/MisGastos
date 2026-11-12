@@ -23,10 +23,6 @@ const categories: Category[] = [
 ];
 
 describe("filterCategoriesByType", () => {
-  it("returns every category for the all filter", () => {
-    expect(filterCategoriesByType(categories, "all")).toEqual(categories);
-  });
-
   it("returns only matching types and preserves order", () => {
     expect(
       filterCategoriesByType(categories, "income").map(
@@ -41,7 +37,7 @@ describe("filterCategoriesByType", () => {
   });
 
   it("does not mutate the input list", () => {
-    const result = filterCategoriesByType(categories, "all");
+    const result = filterCategoriesByType(categories, "expense");
     result.pop();
 
     expect(categories).toHaveLength(2);
@@ -50,7 +46,7 @@ describe("filterCategoriesByType", () => {
 
 describe("getCategoriesEmptyCopy", () => {
   it("asks for the first categories when there are none", () => {
-    expect(getCategoriesEmptyCopy(false, "all")).toEqual({
+    expect(getCategoriesEmptyCopy(false, "expense")).toEqual({
       title: "Aún no tienes categorías",
       message: "Crea categorías para clasificar tus gastos e ingresos.",
     });

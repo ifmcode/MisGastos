@@ -1,13 +1,11 @@
-import { Category, CategoryTypeFilter } from "../types/category.types";
+import { Category, CategoryType } from "../types/category.types";
 
-/** Returns the categories matching a type filter, preserving list order. */
+/** Returns the categories of one type, preserving the stored order. */
 export function filterCategoriesByType(
   categories: readonly Category[],
-  typeFilter: CategoryTypeFilter,
+  type: CategoryType,
 ): Category[] {
-  if (typeFilter === "all") return [...categories];
-
-  return categories.filter((category) => category.type === typeFilter);
+  return categories.filter((category) => category.type === type);
 }
 
 export interface CategoriesEmptyCopy {
@@ -15,10 +13,10 @@ export interface CategoriesEmptyCopy {
   message: string;
 }
 
-/** Copy shown when the list is empty, either globally or for one filter. */
+/** Copy shown when the list is empty, either globally or for one type. */
 export function getCategoriesEmptyCopy(
   hasCategories: boolean,
-  typeFilter: CategoryTypeFilter,
+  typeFilter: CategoryType,
 ): CategoriesEmptyCopy {
   if (!hasCategories) {
     return {

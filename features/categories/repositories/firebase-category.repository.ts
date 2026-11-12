@@ -8,6 +8,7 @@ import {
   setDoc,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
@@ -18,6 +19,11 @@ import {
   UpdateCategoryDto,
 } from "../types/category.types";
 import {
+  compareCategories,
+  getNextSortOrder,
+  type CategoryOrderUpdate,
+} from "../utils/category-order";
+import {
   DEFAULT_CATEGORIES,
   getDefaultCategoryDocumentId,
 } from "../utils/default-categories";
@@ -27,14 +33,7 @@ import { mapCategoryDocument } from "./category.mapper";
 const CATEGORY_COLLECTION = "categories";
 
 function sortCategories(categories: Category[]): Category[] {
-  return categories.sort((first, second) => {
-    const createdComparison =
-      new Date(first.createdAt).getTime() -
-      new Date(second.createdAt).getTime();
-
-    if (createdComparison !== 0) return createdComparison;
-    return first.name.localeCompare(second.name);
-  });
+  return categories.sort(compareCategories);
 }
 
 export class FirebaseCategoryRepository implements ICategoryRepository {
@@ -76,12 +75,14 @@ export class FirebaseCategoryRepository implements ICategoryRepository {
     dto: CreateCategoryDto,
   ): Promise<Category> {
     const now = new Date().toISOString();
+    const existing = await this.getCategories(ownerId);
     const data = {
       name: dto.name,
       icon: dto.icon,
       color: dto.color,
       type: dto.type,
       ownerId,
+      sortOrder: getNextSortOrder(existing),
       createdAt: now,
       updatedAt: now,
     };
@@ -114,6 +115,26 @@ export class FirebaseCategoryRepository implements ICategoryRepository {
     return { ...category, ...data, ownerId };
   }
 
+  async updateCategoryOrders(
+    ownerId: string,
+    updates: readonly CategoryOrderUpdate[],
+  ): Promise<void> {
+    void ownerId;
+    if (updates.length === 0) return;
+
+    const now = new Date().toISOString();
+    const batch = writeBatch(db);
+
+    for (const update of updates) {
+      batch.update(doc(db, CATEGORY_COLLECTION, update.id), {
+        sortOrder: update.sortOrder,
+        updatedAt: now,
+      });
+    }
+
+    await batch.commit();
+  }
+
   async deleteCategory(
     ownerId: string,
     categoryId: string,
@@ -136,6 +157,7 @@ export class FirebaseCategoryRepository implements ICategoryRepository {
         type: definition.type,
         legacyId: definition.legacyId,
         ownerId,
+        sortOrder: index,
         createdAt: timestamp,
         updatedAt: timestamp,
       };

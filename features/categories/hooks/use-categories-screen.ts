@@ -2,12 +2,9 @@ import { useMemo, useState } from "react";
 
 import { useCategories } from "./use-categories";
 import { useCategoryMutations } from "./use-category-mutations";
+import { useCategoryReorder } from "./use-category-reorder";
 import { CategoryInput } from "../schemas/category.schema";
-import {
-  Category,
-  CategoryType,
-  CategoryTypeFilter,
-} from "../types/category.types";
+import { Category, CategoryType } from "../types/category.types";
 import { filterCategoriesByType } from "../utils/category-filters";
 
 /** Orchestrates the categories screen state without rendering concerns. */
@@ -31,7 +28,7 @@ export function useCategoriesScreen() {
     deleteCategory,
   } = useCategoryMutations({ setCategories });
 
-  const [typeFilter, setTypeFilter] = useState<CategoryTypeFilter>("all");
+  const [typeFilter, setTypeFilter] = useState<CategoryType>("expense");
   const [formCategory, setFormCategory] = useState<
     Category | null | undefined
   >(undefined);
@@ -44,6 +41,12 @@ export function useCategoriesScreen() {
     () => filterCategoriesByType(categories, typeFilter),
     [categories, typeFilter],
   );
+
+  const reorder = useCategoryReorder({
+    categories,
+    visibleCategories,
+    setCategories,
+  });
 
   function openCreate() {
     clearMutationState();
@@ -94,6 +97,7 @@ export function useCategoriesScreen() {
     visible,
     formCategory,
     defaultType,
+    reorder,
     openCreate,
     openEdit,
     close,

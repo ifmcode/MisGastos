@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { FlatList, Pressable, View } from "react-native";
+import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
@@ -10,19 +10,11 @@ import {
   categoriesPalette,
   categoriesStyles as styles,
 } from "../styles/categories.styles";
-import { Category } from "../types/category.types";
-import { getCategoriesEmptyCopy } from "../utils/category-filters";
-import { CategoriesEmptyState } from "./categories-empty-state";
 import { CategoriesErrorState } from "./categories-error-state";
 import { CategoriesHeader } from "./categories-header";
+import { CategoriesList } from "./categories-list";
 import { CategoriesLoadingState } from "./categories-loading-state";
-import { CategoriesTypeFilter } from "./categories-type-filter";
-import { CategoryCard } from "./category-card";
 import { CategoryFormModal } from "./category-form-modal";
-
-function CategorySeparator() {
-  return <View style={styles.separator} />;
-}
 
 export function CategoriesScreen() {
   const insets = useSafeAreaInsets();
@@ -43,6 +35,7 @@ export function CategoriesScreen() {
     visible,
     formCategory,
     defaultType,
+    reorder,
     openCreate,
     openEdit,
     close,
@@ -50,17 +43,7 @@ export function CategoriesScreen() {
     deleteEditing,
   } = useCategoriesScreen();
 
-  const canAdd = !loading && !error;
-  const emptyCopy = getCategoriesEmptyCopy(
-    categories.length > 0,
-    typeFilter,
-  );
-
-  function renderCategory({ item }: { item: Category }) {
-    return (
-      <CategoryCard category={item} onPress={() => openEdit(item)} />
-    );
-  }
+  const canAdd = !loading && !error && !reorder.reordering;
 
   return (
     <ThemedView
@@ -77,33 +60,16 @@ export function CategoriesScreen() {
       ) : error ? (
         <CategoriesErrorState message={error} onRetry={() => void reload()} />
       ) : (
-        <FlatList
-          data={visibleCategories}
-          keyExtractor={(category) => category.id}
-          renderItem={renderCategory}
-          ItemSeparatorComponent={CategorySeparator}
-          ListHeaderComponent={
-            categories.length > 0 ? (
-              <CategoriesTypeFilter
-                selected={typeFilter}
-                onSelect={setTypeFilter}
-              />
-            ) : undefined
-          }
-          ListEmptyComponent={
-            <CategoriesEmptyState
-              title={emptyCopy.title}
-              message={emptyCopy.message}
-              onCreate={openCreate}
-            />
-          }
-          contentContainerStyle={[
-            styles.listContent,
-            categories.length === 0 && styles.emptyListContent,
-          ]}
+        <CategoriesList
+          categories={categories}
+          visibleCategories={visibleCategories}
+          typeFilter={typeFilter}
           refreshing={refreshing}
+          reorder={reorder}
+          onSelectFilter={setTypeFilter}
+          onSelectCategory={openEdit}
+          onCreateCategory={openCreate}
           onRefresh={() => void refresh()}
-          showsVerticalScrollIndicator={false}
         />
       )}
 
