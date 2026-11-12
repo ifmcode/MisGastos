@@ -1,10 +1,10 @@
 # Roadmap - MisGastos
 
 ## Current Focus
-- **Phase:** 4 - Platform and Workflow (Phase A.1 complete)
-- **Current ticket:** TICKET-023 - Offline-first design spike (Phase B)
-- **Last completed:** TICKET-029 - Compact Wallet Selector (12/11/2026)
-- **Next:** TICKET-024 - Agents and skills specialization (Phase B)
+- **Phase:** A.3 - Internationalization (next)
+- **Current ticket:** TICKET-031 - Internationalization and text extraction
+- **Last completed:** TICKET-030 - Category Ordering (12/11/2026)
+- **Next:** TICKET-023 - Offline-first design spike (Phase B)
 - **Source of truth:** `docs/project/implementation-plan/implementation-plan.md` §0
 
 ## Phase 0: Organization (COMPLETED)
@@ -51,6 +51,13 @@
 - [x] Home recent movements and transfers (TICKET-027) ✅ 11/11/2026
 - [x] Compact category selector (TICKET-028) ✅ 12/11/2026
 - [x] Compact wallet selector + missing wallet fix (TICKET-029) ✅ 12/11/2026
+
+## Phase 3.2: Category Ordering (COMPLETED)
+- [x] Reorder categories from the categories screen and reuse the order in the movement form (TICKET-030) ✅ 12/11/2026
+
+## Phase 3.3: Internationalization (NEXT)
+- [ ] Extract all UI copy into per-feature translation files and add a Spanish/English selector in Settings (TICKET-031)
+- [ ] Use `expo-localization` + i18next namespaces, persisted preference, `Intl` formatting and error-code mapping
 
 ## Phase 4: Platform and Workflow
 - [ ] Offline-first design spike + sync (TICKET-023)
