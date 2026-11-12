@@ -12,7 +12,7 @@
 | **Phase** | A.3 - Internationalization (next) |
 | **Current ticket** | TICKET-031 - Internationalization and text extraction |
 | **Current status** | ⏳ Pending |
-| **Last completed** | TICKET-030 - Category ordering (12/11/2026) |
+| **Last completed** | TICKET-032 - Move the transfer action to the wallets tab (12/11/2026) |
 | **Next after current** | TICKET-023 - Offline-first design spike (Phase B) |
 
 ## 1. Inspiration: Expense Manager + Splitwise
@@ -106,6 +106,11 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 |---|---|---|---|---|
 | PM-031 | Internationalization | Move all app copy into per-feature translation files, support Spanish/English at runtime and choose the language from Settings | ⏳ Pending | TICKET-031; `expo-localization` + i18next namespaces, typed keys, persisted preference, `Intl` formatting, error-code mapping and a Settings selector |
 
+### 3.10 Wallet transfer entry point (12/11/2026)
+| ID | Feature | Description | Status | Ticket |
+|---|---|---|---|---|
+| PM-032 | Wallet transfer entry point | Move the create-transfer action from the dashboard header to the **Carteras** tab | ✅ Done | TICKET-032; quick-actions row with the shared transfer form and compatibility rule, automatic wallet refresh, dashboard edit and history flows untouched |
+
 ## 4. Key Business Rules
 - **No photos initially**: No avatar/photo uploads. Use initials/icons
 - **Multi-wallet**: Every expense/income must be associated to a wallet
@@ -169,6 +174,8 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - **12/11/2026:** Created TICKET-030 (PM-030) for category ordering. The categories screen gets a **Reordenar** mode and the chosen order is persisted as `sortOrder`, the only ordering source for the movement form chips, the **Seleccionar categoría** popup and the transaction filters. Existing categories keep their current `createdAt`/`name` order until the user reorders, so no migration is required. Phase A.2 runs before Phase B; TICKET-023 follows once it is done.
 - **12/11/2026:** TICKET-030 verified as done and renamed with the `[DONE] ` prefix. PM-030 is complete: the categories screen can reorder with labelled ↑/↓ controls, the order is persisted through a batched `sortOrder` write with optimistic rollback, and the movement form chips and **Seleccionar categoría** popup read the same ordered collection. Legacy categories keep the previous order until the first reorder. The **Todas** filter was removed in the same ticket, so the screen opens on **Gastos**. Phase A.2 is complete; Phase B starts with TICKET-023.
 - **12/11/2026:** Created TICKET-031 (PM-031) for internationalization. All UI copy moves into per-feature translation namespaces using `expo-localization` + i18next/react-i18next, with Spanish/English at runtime, a persisted selector in Settings, `Intl` formatting and error-code mapping. Phase A.3 runs before Phase B; TICKET-023 follows once the text extraction is done.
+- **12/11/2026:** Created TICKET-032 (PM-032) to move the **Transferir** create action from the dashboard header to the **Carteras** tab, reusing the shared transfer form and the `canTransferBetweenWallets` rule. The dashboard keeps editing recent transfers and the `/transfers` history; Phase A.4 follows TICKET-031.
+- **12/11/2026:** TICKET-032 verified as done and renamed with the `[DONE] ` prefix. PM-032 is complete: the **Transferir** button left the dashboard header and now sits in a quick-actions row on the **Carteras** tab next to **Historial de transferencias**, reusing `TransferFormModal`/`useTransferFormDialog` and `canTransferBetweenWallets`. Creating a transfer refreshes wallets, totals and the list automatically; the dashboard empty copy points to **Carteras**, and recent-transfer editing plus `/transfers` are unchanged. Phase A.4 is complete; Phase A.3 (TICKET-031) is next.
 
 ## 8. Recommended Execution Order (04/11/2026)
 
@@ -182,7 +189,7 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - [x] TICKET-014: dark mode, shared visual tokens and a Settings toggle. ✅ Done 09/11/2026
 - [x] TICKET-018: wallet editing/archiving, deletion with reassignment and archived history. ✅ Done 10/11/2026
 - Build only the UI primitives needed next: button, input, list row, avatar, banner, empty state and modal.
-- Phase A is complete. Phase A.1 and Phase A.2 are also complete; Phase A.3 (TICKET-031) is next, then Phase B starts with TICKET-023.
+- Phase A is complete. Phase A.1, Phase A.2 and Phase A.4 are also complete; Phase A.3 (TICKET-031) is next, then Phase B starts with TICKET-023.
 
 ### Phase A.1 - Personal finance UX follow-up (complete)
 - [x] TICKET-025: movement detail view with top-right edit and delete actions. ✅ Done 11/11/2026
@@ -201,6 +208,10 @@ Goal: Merge both worlds - personal + shared finances without unnecessary complex
 - [ ] TICKET-031: extract all UI copy into per-feature translation files and add a Spanish/English selector in Settings. ⏳ Pending
 - Each feature owns its `locales/es.json` and `en.json` namespace; shared copy, validation and formatting live under `shared/i18n`.
 - Phase A.3 runs before Phase B because it touches every screen and would multiply if postponed until after the social slice.
+
+### Phase A.4 - Wallet transfer entry (complete)
+- [x] TICKET-032: move the **Transferir** action from the dashboard header to the **Carteras** tab and reuse the shared transfer form. ✅ Done 12/11/2026
+- Phase A.4 is complete; Phase B starts with TICKET-023 once Phase A.3 is closed.
 
 ### Phase B - Architecture and workflow spike (2-4 days)
 - [ ] TICKET-023 (design spike only): decide local database, outbox, idempotency and conflict policy before groups. ⏳ Pending

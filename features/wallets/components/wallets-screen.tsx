@@ -17,7 +17,7 @@ import { WalletDeleteModal } from "./wallet-delete-modal";
 import { WalletsFormModal } from "./wallets-form-modal";
 import { WalletsHeader } from "./wallets-header";
 import { WalletsList } from "./wallets-list";
-import { WalletsTransferHistoryLink } from "./wallets-transfer-history-link";
+import { WalletsTransferActions } from "./wallets-transfer-actions";
 
 export function WalletsScreen() {
   const insets = useSafeAreaInsets();
@@ -36,8 +36,11 @@ export function WalletsScreen() {
       />
 
       {!wallets.loading && !wallets.error ? (
-        <WalletsTransferHistoryLink
-          onPress={() => router.push("/transfers" as Href)}
+        <WalletsTransferActions
+          activeWallets={wallets.activeWallets}
+          walletLookup={wallets.wallets}
+          onWalletsChanged={() => void wallets.refresh()}
+          onHistoryPress={() => router.push("/transfers" as Href)}
         />
       ) : null}
 

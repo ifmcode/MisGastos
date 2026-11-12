@@ -60,40 +60,42 @@ export const walletsStyles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // Transfer history entry point
-  transferHistoryLink: {
+  // Quick actions (transfer + history) above the wallet list
+  quickActions: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
+    alignItems: "stretch",
+    gap: 10,
     marginHorizontal: 24,
     marginBottom: 16,
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
   },
-  transferHistoryLinkPressed: {
-    opacity: 0.7,
-  },
-  transferHistoryLinkIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
+  quickAction: {
+    flex: 1,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: walletsPalette.primarySoftIcon,
+    gap: 6,
+    minHeight: 48,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
-  transferHistoryLinkText: {
-    flex: 1,
+  quickActionPrimary: {
+    borderColor: walletsPalette.primary,
+    backgroundColor: walletsPalette.primary,
   },
-  transferHistoryLinkTitle: {
-    fontSize: 15,
+  quickActionPressed: {
+    opacity: 0.7,
   },
-  transferHistoryLinkSubtitle: {
-    fontSize: 12,
+  quickActionText: {
+    fontSize: 13,
     lineHeight: 17,
-    opacity: 0.65,
-    marginTop: 2,
+    fontWeight: "700",
+    flexShrink: 1,
+    textAlign: "center",
+  },
+  quickActionTextPrimary: {
+    color: walletsPalette.onPrimary,
   },
 
   // Feedback states

@@ -95,13 +95,7 @@ export function DashboardScreen() {
     <ThemedView
       style={[dashboardStyles.container, { paddingTop: insets.top + 16 }]}
     >
-      <DashboardHeader
-        greeting={`Hola, ${greeting}`}
-        showTransferButton={
-          !walletsState.loading && !walletsState.error && overview.canTransfer
-        }
-        onTransferPress={transferForm.openCreate}
-      />
+      <DashboardHeader greeting={`Hola, ${greeting}`} />
 
       {walletsState.loading ? (
         <DashboardLoadingState />

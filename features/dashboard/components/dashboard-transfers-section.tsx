@@ -7,6 +7,7 @@ import { Wallet } from "@/features/wallets/types/wallet.types";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { dashboardPalette, dashboardStyles } from "../styles/dashboard.styles";
+import { getTransfersEmptyMessage } from "../utils/dashboard-transfers-copy";
 import { DashboardSectionHeader } from "./dashboard-section-header";
 
 export interface DashboardTransfersSectionProps {
@@ -79,9 +80,7 @@ export function DashboardTransfersSection({
             Aún no has hecho transferencias
           </ThemedText>
           <ThemedText style={dashboardStyles.transferEmptyText}>
-            {canTransfer
-              ? "Usa el botón Transferir para mover dinero entre tus carteras."
-              : "Necesitas al menos dos carteras con la misma moneda."}
+            {getTransfersEmptyMessage(canTransfer)}
           </ThemedText>
         </View>
       ) : (

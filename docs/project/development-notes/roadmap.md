@@ -3,7 +3,7 @@
 ## Current Focus
 - **Phase:** A.3 - Internationalization (next)
 - **Current ticket:** TICKET-031 - Internationalization and text extraction
-- **Last completed:** TICKET-030 - Category Ordering (12/11/2026)
+- **Last completed:** TICKET-032 - Move the transfer action to the wallets tab (12/11/2026)
 - **Next:** TICKET-023 - Offline-first design spike (Phase B)
 - **Source of truth:** `docs/project/implementation-plan/implementation-plan.md` §0
 
@@ -58,6 +58,9 @@
 ## Phase 3.3: Internationalization (NEXT)
 - [ ] Extract all UI copy into per-feature translation files and add a Spanish/English selector in Settings (TICKET-031)
 - [ ] Use `expo-localization` + i18next namespaces, persisted preference, `Intl` formatting and error-code mapping
+
+## Phase 3.4: Wallet transfer entry (COMPLETED)
+- [x] Move the **Transferir** action from the dashboard header to the **Carteras** tab (TICKET-032) ✅ 12/11/2026
 
 ## Phase 4: Platform and Workflow
 - [ ] Offline-first design spike + sync (TICKET-023)

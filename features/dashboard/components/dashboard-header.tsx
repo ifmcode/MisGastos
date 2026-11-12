@@ -1,21 +1,14 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 
-import { dashboardPalette, dashboardStyles } from "../styles/dashboard.styles";
+import { dashboardStyles } from "../styles/dashboard.styles";
 
 export interface DashboardHeaderProps {
   greeting: string;
-  showTransferButton: boolean;
-  onTransferPress: () => void;
 }
 
-export function DashboardHeader({
-  greeting,
-  showTransferButton,
-  onTransferPress,
-}: DashboardHeaderProps) {
+export function DashboardHeader({ greeting }: DashboardHeaderProps) {
   return (
     <View style={dashboardStyles.header}>
       <View style={dashboardStyles.headerText}>
@@ -30,24 +23,6 @@ export function DashboardHeader({
           Este es el resumen de tus finanzas.
         </ThemedText>
       </View>
-
-      {showTransferButton ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Nueva transferencia"
-          onPress={onTransferPress}
-          style={dashboardStyles.headerButton}
-        >
-          <Ionicons
-            name="swap-horizontal"
-            size={20}
-            color={dashboardPalette.onPrimary}
-          />
-          <ThemedText style={dashboardStyles.headerButtonText}>
-            Transferir
-          </ThemedText>
-        </Pressable>
-      ) : null}
     </View>
   );
 }

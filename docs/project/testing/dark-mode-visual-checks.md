@@ -71,3 +71,17 @@ text, border and placeholder token:
 - [x] Theme preference persists across reloads
 - [x] No white card or dark-text-on-dark-background issue found in the checked screens
 - [x] Forms, filters, calendars and modals audited against the shared theme tokens
+
+## Wallet transfer entry audit (12/11/2026)
+
+> Ticket: TICKET-032 - Move the transfer action to the wallets tab
+
+- The **Transferir** / **Historial de transferencias** row above the wallet list
+  takes the secondary border, surface and text from `useFormTheme`
+  (`theme.border`, `theme.surface`, `theme.text`) and the primary fill from the
+  brand `walletsPalette.primary` token already validated in dark mode. No screen
+  surface or text color is hardcoded.
+- Accessibility labels are set on both buttons (`Nueva transferencia` and
+  `Ver historial de transferencias`).
+- The row and the shared `TransferFormModal` render on web; the web bundle was
+  verified with `npx expo export --platform web`.
