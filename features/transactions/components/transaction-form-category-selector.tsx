@@ -5,6 +5,7 @@ import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { transactionFormStyles as styles } from "../styles/transaction-form.styles";
+import { getTransactionCategoryChips } from "../utils/transaction-category-chips";
 import { TransactionCategory } from "../utils/transaction-options";
 
 export interface TransactionFormCategorySelectorProps {
@@ -13,24 +14,29 @@ export interface TransactionFormCategorySelectorProps {
   error?: string;
   disabled: boolean;
   onChange: (categoryId: string) => void;
-  onCreate?: () => void;
+  onOpenPicker: () => void;
 }
 
+/**
+ * Compact category picker: up to three chips plus a `+` chip that opens the
+ * full category popup. The selected category is always one of the chips.
+ */
 export function TransactionFormCategorySelector({
   categories,
   value,
   error,
   disabled,
   onChange,
-  onCreate,
+  onOpenPicker,
 }: TransactionFormCategorySelectorProps) {
   const theme = useFormTheme();
+  const { visible } = getTransactionCategoryChips(categories, value);
 
   return (
     <View>
       <ThemedText style={styles.label}>Categoría</ThemedText>
-      <View style={styles.categoryGrid}>
-        {categories.map((category) => {
+      <View style={styles.categoryChips}>
+        {visible.map((category) => {
           const selected = value === category.id;
 
           return (
@@ -69,30 +75,24 @@ export function TransactionFormCategorySelector({
           );
         })}
 
-        {onCreate ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Crear categoría"
-            onPress={onCreate}
-            disabled={disabled}
-            style={[
-              styles.categoryItem,
-              styles.categoryAddItem,
-              { backgroundColor: theme.surface, borderColor: theme.border },
-            ]}
-          >
-            <Ionicons name="add" size={20} color={theme.primary} />
-            <ThemedText
-              style={[styles.categoryText, { color: theme.primary }]}
-            >
-              Nueva
-            </ThemedText>
-          </Pressable>
-        ) : null}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Seleccionar categoría"
+          accessibilityHint="Abre la lista completa de categorías"
+          onPress={onOpenPicker}
+          disabled={disabled}
+          style={[
+            styles.categoryItem,
+            styles.categoryAddItem,
+            { backgroundColor: theme.surface, borderColor: theme.border },
+          ]}
+        >
+          <Ionicons name="add" size={20} color={theme.primary} />
+        </Pressable>
       </View>
-      {categories.length === 0 && !onCreate ? (
+      {categories.length === 0 ? (
         <ThemedText style={[styles.helper, { color: theme.muted }]}>
-          No hay categorías para este tipo.
+          No hay categorías para este tipo. Usa + para crear una.
         </ThemedText>
       ) : null}
       {error ? (

@@ -1,5 +1,7 @@
 import { StyleSheet } from "react-native";
 
+import { absoluteFill } from "@/shared/styles/absolute-fill";
+
 /** Shared tokens so components never repeat raw color values. */
 export const transactionFormPalette = {
   primary: "#0A7EA4",
@@ -9,6 +11,7 @@ export const transactionFormPalette = {
   dangerSoft: "rgba(198, 40, 40, 0.1)",
   dangerSurface: "#FDECEA",
   dangerText: "#8A1C1C",
+  backdrop: "rgba(17, 24, 28, 0.5)",
 } as const;
 
 export const transactionFormStyles = StyleSheet.create({
@@ -172,15 +175,18 @@ export const transactionFormStyles = StyleSheet.create({
     fontWeight: "600",
     fontVariant: ["tabular-nums"],
   },
-  categoryGrid: {
+  categoryChips: {
     flexDirection: "row",
     flexWrap: "wrap",
+    alignItems: "center",
     gap: 8,
   },
   categoryItem: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 8,
+    minHeight: 44,
     borderWidth: 1,
     borderRadius: 999,
     paddingHorizontal: 12,
@@ -192,6 +198,86 @@ export const transactionFormStyles = StyleSheet.create({
   },
   categoryAddItem: {
     borderStyle: "dashed",
+  },
+
+  // Category picker popup
+  pickerOverlay: {
+    ...absoluteFill,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    zIndex: 30,
+  },
+  pickerBackdrop: {
+    ...absoluteFill,
+    backgroundColor: transactionFormPalette.backdrop,
+  },
+  pickerCard: {
+    width: "100%",
+    maxWidth: 420,
+    maxHeight: "80%",
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 20,
+    gap: 12,
+    boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.25)",
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  pickerTitle: {
+    flex: 1,
+    fontSize: 18,
+    lineHeight: 24,
+  },
+  pickerCloseButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pickerList: {
+    flexShrink: 1,
+    maxHeight: 360,
+  },
+  pickerListContent: {
+    gap: 8,
+  },
+  pickerOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  pickerOptionText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  pickerOptionPressed: {
+    opacity: 0.7,
+  },
+  pickerCreateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    minHeight: 48,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+  },
+  pickerCreateText: {
+    fontSize: 15,
+    fontWeight: "700",
   },
   descriptionFooter: {
     flexDirection: "row",

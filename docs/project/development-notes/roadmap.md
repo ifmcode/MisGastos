@@ -2,9 +2,9 @@
 
 ## Current Focus
 - **Phase:** 3 - Post-MVP (Phase A.1 in progress)
-- **Current ticket:** TICKET-028 - Compact Category Selector (Phase A.1)
-- **Last completed:** TICKET-027 - Home Recent Movements and Transfers (11/11/2026)
-- **Next:** TICKET-029 - Compact Wallet Selector (Phase A.1)
+- **Current ticket:** TICKET-029 - Compact Wallet Selector (Phase A.1)
+- **Last completed:** TICKET-028 - Compact Category Selector (12/11/2026)
+- **Next:** TICKET-023 - Offline-first design spike (Phase B)
 - **Source of truth:** `docs/project/implementation-plan/implementation-plan.md` §0
 
 ## Phase 0: Organization (COMPLETED)
@@ -49,8 +49,8 @@
 - [x] Movement detail view with edit/delete actions (TICKET-025) ✅ 11/11/2026
 - [x] Transfer history from accounts (TICKET-026) ✅ 11/11/2026
 - [x] Home recent movements and transfers (TICKET-027) ✅ 11/11/2026
-- [ ] Compact category selector (TICKET-028) ← NEXT
-- [ ] Compact wallet selector + missing wallet fix (TICKET-029)
+- [x] Compact category selector (TICKET-028) ✅ 12/11/2026
+- [ ] Compact wallet selector + missing wallet fix (TICKET-029) ← NEXT
 
 ## Phase 4: Platform and Workflow
 - [ ] Offline-first design spike + sync (TICKET-023)

@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { CategoryFormModal } from "@/features/categories/components/category-form-modal";
 import { useCategoryCreator } from "@/features/categories/hooks/use-category-creator";
 import { CategoryInput } from "@/features/categories/schemas/category.schema";
@@ -5,6 +7,7 @@ import { Category } from "@/features/categories/types/category.types";
 
 import { TransactionType } from "../types/transaction.types";
 import { TransactionCategory } from "../utils/transaction-options";
+import { TransactionCategoryPickerDialog } from "./transaction-category-picker-dialog";
 import { TransactionFormCategorySelector } from "./transaction-form-category-selector";
 
 export interface TransactionFormCategoryFieldProps {
@@ -18,8 +21,9 @@ export interface TransactionFormCategoryFieldProps {
 }
 
 /**
- * Category picker plus the inline creation modal. Keeping both together lets
- * the transaction form create a category without leaving the flow.
+ * Compact category picker, its full-category popup and the inline creation
+ * modal. Keeping them together lets the form create and select a category
+ * without leaving the movement flow.
  */
 export function TransactionFormCategoryField({
   categories,
@@ -31,6 +35,17 @@ export function TransactionFormCategoryField({
   onCategoryCreated,
 }: TransactionFormCategoryFieldProps) {
   const creator = useCategoryCreator();
+  const [pickerVisible, setPickerVisible] = useState(false);
+
+  function selectCategory(categoryId: string) {
+    onChange(categoryId);
+    setPickerVisible(false);
+  }
+
+  function openCreator() {
+    setPickerVisible(false);
+    creator.open(type);
+  }
 
   async function createCategory(input: CategoryInput) {
     const created = await creator.create(input);
@@ -49,7 +64,17 @@ export function TransactionFormCategoryField({
         error={error}
         disabled={disabled}
         onChange={onChange}
-        onCreate={() => creator.open(type)}
+        onOpenPicker={() => setPickerVisible(true)}
+      />
+
+      <TransactionCategoryPickerDialog
+        visible={pickerVisible}
+        categories={categories}
+        value={value}
+        disabled={disabled}
+        onSelect={selectCategory}
+        onCreate={openCreator}
+        onClose={() => setPickerVisible(false)}
       />
 
       <CategoryFormModal
