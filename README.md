@@ -137,6 +137,8 @@ npx firebase-tools deploy --only firestore:rules
 | `npm run web` | Abre la app en el navegador. |
 | `npm run lint` | Ejecuta ESLint. |
 | `npm test` | Ejecuta la suite de Jest. |
+| `npm run test:coverage` | Ejecuta Jest y exige >= 90% en la lógica de negocio. |
+| `npm run test:ci` | Ejecuta la cobertura una sola vez y en serie (CI). |
 
 ## 🧪 Testing y calidad
 
@@ -148,8 +150,11 @@ npm test
 npm run lint
 ```
 
-La meta del proyecto es mantener una cobertura **≥ 90%** en la lógica de negocio y seguir
-las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
+La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negocio**
+(servicios, repositorios, esquemas y utilidades). El umbral se comprueba con
+`npm run test:coverage` y está configurado en `jest.config.js`; las pantallas,
+componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
+Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
 ## 🗺️ Roadmap
 

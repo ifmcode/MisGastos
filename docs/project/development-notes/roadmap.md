@@ -11,7 +11,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Milestone:** M2 - Personal finance complete
 - **Phase:** 3.5 - Dashboard recent data and detail views
 - **Current ticket:** TICKET-033 - Fix the dashboard recent transfers limit and freshness
-- **Last completed:** TICKET-032 - Wallet transfer entry (12/11/2026)
+- **Last completed:** TICKET-038 - Close Phase 1 foundation: atoms and coverage gate (12/11/2026)
 - **Next:** TICKET-034 - Open movement detail from the dashboard
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
@@ -23,13 +23,13 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 | **M3 - Social and platform** | Architecture spike, friends, shared expenses, balances, groups and group history | 4-6 | ⏳ Pending |
 | **M4 - Offline and retention** | Offline-first implementation, budgets, statistics, search, export and final polish | 7-8 | ⏳ Pending |
 
-**V1.0 ships when M1-M4 are complete.** Phase 1 (foundation) is a cross-cutting quality track: its open items are part of V1 but do not block M1. Anything outside these phases is post-V1.
+**V1.0 ships when M1-M4 are complete.** Phase 1 (foundation) is a completed cross-cutting quality track; its coverage gate stays enforced. Anything outside these phases is post-V1.
 
 ## Phase Overview
 | Phase | Theme | Status |
 |---|---|---|
 | 0 | Organization | ✅ Done |
-| 1 | Foundation | 🚧 Ongoing |
+| 1 | Foundation | ✅ Done |
 | 2 | MVP core | ✅ Done |
 | 3 | Personal finance complete | 🚧 In progress |
 | 4 | Architecture and workflow spike | ⏳ Queued |
@@ -49,12 +49,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] Create memory, guidelines, roadmap and tickets
 - [x] Define the MVP merging Expense Manager + Splitwise
 
-## Phase 1: Foundation (ONGOING)
+## Phase 1: Foundation (COMPLETED)
 - [x] Create `features/` and `shared/` structure
 - [x] Migrate auth to `features/auth` (repo + service) without breaking the flow
-- [ ] Create the base UI kit in `shared/components/atoms` (resolve the unused atoms in TICKET-037)
-- [ ] Add common types (`Result<T>`, etc.)
-- [ ] Configure test coverage >= 90%
+- [x] Resolve the base UI kit in `shared/components` — the unused `atoms` were removed in TICKET-038 so the themed feature components remain the only UI system
+- [x] Add common types (`Result<T>`, etc.) — delivered in `shared/types/common.types.ts` and verified in TICKET-038
+- [x] Configure test coverage >= 90% (TICKET-038): business-logic scope enforced in `jest.config.js` (99.08% statements, 94.13% branches, 98.96% functions, 99.57% lines)
 
 ## Phase 2: MVP core (COMPLETED)
 - [x] TICKET-000 Setup, auth and project organization

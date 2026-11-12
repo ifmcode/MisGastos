@@ -3,7 +3,7 @@
 **Type:** Refactor / Architecture  
 **Priority:** Medium  
 **Status:** ⏳ Pending  
-**Related:** PM-037; TICKET-033, TICKET-034, TICKET-035, TICKET-036  
+**Related:** PM-037; TICKET-033, TICKET-034, TICKET-035, TICKET-036, TICKET-038  
 **Sprint:** Post-MVP / Phase 3.6  
 
 ## Description
@@ -17,7 +17,7 @@ Several features reimplement the same UI behavior with different styles: loading
 - [ ] Extract a base list-row card shared by `TransactionItem` and `TransferItem`, keeping feature wrappers for labels, icons and data
 - [ ] Keep user-visible copy out of the shared components: titles, messages, button labels and accessibility labels arrive as props so TICKET-031 can translate them later
 - [ ] Delete the feature styles and imports that become dead after each extraction; do not leave duplicated variants behind
-- [ ] Resolve the unused `shared/components/atoms` (`button.tsx`, `input.tsx`, `text.tsx`): adopt them where they fit or remove them, but do not keep two competing button/input systems
+- [x] Resolve the unused `shared/components/atoms` (`button.tsx`, `input.tsx`, `text.tsx`): adopted nowhere and removed in TICKET-038, so no second button/input system remains
 - [ ] Keep every extracted component under 150 lines and one component per file
 - [ ] Preserve markup, copy, accessibility labels and dark-mode/web behavior; document any intentional visual change
 - [ ] Update or add tests for the pure helpers touched by the extractions and keep the existing suites green
@@ -46,7 +46,7 @@ Several features reimplement the same UI behavior with different styles: loading
 | Date field | `transaction-form-date-field.tsx`, `transfer-form-date-field.tsx` | `shared/components/molecules/date-form-field.tsx` over `DateQuickSelector` |
 | Form modal shell | `transactions-form-modal.tsx`, `transfer-form-modal.tsx`, `wallets-form-modal.tsx` | `shared/components/molecules/page-sheet-form-modal.tsx` |
 | List row | `transactions/components/transaction-item.tsx`, `transfers/components/transfer-item.tsx` | `shared/components/molecules/record-card.tsx` with icon/title/meta/amount/affordance slots |
-| Shared atoms | `shared/components/atoms/button.tsx`, `input.tsx`, `text.tsx` (no consumers) | Adopt in forms or remove; do not leave a second button system |
+| Shared atoms | `shared/components/atoms/button.tsx`, `input.tsx`, `text.tsx` (no consumers) | Removed in TICKET-038; no shared atom system is needed until a real consumer appears |
 
 ## Technical Notes
 - The duplicated error states differ only in title, accessibility label and styles; the loading states only in message and size. The form amount/notes/date fields and form actions are nearly line-for-line copies between transactions and transfers.

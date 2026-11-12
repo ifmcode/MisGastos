@@ -1,11 +1,22 @@
 # Test Guide and Coverage
 
 ## 1. Coverage Goal
-**Target: >= 90% global coverage**
+**Target: >= 90% global coverage for business logic.**
 
 Reason: app with financial logic (balances, transfers, split expenses). Errors are costly. 90% forces critical logic coverage without chasing 100%.
 
-Metrics: statements, branches, functions, lines >= 90%.
+Metrics: statements, branches, functions and lines >= 90%.
+
+**Scope (enforced by `jest.config.js`):**
+- `features/*/services/**/*.ts`
+- `features/*/repositories/**/*.ts`
+- `features/*/schemas/**/*.ts`
+- `features/*/utils/**/*.ts`
+- `shared/lib/**/*.ts`
+- `shared/services/**/*.ts`
+- `shared/utils/**/*.ts`
+
+**Excluded on purpose:** screens, components, hooks, styles, routes (`app/`), providers, contexts, constants, types, tests and `*.d.ts`. UI and orchestration are still worth testing case by case, but they do not gate the business-logic threshold until a React renderer is added.
 
 ## 2. Testing Stack
 - Jest (configured)
@@ -19,8 +30,8 @@ Metrics: statements, branches, functions, lines >= 90%.
 | **Services** (business rules) | CRITICAL | Balances, transfers, expense splitting, validations |
 | **Utils** (pure) | CRITICAL | Calculations, formatters, validators |
 | **Repositories** | HIGH | Mock Firestore/Auth |
-| **Hooks** | HIGH | Orchestration logic |
-| **UI Components** | MEDIUM | Key cases, don't over-test styles |
+| **Hooks** | HIGH | Orchestration logic (not in the current coverage gate) |
+| **UI Components** | MEDIUM | Key cases, don't over-test styles (not in the current coverage gate) |
 | **Feature integration** | HIGH | MVP flows |
 
 ## 4. Test Structure
@@ -37,7 +48,7 @@ lib/__tests__/  # existing
 ```
 
 ## 5. package.json Scripts
-Add:
+Available:
 ```json
 {
   "scripts": {
@@ -50,19 +61,29 @@ Add:
 ```
 
 ## 6. Jest Config
-Ensure coverageThreshold:
+`jest.config.js` collects coverage only from business logic and enforces the threshold:
 ```js
+collectCoverageFrom: [
+  "features/*/services/**/*.ts",
+  "features/*/repositories/**/*.ts",
+  "features/*/schemas/**/*.ts",
+  "features/*/utils/**/*.ts",
+  "shared/lib/**/*.ts",
+  "shared/services/**/*.ts",
+  "shared/utils/**/*.ts",
+  "!**/__tests__/**",
+  "!**/*.d.ts",
+  "!**/*.types.ts",
+],
 coverageThreshold: {
   global: {
     statements: 90,
     branches: 90,
     functions: 90,
-    lines: 90
-  }
-}
+    lines: 90,
+  },
+},
 ```
-
-Exclude from coverage: assets, route layouts, types, *.d.ts, __tests__, coverage
 
 ## 7. Best Practices
 - AAA: Arrange, Act, Assert
@@ -73,7 +94,7 @@ Exclude from coverage: assets, route layouts, types, *.d.ts, __tests__, coverage
 - Reusable test data
 
 ## 8. Coverage Verification
-Run `npm run test:coverage`. If below 90%, fix before merge.
+Run `npm run test:coverage` (or `npm run test:ci` in CI). Jest fails when any global business-logic metric drops below 90%.
 
 ## 9. Checklist
 - [ ] Critical logic covered
