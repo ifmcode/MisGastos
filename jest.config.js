@@ -10,4 +10,28 @@ module.exports = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
   },
+  // The 90% gate measures business logic only. Screens, components, hooks,
+  // styles, routes, types, constants, providers and contexts are excluded on
+  // purpose; see docs/project/testing/test-guide.md.
+  collectCoverageFrom: [
+    "features/*/services/**/*.ts",
+    "features/*/repositories/**/*.ts",
+    "features/*/schemas/**/*.ts",
+    "features/*/utils/**/*.ts",
+    "shared/lib/**/*.ts",
+    "shared/services/**/*.ts",
+    "shared/utils/**/*.ts",
+    "!**/__tests__/**",
+    "!**/*.d.ts",
+    "!**/*.types.ts",
+  ],
+  coverageThreshold: {
+    global: {
+      statements: 90,
+      branches: 90,
+      functions: 90,
+      lines: 90,
+    },
+  },
+  coverageReporters: ["text", "lcov"],
 };

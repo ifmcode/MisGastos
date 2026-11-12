@@ -48,3 +48,6 @@ app-example
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
+
+# Test coverage
+coverage/
