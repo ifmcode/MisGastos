@@ -1,0 +1,20 @@
+{
+  "title": "Settings",
+  "currentUser": "Current user:",
+  "noName": "No name",
+  "manageCategories": "Manage categories",
+  "categories": "Categories",
+  "logout": "Sign Out",
+  "theme": {
+    "label": "Dark mode",
+    "on": "On",
+    "off": "Off",
+    "accessibility": "Enable dark mode"
+  },
+  "language": {
+    "label": "Language",
+    "spanish": "Español",
+    "english": "English",
+    "accessibility": "Choose the app language"
+  }
+}

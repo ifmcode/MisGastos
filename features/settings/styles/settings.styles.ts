@@ -37,6 +37,27 @@ export const settingsStyles = StyleSheet.create({
     lineHeight: 18,
     marginTop: 2,
   },
+  languageItem: {
+    alignItems: "flex-start",
+  },
+  languageContent: {
+    flex: 1,
+    gap: 8,
+  },
+  languageOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  languageOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
   logoutButton: {
     backgroundColor: settingsPalette.danger,
     padding: 12,

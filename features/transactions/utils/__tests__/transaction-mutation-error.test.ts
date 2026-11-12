@@ -9,31 +9,31 @@ import { toTransactionMutationError } from "../transaction-mutation-error";
 describe("toTransactionMutationError", () => {
   it("keeps the field errors of a validation failure", () => {
     const failure = new TransactionValidationError([
-      { field: "amount", code: "INVALID_AMOUNT", message: "Importe inválido" },
+      { field: "amount", code: "INVALID_AMOUNT" },
     ]);
 
     expect(toTransactionMutationError(failure)).toEqual({
-      message: "Importe inválido",
-      fieldErrors: { amount: "Importe inválido" },
+      code: "VALIDATION",
+      fieldErrors: { amount: "INVALID_AMOUNT" },
     });
   });
 
-  it("returns the operation message without field errors", () => {
+  it("returns the operation code without field errors", () => {
     const failure = new TransactionOperationError("WALLET_NOT_FOUND");
 
     expect(toTransactionMutationError(failure)).toEqual({
-      message: "La cartera asociada al movimiento ya no existe.",
+      code: "WALLET_NOT_FOUND",
       fieldErrors: {},
     });
   });
 
-  it("falls back for unknown failures", () => {
+  it("maps unknown failures to stable codes", () => {
     expect(toTransactionMutationError(new Error("permission-denied"))).toEqual({
-      message: "No tienes permisos para realizar esta operación.",
+      code: "PERMISSION_DENIED",
       fieldErrors: {},
     });
     expect(toTransactionMutationError("boom")).toEqual({
-      message: "No se pudo guardar el movimiento. Inténtalo de nuevo.",
+      code: "SAVE_FAILED",
       fieldErrors: {},
     });
   });

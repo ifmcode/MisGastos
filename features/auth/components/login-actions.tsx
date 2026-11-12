@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -22,6 +23,8 @@ export function LoginActions({
   onSubmit,
   onGoogleLogin,
 }: LoginActionsProps) {
+  const { t } = useTranslation("auth");
+
   return (
     <>
       <AuthFeedback message={emailError} variant="banner" />
@@ -37,7 +40,7 @@ export function LoginActions({
           <ActivityIndicator color={loginPalette.onPrimary} />
         ) : (
           <ThemedText style={styles.buttonText}>
-            {isRegister ? "Registrarse" : "Iniciar sesión con Email"}
+            {isRegister ? t("login.register") : t("login.signInEmail")}
           </ThemedText>
         )}
       </Pressable>
@@ -58,7 +61,7 @@ export function LoginActions({
             accessibilityState={{ disabled: loading, busy: loading }}
           >
             <ThemedText style={styles.buttonText}>
-              Iniciar sesión con Google
+              {t("login.google")}
             </ThemedText>
           </Pressable>
         </>

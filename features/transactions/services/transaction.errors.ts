@@ -9,7 +9,7 @@ export class TransactionValidationError extends Error {
   readonly fieldErrors: TransactionValidationErrors;
 
   constructor(issues: TransactionValidationIssue[]) {
-    super(issues[0]?.message ?? "Los datos del movimiento no son válidos.");
+    super(issues[0]?.code ?? "VALIDATION");
     this.name = "TransactionValidationError";
     this.issues = issues;
     this.fieldErrors = toTransactionFieldErrors(issues);
@@ -25,58 +25,49 @@ export type TransactionOperationCode =
   | "CATEGORY_NOT_FOUND"
   | "CATEGORY_TYPE_MISMATCH";
 
-const OPERATION_MESSAGES: Record<TransactionOperationCode, string> = {
-  TRANSACTION_NOT_FOUND: "El movimiento ya no existe.",
-  TRANSACTION_INVALID: "El movimiento no contiene datos válidos.",
-  WALLET_NOT_FOUND: "La cartera asociada al movimiento ya no existe.",
-  WALLET_NOT_OWNED: "No tienes permisos sobre esta cartera.",
-  CURRENCY_MISMATCH:
-    "La moneda del movimiento debe coincidir con la de la cartera.",
-  CATEGORY_NOT_FOUND: "La categoría seleccionada ya no existe.",
-  CATEGORY_TYPE_MISMATCH:
-    "La categoría debe ser del mismo tipo que el movimiento.",
-};
+export type TransactionErrorCode =
+  | TransactionOperationCode
+  | "VALIDATION"
+  | "PERMISSION_DENIED"
+  | "NETWORK"
+  | "LOAD_FAILED"
+  | "SAVE_FAILED"
+  | "SIGN_IN_CREATE"
+  | "SIGN_IN_EDIT"
+  | "SIGN_IN_DELETE";
 
 export class TransactionOperationError extends Error {
   readonly code: TransactionOperationCode;
 
   constructor(code: TransactionOperationCode) {
-    super(OPERATION_MESSAGES[code]);
+    super(code);
     this.name = "TransactionOperationError";
     this.code = code;
   }
 }
 
-function getErrorCode(error: Error): string | null {
+function readErrorCode(error: Error): string | null {
   const code = (error as { code?: unknown }).code;
   return typeof code === "string" ? code : null;
 }
 
 /**
- * Translates infrastructure errors into user-friendly messages without
- * exposing stack traces or provider details.
+ * Maps transaction failures to stable codes. The UI translates them; services
+ * and repositories never return user-facing sentences.
  */
-export function getTransactionErrorMessage(
+export function getTransactionErrorCode(
   error: unknown,
-  fallback: string,
-): string {
-  if (error instanceof TransactionValidationError) {
-    return error.message;
-  }
-
-  if (error instanceof TransactionOperationError) {
-    return error.message;
-  }
+  fallback: TransactionErrorCode = "SAVE_FAILED",
+): TransactionErrorCode {
+  if (error instanceof TransactionValidationError) return "VALIDATION";
+  if (error instanceof TransactionOperationError) return error.code;
 
   if (error instanceof Error) {
-    const code = getErrorCode(error);
+    const code = readErrorCode(error);
 
-    if (code === "permission-denied") {
-      return "No tienes permisos para realizar esta operación.";
-    }
-
+    if (code === "permission-denied") return "PERMISSION_DENIED";
     if (code === "unavailable" || code === "network-request-failed") {
-      return "No hay conexión. Comprueba tu red e inténtalo de nuevo.";
+      return "NETWORK";
     }
 
     const normalizedMessage = error.message.toLowerCase();
@@ -84,7 +75,7 @@ export function getTransactionErrorMessage(
       normalizedMessage.includes("permission-denied") ||
       normalizedMessage.includes("permission_denied")
     ) {
-      return "No tienes permisos para realizar esta operación.";
+      return "PERMISSION_DENIED";
     }
   }
 

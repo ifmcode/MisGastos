@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Keyboard, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -24,13 +25,16 @@ export function ConfirmDialog({
   visible,
   title,
   message,
-  confirmLabel = "Eliminar",
-  cancelLabel = "Cancelar",
+  confirmLabel,
+  cancelLabel,
   tone = "danger",
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("common");
+  const resolvedConfirmLabel = confirmLabel ?? t("actions.delete");
+  const resolvedCancelLabel = cancelLabel ?? t("actions.cancel");
   const confirmColor = tone === "primary" ? theme.primary : theme.danger;
 
   useEffect(() => {
@@ -67,7 +71,7 @@ export function ConfirmDialog({
         <View style={styles.actions}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={cancelLabel}
+            accessibilityLabel={resolvedCancelLabel}
             onPress={onCancel}
             style={({ pressed }) => [
               styles.button,
@@ -76,11 +80,13 @@ export function ConfirmDialog({
               pressed && styles.pressed,
             ]}
           >
-            <ThemedText type="defaultSemiBold">{cancelLabel}</ThemedText>
+            <ThemedText type="defaultSemiBold">
+              {resolvedCancelLabel}
+            </ThemedText>
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={confirmLabel}
+            accessibilityLabel={resolvedConfirmLabel}
             onPress={onConfirm}
             style={({ pressed }) => [
               styles.button,
@@ -90,7 +96,7 @@ export function ConfirmDialog({
             ]}
           >
             <ThemedText style={styles.confirmButtonText}>
-              {confirmLabel}
+              {resolvedConfirmLabel}
             </ThemedText>
           </Pressable>
         </View>

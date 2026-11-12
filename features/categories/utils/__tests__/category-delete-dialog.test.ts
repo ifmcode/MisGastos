@@ -18,13 +18,13 @@ function buildCategory(overrides: Partial<Category>): Category {
 }
 
 describe("getDeleteCategoryConfirmation", () => {
-  it("includes the category name and the usage warning", () => {
+  it("includes the category name and the usage warning keys", () => {
     const confirmation = getDeleteCategoryConfirmation(buildCategory({}));
 
     expect(confirmation).toEqual({
-      title: "Eliminar categoría",
-      message:
-        '¿Seguro que quieres eliminar "Comida"? Solo es posible si no se usa en ningún movimiento.',
+      titleKey: "deleteDialog.title",
+      messageKey: "deleteDialog.message",
+      values: { name: "Comida" },
     });
   });
 });

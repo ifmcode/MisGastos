@@ -3,7 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 import { Transaction } from "../../types/transaction.types";
 import {
   getTransactionDetailLabel,
-  OPEN_TRANSACTION_DETAIL_HINT,
+  OPEN_TRANSACTION_DETAIL_HINT_KEY,
 } from "../transaction-item-accessibility";
 
 function buildTransaction(overrides: Partial<Transaction>): Transaction {
@@ -29,11 +29,21 @@ describe("getTransactionDetailLabel", () => {
       getTransactionDetailLabel(
         buildTransaction({ concept: "Supermercado" }),
         "Alimentación",
+        "1.234,50 €",
+        "20/10/2026",
         "Cuenta principal",
       ),
-    ).toBe(
-      "Ver detalle del gasto: Supermercado, 1.234,50 €, 20/10/2026, Alimentación, Cuenta principal",
-    );
+    ).toEqual({
+      key: "accessibility.detailLabelWithWallet",
+      values: {
+        typeKey: "types.expense",
+        concept: "Supermercado",
+        amount: "1.234,50 €",
+        date: "20/10/2026",
+        category: "Alimentación",
+        wallet: "Cuenta principal",
+      },
+    });
   });
 
   it("announces an income and omits a missing wallet", () => {
@@ -41,15 +51,26 @@ describe("getTransactionDetailLabel", () => {
       getTransactionDetailLabel(
         buildTransaction({ type: "income", concept: "Nómina" }),
         "Salario",
+        "1.234,50 €",
+        "20/10/2026",
       ),
-    ).toBe("Ver detalle del ingreso: Nómina, 1.234,50 €, 20/10/2026, Salario");
+    ).toEqual({
+      key: "accessibility.detailLabel",
+      values: {
+        typeKey: "types.income",
+        concept: "Nómina",
+        amount: "1.234,50 €",
+        date: "20/10/2026",
+        category: "Salario",
+      },
+    });
   });
 });
 
-describe("OPEN_TRANSACTION_DETAIL_HINT", () => {
-  it("explains that the detail view allows editing and deleting", () => {
-    expect(OPEN_TRANSACTION_DETAIL_HINT).toContain("detalle");
-    expect(OPEN_TRANSACTION_DETAIL_HINT).toContain("editar");
-    expect(OPEN_TRANSACTION_DETAIL_HINT).toContain("eliminar");
+describe("OPEN_TRANSACTION_DETAIL_HINT_KEY", () => {
+  it("points to the detail hint key", () => {
+    expect(OPEN_TRANSACTION_DETAIL_HINT_KEY).toBe(
+      "accessibility.openDetailHint",
+    );
   });
 });

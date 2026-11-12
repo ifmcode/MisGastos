@@ -10,7 +10,7 @@ describe("WalletService owner and usage handling", () => {
       service.createWallet("   ", validInput),
     ).rejects.toMatchObject({
       fieldErrors: {
-        ownerId: "Debes iniciar sesión para crear una cartera.",
+        ownerId: "OWNER_REQUIRED",
       },
     });
   });

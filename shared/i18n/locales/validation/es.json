@@ -1,0 +1,57 @@
+{
+  "auth": {
+    "NAME_REQUIRED": "Ingresa tu nombre.",
+    "EMAIL_REQUIRED": "Ingresa tu correo electrónico.",
+    "EMAIL_INVALID": "Ingresa un correo electrónico válido.",
+    "PASSWORD_REQUIRED": "Ingresa tu contraseña.",
+    "PASSWORD_TOO_SHORT": "La contraseña debe tener al menos 6 caracteres."
+  },
+  "wallets": {
+    "OWNER_REQUIRED": "Debes iniciar sesión para gestionar tus carteras.",
+    "WALLET_REQUIRED": "Selecciona una cartera válida.",
+    "NAME_REQUIRED": "El nombre de la cartera es obligatorio.",
+    "NAME_TOO_LONG": "El nombre no puede superar los {{max}} caracteres.",
+    "INVALID_CURRENCY": "Selecciona una moneda válida.",
+    "INVALID_ICON": "Selecciona un icono válido.",
+    "INVALID_COLOR": "Selecciona un color válido.",
+    "INVALID_AMOUNT": "Introduce un importe válido con hasta 2 decimales.",
+    "NEGATIVE_AMOUNT": "El saldo inicial no puede ser negativo.",
+    "INVALID_TYPE": "Selecciona un tipo de cartera válido.",
+    "INVALID_INCLUDE_IN_TOTAL": "El valor de incluir en el total no es válido.",
+    "DESCRIPTION_TOO_LONG": "La descripción no puede superar los {{max}} caracteres."
+  },
+  "categories": {
+    "OWNER_REQUIRED": "Debes iniciar sesión para gestionar tus categorías.",
+    "CATEGORY_REQUIRED": "Selecciona una categoría válida.",
+    "NAME_REQUIRED": "El nombre de la categoría es obligatorio.",
+    "NAME_TOO_LONG": "El nombre no puede superar los {{max}} caracteres.",
+    "INVALID_ICON": "Selecciona un icono válido.",
+    "INVALID_COLOR": "Selecciona un color válido.",
+    "INVALID_TYPE": "Selecciona si la categoría es de gasto o de ingreso."
+  },
+  "transactions": {
+    "OWNER_REQUIRED": "Debes iniciar sesión para gestionar tus movimientos.",
+    "TRANSACTION_REQUIRED": "Selecciona un movimiento válido.",
+    "INVALID_TYPE": "Selecciona si es un gasto o un ingreso.",
+    "INVALID_AMOUNT": "Introduce un importe mayor que 0 con hasta 2 decimales.",
+    "INVALID_CURRENCY": "La moneda del movimiento no es válida.",
+    "WALLET_REQUIRED": "Selecciona una cartera.",
+    "INVALID_CATEGORY": "Selecciona una categoría válida.",
+    "CATEGORY_TYPE_MISMATCH": "La categoría no corresponde al tipo de movimiento.",
+    "CONCEPT_REQUIRED": "El concepto es obligatorio.",
+    "CONCEPT_TOO_LONG": "El concepto no puede superar los {{max}} caracteres.",
+    "NOTES_TOO_LONG": "Las notas no pueden superar los {{max}} caracteres.",
+    "INVALID_DATE": "Introduce una fecha válida con formato DD/MM/AAAA."
+  },
+  "transfers": {
+    "OWNER_REQUIRED": "Debes iniciar sesión para gestionar tus transferencias.",
+    "FROM_WALLET_REQUIRED": "Selecciona la cartera de origen.",
+    "TO_WALLET_REQUIRED": "Selecciona la cartera de destino.",
+    "SAME_WALLET": "La cartera de origen y destino deben ser distintas.",
+    "INVALID_AMOUNT": "Introduce un importe mayor que 0 con hasta 2 decimales.",
+    "INSUFFICIENT_BALANCE": "Saldo insuficiente para esta transferencia.",
+    "INVALID_CURRENCY": "La moneda de la transferencia no es válida.",
+    "NOTES_TOO_LONG": "Las notas no pueden superar los {{max}} caracteres.",
+    "INVALID_DATE": "Introduce una fecha válida con formato DD/MM/AAAA."
+  }
+}

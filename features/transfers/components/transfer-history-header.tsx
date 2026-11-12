@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -12,12 +13,13 @@ export interface TransferHistoryHeaderProps {
 
 export function TransferHistoryHeader({ onBack }: TransferHistoryHeaderProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["transfers", "common"]);
 
   return (
     <View style={styles.header}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Volver"
+        accessibilityLabel={t("common:accessibility.back")}
         onPress={onBack}
         style={styles.backButton}
       >
@@ -26,10 +28,10 @@ export function TransferHistoryHeader({ onBack }: TransferHistoryHeaderProps) {
 
       <View style={styles.headerText}>
         <ThemedText type="title" style={styles.title} numberOfLines={2}>
-          Historial de transferencias
+          {t("historyTitle")}
         </ThemedText>
         <ThemedText style={styles.subtitle}>
-          Todos tus traspasos entre carteras.
+          {t("historySubtitle")}
         </ThemedText>
       </View>
     </View>

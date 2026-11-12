@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Modal, Pressable, ScrollView, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -13,7 +14,7 @@ export interface WalletPickerDialogProps {
   wallets: readonly Wallet[];
   selectedId: string;
   disabled: boolean;
-  /** Screen-reader context: "Cartera", "Origen" or "Destino". */
+  /** Screen-reader context, already translated by the caller. */
   accessibilityPrefix: string;
   onSelect: (walletId: string) => void;
   onClose: () => void;
@@ -33,6 +34,7 @@ export function WalletPickerDialog({
   onClose,
 }: WalletPickerDialogProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("wallets");
 
   return (
     <Modal
@@ -62,11 +64,11 @@ export function WalletPickerDialog({
               accessibilityRole="header"
               style={styles.title}
             >
-              Seleccionar cartera
+              {t("picker.title")}
             </ThemedText>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Cerrar selector de cartera"
+              accessibilityLabel={t("picker.close")}
               onPress={onClose}
               hitSlop={8}
               style={styles.closeButton}
@@ -83,7 +85,7 @@ export function WalletPickerDialog({
           >
             {wallets.length === 0 ? (
               <ThemedText style={[styles.helper, { color: theme.muted }]}>
-                No hay carteras disponibles.
+                {t("picker.empty")}
               </ThemedText>
             ) : null}
 

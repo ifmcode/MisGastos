@@ -4,7 +4,7 @@ import { Wallet } from "@/features/wallets/types/wallet.types";
 
 import { Transfer } from "../../types/transfer.types";
 import {
-  DELETED_TRANSFER_WALLET_NAME,
+  DELETED_TRANSFER_WALLET_NAME_KEY,
   getTransferWalletNames,
   resolveTransferWalletName,
 } from "../transfer-wallet-names";
@@ -63,7 +63,7 @@ describe("resolveTransferWalletName", () => {
 
   it("uses a readable generic label when no name is available", () => {
     expect(resolveTransferWalletName(undefined, undefined)).toBe(
-      DELETED_TRANSFER_WALLET_NAME,
+      DELETED_TRANSFER_WALLET_NAME_KEY,
     );
   });
 });

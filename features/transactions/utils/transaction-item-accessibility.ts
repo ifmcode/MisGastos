@@ -1,26 +1,39 @@
-import { formatMoney } from "@/features/wallets/utils/money";
-import { formatDateInput } from "@/shared/utils/date";
-
 import { Transaction } from "../types/transaction.types";
 
-export const OPEN_TRANSACTION_DETAIL_HINT =
-  "Abre el detalle del movimiento para editar o eliminar.";
+export interface TransactionDetailLabel {
+  key: string;
+  values: {
+    typeKey: string;
+    concept: string;
+    amount: string;
+    date: string;
+    category: string;
+    wallet?: string;
+  };
+}
 
 /** Screen-reader summary and open action for a movement card. */
 export function getTransactionDetailLabel(
   transaction: Transaction,
   categoryLabel: string,
+  amount: string,
+  date: string,
   walletName?: string,
-): string {
-  const kind = transaction.type === "income" ? "ingreso" : "gasto";
-  const parts = [
-    `Ver detalle del ${kind}: ${transaction.concept}`,
-    formatMoney(transaction.amount, transaction.currency),
-    formatDateInput(transaction.date),
-    categoryLabel,
-  ];
-
-  if (walletName) parts.push(walletName);
-
-  return parts.join(", ");
+): TransactionDetailLabel {
+  return {
+    key: walletName
+      ? "accessibility.detailLabelWithWallet"
+      : "accessibility.detailLabel",
+    values: {
+      typeKey:
+        transaction.type === "income" ? "types.income" : "types.expense",
+      concept: transaction.concept,
+      amount,
+      date,
+      category: categoryLabel,
+      ...(walletName ? { wallet: walletName } : {}),
+    },
+  };
 }
+
+export const OPEN_TRANSACTION_DETAIL_HINT_KEY = "accessibility.openDetailHint";

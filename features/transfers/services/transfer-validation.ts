@@ -17,11 +17,7 @@ import {
 } from "./transfer.errors";
 
 function ownerIssue(): TransferValidationIssue {
-  return {
-    field: "ownerId",
-    code: "OWNER_REQUIRED",
-    message: "Debes iniciar sesión para gestionar tus transferencias.",
-  };
+  return { field: "ownerId", code: "OWNER_REQUIRED" };
 }
 
 /** Trims the owner id and rejects anonymous callers. */

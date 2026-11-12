@@ -11,12 +11,12 @@ describe("getWalletsQuickActions", () => {
       "history",
     ]);
     expect(actions[0]).toMatchObject({
-      label: "Transferir",
-      accessibilityLabel: "Nueva transferencia",
+      labelKey: "quick.transfer",
+      accessibilityKey: "quick.transferAccessibility",
     });
     expect(actions[1]).toMatchObject({
-      label: "Historial de transferencias",
-      accessibilityLabel: "Ver historial de transferencias",
+      labelKey: "quick.history",
+      accessibilityKey: "quick.historyAccessibility",
     });
   });
 
@@ -26,7 +26,7 @@ describe("getWalletsQuickActions", () => {
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
       key: "history",
-      accessibilityLabel: "Ver historial de transferencias",
+      accessibilityKey: "quick.historyAccessibility",
     });
   });
 });

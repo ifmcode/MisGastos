@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { WalletPickerDialog } from "@/features/wallets/components/wallet-picker-dialog";
 import { Wallet } from "@/features/wallets/types/wallet.types";
@@ -24,6 +25,7 @@ export function TransactionFormWalletField({
   disabled,
   onChange,
 }: TransactionFormWalletFieldProps) {
+  const { t } = useTranslation("transactions");
   const [pickerVisible, setPickerVisible] = useState(false);
 
   function selectWallet(walletId: string) {
@@ -47,7 +49,7 @@ export function TransactionFormWalletField({
         wallets={wallets}
         selectedId={value}
         disabled={disabled}
-        accessibilityPrefix="Cartera"
+        accessibilityPrefix={t("form.wallet")}
         onSelect={selectWallet}
         onClose={() => setPickerVisible(false)}
       />

@@ -1,12 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { formatMoney } from "@/features/wallets/utils/money";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
-import { formatDateInput } from "@/shared/utils/date";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import {
   transactionItemPalette as palette,
@@ -15,9 +16,12 @@ import {
 import { Transaction } from "../types/transaction.types";
 import {
   getTransactionDetailLabel,
-  OPEN_TRANSACTION_DETAIL_HINT,
+  OPEN_TRANSACTION_DETAIL_HINT_KEY,
 } from "../utils/transaction-item-accessibility";
-import { TransactionCategory } from "../utils/transaction-options";
+import {
+  getTransactionCategoryLabel,
+  TransactionCategory,
+} from "../utils/transaction-options";
 
 export interface TransactionItemProps {
   transaction: Transaction;
@@ -32,24 +36,40 @@ export function TransactionItem({
   transaction,
   wallet,
   category,
-  accessibilityHint = OPEN_TRANSACTION_DETAIL_HINT,
+  accessibilityHint,
   onPress,
 }: TransactionItemProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("transactions");
+  const tr = asTranslate(t);
+  const locale = useAppLocale();
   const isIncome = transaction.type === "income";
   const amountColor = isIncome ? theme.success : theme.danger;
   const amountPrefix = isIncome ? "+" : "-";
   const walletName = wallet?.name ?? transaction.walletName;
+  const categoryLabel = getTransactionCategoryLabel(category, tr);
+  const amount = locale.formatCurrency(
+    transaction.amount,
+    transaction.currency,
+  );
+  const date = locale.formatDate(transaction.date);
+  const detailLabel = getTransactionDetailLabel(
+    transaction,
+    categoryLabel,
+    amount,
+    date,
+    walletName,
+  );
+  const hint = accessibilityHint ?? t(OPEN_TRANSACTION_DETAIL_HINT_KEY);
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={getTransactionDetailLabel(
-        transaction,
-        category.label,
-        walletName,
-      )}
-      accessibilityHint={accessibilityHint}
+      accessibilityLabel={tr(detailLabel.key, {
+        ...detailLabel.values,
+        type: tr(detailLabel.values.typeKey),
+      })}
+      accessibilityHint={hint}
       onPress={onPress}
       style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
     >
@@ -68,7 +88,7 @@ export function TransactionItem({
             {transaction.concept}
           </ThemedText>
           <ThemedText style={styles.meta} numberOfLines={1}>
-            {formatDateInput(transaction.date)} · {category.label}
+            {date} · {categoryLabel}
             {walletName ? ` · ${walletName}` : ""}
           </ThemedText>
         </View>
@@ -80,7 +100,7 @@ export function TransactionItem({
             numberOfLines={1}
           >
             {amountPrefix}
-            {formatMoney(transaction.amount, transaction.currency)}
+            {amount}
           </ThemedText>
           <ThemedText style={styles.currency}>
             {transaction.currency}

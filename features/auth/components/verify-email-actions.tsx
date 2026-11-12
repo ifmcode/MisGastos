@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -23,6 +24,7 @@ export function VerifyEmailActions({
   onLogout,
 }: VerifyEmailActionsProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("auth");
   const busy = sending || checking;
 
   return (
@@ -32,14 +34,14 @@ export function VerifyEmailActions({
         onPress={onCheck}
         disabled={busy}
         accessibilityRole="button"
-        accessibilityLabel="Ya verifiqué mi correo"
+        accessibilityLabel={t("verify.check")}
         accessibilityState={{ disabled: busy, busy: checking }}
       >
         {checking ? (
           <ActivityIndicator color={loginPalette.onPrimary} />
         ) : (
           <ThemedText style={loginStyles.buttonText}>
-            Ya verifiqué mi correo
+            {t("verify.check")}
           </ThemedText>
         )}
       </Pressable>
@@ -53,14 +55,14 @@ export function VerifyEmailActions({
         onPress={onResend}
         disabled={busy}
         accessibilityRole="button"
-        accessibilityLabel="Reenviar correo de verificación"
+        accessibilityLabel={t("verify.resendAccessibility")}
         accessibilityState={{ disabled: busy, busy: sending }}
       >
         {sending ? (
           <ActivityIndicator color={theme.primary} />
         ) : (
           <ThemedText style={[styles.secondaryText, { color: theme.primary }]}>
-            Reenviar correo
+            {t("verify.resend")}
           </ThemedText>
         )}
       </Pressable>
@@ -70,11 +72,11 @@ export function VerifyEmailActions({
         onPress={onLogout}
         disabled={busy}
         accessibilityRole="button"
-        accessibilityLabel="Cerrar sesión y usar otra cuenta"
+        accessibilityLabel={t("verify.logoutAccessibility")}
         accessibilityState={{ disabled: busy }}
       >
         <ThemedText style={[styles.logoutText, { color: theme.muted }]}>
-          Cerrar sesión
+          {t("verify.logout")}
         </ThemedText>
       </Pressable>
     </View>

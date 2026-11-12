@@ -1,14 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { transactionDetailStyles as styles } from "../styles/transaction-detail.styles";
-import { Transaction } from "../types/transaction.types";
 
 export interface TransactionDetailHeaderProps {
-  transaction: Transaction;
+  concept: string;
   disabled: boolean;
   onEdit: () => void;
   onDelete: () => void;
@@ -16,19 +16,20 @@ export interface TransactionDetailHeaderProps {
 }
 
 export function TransactionDetailHeader({
-  transaction,
+  concept,
   disabled,
   onEdit,
   onDelete,
   onClose,
 }: TransactionDetailHeaderProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["transactions", "common"]);
 
   return (
     <View style={styles.header}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Cerrar detalle"
+        accessibilityLabel={t("common:accessibility.closeDetail")}
         hitSlop={10}
         onPress={onClose}
         disabled={disabled}
@@ -39,21 +40,21 @@ export function TransactionDetailHeader({
 
       <View style={styles.headerText}>
         <ThemedText type="title" style={styles.title}>
-          Detalle del movimiento
+          {t("detail.title")}
         </ThemedText>
         <ThemedText
           style={[styles.subtitle, { color: theme.muted }]}
           numberOfLines={1}
         >
-          {transaction.concept}
+          {concept}
         </ThemedText>
       </View>
 
       <View style={styles.headerActions}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Editar movimiento"
-          accessibilityHint="Abre el formulario con este movimiento."
+          accessibilityLabel={t("detail.edit")}
+          accessibilityHint={t("detail.editHint")}
           hitSlop={6}
           onPress={onEdit}
           disabled={disabled}
@@ -69,8 +70,8 @@ export function TransactionDetailHeader({
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Eliminar movimiento"
-          accessibilityHint="Pide confirmación antes de eliminar el movimiento y revertir el saldo."
+          accessibilityLabel={t("detail.delete")}
+          accessibilityHint={t("detail.deleteHint")}
           hitSlop={6}
           onPress={onDelete}
           disabled={disabled}

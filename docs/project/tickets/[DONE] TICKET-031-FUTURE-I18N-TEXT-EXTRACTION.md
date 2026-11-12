@@ -1,8 +1,8 @@
-# TICKET-031 - Future Epic: Internationalization and Text Extraction
+# [DONE] TICKET-031 - Future Epic: Internationalization and Text Extraction
 
 **Type:** Epic / Architecture + UX  
 **Priority:** High  
-**Status:** ⏳ Pending  
+**Status:** ✅ Done (12/11/2026)  
 **Related:** PM-031; all feature tickets; TICKET-014 (settings pattern)  
 **Sprint:** Post-MVP / Phase 3.3  
 
@@ -12,33 +12,33 @@ Every user-facing string must come from translation files split by feature, so t
 This is an epic because it touches every screen, form, modal, empty/error state, accessibility label and domain error message. The goal is one source of truth per string, no hardcoded copy left in components, and a documented workflow for adding keys and languages.
 
 ## Requirements
-- [ ] Choose the i18n approach and library in a short ADR, documenting the alternatives
-- [ ] Add `expo-localization` and declare the supported locales (`es`, `en`) in the Expo config
-- [ ] Set up the i18n runtime with Spanish as the default and fallback language
-- [ ] Split copy into one translation file per feature and language, loaded as namespaces
-- [ ] Create the initial `es`/`en` files for `common`, `navigation`, `auth`, `wallets`, `categories`, `transactions`, `transfers`, `dashboard`, `settings` and `validation`
-- [ ] Replace every hardcoded UI string: titles, labels, buttons, placeholders, helper text, empty/loading/error states, confirmations, accessibility labels and hints
-- [ ] Replace hardcoded domain messages with stable error codes mapped to translation keys in the UI layer
-- [ ] Format dates, times, numbers, currencies and percentages with `Intl` using the active locale
-- [ ] Persist the language preference with AsyncStorage, mirroring the existing theme preference pattern
-- [ ] Resolve the initial language as: saved preference → first supported device locale → Spanish
-- [ ] Add a language selector to Settings with Español and English, applying the change immediately
-- [ ] Keep a dev warning plus Spanish fallback when a key is missing instead of rendering the raw key
-- [ ] Add tests for language resolution, key parity between languages and the persistence helpers
-- [ ] Add a guard against new hardcoded copy (lint rule, script or PR checklist)
-- [ ] Document how to add a key, add a namespace and add a new language
+- [x] Choose the i18n approach and library in a short ADR, documenting the alternatives
+- [x] Add `expo-localization` and declare the supported locales (`es`, `en`) in the Expo config
+- [x] Set up the i18n runtime with Spanish as the default and fallback language
+- [x] Split copy into one translation file per feature and language, loaded as namespaces
+- [x] Create the initial `es`/`en` files for `common`, `navigation`, `auth`, `wallets`, `categories`, `transactions`, `transfers`, `dashboard`, `settings` and `validation`
+- [x] Replace every hardcoded UI string: titles, labels, buttons, placeholders, helper text, empty/loading/error states, confirmations, accessibility labels and hints
+- [x] Replace hardcoded domain messages with stable error codes mapped to translation keys in the UI layer
+- [x] Format dates, times, numbers, currencies and percentages with `Intl` using the active locale
+- [x] Persist the language preference with AsyncStorage, mirroring the existing theme preference pattern
+- [x] Resolve the initial language as: saved preference → first supported device locale → Spanish
+- [x] Add a language selector to Settings with Español and English, applying the change immediately
+- [x] Keep a dev warning plus Spanish fallback when a key is missing instead of rendering the raw key
+- [x] Add tests for language resolution, key parity between languages and the persistence helpers
+- [x] Add a guard against new hardcoded copy (lint rule, script or PR checklist)
+- [x] Document how to add a key, add a namespace and add a new language
 
 ## Acceptance Criteria
-- [ ] Switching language in Settings updates the whole app immediately and survives a restart
-- [ ] A device configured in English opens the app in English unless the user explicitly chose Spanish
-- [ ] Forcing an unsupported device locale falls back to Spanish
-- [ ] Every visible string comes from a translation file; no component contains literal Spanish copy
-- [ ] No component imports translation JSON directly: screens use the typed hook/keys
-- [ ] Dates and amounts follow the selected locale (`1.234,56 €` vs `€1,234.56`)
-- [ ] A missing key shows the Spanish value and a development warning, never a raw key or blank space
-- [ ] Domain services and repositories keep returning codes, not translated sentences
-- [ ] Existing flows, validation and tests keep working in Spanish
-- [ ] `npx tsc --noEmit`, `npx expo lint` and `npx jest` pass
+- [x] Switching language in Settings updates the whole app immediately and survives a restart
+- [x] A device configured in English opens the app in English unless the user explicitly chose Spanish
+- [x] Forcing an unsupported device locale falls back to Spanish
+- [x] Every visible string comes from a translation file; no component contains literal Spanish copy
+- [x] No component imports translation JSON directly: screens use the typed hook/keys
+- [x] Dates and amounts follow the selected locale (`1.234,56 €` vs `€1,234.56`)
+- [x] A missing key shows the Spanish value and a development warning, never a raw key or blank space
+- [x] Domain services and repositories keep returning codes, not translated sentences
+- [x] Existing flows, validation and tests keep working in Spanish
+- [x] `npx tsc --noEmit`, `npx expo lint` and `npx jest` pass
 
 ## Research And Decision
 - Expo's official localization guide uses `expo-localization` to read the device locale and `Intl` (available on Hermes) for dates, numbers and currencies. It explicitly recommends **not** building custom formatting and lists `i18next`, Lingui, fbtee and Intlayer as translation library options: <https://docs.expo.dev/guides/localization/>
@@ -100,3 +100,44 @@ This is an epic because it touches every screen, form, modal, empty/error state,
 | 3 | Auth + wallets + categories | Core personal-finance copy migrated |
 | 4 | Transactions + transfers + dashboard | Every main tab migrated |
 | 5 | Error codes + `Intl` formatters + audit | No hardcoded copy or locale assumptions left |
+
+## Implemented
+
+### Infrastructure
+- Added `expo-localization`, `i18next` and `react-i18next`; declared `["es", "en"]` through the `expo-localization` config plugin.
+- `shared/i18n/index.ts` initializes i18next with Spanish as `fallbackLng`, `defaultNS: "common"`, synchronous initialization and a development missing-key warning. `shared/i18n/missing-key.ts` never renders a raw key: it returns the Spanish fallback from i18next, then a humanized last segment.
+- `shared/i18n/resources.ts` registers the ten namespaces. Copy is colocated with each feature (`features/<feature>/locales/{es,en}.json`) and shared copy lives in `shared/i18n/locales/{common,navigation,validation}`.
+- `AppLanguageProvider` is mounted in `app/_layout.tsx` around the theme and auth providers. It resolves `saved preference → first supported device locale → Spanish`, exposes `{ language, languageTag, ready, setLanguage }`, persists explicit choices in `misgastos.language.preference` and calls `i18n.changeLanguage` immediately.
+- `SettingsLanguageSelector` adds **Español** and **English** next to the dark-mode toggle. The active option shows a check and the whole tree re-renders on change.
+
+### Copy migration
+- Every visible string in auth, wallets, categories, transactions, transfers, dashboard, settings, shared date/dialog components and the modal route now comes from a namespace. The `check:copy` audit passes on 155 TSX files.
+- Dynamic labels (wallet/category type options, quick actions, filter options, dashboard empty states, transfer history) now return translation keys instead of Spanish text.
+- Accessibility labels and hints, confirmation dialogs, empty/loading/error states, placeholders and helper text are translated.
+- Seeded category names and wallet/category names remain user data and are not translated.
+
+### Error codes
+- Validation issues and operation errors now carry stable codes only. `WalletValidationError`, `CategoryValidationError`, `TransactionValidationError`, `TransferValidationError` and their operation errors no longer contain Spanish sentences.
+- `getWalletErrorCode`, `getCategoryErrorCode`, `getTransactionErrorCode`, `getTransferErrorCode` and `getAuthErrorCode` map provider/infrastructure failures to codes. Hooks translate them with `t(\`errors.${code}\`)`.
+- Field errors are translated in the form components with `validation:<feature>.<CODE>`.
+
+### Formatting
+- `shared/utils/format.ts` provides `formatCurrency`, `formatNumber`, `formatPercent`, `formatDate` and `formatDateTime` through `Intl`.
+- `useAppLocale()` wraps those helpers with the active `languageTag`. Cards, lists, detail views, delete dialogs and forms use it, so amounts follow `1.234,56 €` vs `€1,234.56` and display dates follow the selected locale.
+- Manual date entry remains `DD/MM/YYYY` in both languages because the parser is deterministic; displayed dates are localized.
+
+### Stability follow-up
+- The first integration exposed a render loop: `asTranslate(t)` was created inline and used in data-loading `useCallback` dependencies, so `useWallets`/`useCategories`/`useTransactions`/`useTransfers` re-ran their effects on every render and the dashboard flickered between **Cargando tu resumen** and content. Added `useScopedTranslation(ns)` (`shared/hooks/use-scoped-translation.ts`), which memoizes the adapter against the stable i18next `t`, and migrated every hook that uses it in a dependency array.
+
+### Tests and guardrails
+- Added tests for language resolution (`shared/utils/language.test.ts`), AsyncStorage persistence (`shared/lib/language-storage.test.ts`), `es`/`en` key parity and missing-key fallback (`shared/i18n/resources.test.ts`) and `Intl` formatting (`shared/utils/format.test.ts`).
+- Added `scripts/check-copy.js` and `npm run check:copy`; it parses TSX with the TypeScript compiler and fails on literal JSX text or copy-bearing literal props.
+- Updated all affected tests to assert codes/keys instead of Spanish messages.
+
+### Verification
+- `npx tsc --noEmit` ✅
+- `npx expo lint` ✅
+- `npx jest` ✅ 133 suites / 613 tests
+- `npx jest --coverage` ✅ 98.75% statements, 93.63% branches, 98.76% functions, 99.31% lines
+- `npm run check:copy` ✅
+- `npx expo export --platform web` ✅

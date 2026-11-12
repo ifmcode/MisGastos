@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -20,6 +21,8 @@ export function LoginPasswordReset({
   feedback,
   onReset,
 }: LoginPasswordResetProps) {
+  const { t } = useTranslation("auth");
+
   if (isRegister) {
     return null;
   }
@@ -39,7 +42,7 @@ export function LoginPasswordReset({
         accessibilityState={{ disabled: loading, busy: loading }}
       >
         <ThemedText style={styles.resetText}>
-          ¿Olvidaste tu contraseña?
+          {t("login.forgotPassword")}
         </ThemedText>
       </Pressable>
     </View>

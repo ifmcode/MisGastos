@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -36,12 +37,13 @@ export function DashboardMovementsSection({
   onPressMovement,
 }: DashboardMovementsSectionProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["dashboard", "transactions"]);
 
   return (
     <View>
       <DashboardSectionHeader
-        title="Movimientos recientes"
-        actionLabel={hasMore ? "Ver todos" : undefined}
+        title={t("movements.title")}
+        actionLabel={hasMore ? t("movements.viewAll") : undefined}
         onActionPress={hasMore ? onOpenMovements : undefined}
       />
 
@@ -49,7 +51,7 @@ export function DashboardMovementsSection({
         <View style={dashboardStyles.inlineLoading}>
           <ActivityIndicator size="small" color={dashboardPalette.primary} />
           <ThemedText style={dashboardStyles.inlineLoadingText}>
-            Cargando movimientos…
+            {t("movements.loading")}
           </ThemedText>
         </View>
       ) : error ? (
@@ -66,23 +68,23 @@ export function DashboardMovementsSection({
           </ThemedText>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Reintentar carga de movimientos"
+            accessibilityLabel={t("movements.retryAccessibility")}
             onPress={onRetry}
           >
             <ThemedText
               style={[dashboardStyles.inlineRetryText, { color: theme.danger }]}
             >
-              Reintentar
+              {t("movements.retry")}
             </ThemedText>
           </Pressable>
         </View>
       ) : movements.length === 0 ? (
         <View style={styles.emptyCard}>
           <ThemedText type="defaultSemiBold">
-            Aún no tienes movimientos
+            {t("movements.emptyTitle")}
           </ThemedText>
           <ThemedText style={styles.emptyText}>
-            Crea tu primer gasto o ingreso desde la pestaña Movimientos.
+            {t("movements.emptyMessage")}
           </ThemedText>
         </View>
       ) : (
@@ -96,7 +98,7 @@ export function DashboardMovementsSection({
                 categories,
                 movement.categoryId,
               )}
-              accessibilityHint="Abre la pestaña Movimientos para ver el historial completo."
+              accessibilityHint={t("movements.openHistoryHint")}
               onPress={() => onPressMovement(movement)}
             />
           ))}

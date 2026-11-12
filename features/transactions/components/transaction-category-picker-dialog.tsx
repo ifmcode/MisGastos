@@ -1,11 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Modal, Pressable, ScrollView, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { transactionFormStyles as styles } from "../styles/transaction-form.styles";
-import { TransactionCategory } from "../utils/transaction-options";
+import {
+  getTransactionCategoryLabel,
+  TransactionCategory,
+} from "../utils/transaction-options";
 import { TransactionCategoryPickerOption } from "./transaction-category-picker-option";
 
 export interface TransactionCategoryPickerDialogProps {
@@ -32,6 +36,7 @@ export function TransactionCategoryPickerDialog({
   onClose,
 }: TransactionCategoryPickerDialogProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("transactions");
 
   return (
     <Modal
@@ -61,11 +66,11 @@ export function TransactionCategoryPickerDialog({
               accessibilityRole="header"
               style={styles.pickerTitle}
             >
-              Seleccionar categoría
+              {t("categoryPicker.title")}
             </ThemedText>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Cerrar selector de categoría"
+              accessibilityLabel={t("categoryPicker.close")}
               onPress={onClose}
               hitSlop={8}
               style={styles.pickerCloseButton}
@@ -82,7 +87,7 @@ export function TransactionCategoryPickerDialog({
           >
             {categories.length === 0 ? (
               <ThemedText style={[styles.helper, { color: theme.muted }]}>
-                No hay categorías para este tipo. Crea una con Nueva.
+                {t("categoryPicker.empty")}
               </ThemedText>
             ) : null}
 
@@ -99,7 +104,7 @@ export function TransactionCategoryPickerDialog({
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Crear categoría"
+            accessibilityLabel={t("categoryPicker.create")}
             onPress={onCreate}
             disabled={disabled}
             style={({ pressed }) => [
@@ -112,7 +117,7 @@ export function TransactionCategoryPickerDialog({
             <ThemedText
               style={[styles.pickerCreateText, { color: theme.primary }]}
             >
-              Nueva
+              {t("categoryPicker.new")}
             </ThemedText>
           </Pressable>
         </View>

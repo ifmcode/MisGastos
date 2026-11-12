@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -9,12 +10,16 @@ export interface DashboardLoadingStateProps {
 }
 
 export function DashboardLoadingState({
-  message = "Cargando tu resumen…",
+  message,
 }: DashboardLoadingStateProps) {
+  const { t } = useTranslation("dashboard");
+
   return (
     <View style={dashboardStyles.centered}>
       <ActivityIndicator size="large" color={dashboardPalette.primary} />
-      <ThemedText style={dashboardStyles.centeredText}>{message}</ThemedText>
+      <ThemedText style={dashboardStyles.centeredText}>
+        {message ?? t("loadingSummary")}
+      </ThemedText>
     </View>
   );
 }

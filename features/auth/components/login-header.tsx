@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { ThemedText } from "@/components/themed-text";
 
 import { loginStyles as styles } from "../styles/login.styles";
@@ -7,13 +9,15 @@ export interface LoginHeaderProps {
 }
 
 export function LoginHeader({ isRegister }: LoginHeaderProps) {
+  const { t } = useTranslation(["auth", "common"]);
+
   return (
     <>
       <ThemedText type="title" style={styles.title}>
-        MisGastos
+        {t("common:appName")}
       </ThemedText>
       <ThemedText style={styles.subtitle}>
-        {isRegister ? "Crea una cuenta" : "Inicia sesión para continuar"}
+        {isRegister ? t("login.registerTitle") : t("login.signInSubtitle")}
       </ThemedText>
     </>
   );

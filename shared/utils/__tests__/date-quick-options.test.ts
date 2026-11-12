@@ -11,13 +11,13 @@ describe("getDateQuickOptions", () => {
 
     expect(options.today).toEqual({
       key: "today",
-      label: "Hoy",
+      labelKey: "date.today",
       isoDate: "2026-11-02",
       displayDate: "02/11",
     });
     expect(options.yesterday).toEqual({
       key: "yesterday",
-      label: "Ayer",
+      labelKey: "date.yesterday",
       isoDate: "2026-11-01",
       displayDate: "01/11",
     });
@@ -41,10 +41,10 @@ describe("getDateQuickOptions", () => {
 describe("getLastUsedDateOption", () => {
   const reference = new Date(2026, 10, 2, 12);
 
-  it("returns the last used date formatted as DD/MM", () => {
+  it("returns the last used date with its label key", () => {
     expect(getLastUsedDateOption("2026-10-30", reference)).toEqual({
       key: "last",
-      label: "Último",
+      labelKey: "date.last",
       isoDate: "2026-10-30",
       displayDate: "30/10",
     });

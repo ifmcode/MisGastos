@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
@@ -23,12 +24,13 @@ export function CategoryReorderActions({
   onMoveDown,
 }: CategoryReorderActionsProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("categories");
 
   return (
     <View style={styles.reorderActions}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Mover ${categoryName} hacia arriba`}
+        accessibilityLabel={t("reorder.moveUp", { name: categoryName })}
         accessibilityState={{ disabled: disabled || !canMoveUp }}
         disabled={disabled || !canMoveUp}
         onPress={onMoveUp}
@@ -43,7 +45,7 @@ export function CategoryReorderActions({
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Mover ${categoryName} hacia abajo`}
+        accessibilityLabel={t("reorder.moveDown", { name: categoryName })}
         accessibilityState={{ disabled: disabled || !canMoveDown }}
         disabled={disabled || !canMoveDown}
         onPress={onMoveDown}

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -16,6 +17,7 @@ export function TransactionsErrorState({
   onRetry,
 }: TransactionsErrorStateProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["transactions", "common"]);
 
   return (
     <View style={styles.centered}>
@@ -25,16 +27,18 @@ export function TransactionsErrorState({
         color={theme.danger}
       />
       <ThemedText type="defaultSemiBold" style={styles.errorTitle}>
-        No se pudieron cargar los movimientos
+        {t("errorTitle")}
       </ThemedText>
       <ThemedText style={styles.centeredText}>{message}</ThemedText>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Reintentar carga de movimientos"
+        accessibilityLabel={t("retryAccessibility")}
         onPress={onRetry}
         style={styles.retryButton}
       >
-        <ThemedText style={styles.retryButtonText}>Reintentar</ThemedText>
+        <ThemedText style={styles.retryButtonText}>
+          {t("common:actions.retry")}
+        </ThemedText>
       </Pressable>
     </View>
   );

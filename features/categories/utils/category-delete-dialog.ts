@@ -1,16 +1,18 @@
 import { Category } from "../types/category.types";
 
 export interface DeleteCategoryConfirmation {
-  title: string;
-  message: string;
+  titleKey: string;
+  messageKey: string;
+  values: { name: string };
 }
 
-/** Builds the copy shown before deleting a category. */
+/** Builds the translation keys shown before deleting a category. */
 export function getDeleteCategoryConfirmation(
   category: Category,
 ): DeleteCategoryConfirmation {
   return {
-    title: "Eliminar categoría",
-    message: `¿Seguro que quieres eliminar "${category.name}"? Solo es posible si no se usa en ningún movimiento.`,
+    titleKey: "deleteDialog.title",
+    messageKey: "deleteDialog.message",
+    values: { name: category.name },
   };
 }

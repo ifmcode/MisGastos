@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -14,20 +15,21 @@ export function TransactionFiltersHeader({
   onClose,
 }: TransactionFiltersHeaderProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["transactions", "common"]);
 
   return (
     <View style={styles.header}>
       <View style={styles.headerText}>
         <ThemedText type="title" style={styles.title}>
-          Filtros
+          {t("filters.title")}
         </ThemedText>
         <ThemedText style={[styles.subtitle, { color: theme.muted }]}>
-          Filtra y ordena tu historial.
+          {t("filters.subtitle")}
         </ThemedText>
       </View>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Cerrar filtros"
+        accessibilityLabel={t("filters.close")}
         hitSlop={10}
         onPress={onClose}
         style={styles.closeButton}

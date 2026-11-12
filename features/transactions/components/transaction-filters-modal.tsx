@@ -4,6 +4,7 @@ import {
   ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -43,6 +44,7 @@ export function TransactionFiltersModal({
   onCancel,
 }: TransactionFiltersModalProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("transactions");
   const {
     localFilters,
     fromText,
@@ -58,12 +60,12 @@ export function TransactionFiltersModal({
   } = useTransactionFiltersForm({ filters, onApply });
 
   const walletOptions: TransactionFiltersOption<string>[] = [
-    { value: "", label: "Todas" },
+    { value: "", labelKey: "filters.all" },
     ...wallets.map((wallet) => ({ value: wallet.id, label: wallet.name })),
   ];
 
   const categoryOptions: TransactionFiltersOption<string>[] = [
-    { value: "", label: "Todas" },
+    { value: "", labelKey: "filters.all" },
     ...categories
       .filter(
         (category) =>
@@ -93,35 +95,35 @@ export function TransactionFiltersModal({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <ThemedText style={styles.label}>Orden</ThemedText>
+            <ThemedText style={styles.label}>{t("filters.sort")}</ThemedText>
             <TransactionFiltersOptionRow
               options={TRANSACTION_SORT_OPTIONS}
               selectedValue={localFilters.sort}
               onSelect={(sort) => updateFilters({ sort })}
             />
 
-            <ThemedText style={styles.label}>Tipo</ThemedText>
+            <ThemedText style={styles.label}>{t("filters.type")}</ThemedText>
             <TransactionFiltersOptionRow
               options={TRANSACTION_TYPE_FILTER_OPTIONS}
               selectedValue={localFilters.type}
               onSelect={(type) => updateFilters({ type })}
             />
 
-            <ThemedText style={styles.label}>Cartera</ThemedText>
+            <ThemedText style={styles.label}>{t("filters.wallet")}</ThemedText>
             <TransactionFiltersChipGroup
               options={walletOptions}
               selectedValue={localFilters.walletId}
               onSelect={(walletId) => updateFilters({ walletId })}
             />
 
-            <ThemedText style={styles.label}>Categoría</ThemedText>
+            <ThemedText style={styles.label}>{t("filters.category")}</ThemedText>
             <TransactionFiltersChipGroup
               options={categoryOptions}
               selectedValue={localFilters.categoryId}
               onSelect={(categoryId) => updateFilters({ categoryId })}
             />
 
-            <ThemedText style={styles.label}>Rango de fechas</ThemedText>
+            <ThemedText style={styles.label}>{t("filters.dateRange")}</ThemedText>
             <TransactionFiltersDateRange
               fromText={fromText}
               fromIso={fromIso}

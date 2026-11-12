@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  StyleSheet,
-  View,
-} from "react-native";
+import { useTranslation } from "react-i18next";
+import { ActivityIndicator, Modal, Pressable, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
@@ -43,6 +38,7 @@ export function WalletDeleteModal({
   onClose,
 }: WalletDeleteModalProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("wallets");
   const [mode, setMode] = useState<WalletDeleteMode>("keep");
   const [targetWalletId, setTargetWalletId] = useState<string | null>(null);
 
@@ -92,7 +88,7 @@ export function WalletDeleteModal({
         <Pressable
           style={StyleSheet.absoluteFill}
           accessibilityRole="button"
-          accessibilityLabel="Cerrar eliminación de cartera"
+          accessibilityLabel={t("delete.close")}
           onPress={submitting ? undefined : onClose}
         />
         <View
@@ -102,21 +98,21 @@ export function WalletDeleteModal({
           ]}
         >
           <ThemedText type="title" style={styles.sheetTitle}>
-            Eliminar cartera
+            {t("delete.title")}
           </ThemedText>
           <ThemedText style={[styles.deleteMessage, { color: theme.muted }]}>
             {usageLoading
-              ? `Comprobando los movimientos de «${wallet.name}»…`
+              ? t("delete.checking", { name: wallet.name })
               : hasMovements
-                ? `«${wallet.name}» tiene movimientos. Elige qué hacer con ellos antes de eliminarla.`
-                : `«${wallet.name}» no tiene movimientos y se eliminará de forma permanente.`}
+                ? t("delete.hasMovements", { name: wallet.name })
+                : t("delete.noMovements", { name: wallet.name })}
           </ThemedText>
 
           {usageLoading ? (
             <View style={styles.centered}>
               <ActivityIndicator color={theme.primary} />
               <ThemedText style={[styles.optionHint, { color: theme.muted }]}>
-                Comprobando movimientos…
+                {t("delete.checkingShort")}
               </ThemedText>
             </View>
           ) : null}

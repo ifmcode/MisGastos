@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -10,6 +11,8 @@ export interface WalletsEmptyStateProps {
 }
 
 export function WalletsEmptyState({ onCreate }: WalletsEmptyStateProps) {
+  const { t } = useTranslation("wallets");
+
   return (
     <View style={walletsStyles.emptyState}>
       <View style={walletsStyles.emptyIcon}>
@@ -20,20 +23,20 @@ export function WalletsEmptyState({ onCreate }: WalletsEmptyStateProps) {
         />
       </View>
       <ThemedText type="subtitle" style={walletsStyles.emptyTitle}>
-        Aún no tienes carteras
+        {t("emptyTitle")}
       </ThemedText>
       <ThemedText style={walletsStyles.centeredText}>
-        Crea tu primera cartera para empezar a organizar tus gastos e ingresos.
+        {t("emptyMessage")}
       </ThemedText>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Crear primera cartera"
+        accessibilityLabel={t("createFirst")}
         onPress={onCreate}
         style={walletsStyles.createButton}
       >
         <Ionicons name="add" size={20} color={walletsPalette.onPrimary} />
         <ThemedText style={walletsStyles.createButtonText}>
-          Crear cartera
+          {t("create")}
         </ThemedText>
       </Pressable>
     </View>

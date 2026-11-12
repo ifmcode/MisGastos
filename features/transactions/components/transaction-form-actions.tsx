@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -24,6 +25,7 @@ export function TransactionFormActions({
   onDelete,
 }: TransactionFormActionsProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["transactions", "common"]);
   const disabled = submitting || !canSubmit;
 
   return (
@@ -31,7 +33,7 @@ export function TransactionFormActions({
       {isEditing && onDelete ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Eliminar movimiento"
+          accessibilityLabel={t("form.delete")}
           onPress={onDelete}
           disabled={submitting}
           style={[
@@ -44,14 +46,14 @@ export function TransactionFormActions({
           <ThemedText
             style={[styles.deleteButtonText, { color: theme.danger }]}
           >
-            Eliminar
+            {t("common:actions.delete")}
           </ThemedText>
         </Pressable>
       ) : null}
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Cancelar"
+        accessibilityLabel={t("common:actions.cancel")}
         onPress={onCancel}
         disabled={submitting}
         style={[
@@ -60,12 +62,16 @@ export function TransactionFormActions({
           submitting && styles.disabled,
         ]}
       >
-        <ThemedText type="defaultSemiBold">Cancelar</ThemedText>
+        <ThemedText type="defaultSemiBold">
+          {t("common:actions.cancel")}
+        </ThemedText>
       </Pressable>
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={isEditing ? "Guardar cambios" : "Crear movimiento"}
+        accessibilityLabel={
+          isEditing ? t("form.saveChanges") : t("form.create")
+        }
         onPress={onSubmit}
         disabled={disabled}
         style={[styles.primaryButton, disabled && styles.disabled]}
@@ -74,7 +80,7 @@ export function TransactionFormActions({
           <ActivityIndicator color={theme.onPrimary} />
         ) : (
           <ThemedText style={styles.primaryButtonText}>
-            {isEditing ? "Guardar" : "Crear"}
+            {isEditing ? t("form.save") : t("form.createShort")}
           </ThemedText>
         )}
       </Pressable>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 
 import { ThemedText } from "@/components/themed-text";
@@ -24,6 +25,7 @@ export function TransferFormSourceSelector({
   onSelect,
 }: TransferFormSourceSelectorProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("transfers");
   const [pickerVisible, setPickerVisible] = useState(false);
 
   function selectWallet(walletId: string) {
@@ -33,12 +35,12 @@ export function TransferFormSourceSelector({
 
   return (
     <>
-      <ThemedText style={styles.label}>Desde</ThemedText>
+      <ThemedText style={styles.label}>{t("form.from")}</ThemedText>
       <WalletChipSelector
         wallets={wallets}
         selectedId={selectedId}
         disabled={disabled}
-        accessibilityPrefix="Origen"
+        accessibilityPrefix={t("form.from")}
         onSelect={onSelect}
         onOpenPicker={() => setPickerVisible(true)}
       />
@@ -53,7 +55,7 @@ export function TransferFormSourceSelector({
         wallets={wallets}
         selectedId={selectedId}
         disabled={disabled}
-        accessibilityPrefix="Origen"
+        accessibilityPrefix={t("form.from")}
         onSelect={selectWallet}
         onClose={() => setPickerVisible(false)}
       />

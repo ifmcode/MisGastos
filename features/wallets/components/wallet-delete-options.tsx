@@ -1,11 +1,13 @@
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { walletManagementStyles as styles } from "../styles/wallet-management.styles";
 import { Wallet, WalletDeleteMode } from "../types/wallet.types";
-import { formatMoney } from "../utils/money";
 
 export interface WalletDeleteOptionsProps {
   targets: readonly Wallet[];
@@ -19,18 +21,18 @@ export interface WalletDeleteOptionsProps {
 
 const MODE_OPTIONS: ReadonlyArray<{
   mode: WalletDeleteMode;
-  title: string;
-  hint: string;
+  titleKey: string;
+  hintKey: string;
 }> = [
   {
     mode: "keep",
-    title: "Conservar los movimientos",
-    hint: "Se mantendrán en el historial bajo la cartera eliminada sin afectar a ninguna otra cartera.",
+    titleKey: "delete.keepTitle",
+    hintKey: "delete.keepHint",
   },
   {
     mode: "reassign",
-    title: "Mover a otra cartera",
-    hint: "Los movimientos pasan a otra cartera activa con la misma moneda.",
+    titleKey: "delete.reassignTitle",
+    hintKey: "delete.reassignHint",
   },
 ];
 
@@ -45,6 +47,9 @@ export function WalletDeleteOptions({
   onTargetChange,
 }: WalletDeleteOptionsProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("wallets");
+  const tr = asTranslate(t);
+  const locale = useAppLocale();
   const canReassign = targets.length > 0;
 
   return (
@@ -52,6 +57,8 @@ export function WalletDeleteOptions({
       {MODE_OPTIONS.map((option) => {
         const selected = mode === option.mode;
         const optionDisabled = option.mode === "reassign" && !canReassign;
+        const title = tr(option.titleKey);
+        const hint = tr(option.hintKey);
 
         return (
           <View key={option.mode} style={styles.optionGroup}>
@@ -61,7 +68,7 @@ export function WalletDeleteOptions({
                 checked: selected,
                 disabled: optionDisabled,
               }}
-              accessibilityLabel={option.title}
+              accessibilityLabel={title}
               disabled={optionDisabled || submitting}
               onPress={() => onModeChange(option.mode)}
               style={[
@@ -80,15 +87,11 @@ export function WalletDeleteOptions({
                 {selected ? <View style={styles.radioDot} /> : null}
               </View>
               <View style={styles.optionText}>
-                <ThemedText style={styles.optionTitle}>
-                  {option.title}
-                </ThemedText>
-                <ThemedText
-                  style={[styles.optionHint, { color: theme.muted }]}
-                >
+                <ThemedText style={styles.optionTitle}>{title}</ThemedText>
+                <ThemedText style={[styles.optionHint, { color: theme.muted }]}>
                   {option.mode === "keep"
-                    ? `Quedarán como «${deletedName}». ${option.hint}`
-                    : option.hint}
+                    ? t("delete.keepHintNamed", { name: deletedName, hint })
+                    : hint}
                 </ThemedText>
               </View>
             </Pressable>
@@ -108,7 +111,9 @@ export function WalletDeleteOptions({
                         key={target.id}
                         accessibilityRole="radio"
                         accessibilityState={{ checked: targetSelected }}
-                        accessibilityLabel={`Mover movimientos a ${target.name}`}
+                        accessibilityLabel={t("delete.reassignAccessibility", {
+                          name: target.name,
+                        })}
                         disabled={submitting}
                         onPress={() => onTargetChange(target.id)}
                         style={[
@@ -125,16 +130,14 @@ export function WalletDeleteOptions({
                       >
                         <ThemedText style={styles.targetText}>
                           {target.name} ·{" "}
-                          {formatMoney(target.balance, target.currency)}
+                          {locale.formatCurrency(target.balance, target.currency)}
                         </ThemedText>
                       </Pressable>
                     );
                   })
                 ) : (
-                  <ThemedText
-                    style={[styles.optionHint, { color: theme.muted }]}
-                  >
-                    No hay otra cartera activa con la misma moneda.
+                  <ThemedText style={[styles.optionHint, { color: theme.muted }]}>
+                    {t("delete.noTargets")}
                   </ThemedText>
                 )}
               </ScrollView>

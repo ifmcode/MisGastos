@@ -1,20 +1,19 @@
 import { describe, expect, it } from "@jest/globals";
 
 import {
-  getTransfersEmptyMessage,
-  TRANSFER_EMPTY_GUIDANCE,
+  getTransfersEmptyMessageKey,
+  TRANSFER_EMPTY_GUIDANCE_KEY,
 } from "../dashboard-transfers-copy";
 
-describe("getTransfersEmptyMessage", () => {
+describe("getTransfersEmptyMessageKey", () => {
   it("points to the wallets tab when a transfer is possible", () => {
-    expect(getTransfersEmptyMessage(true)).toBe(TRANSFER_EMPTY_GUIDANCE);
-    expect(getTransfersEmptyMessage(true)).toContain("Carteras");
-    expect(getTransfersEmptyMessage(true)).toContain("Transferir");
+    expect(getTransfersEmptyMessageKey(true)).toBe(
+      TRANSFER_EMPTY_GUIDANCE_KEY,
+    );
+    expect(TRANSFER_EMPTY_GUIDANCE_KEY).toBe("transfers.guidance");
   });
 
   it("explains the wallet requirement when a transfer is not possible", () => {
-    expect(getTransfersEmptyMessage(false)).toBe(
-      "Necesitas al menos dos carteras con la misma moneda.",
-    );
+    expect(getTransfersEmptyMessageKey(false)).toBe("transfers.requirement");
   });
 });

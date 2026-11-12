@@ -1,14 +1,16 @@
+import { useTranslation } from "react-i18next";
 import { TextInput, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
+import { type TransferValidationCode } from "../schemas/transfer.schema";
 import { transferFormStyles as styles } from "../styles/transfer-form.styles";
 
 export interface TransferFormAmountFieldProps {
   value: string;
   symbol: string;
-  error?: string;
+  error?: TransferValidationCode;
   helper?: string;
   disabled: boolean;
   onChange: (value: string) => void;
@@ -23,10 +25,12 @@ export function TransferFormAmountField({
   onChange,
 }: TransferFormAmountFieldProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["transfers", "validation"]);
+  const errorText = error ? t(`validation:transfers.${error}`) : null;
 
   return (
     <>
-      <ThemedText style={styles.label}>Importe</ThemedText>
+      <ThemedText style={styles.label}>{t("form.amount")}</ThemedText>
       <View
         style={[
           styles.amountWrapper,
@@ -42,18 +46,18 @@ export function TransferFormAmountField({
         <TextInput
           value={value}
           onChangeText={onChange}
-          placeholder="0,00"
+          placeholder={t("form.amountPlaceholder")}
           placeholderTextColor={theme.muted}
           keyboardType="decimal-pad"
           inputMode="decimal"
           editable={!disabled}
-          accessibilityLabel="Importe de la transferencia"
+          accessibilityLabel={t("form.amountAccessibility")}
           style={[styles.amountInput, { color: theme.text }]}
         />
       </View>
-      {error ? (
+      {errorText ? (
         <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-          {error}
+          {errorText}
         </ThemedText>
       ) : helper ? (
         <ThemedText style={[styles.helper, { color: theme.muted }]}>

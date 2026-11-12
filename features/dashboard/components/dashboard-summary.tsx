@@ -1,10 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { formatMoney, WalletTotal } from "@/features/wallets/utils/money";
+import { WalletTotal } from "@/features/wallets/utils/money";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 
 export interface DashboardSummaryProps {
   totals: readonly WalletTotal[];
@@ -15,15 +17,18 @@ export function DashboardSummary({
   totals,
   selectedWallet,
 }: DashboardSummaryProps) {
+  const { t } = useTranslation("dashboard");
+  const locale = useAppLocale();
+
   const label = selectedWallet
-    ? `Saldo de ${selectedWallet.name}`
-    : "Saldo total";
+    ? t("summary.wallet", { name: selectedWallet.name })
+    : t("summary.total");
 
   const hint = selectedWallet
     ? selectedWallet.includeInTotal
-      ? "Esta cartera se suma al total global."
-      : "Esta cartera está fuera del total global."
-    : "Solo se suman las carteras incluidas en el total.";
+      ? t("summary.included")
+      : t("summary.excluded")
+    : t("summary.hint");
 
   return (
     <ThemedView style={styles.card} lightColor="#0A7EA4" darkColor="#0B3F52">
@@ -40,7 +45,7 @@ export function DashboardSummary({
 
       {totals.length === 0 ? (
         <ThemedText style={styles.emptyTotal}>
-          No hay saldo incluido en el total.
+          {t("summary.emptyTotal")}
         </ThemedText>
       ) : (
         totals.map((total, index) => (
@@ -52,7 +57,7 @@ export function DashboardSummary({
             <ThemedText
               style={[styles.amount, total.total < 0 && styles.negative]}
             >
-              {formatMoney(total.total, total.currency)}
+              {locale.formatCurrency(total.total, total.currency)}
             </ThemedText>
           </View>
         ))

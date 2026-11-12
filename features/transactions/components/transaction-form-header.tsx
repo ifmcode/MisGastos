@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -18,22 +19,21 @@ export function TransactionFormHeader({
   onClose,
 }: TransactionFormHeaderProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["transactions", "common"]);
 
   return (
     <View style={styles.header}>
       <View style={styles.headerText}>
         <ThemedText type="title" style={styles.title}>
-          {isEditing ? "Editar movimiento" : "Nuevo movimiento"}
+          {isEditing ? t("form.editTitle") : t("form.createTitle")}
         </ThemedText>
         <ThemedText style={[styles.subtitle, { color: theme.muted }]}>
-          {isEditing
-            ? "Ajusta el importe, la fecha o la categoría."
-            : "Registra un gasto o ingreso en tu cartera."}
+          {isEditing ? t("form.editSubtitle") : t("form.createSubtitle")}
         </ThemedText>
       </View>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Cerrar formulario"
+        accessibilityLabel={t("common:accessibility.closeForm")}
         hitSlop={10}
         onPress={onClose}
         disabled={disabled}

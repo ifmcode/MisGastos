@@ -1,10 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import {
-  WEEKDAY_LABELS,
   buildCalendarMonth,
   type CalendarMonthRef,
 } from "@/shared/utils/date-calendar";
@@ -27,14 +28,16 @@ export function DatePickerCalendar({
   onSelectDate,
 }: DatePickerCalendarProps) {
   const theme = useFormTheme();
-  const calendar = buildCalendarMonth(month.year, month.month);
+  const { t } = useTranslation("common");
+  const { locale } = useAppLocale();
+  const calendar = buildCalendarMonth(month.year, month.month, locale);
 
   return (
     <>
       <View style={styles.monthRow}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Mes anterior"
+          accessibilityLabel={t("date.previousMonth")}
           onPress={onPreviousMonth}
           style={styles.navButton}
         >
@@ -43,7 +46,7 @@ export function DatePickerCalendar({
         <ThemedText style={styles.monthLabel}>{calendar.label}</ThemedText>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Mes siguiente"
+          accessibilityLabel={t("date.nextMonth")}
           onPress={onNextMonth}
           style={styles.navButton}
         >
@@ -52,8 +55,8 @@ export function DatePickerCalendar({
       </View>
 
       <View style={styles.weekdaysRow}>
-        {WEEKDAY_LABELS.map((label) => (
-          <View key={label} style={styles.weekdayCell}>
+        {calendar.weekdayLabels.map((label, index) => (
+          <View key={`${label}-${index}`} style={styles.weekdayCell}>
             <ThemedText style={[styles.weekdayText, { color: theme.muted }]}>
               {label}
             </ThemedText>
@@ -80,7 +83,10 @@ export function DatePickerCalendar({
                 <Pressable
                   key={day.isoDate}
                   accessibilityRole="button"
-                  accessibilityLabel={`Día ${day.day} de ${calendar.label}`}
+                  accessibilityLabel={t("date.dayOfMonth", {
+                    day: day.day,
+                    month: calendar.label,
+                  })}
                   accessibilityState={{ selected }}
                   onPress={() => onSelectDate(day.isoDate)}
                   style={[

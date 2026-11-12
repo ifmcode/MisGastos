@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -16,6 +17,7 @@ export function CategoriesErrorState({
   onRetry,
 }: CategoriesErrorStateProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["categories", "common"]);
 
   return (
     <View style={categoriesStyles.centered}>
@@ -25,17 +27,17 @@ export function CategoriesErrorState({
         color={theme.danger}
       />
       <ThemedText type="defaultSemiBold" style={categoriesStyles.errorTitle}>
-        No se pudieron cargar las categorías
+        {t("errorTitle")}
       </ThemedText>
       <ThemedText style={categoriesStyles.centeredText}>{message}</ThemedText>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Reintentar carga de categorías"
+        accessibilityLabel={t("retryAccessibility")}
         onPress={onRetry}
         style={categoriesStyles.retryButton}
       >
         <ThemedText style={categoriesStyles.retryButtonText}>
-          Reintentar
+          {t("common:actions.retry")}
         </ThemedText>
       </Pressable>
     </View>

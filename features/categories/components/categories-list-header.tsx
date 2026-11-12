@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -19,6 +20,8 @@ export function CategoriesListHeader({
   onSelectFilter,
   reorder,
 }: CategoriesListHeaderProps) {
+  const { t } = useTranslation("categories");
+
   return (
     <View>
       <View style={styles.listHeaderRow}>
@@ -38,7 +41,7 @@ export function CategoriesListHeader({
 
       {reorder.reordering ? (
         <ThemedText style={styles.reorderHint}>
-          Usa las flechas para cambiar el orden.
+          {t("reorder.hint")}
         </ThemedText>
       ) : null}
 

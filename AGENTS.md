@@ -28,6 +28,7 @@ Instructions for AI agents (OpenCode, Claude, etc.) working on MisGastos.
 - **Feature folders**: `components/`, `hooks/`, `services/`, `repositories/`, `schemas/`, `types/`, `utils/`, `styles/`.
 - **Imports**: `@/` alias, named imports only, no default re-exports.
 - **No `any`**: use `unknown` + type guards.
+- **Copy**: every visible string (including accessibility labels/hints) comes from a translation namespace. Add keys to `features/<feature>/locales/{es,en}.json`; never import JSON from components. Domain errors return codes, not sentences. Run `npm run check:copy`.
 - **Commits**: never commit unless the user explicitly asks.
 - **Tests**: colocated in `__tests__/`; services and utils are expected to be tested.
 
@@ -36,4 +37,5 @@ Instructions for AI agents (OpenCode, Claude, etc.) working on MisGastos.
 npx tsc --noEmit
 npx expo lint
 npx jest
+npm run check:copy
 ```

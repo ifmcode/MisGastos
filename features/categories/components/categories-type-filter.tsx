@@ -1,4 +1,7 @@
+import { useTranslation } from "react-i18next";
 import { ScrollView } from "react-native";
+
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { categoriesStyles } from "../styles/categories.styles";
 import { CategoryType } from "../types/category.types";
@@ -6,18 +9,18 @@ import { CategoriesTypeFilterChip } from "./categories-type-filter-chip";
 
 const TYPE_FILTER_OPTIONS: readonly {
   value: CategoryType;
-  label: string;
-  accessibilityLabel: string;
+  labelKey: string;
+  accessibilityKey: string;
 }[] = [
   {
     value: "expense",
-    label: "Gastos",
-    accessibilityLabel: "Ver categorías de gasto",
+    labelKey: "filter.expense",
+    accessibilityKey: "filter.expenseAccessibility",
   },
   {
     value: "income",
-    label: "Ingresos",
-    accessibilityLabel: "Ver categorías de ingreso",
+    labelKey: "filter.income",
+    accessibilityKey: "filter.incomeAccessibility",
   },
 ];
 
@@ -30,6 +33,9 @@ export function CategoriesTypeFilter({
   selected,
   onSelect,
 }: CategoriesTypeFilterProps) {
+  const { t } = useTranslation("categories");
+  const tr = asTranslate(t);
+
   return (
     <ScrollView
       horizontal
@@ -39,8 +45,8 @@ export function CategoriesTypeFilter({
       {TYPE_FILTER_OPTIONS.map((option) => (
         <CategoriesTypeFilterChip
           key={option.value}
-          label={option.label}
-          accessibilityLabel={option.accessibilityLabel}
+          label={tr(option.labelKey)}
+          accessibilityLabel={tr(option.accessibilityKey)}
           selected={selected === option.value}
           onPress={() => onSelect(option.value)}
         />

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -18,6 +19,7 @@ export function WalletFormCurrencySelector({
   onChange,
 }: WalletFormCurrencySelectorProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("wallets");
 
   return (
     <View style={styles.chipsWrap}>
@@ -29,7 +31,9 @@ export function WalletFormCurrencySelector({
             key={currency.code}
             accessibilityRole="radio"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Moneda ${currency.name}`}
+            accessibilityLabel={t("types.currencyAccessibility", {
+              name: currency.code,
+            })}
             onPress={() => onChange(currency.code)}
             disabled={disabled}
             style={[

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
 import {
-  getWalletErrorMessage,
+  getWalletErrorCode,
   WalletValidationError,
 } from "../wallet.errors";
 
@@ -9,49 +9,43 @@ function errorWithCode(code: string): Error {
   return Object.assign(new Error("provider detail"), { code });
 }
 
-describe("getWalletErrorMessage", () => {
-  it("returns the validation message for validation errors", () => {
+describe("getWalletErrorCode", () => {
+  it("returns VALIDATION for validation errors", () => {
     const error = new WalletValidationError([
-      {
-        field: "name",
-        code: "NAME_REQUIRED",
-        message: "El nombre es obligatorio.",
-      },
+      { field: "name", code: "NAME_REQUIRED" },
     ]);
 
-    expect(getWalletErrorMessage(error, "fallback")).toBe(
-      "El nombre es obligatorio.",
-    );
+    expect(getWalletErrorCode(error, "LOAD_FAILED")).toBe("VALIDATION");
   });
 
-  it("translates permission errors", () => {
+  it("maps permission errors", () => {
     expect(
-      getWalletErrorMessage(errorWithCode("permission-denied"), "fallback"),
-    ).toBe("No tienes permisos para realizar esta operación.");
-
+      getWalletErrorCode(errorWithCode("permission-denied"), "LOAD_FAILED"),
+    ).toBe("PERMISSION_DENIED");
     expect(
-      getWalletErrorMessage(new Error("7 PERMISSION_DENIED"), "fallback"),
-    ).toBe("No tienes permisos para realizar esta operación.");
+      getWalletErrorCode(new Error("7 PERMISSION_DENIED"), "LOAD_FAILED"),
+    ).toBe("PERMISSION_DENIED");
   });
 
-  it("translates connection errors", () => {
+  it("maps connection errors", () => {
     expect(
-      getWalletErrorMessage(errorWithCode("unavailable"), "fallback"),
-    ).toBe("No hay conexión. Comprueba tu red e inténtalo de nuevo.");
-
+      getWalletErrorCode(errorWithCode("unavailable"), "LOAD_FAILED"),
+    ).toBe("NETWORK");
     expect(
-      getWalletErrorMessage(
+      getWalletErrorCode(
         errorWithCode("network-request-failed"),
-        "fallback",
+        "LOAD_FAILED",
       ),
-    ).toBe("No hay conexión. Comprueba tu red e inténtalo de nuevo.");
+    ).toBe("NETWORK");
   });
 
   it("falls back for unknown errors", () => {
-    expect(getWalletErrorMessage(new Error("unknown"), "fallback")).toBe(
-      "fallback",
+    expect(getWalletErrorCode(new Error("unknown"), "LOAD_FAILED")).toBe(
+      "LOAD_FAILED",
     );
-    expect(getWalletErrorMessage("not an error", "fallback")).toBe("fallback");
-    expect(getWalletErrorMessage(null, "fallback")).toBe("fallback");
+    expect(getWalletErrorCode("not an error", "USAGE_FAILED")).toBe(
+      "USAGE_FAILED",
+    );
+    expect(getWalletErrorCode(null, "CREATE_FAILED")).toBe("CREATE_FAILED");
   });
 });

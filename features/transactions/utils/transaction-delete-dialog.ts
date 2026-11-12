@@ -1,39 +1,49 @@
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
-import { formatMoney } from "@/features/wallets/utils/money";
 
 import { Transaction } from "../types/transaction.types";
 
 export interface DeleteTransactionConfirmation {
-  title: string;
-  message: string;
+  titleKey: string;
+  messageKey: string;
+  values: { concept: string; amount: string; wallet: string };
 }
 
-/** Builds the copy shown before deleting a movement and reverting its balance. */
+/**
+ * Builds the translation keys shown before deleting a movement and reverting
+ * its balance. The caller formats the amount with the active locale.
+ */
 export function getDeleteTransactionConfirmation(
   transaction: Transaction,
   wallets: readonly Wallet[],
+  amount: string,
 ): DeleteTransactionConfirmation {
-  const amount = formatMoney(transaction.amount, transaction.currency);
-
   if (isOrphanedWalletId(transaction.walletId)) {
-    const historyLabel = transaction.walletName
-      ? ` del historial de la cartera «${transaction.walletName}»`
-      : " del historial";
-
     return {
-      title: "Eliminar movimiento",
-      message: `Se eliminará "${transaction.concept}" (${amount})${historyLabel}. La cartera ya no existe, así que no hay saldo que revertir.`,
+      titleKey: "deleteDialog.title",
+      messageKey: transaction.walletName
+        ? "deleteDialog.messageOrphan"
+        : "deleteDialog.messageOrphanNoWallet",
+      values: {
+        concept: transaction.concept,
+        amount,
+        wallet: transaction.walletName ?? "",
+      },
     };
   }
 
   const walletName =
     wallets.find((wallet) => wallet.id === transaction.walletId)?.name ??
     transaction.walletName ??
-    "esta cartera";
+    "";
 
   return {
-    title: "Eliminar movimiento",
-    message: `Se eliminará "${transaction.concept}" (${amount}) de ${walletName} y se revertirá el saldo.`,
+    titleKey: "deleteDialog.title",
+    messageKey: "deleteDialog.message",
+    values: {
+      concept: transaction.concept,
+      amount,
+      wallet: walletName,
+    },
   };
 }

@@ -80,7 +80,7 @@ describe("TransactionService.createTransaction", () => {
     expect(error).toBeInstanceOf(TransactionValidationError);
     if (!(error instanceof TransactionValidationError)) return;
     expect(error.fieldErrors).toEqual({
-      ownerId: "Debes iniciar sesión para gestionar tus movimientos.",
+      ownerId: "OWNER_REQUIRED",
     });
   });
 

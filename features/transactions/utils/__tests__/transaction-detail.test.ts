@@ -60,11 +60,18 @@ function buildCategory(overrides: Partial<Category>): Category {
   };
 }
 
+const t = (key: string) => key;
+const formatCurrency = (value: number, currency: string) =>
+  `${value} ${currency}`;
+const formatDate = (isoDate: string) => isoDate;
+
 describe("getTransactionDetailSummary", () => {
   it("describes an expense with its formatted amount and currency", () => {
-    expect(getTransactionDetailSummary(buildTransaction({}))).toEqual({
-      typeLabel: "Gasto",
-      amountLabel: "1.234,50 €",
+    expect(
+      getTransactionDetailSummary(buildTransaction({}), formatCurrency),
+    ).toEqual({
+      typeKey: "types.expense",
+      amountLabel: "1234.5 EUR",
       currency: "EUR",
       isIncome: false,
     });
@@ -72,8 +79,11 @@ describe("getTransactionDetailSummary", () => {
 
   it("describes an income", () => {
     expect(
-      getTransactionDetailSummary(buildTransaction({ type: "income" })),
-    ).toMatchObject({ typeLabel: "Ingreso", isIncome: true });
+      getTransactionDetailSummary(
+        buildTransaction({ type: "income" }),
+        formatCurrency,
+      ),
+    ).toMatchObject({ typeKey: "types.income", isIncome: true });
   });
 });
 
@@ -104,36 +114,39 @@ describe("getTransactionWalletInfo", () => {
     ).toEqual({ name: "[Eliminada] Cuenta principal", status: "deleted" });
   });
 
-  it("uses a safe label when no wallet or stored name is available", () => {
+  it("uses an empty name when no wallet or stored name is available", () => {
     expect(
       getTransactionWalletInfo(
         buildTransaction({ walletId: "missing-wallet" }),
         [],
       ),
-    ).toEqual({ name: "Cartera no disponible", status: "deleted" });
+    ).toEqual({ name: "", status: "deleted" });
   });
 });
 
 describe("getTransactionWalletLabel", () => {
   it("marks archived wallets", () => {
     expect(
-      getTransactionWalletLabel({ name: "Cuenta", status: "archived" }),
-    ).toBe("Cuenta (archivada)");
+      getTransactionWalletLabel({ name: "Cuenta", status: "archived" }, t),
+    ).toBe("Cuenta detail.archivedSuffix");
   });
 
   it("does not duplicate the deleted prefix", () => {
     expect(
-      getTransactionWalletLabel({
-        name: "[Eliminada] Cuenta",
-        status: "deleted",
-      }),
+      getTransactionWalletLabel(
+        {
+          name: "[Eliminada] Cuenta",
+          status: "deleted",
+        },
+        t,
+      ),
     ).toBe("[Eliminada] Cuenta");
   });
 
   it("marks deleted wallets that lost their prefix", () => {
     expect(
-      getTransactionWalletLabel({ name: "Cuenta", status: "deleted" }),
-    ).toBe("Cuenta (eliminada)");
+      getTransactionWalletLabel({ name: "Cuenta", status: "deleted" }, t),
+    ).toBe("Cuenta detail.deletedSuffix");
   });
 });
 
@@ -144,28 +157,44 @@ describe("buildTransactionDetailFields", () => {
         buildTransaction({ notes: "  Cena con amigos  " }),
         [buildWallet({})],
         [buildCategory({})],
+        t,
+        formatDate,
       ),
     ).toEqual([
-      { key: "wallet", label: "Cartera", value: "Cuenta principal" },
-      { key: "category", label: "Categoría", value: "Alimentación" },
-      { key: "concept", label: "Concepto", value: "Cena" },
-      { key: "date", label: "Fecha", value: "20/10/2026" },
-      { key: "notes", label: "Notas", value: "Cena con amigos" },
+      {
+        key: "wallet",
+        labelKey: "detail.wallet",
+        value: "Cuenta principal",
+      },
+      {
+        key: "category",
+        labelKey: "detail.category",
+        value: "Alimentación",
+      },
+      { key: "concept", labelKey: "detail.concept", value: "Cena" },
+      { key: "date", labelKey: "detail.date", value: "2026-10-20" },
+      {
+        key: "notes",
+        labelKey: "detail.notes",
+        value: "Cena con amigos",
+      },
     ]);
   });
 
-  it("shows a fallback when the movement has no notes", () => {
+  it("shows translation keys when the movement has no notes", () => {
     const fields = buildTransactionDetailFields(
       buildTransaction({ notes: "   " }),
       [],
       [],
+      t,
+      formatDate,
     );
 
     expect(fields.find((field) => field.key === "notes")?.value).toBe(
-      "Sin notas",
+      "common:states.noNotes",
     );
     expect(fields.find((field) => field.key === "category")?.value).toBe(
-      "Sin categoría",
+      "fallbackCategory",
     );
   });
 });

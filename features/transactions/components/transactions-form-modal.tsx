@@ -1,10 +1,13 @@
+import { useTranslation } from "react-i18next";
 import { Modal, View } from "react-native";
 
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { confirmDialogStyles } from "@/shared/components/molecules/confirm-dialog.styles";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import {
   TransactionInput,
@@ -45,16 +48,27 @@ export function TransactionsFormModal({
   onClose,
   onCategoryCreated,
 }: TransactionsFormModalProps) {
+  const { t } = useTranslation("transactions");
+  const tr = asTranslate(t);
+  const locale = useAppLocale();
   const deleteDialog = useConfirmDialog();
   const deleteConfirmation = editingTransaction
-    ? getDeleteTransactionConfirmation(editingTransaction, walletLookup)
+    ? getDeleteTransactionConfirmation(
+        editingTransaction,
+        walletLookup,
+        locale.formatCurrency(
+          editingTransaction.amount,
+          editingTransaction.currency,
+        ),
+      )
     : null;
 
   function requestDelete() {
     if (!deleteConfirmation) return;
 
     deleteDialog.open({
-      ...deleteConfirmation,
+      title: tr(deleteConfirmation.titleKey),
+      message: tr(deleteConfirmation.messageKey, deleteConfirmation.values),
       onConfirm: onDelete,
     });
   }

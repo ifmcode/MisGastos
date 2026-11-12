@@ -18,11 +18,7 @@ export function getTransactionCategoryIssue(
     typeof input.categoryId === "string" ? input.categoryId.trim() : "";
 
   if (categoryId.length === 0) {
-    return {
-      field: "categoryId",
-      code: "INVALID_CATEGORY",
-      message: "Selecciona una categoría válida.",
-    };
+    return { field: "categoryId", code: "INVALID_CATEGORY" };
   }
 
   if (!categories) return null;
@@ -30,19 +26,11 @@ export function getTransactionCategoryIssue(
   const category = findTransactionCategory(categories, categoryId);
 
   if (!category) {
-    return {
-      field: "categoryId",
-      code: "INVALID_CATEGORY",
-      message: "Selecciona una categoría válida.",
-    };
+    return { field: "categoryId", code: "INVALID_CATEGORY" };
   }
 
   if (isTransactionType(input.type) && category.type !== input.type) {
-    return {
-      field: "categoryId",
-      code: "CATEGORY_TYPE_MISMATCH",
-      message: "La categoría no corresponde al tipo de movimiento.",
-    };
+    return { field: "categoryId", code: "CATEGORY_TYPE_MISMATCH" };
   }
 
   return null;

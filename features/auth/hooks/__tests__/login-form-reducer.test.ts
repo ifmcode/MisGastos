@@ -11,7 +11,7 @@ const stateWithFeedback: LoginFormState = {
   name: "Ada",
   email: "ada@example.com",
   password: "secret123",
-  fieldErrors: { email: "Old email error" },
+  fieldErrors: { email: "EMAIL_REQUIRED" },
   emailError: "Old email error",
   googleError: "Old Google error",
   resetFeedback: { tone: "error", message: "Old reset error" },
@@ -36,12 +36,15 @@ describe("loginFormReducer", () => {
     const state = loginFormReducer(
       {
         ...stateWithFeedback,
-        fieldErrors: { email: "Email error", password: "Password error" },
+        fieldErrors: {
+          email: "EMAIL_INVALID",
+          password: "PASSWORD_REQUIRED",
+        },
       },
       { type: "field-changed", field: "email", value: "new@example.com" },
     );
 
-    expect(state.fieldErrors.password).toBe("Password error");
+    expect(state.fieldErrors.password).toBe("PASSWORD_REQUIRED");
   });
 
   it("toggles the mode and clears every error", () => {
@@ -59,13 +62,16 @@ describe("loginFormReducer", () => {
   it("stores validation errors without starting a request", () => {
     const state = loginFormReducer(stateWithFeedback, {
       type: "validation-failed",
-      errors: { email: "Required", password: "Required" },
+      errors: {
+        email: "EMAIL_REQUIRED",
+        password: "PASSWORD_REQUIRED",
+      },
     });
 
     expect(state.loading).toBe(false);
     expect(state.fieldErrors).toEqual({
-      email: "Required",
-      password: "Required",
+      email: "EMAIL_REQUIRED",
+      password: "PASSWORD_REQUIRED",
     });
     expect(state.emailError).toBeNull();
   });
@@ -118,11 +124,11 @@ describe("loginFormReducer", () => {
   it("shows an invalid reset email as a field error", () => {
     const state = loginFormReducer(stateWithFeedback, {
       type: "reset-invalid",
-      error: "Ingresa tu correo electrónico.",
+      error: "EMAIL_REQUIRED",
     });
 
     expect(state.loading).toBe(false);
-    expect(state.fieldErrors.email).toBe("Ingresa tu correo electrónico.");
+    expect(state.fieldErrors.email).toBe("EMAIL_REQUIRED");
     expect(state.resetFeedback).toBeNull();
   });
 

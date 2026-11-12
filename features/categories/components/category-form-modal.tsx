@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { Modal, View } from "react-native";
 
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { confirmDialogStyles } from "@/shared/components/molecules/confirm-dialog.styles";
 import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import {
   CategoryInput,
@@ -40,6 +42,8 @@ export function CategoryFormModal({
   onClose,
   onDelete,
 }: CategoryFormModalProps) {
+  const { t } = useTranslation("categories");
+  const tr = asTranslate(t);
   const deleteDialog = useConfirmDialog();
   const deleteConfirmation = category
     ? getDeleteCategoryConfirmation(category)
@@ -49,7 +53,8 @@ export function CategoryFormModal({
     if (!deleteConfirmation || !onDelete) return;
 
     deleteDialog.open({
-      ...deleteConfirmation,
+      title: tr(deleteConfirmation.titleKey),
+      message: tr(deleteConfirmation.messageKey, deleteConfirmation.values),
       onConfirm: onDelete,
     });
   }

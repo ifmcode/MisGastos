@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -18,20 +19,22 @@ export function WalletsArchivedSection({
   onWalletPress,
 }: WalletsArchivedSectionProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("wallets");
 
   if (wallets.length === 0) return null;
 
   return (
     <View>
       <View style={styles.sectionHeader}>
-        <ThemedText style={styles.sectionTitle}>Carteras archivadas</ThemedText>
+        <ThemedText style={styles.sectionTitle}>
+          {t("archivedTitle")}
+        </ThemedText>
         <ThemedText style={[styles.sectionCount, { color: theme.muted }]}>
           {wallets.length}
         </ThemedText>
       </View>
       <ThemedText style={[styles.sectionHint, { color: theme.muted }]}>
-        No aparecen en los selectores ni en los totales, pero conservan su
-        historial. Tócalas para restaurarlas.
+        {t("archivedHint")}
       </ThemedText>
       <View style={styles.sectionList}>
         {wallets.map((wallet) => (

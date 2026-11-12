@@ -1,12 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { walletManagementStyles as styles } from "../styles/wallet-management.styles";
 import { Wallet } from "../types/wallet.types";
-import { formatMoney } from "../utils/money";
 import { isWalletArchived } from "../utils/wallet-status";
 
 export interface WalletActionsModalProps {
@@ -25,10 +26,13 @@ export function WalletActionsModal({
   onClose,
 }: WalletActionsModalProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["wallets", "common"]);
+  const locale = useAppLocale();
 
   if (!wallet) return null;
 
   const archived = isWalletArchived(wallet);
+  const archiveLabel = archived ? t("actions.restore") : t("actions.archive");
 
   return (
     <Modal
@@ -41,7 +45,7 @@ export function WalletActionsModal({
         <Pressable
           style={StyleSheet.absoluteFill}
           accessibilityRole="button"
-          accessibilityLabel="Cerrar acciones de la cartera"
+          accessibilityLabel={t("actions.close")}
           onPress={onClose}
         />
         <View
@@ -54,25 +58,25 @@ export function WalletActionsModal({
             {wallet.name}
           </ThemedText>
           <ThemedText style={[styles.sheetSubtitle, { color: theme.muted }]}>
-            {archived ? "Cartera archivada" : "Cartera activa"} ·{" "}
-            {formatMoney(wallet.balance, wallet.currency)}
+            {archived ? t("actions.archived") : t("actions.active")} ·{" "}
+            {locale.formatCurrency(wallet.balance, wallet.currency)}
           </ThemedText>
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Editar cartera"
+            accessibilityLabel={t("actions.edit")}
             onPress={onEdit}
             style={[styles.actionButton, { borderColor: theme.border }]}
           >
             <Ionicons name="pencil-outline" size={20} color={theme.primary} />
-            <ThemedText style={styles.actionText}>Editar cartera</ThemedText>
+            <ThemedText style={styles.actionText}>
+              {t("actions.edit")}
+            </ThemedText>
           </Pressable>
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={
-              archived ? "Restaurar cartera" : "Archivar cartera"
-            }
+            accessibilityLabel={archiveLabel}
             onPress={onToggleArchive}
             style={[styles.actionButton, { borderColor: theme.border }]}
           >
@@ -81,14 +85,12 @@ export function WalletActionsModal({
               size={20}
               color={theme.primary}
             />
-            <ThemedText style={styles.actionText}>
-              {archived ? "Restaurar cartera" : "Archivar cartera"}
-            </ThemedText>
+            <ThemedText style={styles.actionText}>{archiveLabel}</ThemedText>
           </Pressable>
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Eliminar cartera"
+            accessibilityLabel={t("actions.delete")}
             onPress={onDelete}
             style={[
               styles.actionButton,
@@ -97,18 +99,18 @@ export function WalletActionsModal({
           >
             <Ionicons name="trash-outline" size={20} color={theme.danger} />
             <ThemedText style={[styles.actionText, { color: theme.dangerText }]}>
-              Eliminar cartera
+              {t("actions.delete")}
             </ThemedText>
           </Pressable>
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Cancelar acciones"
+            accessibilityLabel={t("actions.cancel")}
             onPress={onClose}
             style={styles.cancelButton}
           >
             <ThemedText type="defaultSemiBold" style={{ color: theme.muted }}>
-              Cancelar
+              {t("common:actions.cancel")}
             </ThemedText>
           </Pressable>
         </View>

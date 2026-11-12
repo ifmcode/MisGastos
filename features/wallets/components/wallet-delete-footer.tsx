@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -23,6 +24,7 @@ export function WalletDeleteFooter({
   onClose,
 }: WalletDeleteFooterProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["wallets", "common"]);
 
   return (
     <>
@@ -42,16 +44,18 @@ export function WalletDeleteFooter({
       <View style={styles.actions}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Cancelar eliminación"
+          accessibilityLabel={t("delete.cancel")}
           disabled={submitting}
           onPress={onClose}
           style={[styles.secondaryButton, { borderColor: theme.border }]}
         >
-          <ThemedText type="defaultSemiBold">Cancelar</ThemedText>
+          <ThemedText type="defaultSemiBold">
+            {t("common:actions.cancel")}
+          </ThemedText>
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Confirmar eliminación"
+          accessibilityLabel={t("delete.confirm")}
           accessibilityState={{ disabled }}
           disabled={disabled}
           onPress={onConfirm}
@@ -66,7 +70,9 @@ export function WalletDeleteFooter({
                 size={18}
                 color={theme.onPrimary}
               />
-              <ThemedText style={styles.dangerButtonText}>Eliminar</ThemedText>
+              <ThemedText style={styles.dangerButtonText}>
+                {t("delete.confirmShort")}
+              </ThemedText>
             </View>
           )}
         </Pressable>

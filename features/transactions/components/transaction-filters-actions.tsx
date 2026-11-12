@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -15,28 +16,31 @@ export function TransactionFiltersActions({
   onApply,
 }: TransactionFiltersActionsProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("transactions");
 
   return (
     <View style={styles.actions}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Restablecer filtros"
+        accessibilityLabel={t("filters.resetAccessibility")}
         onPress={onReset}
         style={[
           styles.secondaryButton,
           { borderColor: theme.border, backgroundColor: theme.surface },
         ]}
       >
-        <ThemedText type="defaultSemiBold">Restablecer</ThemedText>
+        <ThemedText type="defaultSemiBold">{t("filters.reset")}</ThemedText>
       </Pressable>
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Aplicar filtros"
+        accessibilityLabel={t("filters.applyAccessibility")}
         onPress={onApply}
         style={styles.primaryButton}
       >
-        <ThemedText style={styles.primaryButtonText}>Aplicar</ThemedText>
+        <ThemedText style={styles.primaryButtonText}>
+          {t("filters.apply")}
+        </ThemedText>
       </Pressable>
     </View>
   );

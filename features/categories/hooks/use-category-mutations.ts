@@ -4,8 +4,8 @@ import {
   useCallback,
   useState,
 } from "react";
-
 import { useAuth } from "@/hooks/use-auth";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import {
   CategoryInput,
@@ -13,7 +13,8 @@ import {
 } from "../schemas/category.schema";
 import {
   CategoryValidationError,
-  getCategoryErrorMessage,
+  getCategoryErrorCode,
+  type CategoryErrorCode,
 } from "../services/category.errors";
 import { Category } from "../types/category.types";
 import { useCategoryService } from "./use-category-service";
@@ -40,6 +41,7 @@ export function useCategoryMutations({
   setCategories,
 }: UseCategoryMutationsOptions): CategoryMutations {
   const { user } = useAuth();
+  const { tr } = useScopedTranslation("categories");
   const categoryService = useCategoryService();
 
   const [mutating, setMutating] = useState(false);
@@ -47,34 +49,39 @@ export function useCategoryMutations({
   const [mutationFieldErrors, setMutationFieldErrors] =
     useState<CategoryValidationErrors>({});
 
+  const translate = useCallback(
+    (code: CategoryErrorCode) => tr(`errors.${code}`),
+    [tr],
+  );
+
   const clearMutationState = useCallback(() => {
     setMutationError(null);
     setMutationFieldErrors({});
   }, []);
 
-  const fail = useCallback((failure: unknown): false => {
-    if (failure instanceof CategoryValidationError) {
-      setMutationFieldErrors(failure.fieldErrors);
-      setMutationError(failure.message);
-    } else {
-      setMutationError(
-        getCategoryErrorMessage(
-          failure,
-          "No se pudo completar la operación. Inténtalo de nuevo.",
-        ),
-      );
-    }
+  const fail = useCallback(
+    (failure: unknown): false => {
+      if (failure instanceof CategoryValidationError) {
+        setMutationFieldErrors(failure.fieldErrors);
+        setMutationError(translate("VALIDATION"));
+      } else {
+        setMutationError(
+          translate(getCategoryErrorCode(failure, "OPERATION_FAILED")),
+        );
+      }
 
-    return false;
-  }, []);
+      return false;
+    },
+    [translate],
+  );
 
   const run = useCallback(
     async (
       operation: (ownerId: string) => Promise<void>,
-      unauthenticatedMessage: string,
+      unauthenticated: CategoryErrorCode,
     ): Promise<boolean> => {
       if (!user) {
-        setMutationError(unauthenticatedMessage);
+        setMutationError(translate(unauthenticated));
         return false;
       }
 
@@ -90,7 +97,7 @@ export function useCategoryMutations({
         setMutating(false);
       }
     },
-    [user, clearMutationState, fail],
+    [user, clearMutationState, fail, translate],
   );
 
   const createCategory = useCallback(
@@ -98,7 +105,7 @@ export function useCategoryMutations({
       run(async (ownerId) => {
         const category = await categoryService.createCategory(ownerId, input);
         setCategories((current) => [...current, category]);
-      }, "Debes iniciar sesión para crear una categoría."),
+      }, "SIGN_IN_CREATE"),
     [run, categoryService, setCategories],
   );
 
@@ -115,7 +122,7 @@ export function useCategoryMutations({
             item.id === category.id ? category : item,
           ),
         );
-      }, "Debes iniciar sesión para editar una categoría."),
+      }, "SIGN_IN_EDIT"),
     [run, categoryService, setCategories],
   );
 
@@ -126,7 +133,7 @@ export function useCategoryMutations({
         setCategories((current) =>
           current.filter((category) => category.id !== categoryId),
         );
-      }, "Debes iniciar sesión para eliminar una categoría."),
+      }, "SIGN_IN_DELETE"),
     [run, categoryService, setCategories],
   );
 

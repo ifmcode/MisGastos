@@ -38,24 +38,50 @@ function buildTransfer(overrides: Partial<Transfer>): Transfer {
   };
 }
 
+const messages = {
+  bothOrphaned: "both",
+  oneOrphaned: "one",
+  noneOrphaned: "none",
+};
+
 describe("getDeleteTransferConfirmation", () => {
   it("includes the amount and both wallet names", () => {
-    const confirmation = getDeleteTransferConfirmation(buildTransfer({}), [
-      buildWallet({ id: "wallet-1", name: "Cuenta principal" }),
-      buildWallet({ id: "wallet-2", name: "Ahorros" }),
-    ]);
+    const confirmation = getDeleteTransferConfirmation(
+      buildTransfer({}),
+      [
+        buildWallet({ id: "wallet-1", name: "Cuenta principal" }),
+        buildWallet({ id: "wallet-2", name: "Ahorros" }),
+      ],
+      "25,50 €",
+      "the wallet",
+      "the deleted wallet",
+      messages,
+    );
 
     expect(confirmation).toEqual({
-      title: "Eliminar transferencia",
-      message:
-        "Se eliminará la transferencia de 25,50 € de Cuenta principal a Ahorros. Los saldos se revertirán y el registro se conservará para auditoría.",
+      titleKey: "deleteDialog.title",
+      messageKey: "deleteDialog.message",
+      values: {
+        amount: "25,50 €",
+        from: "Cuenta principal",
+        to: "Ahorros",
+        balanceMessage: "none",
+      },
     });
   });
 
   it("falls back to generic labels when a wallet is missing", () => {
-    const confirmation = getDeleteTransferConfirmation(buildTransfer({}), []);
+    const confirmation = getDeleteTransferConfirmation(
+      buildTransfer({}),
+      [],
+      "25,50 €",
+      "the wallet",
+      "the deleted wallet",
+      messages,
+    );
 
-    expect(confirmation.message).toContain("de la cartera a la cartera");
+    expect(confirmation.values.from).toBe("the wallet");
+    expect(confirmation.values.to).toBe("the wallet");
   });
 
   it("uses stored names and clarifies orphaned wallet balances", () => {
@@ -66,20 +92,26 @@ describe("getDeleteTransferConfirmation", () => {
         toWalletId: "wallet-2",
       }),
       [buildWallet({ id: "wallet-2", name: "Ahorros" })],
+      "25,50 €",
+      "the wallet",
+      "the deleted wallet",
+      messages,
     );
 
-    expect(confirmation.message).toContain("[Eliminada] Cuenta principal");
-    expect(confirmation.message).toContain(
-      "Solo se revertirá el saldo de la cartera que sigue existiendo",
-    );
+    expect(confirmation.values.from).toBe("[Eliminada] Cuenta principal");
+    expect(confirmation.values.balanceMessage).toBe("one");
   });
 
   it("explains when both wallets were deleted", () => {
     const confirmation = getDeleteTransferConfirmation(
       buildTransfer({ fromWalletId: "-1", toWalletId: "-1" }),
       [],
+      "25,50 €",
+      "the wallet",
+      "the deleted wallet",
+      messages,
     );
 
-    expect(confirmation.message).toContain("no hay saldos que revertir");
+    expect(confirmation.values.balanceMessage).toBe("both");
   });
 });

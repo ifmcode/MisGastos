@@ -1,0 +1,11 @@
+{
+  "tabs": {
+    "home": "Inicio",
+    "wallets": "Carteras",
+    "transactions": "Movimientos",
+    "settings": "Configuración"
+  },
+  "stack": {
+    "modal": "Modal"
+  }
+}

@@ -1,9 +1,12 @@
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { transactionDetailStyles as styles } from "../styles/transaction-detail.styles";
 import { Transaction } from "../types/transaction.types";
@@ -24,11 +27,19 @@ export function TransactionDetailContent({
   categories,
 }: TransactionDetailContentProps) {
   const theme = useFormTheme();
-  const summary = getTransactionDetailSummary(transaction);
+  const { t } = useTranslation("transactions");
+  const tr = asTranslate(t);
+  const locale = useAppLocale();
+  const summary = getTransactionDetailSummary(
+    transaction,
+    locale.formatCurrency,
+  );
   const fields = buildTransactionDetailFields(
     transaction,
     wallets,
     categories,
+    asTranslate(t),
+    locale.formatDate,
   );
   const amountColor = summary.isIncome ? theme.success : theme.danger;
 
@@ -41,7 +52,7 @@ export function TransactionDetailContent({
         ]}
       >
         <ThemedText style={[styles.summaryType, { color: theme.muted }]}>
-          {summary.typeLabel}
+          {tr(summary.typeKey)}
         </ThemedText>
         <ThemedText style={[styles.summaryAmount, { color: amountColor }]}>
           {summary.isIncome ? "+" : "-"}
@@ -68,7 +79,7 @@ export function TransactionDetailContent({
             ]}
           >
             <ThemedText style={[styles.fieldLabel, { color: theme.muted }]}>
-              {field.label}
+              {tr(field.labelKey)}
             </ThemedText>
             <ThemedText style={styles.fieldValue}>{field.value}</ThemedText>
           </View>

@@ -13,11 +13,7 @@ import {
 } from "./transaction.errors";
 
 function ownerIssue(): TransactionValidationIssue {
-  return {
-    field: "ownerId",
-    code: "OWNER_REQUIRED",
-    message: "Debes iniciar sesión para gestionar tus movimientos.",
-  };
+  return { field: "ownerId", code: "OWNER_REQUIRED" };
 }
 
 export class TransactionService {

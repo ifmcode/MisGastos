@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -16,6 +17,7 @@ export function DashboardErrorState({
   onRetry,
 }: DashboardErrorStateProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["dashboard", "common"]);
 
   return (
     <View style={dashboardStyles.centered}>
@@ -25,17 +27,17 @@ export function DashboardErrorState({
         color={theme.danger}
       />
       <ThemedText type="defaultSemiBold" style={dashboardStyles.errorTitle}>
-        No se pudo cargar el resumen
+        {t("errorTitle")}
       </ThemedText>
       <ThemedText style={dashboardStyles.centeredText}>{message}</ThemedText>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Reintentar carga del resumen"
+        accessibilityLabel={t("retryAccessibility")}
         onPress={onRetry}
         style={dashboardStyles.retryButton}
       >
         <ThemedText style={dashboardStyles.retryButtonText}>
-          Reintentar
+          {t("common:actions.retry")}
         </ThemedText>
       </Pressable>
     </View>

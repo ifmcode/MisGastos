@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-
 import { useAuth } from "@/hooks/use-auth";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import {
   CategoryInput,
@@ -8,7 +8,7 @@ import {
 } from "../schemas/category.schema";
 import {
   CategoryValidationError,
-  getCategoryErrorMessage,
+  getCategoryErrorCode,
 } from "../services/category.errors";
 import { Category, CategoryType } from "../types/category.types";
 import { useCategoryService } from "./use-category-service";
@@ -30,6 +30,7 @@ export interface UseCategoryCreatorResult {
  */
 export function useCategoryCreator(): UseCategoryCreatorResult {
   const { user } = useAuth();
+  const { t, tr } = useScopedTranslation("categories");
   const categoryService = useCategoryService();
 
   const [visible, setVisible] = useState(false);
@@ -54,7 +55,7 @@ export function useCategoryCreator(): UseCategoryCreatorResult {
   const create = useCallback(
     async (input: CategoryInput): Promise<Category | null> => {
       if (!user) {
-        setError("Debes iniciar sesión para crear una categoría.");
+        setError(t("errors.SIGN_IN_CREATE"));
         return null;
       }
 
@@ -67,13 +68,10 @@ export function useCategoryCreator(): UseCategoryCreatorResult {
       } catch (failure: unknown) {
         if (failure instanceof CategoryValidationError) {
           setFieldErrors(failure.fieldErrors);
-          setError(failure.message);
+          setError(t("errors.VALIDATION"));
         } else {
           setError(
-            getCategoryErrorMessage(
-              failure,
-              "No se pudo crear la categoría. Inténtalo de nuevo.",
-            ),
+            tr(`errors.${getCategoryErrorCode(failure, "CREATE_FAILED")}`),
           );
         }
 
@@ -82,7 +80,7 @@ export function useCategoryCreator(): UseCategoryCreatorResult {
         setSubmitting(false);
       }
     },
-    [user, categoryService],
+    [user, categoryService, t, tr],
   );
 
   return {

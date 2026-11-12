@@ -47,17 +47,17 @@ describe("filterCategoriesByType", () => {
 describe("getCategoriesEmptyCopy", () => {
   it("asks for the first categories when there are none", () => {
     expect(getCategoriesEmptyCopy(false, "expense")).toEqual({
-      title: "Aún no tienes categorías",
-      message: "Crea categorías para clasificar tus gastos e ingresos.",
+      titleKey: "emptyTitle",
+      messageKey: "emptyMessage",
     });
   });
 
   it("explains when a type filter has no results", () => {
-    expect(getCategoriesEmptyCopy(true, "income").title).toBe(
-      "No hay categorías de ingreso",
+    expect(getCategoriesEmptyCopy(true, "income").titleKey).toBe(
+      "emptyIncomeTitle",
     );
-    expect(getCategoriesEmptyCopy(true, "expense").title).toBe(
-      "No hay categorías de gasto",
+    expect(getCategoriesEmptyCopy(true, "expense").titleKey).toBe(
+      "emptyExpenseTitle",
     );
   });
 });

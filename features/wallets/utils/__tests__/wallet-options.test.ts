@@ -4,7 +4,7 @@ import { Wallet } from "../../types/wallet.types";
 import {
   buildWalletFormValues,
   getWalletIconName,
-  getWalletTypeLabel,
+  getWalletTypeKey,
   isWalletIcon,
   isWalletType,
 } from "../wallet-options";
@@ -48,6 +48,6 @@ describe("wallet options", () => {
   it("falls back to the default icon and resolves labels", () => {
     expect(getWalletIconName("cash")).toBe("cash");
     expect(getWalletIconName("invalid")).toBe("wallet");
-    expect(getWalletTypeLabel("bank")).toBe("Banco");
+    expect(getWalletTypeKey("bank")).toBe("types.bank");
   });
 });

@@ -2,12 +2,13 @@ import { useCallback } from "react";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useAsyncCollection } from "@/shared/hooks/use-async-collection";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import {
   TransferInput,
   TransferValidationErrors,
 } from "../schemas/transfer.schema";
-import { getTransferErrorMessage } from "../services/transfer.errors";
+import { getTransferErrorCode } from "../services/transfer.errors";
 import { Transfer } from "../types/transfer.types";
 import { sortTransfersByDate } from "../utils/transfer-sort";
 import { useTransferMutations } from "./use-transfer-mutations";
@@ -35,6 +36,7 @@ export interface UseTransfersResult {
 /** Loads the owner's transfers and exposes the create/update/delete flows. */
 export function useTransfers(): UseTransfersResult {
   const { user } = useAuth();
+  const { tr } = useScopedTranslation("transfers");
   const ownerId = user?.uid;
   const transferService = useTransferService();
 
@@ -47,11 +49,8 @@ export function useTransfers(): UseTransfersResult {
   );
   const describeLoadError = useCallback(
     (error: unknown) =>
-      getTransferErrorMessage(
-        error,
-        "No se pudieron cargar las transferencias. Inténtalo de nuevo.",
-      ),
-    [],
+      tr(`errors.${getTransferErrorCode(error, "LOAD_FAILED")}`),
+    [tr],
   );
 
   const {

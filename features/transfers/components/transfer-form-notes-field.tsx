@@ -1,14 +1,18 @@
+import { useTranslation } from "react-i18next";
 import { TextInput, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
-import { TRANSFER_NOTES_MAX_LENGTH } from "../schemas/transfer.schema";
+import {
+  TRANSFER_NOTES_MAX_LENGTH,
+  type TransferValidationCode,
+} from "../schemas/transfer.schema";
 import { transferFormStyles as styles } from "../styles/transfer-form.styles";
 
 export interface TransferFormNotesFieldProps {
   value: string;
-  error?: string;
+  error?: TransferValidationCode;
   disabled: boolean;
   onChange: (value: string) => void;
 }
@@ -20,21 +24,27 @@ export function TransferFormNotesField({
   onChange,
 }: TransferFormNotesFieldProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["transfers", "validation"]);
+  const errorText = error
+    ? t(`validation:transfers.${error}`, {
+        max: TRANSFER_NOTES_MAX_LENGTH,
+      })
+    : null;
 
   return (
     <>
-      <ThemedText style={styles.label}>Notas (opcional)</ThemedText>
+      <ThemedText style={styles.label}>{t("form.notes")}</ThemedText>
       <TextInput
         value={value}
         onChangeText={onChange}
-        placeholder="Ej. Traspaso al fondo de ahorro"
+        placeholder={t("form.notesPlaceholder")}
         placeholderTextColor={theme.muted}
         maxLength={TRANSFER_NOTES_MAX_LENGTH}
         editable={!disabled}
         multiline
         numberOfLines={3}
         textAlignVertical="top"
-        accessibilityLabel="Notas de la transferencia"
+        accessibilityLabel={t("form.notesAccessibility")}
         style={[
           styles.input,
           styles.textArea,
@@ -46,9 +56,9 @@ export function TransferFormNotesField({
         ]}
       />
       <View style={styles.descriptionFooter}>
-        {error ? (
+        {errorText ? (
           <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-            {error}
+            {errorText}
           </ThemedText>
         ) : (
           <View />

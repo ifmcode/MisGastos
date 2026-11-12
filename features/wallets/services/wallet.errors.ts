@@ -9,7 +9,7 @@ export class WalletValidationError extends Error {
   readonly fieldErrors: WalletValidationErrors;
 
   constructor(issues: WalletValidationIssue[]) {
-    super(issues[0]?.message ?? "Los datos de la cartera no son válidos.");
+    super(issues[0]?.code ?? "VALIDATION");
     this.name = "WalletValidationError";
     this.issues = issues;
     this.fieldErrors = toWalletFieldErrors(issues);
@@ -28,64 +28,55 @@ export type WalletOperationCode =
   | "TARGET_WALLET_INSUFFICIENT_BALANCE"
   | "TOO_MANY_MOVEMENTS";
 
-const OPERATION_MESSAGES: Record<WalletOperationCode, string> = {
-  WALLET_NOT_FOUND: "La cartera ya no existe.",
-  CURRENCY_LOCKED:
-    "No puedes cambiar la moneda de una cartera que ya tiene movimientos.",
-  INITIAL_BALANCE_LOCKED:
-    "Solo puedes editar el saldo inicial de una cartera sin movimientos.",
-  TARGET_WALLET_REQUIRED: "Selecciona la cartera que recibirá los movimientos.",
-  TARGET_WALLET_NOT_FOUND: "La cartera de destino ya no existe.",
-  TARGET_WALLET_SAME: "La cartera de destino debe ser distinta de la eliminada.",
-  TARGET_WALLET_ARCHIVED: "No puedes mover movimientos a una cartera archivada.",
-  TARGET_WALLET_CURRENCY_MISMATCH:
-    "La cartera de destino debe tener la misma moneda.",
-  TARGET_WALLET_INSUFFICIENT_BALANCE:
-    "La cartera de destino no tiene saldo suficiente para asumir las transferencias.",
-  TOO_MANY_MOVEMENTS:
-    "Esta cartera tiene demasiados movimientos para eliminarla de una vez.",
-};
+export type WalletErrorCode =
+  | WalletOperationCode
+  | "VALIDATION"
+  | "PERMISSION_DENIED"
+  | "NETWORK"
+  | "CREATE_FAILED"
+  | "UPDATE_FAILED"
+  | "ARCHIVE_FAILED"
+  | "DELETE_FAILED"
+  | "LOAD_FAILED"
+  | "USAGE_FAILED"
+  | "SIGN_IN_CREATE"
+  | "SIGN_IN_UPDATE"
+  | "SIGN_IN_ARCHIVE"
+  | "SIGN_IN_DELETE"
+  | "SIGN_IN_USAGE";
 
 export class WalletOperationError extends Error {
   readonly code: WalletOperationCode;
 
   constructor(code: WalletOperationCode) {
-    super(OPERATION_MESSAGES[code]);
+    super(code);
     this.name = "WalletOperationError";
     this.code = code;
   }
 }
 
-function getErrorCode(error: Error): string | null {
+function readErrorCode(error: Error): string | null {
   const code = (error as { code?: unknown }).code;
   return typeof code === "string" ? code : null;
 }
 
 /**
- * Translates infrastructure errors into user-friendly messages without
- * exposing stack traces or provider details.
+ * Maps wallet failures to stable codes. The UI translates them; services and
+ * repositories never return user-facing sentences.
  */
-export function getWalletErrorMessage(
+export function getWalletErrorCode(
   error: unknown,
-  fallback: string,
-): string {
-  if (error instanceof WalletValidationError) {
-    return error.message;
-  }
-
-  if (error instanceof WalletOperationError) {
-    return error.message;
-  }
+  fallback: WalletErrorCode = "LOAD_FAILED",
+): WalletErrorCode {
+  if (error instanceof WalletValidationError) return "VALIDATION";
+  if (error instanceof WalletOperationError) return error.code;
 
   if (error instanceof Error) {
-    const code = getErrorCode(error);
+    const code = readErrorCode(error);
 
-    if (code === "permission-denied") {
-      return "No tienes permisos para realizar esta operación.";
-    }
-
+    if (code === "permission-denied") return "PERMISSION_DENIED";
     if (code === "unavailable" || code === "network-request-failed") {
-      return "No hay conexión. Comprueba tu red e inténtalo de nuevo.";
+      return "NETWORK";
     }
 
     const normalizedMessage = error.message.toLowerCase();
@@ -93,7 +84,7 @@ export function getWalletErrorMessage(
       normalizedMessage.includes("permission-denied") ||
       normalizedMessage.includes("permission_denied")
     ) {
-      return "No tienes permisos para realizar esta operación.";
+      return "PERMISSION_DENIED";
     }
   }
 

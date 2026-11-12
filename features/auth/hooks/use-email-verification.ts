@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { useAuth } from "@/hooks/use-auth";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
-import { getAuthErrorMessage } from "../services/auth.errors";
+import { getAuthErrorCode } from "../services/auth.errors";
 import type { AuthFeedbackMessage } from "../types/auth.types";
 import { needsEmailVerification } from "../utils/email-verification";
 import { consumePendingVerificationEmail } from "../utils/verification-email-store";
@@ -14,13 +15,6 @@ import { useEmailVerificationService } from "./use-email-verification-service";
 
 export const VERIFICATION_POLL_INTERVAL_MS = 10_000;
 export const VERIFICATION_MAX_POLLS = 6;
-const RESEND_FALLBACK =
-  "No pudimos enviar el correo de verificación. Inténtalo de nuevo.";
-const CHECK_FALLBACK =
-  "No pudimos comprobar el estado. Inténtalo de nuevo.";
-const PENDING_MESSAGE =
-  "Todavía no detectamos la verificación. Abre el enlace del correo y vuelve a intentarlo.";
-const VERIFIED_MESSAGE = "Tu correo está verificado. Entrando a la app...";
 
 export interface EmailVerificationController {
   sending: boolean;
@@ -33,6 +27,7 @@ export interface EmailVerificationController {
 /** Orchestrates resend, manual status refresh and controlled polling. */
 export function useEmailVerification(): EmailVerificationController {
   const { user, refreshUser } = useAuth();
+  const { t, tr } = useScopedTranslation("auth");
   const service = useEmailVerificationService();
   const [state, dispatch] = useReducer(
     emailVerificationReducer,
@@ -57,23 +52,25 @@ export function useEmailVerification(): EmailVerificationController {
       if (result === "sent") {
         dispatch({
           type: "resend-succeeded",
-          message: `Te enviamos un enlace de verificación a ${user?.email ?? "tu correo"}.`,
+          message: t("verify.sent", {
+            email: user?.email ?? t("verify.emailFallback"),
+          }),
         });
       } else {
         dispatch({
           type: "resend-failed",
-          message: "Esta cuenta no necesita verificación.",
+          message: t("verify.notNeeded"),
         });
       }
     } catch (error: unknown) {
       dispatch({
         type: "resend-failed",
-        message: getAuthErrorMessage(error, RESEND_FALLBACK),
+        message: tr(`errors.${getAuthErrorCode(error, "sendFailed")}`),
       });
     } finally {
       sendingRef.current = false;
     }
-  }, [service, user]);
+  }, [service, t, tr, user]);
 
   const checkStatus = useCallback(
     async (showFeedback = true) => {
@@ -91,22 +88,22 @@ export function useEmailVerification(): EmailVerificationController {
         const updated = await refreshUser();
 
         if (updated && !needsEmailVerification(updated)) {
-          dispatch({ type: "check-verified", message: VERIFIED_MESSAGE });
+          dispatch({ type: "check-verified", message: t("verify.verified") });
         } else if (showFeedback) {
-          dispatch({ type: "check-pending", message: PENDING_MESSAGE });
+          dispatch({ type: "check-pending", message: t("verify.notYet") });
         }
       } catch (error: unknown) {
         if (showFeedback) {
           dispatch({
             type: "check-failed",
-            message: getAuthErrorMessage(error, CHECK_FALLBACK),
+            message: tr(`errors.${getAuthErrorCode(error, "checkFailed")}`),
           });
         }
       } finally {
         checkingRef.current = false;
       }
     },
-    [refreshUser],
+    [refreshUser, t, tr],
   );
 
   useEffect(() => {

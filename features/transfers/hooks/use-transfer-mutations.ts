@@ -4,6 +4,7 @@ import {
   useCallback,
   useState,
 } from "react";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import {
   TransferInput,
@@ -37,6 +38,7 @@ export function useTransferMutations({
   ownerId,
   setTransfers,
 }: UseTransferMutationsOptions): TransferMutations {
+  const { tr } = useScopedTranslation("transfers");
   const transferService = useTransferService();
 
   const [mutating, setMutating] = useState(false);
@@ -49,20 +51,23 @@ export function useTransferMutations({
     setCreateFieldErrors({});
   }, []);
 
-  const fail = useCallback((failure: unknown): false => {
-    const state = toTransferMutationError(failure);
-    setCreateError(state.message);
-    setCreateFieldErrors(state.fieldErrors);
-    return false;
-  }, []);
+  const fail = useCallback(
+    (failure: unknown): false => {
+      const state = toTransferMutationError(failure);
+      setCreateError(state.code ? tr(`errors.${state.code}`) : null);
+      setCreateFieldErrors(state.fieldErrors);
+      return false;
+    },
+    [tr],
+  );
 
   const run = useCallback(
     async (
       operation: (ownerId: string) => Promise<void>,
-      unauthenticatedMessage: string,
+      unauthenticatedKey: string,
     ): Promise<boolean> => {
       if (!ownerId) {
-        setCreateError(unauthenticatedMessage);
+        setCreateError(tr(unauthenticatedKey));
         return false;
       }
 
@@ -78,7 +83,7 @@ export function useTransferMutations({
         setMutating(false);
       }
     },
-    [ownerId, clearCreateState, fail],
+    [ownerId, clearCreateState, fail, tr],
   );
 
   const createTransfer = useCallback(
@@ -91,7 +96,7 @@ export function useTransferMutations({
         setTransfers((current) =>
           sortTransfersByDate([result.transfer, ...current]),
         );
-      }, "Debes iniciar sesión para crear una transferencia."),
+      }, "errors.SIGN_IN_CREATE"),
     [run, transferService, setTransfers],
   );
 
@@ -110,7 +115,7 @@ export function useTransferMutations({
             ),
           ),
         );
-      }, "Debes iniciar sesión para editar una transferencia."),
+      }, "errors.SIGN_IN_EDIT"),
     [run, transferService, setTransfers],
   );
 
@@ -121,7 +126,7 @@ export function useTransferMutations({
         setTransfers((current) =>
           current.filter((transfer) => transfer.id !== transferId),
         );
-      }, "Debes iniciar sesión para eliminar una transferencia."),
+      }, "errors.SIGN_IN_DELETE"),
     [run, transferService, setTransfers],
   );
 

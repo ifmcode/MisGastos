@@ -1,11 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { transactionFormStyles as styles } from "../styles/transaction-form.styles";
-import { TransactionCategory } from "../utils/transaction-options";
+import {
+  getTransactionCategoryLabel,
+  TransactionCategory,
+} from "../utils/transaction-options";
 
 export interface TransactionCategoryPickerOptionProps {
   category: TransactionCategory;
@@ -22,12 +27,14 @@ export function TransactionCategoryPickerOption({
   onSelect,
 }: TransactionCategoryPickerOptionProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("transactions");
+  const label = getTransactionCategoryLabel(category, asTranslate(t));
 
   return (
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      accessibilityLabel={category.label}
+      accessibilityLabel={label}
       onPress={() => onSelect(category.id)}
       disabled={disabled}
       style={({ pressed }) => [
@@ -51,7 +58,7 @@ export function TransactionCategoryPickerOption({
         ]}
         numberOfLines={1}
       >
-        {category.label}
+        {label}
       </ThemedText>
       {selected ? (
         <Ionicons name="checkmark" size={18} color={theme.primary} />

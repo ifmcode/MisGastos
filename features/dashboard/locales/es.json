@@ -1,0 +1,41 @@
+{
+  "greeting": "Hola, {{name}}",
+  "defaultUser": "Usuario",
+  "subtitle": "Este es el resumen de tus finanzas.",
+  "loadingSummary": "Cargando tu resumen…",
+  "errorTitle": "No se pudo cargar el resumen",
+  "retryAccessibility": "Reintentar carga del resumen",
+  "summary": {
+    "total": "Saldo total",
+    "wallet": "Saldo de {{name}}",
+    "included": "Esta cartera se suma al total global.",
+    "excluded": "Esta cartera está fuera del total global.",
+    "hint": "Solo se suman las carteras incluidas en el total.",
+    "emptyTotal": "No hay saldo incluido en el total."
+  },
+  "filters": {
+    "all": "Todas",
+    "allAccessibility": "Todas las carteras",
+    "walletAccessibility": "Filtrar por {{name}}"
+  },
+  "movements": {
+    "title": "Movimientos recientes",
+    "viewAll": "Ver todos",
+    "loading": "Cargando movimientos…",
+    "retryAccessibility": "Reintentar carga de movimientos",
+    "retry": "Reintentar",
+    "emptyTitle": "Aún no tienes movimientos",
+    "emptyMessage": "Crea tu primer gasto o ingreso desde la pestaña Movimientos.",
+    "openHistoryHint": "Abre la pestaña Movimientos para ver el historial completo."
+  },
+  "transfers": {
+    "title": "Transferencias recientes",
+    "viewHistory": "Ver historial",
+    "loading": "Cargando transferencias…",
+    "retryAccessibility": "Reintentar carga de transferencias",
+    "retry": "Reintentar",
+    "emptyTitle": "Aún no has hecho transferencias",
+    "guidance": "Abre Carteras y pulsa Transferir para mover dinero entre tus carteras.",
+    "requirement": "Necesitas al menos dos carteras con la misma moneda."
+  }
+}

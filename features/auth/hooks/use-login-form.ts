@@ -1,8 +1,10 @@
 import { useReducer } from "react";
 
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
+
 import { getLoginEmailError, validateLoginForm } from "../schemas/login.schema";
 import type { LoginFieldErrors } from "../schemas/login.schema";
-import { getAuthErrorMessage } from "../services/auth.errors";
+import { getAuthErrorCode } from "../services/auth.errors";
 import type { AuthFeedbackMessage, Email } from "../types/auth.types";
 import {
   INITIAL_LOGIN_FORM_STATE,
@@ -33,11 +35,16 @@ export interface LoginForm {
 /** Owns the login/register fields, inline feedback and the auth flows. */
 export function useLoginForm(): LoginForm {
   const authService = useAuthService();
+  const { t, tr } = useScopedTranslation("auth");
   const [state, dispatch] = useReducer(
     loginFormReducer,
     INITIAL_LOGIN_FORM_STATE,
   );
   const { runRequest, isRequestInFlight } = useLoginRequest(dispatch);
+
+  function translateError(code: string): string {
+    return tr(`errors.${code}`);
+  }
 
   async function submit() {
     if (isRequestInFlight()) {
@@ -57,9 +64,7 @@ export function useLoginForm(): LoginForm {
     }
 
     const email = state.email.trim() as Email;
-    const fallback = state.isRegister
-      ? "No pudimos crear la cuenta. Inténtalo de nuevo."
-      : "No pudimos iniciar sesión. Inténtalo de nuevo.";
+    const fallback = state.isRegister ? "createFailed" : "signInFailed";
 
     await runRequest(
       () =>
@@ -70,7 +75,7 @@ export function useLoginForm(): LoginForm {
       (error) =>
         dispatch({
           type: "email-failed",
-          message: getAuthErrorMessage(error, fallback),
+          message: translateError(getAuthErrorCode(error, fallback)),
         }),
     );
   }
@@ -82,10 +87,7 @@ export function useLoginForm(): LoginForm {
       (error) =>
         dispatch({
           type: "google-failed",
-          message: getAuthErrorMessage(
-            error,
-            "No pudimos iniciar sesión con Google. Inténtalo de nuevo.",
-          ),
+          message: translateError(getAuthErrorCode(error, "googleFailed")),
         }),
     );
   }
@@ -109,15 +111,12 @@ export function useLoginForm(): LoginForm {
       () =>
         dispatch({
           type: "reset-succeeded",
-          message: "Te enviamos un enlace de recuperación a tu correo.",
+          message: t("login.resetSent"),
         }),
       (error) =>
         dispatch({
           type: "reset-failed",
-          message: getAuthErrorMessage(
-            error,
-            "No pudimos enviar el correo de recuperación. Inténtalo de nuevo.",
-          ),
+          message: translateError(getAuthErrorCode(error, "resetFailed")),
         }),
     );
   }

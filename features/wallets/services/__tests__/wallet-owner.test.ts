@@ -4,18 +4,16 @@ import { WalletValidationError } from "../wallet.errors";
 import { normalizeOwnerId, normalizeWalletId } from "../wallet-owner";
 
 describe("wallet owner helpers", () => {
-  it("trims the owner id and builds the action-specific message", () => {
-    expect(normalizeOwnerId("  user-1  ", "crear")).toBe("user-1");
+  it("trims the owner id and returns the OWNER_REQUIRED code", () => {
+    expect(normalizeOwnerId("  user-1  ")).toBe("user-1");
 
     try {
-      normalizeOwnerId(" ", "crear una cartera");
+      normalizeOwnerId(" ");
       throw new Error("Expected a validation error");
     } catch (error) {
       expect(error).toBeInstanceOf(WalletValidationError);
       if (!(error instanceof WalletValidationError)) return;
-      expect(error.fieldErrors.ownerId).toBe(
-        "Debes iniciar sesión para crear una cartera.",
-      );
+      expect(error.fieldErrors.ownerId).toBe("OWNER_REQUIRED");
     }
   });
 
@@ -28,7 +26,7 @@ describe("wallet owner helpers", () => {
     } catch (error) {
       expect(error).toBeInstanceOf(WalletValidationError);
       if (!(error instanceof WalletValidationError)) return;
-      expect(error.fieldErrors.walletId).toBe("Selecciona una cartera válida.");
+      expect(error.fieldErrors.walletId).toBe("WALLET_REQUIRED");
     }
   });
 });

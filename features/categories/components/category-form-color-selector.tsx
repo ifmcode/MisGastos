@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
@@ -18,6 +19,7 @@ export function CategoryFormColorSelector({
   onChange,
 }: CategoryFormColorSelectorProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("categories");
 
   return (
     <View style={styles.colorRow}>
@@ -29,7 +31,7 @@ export function CategoryFormColorSelector({
             key={color}
             accessibilityRole="radio"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Color ${color}`}
+            accessibilityLabel={t("form.colorAccessibility", { name: color })}
             onPress={() => onChange(color)}
             disabled={disabled}
             style={[

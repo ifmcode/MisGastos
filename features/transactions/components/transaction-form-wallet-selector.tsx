@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -25,10 +26,11 @@ export function TransactionFormWalletSelector({
   onOpenPicker,
 }: TransactionFormWalletSelectorProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("transactions");
 
   return (
     <View>
-      <ThemedText style={styles.label}>Cartera</ThemedText>
+      <ThemedText style={styles.label}>{t("form.wallet")}</ThemedText>
 
       {wallets.length === 0 ? (
         <View
@@ -38,8 +40,7 @@ export function TransactionFormWalletSelector({
           ]}
         >
           <ThemedText style={[styles.infoText, { color: theme.muted }]}>
-            No tienes carteras. Crea una en la pestaña "Carteras" para poder
-            registrar movimientos.
+            {t("form.noWallets")}
           </ThemedText>
         </View>
       ) : null}
@@ -48,7 +49,7 @@ export function TransactionFormWalletSelector({
         wallets={wallets}
         selectedId={value}
         disabled={disabled}
-        accessibilityPrefix="Cartera"
+        accessibilityPrefix={t("form.wallet")}
         onSelect={onChange}
         onOpenPicker={onOpenPicker}
       />

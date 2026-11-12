@@ -1,72 +1,76 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { getAuthErrorMessage } from "../auth.errors";
+import { getAuthErrorCode } from "../auth.errors";
 
 function errorWithCode(code: string): Error {
   return Object.assign(new Error("provider detail"), { code });
 }
 
-describe("getAuthErrorMessage", () => {
+describe("getAuthErrorCode", () => {
   it("maps invalid credentials and unknown emails", () => {
-    const expected = "El correo o la contraseña no son correctos.";
-
     expect(
-      getAuthErrorMessage(errorWithCode("auth/wrong-password"), "fallback"),
-    ).toBe(expected);
+      getAuthErrorCode(errorWithCode("auth/wrong-password"), "signInFailed"),
+    ).toBe("wrongPassword");
     expect(
-      getAuthErrorMessage(errorWithCode("auth/invalid-credential"), "fallback"),
-    ).toBe(expected);
+      getAuthErrorCode(errorWithCode("auth/invalid-credential"), "signInFailed"),
+    ).toBe("wrongPassword");
     expect(
-      getAuthErrorMessage(errorWithCode("auth/invalid-login-credentials"), "fallback"),
-    ).toBe(expected);
+      getAuthErrorCode(
+        errorWithCode("auth/invalid-login-credentials"),
+        "signInFailed",
+      ),
+    ).toBe("wrongPassword");
   });
 
   it("maps unknown emails", () => {
     expect(
-      getAuthErrorMessage(errorWithCode("auth/user-not-found"), "fallback"),
-    ).toBe("No encontramos una cuenta con ese correo.");
+      getAuthErrorCode(errorWithCode("auth/user-not-found"), "signInFailed"),
+    ).toBe("userNotFound");
   });
 
   it("maps email and password validation errors", () => {
     expect(
-      getAuthErrorMessage(errorWithCode("auth/invalid-email"), "fallback"),
-    ).toBe("El correo electrónico no es válido.");
+      getAuthErrorCode(errorWithCode("auth/invalid-email"), "signInFailed"),
+    ).toBe("invalidEmail");
     expect(
-      getAuthErrorMessage(errorWithCode("auth/email-already-in-use"), "fallback"),
-    ).toBe("Ya existe una cuenta con este correo.");
+      getAuthErrorCode(errorWithCode("auth/email-already-in-use"), "signInFailed"),
+    ).toBe("emailInUse");
     expect(
-      getAuthErrorMessage(errorWithCode("auth/weak-password"), "fallback"),
-    ).toBe("La contraseña debe tener al menos 6 caracteres.");
+      getAuthErrorCode(errorWithCode("auth/weak-password"), "signInFailed"),
+    ).toBe("weakPassword");
   });
 
   it("maps rate limits and connection failures", () => {
     expect(
-      getAuthErrorMessage(errorWithCode("auth/too-many-requests"), "fallback"),
-    ).toBe("Demasiados intentos. Espera unos minutos e inténtalo de nuevo.");
+      getAuthErrorCode(errorWithCode("auth/too-many-requests"), "signInFailed"),
+    ).toBe("tooManyRequests");
     expect(
-      getAuthErrorMessage(errorWithCode("auth/network-request-failed"), "fallback"),
-    ).toBe("No hay conexión. Comprueba tu red e inténtalo de nuevo.");
+      getAuthErrorCode(
+        errorWithCode("auth/network-request-failed"),
+        "signInFailed",
+      ),
+    ).toBe("network");
   });
 
   it("maps Google popup failures", () => {
     expect(
-      getAuthErrorMessage(
+      getAuthErrorCode(
         errorWithCode("auth/popup-closed-by-user"),
-        "fallback",
+        "googleFailed",
       ),
-    ).toBe("Se canceló el inicio de sesión con Google.");
+    ).toBe("popupClosed");
     expect(
-      getAuthErrorMessage(errorWithCode("auth/popup-blocked"), "fallback"),
-    ).toBe(
-      "El navegador bloqueó la ventana de Google. Permite las ventanas emergentes e inténtalo de nuevo.",
-    );
+      getAuthErrorCode(errorWithCode("auth/popup-blocked"), "googleFailed"),
+    ).toBe("popupBlocked");
   });
 
-  it("returns the fallback for unknown errors without leaking raw text", () => {
-    expect(getAuthErrorMessage(new Error("raw detail"), "fallback")).toBe(
-      "fallback",
+  it("returns the fallback code for unknown errors", () => {
+    expect(getAuthErrorCode(new Error("raw detail"), "signInFailed")).toBe(
+      "signInFailed",
     );
-    expect(getAuthErrorMessage("not an error", "fallback")).toBe("fallback");
-    expect(getAuthErrorMessage(null, "fallback")).toBe("fallback");
+    expect(getAuthErrorCode("not an error", "googleFailed")).toBe(
+      "googleFailed",
+    );
+    expect(getAuthErrorCode(null, "resetFailed")).toBe("resetFailed");
   });
 });

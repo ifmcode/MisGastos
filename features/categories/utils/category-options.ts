@@ -39,18 +39,18 @@ export const CATEGORY_COLORS = [
 
 export type CategoryColor = (typeof CATEGORY_COLORS)[number];
 
-export const CATEGORY_TYPE_LABELS: Record<CategoryType, string> = {
-  expense: "Gasto",
-  income: "Ingreso",
+export const CATEGORY_TYPE_KEYS: Record<CategoryType, string> = {
+  expense: "types.expense",
+  income: "types.income",
 };
 
 export const CATEGORY_TYPE_OPTIONS: ReadonlyArray<{
   value: CategoryType;
-  label: string;
+  labelKey: string;
   icon: CategoryIcon;
 }> = [
-  { value: "expense", label: "Gasto", icon: "cart-outline" },
-  { value: "income", label: "Ingreso", icon: "cash-outline" },
+  { value: "expense", labelKey: CATEGORY_TYPE_KEYS.expense, icon: "cart-outline" },
+  { value: "income", labelKey: CATEGORY_TYPE_KEYS.income, icon: "cash-outline" },
 ];
 
 export const DEFAULT_CATEGORY_FORM_VALUES: CategoryFormValues = {
@@ -75,6 +75,6 @@ export function getCategoryIconName(value: string): CategoryIcon {
   return isCategoryIcon(value) ? value : "receipt-outline";
 }
 
-export function getCategoryTypeLabel(type: CategoryType): string {
-  return CATEGORY_TYPE_LABELS[type];
+export function getCategoryTypeKey(type: CategoryType): string {
+  return CATEGORY_TYPE_KEYS[type];
 }

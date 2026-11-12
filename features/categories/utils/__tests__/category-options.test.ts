@@ -4,7 +4,7 @@ import { Category } from "../../types/category.types";
 import { buildCategoryFormValues } from "../category-form-defaults";
 import {
   getCategoryIconName,
-  getCategoryTypeLabel,
+  getCategoryTypeKey,
   isCategoryIcon,
   isCategoryType,
 } from "../category-options";
@@ -24,7 +24,7 @@ describe("category options", () => {
     expect(isCategoryType("expense")).toBe(true);
     expect(isCategoryType("income")).toBe(true);
     expect(isCategoryType("transfer")).toBe(false);
-    expect(getCategoryTypeLabel("income")).toBe("Ingreso");
+    expect(getCategoryTypeKey("income")).toBe("types.income");
   });
 });
 

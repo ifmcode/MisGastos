@@ -96,6 +96,11 @@ coverageThreshold: {
 ## 8. Coverage Verification
 Run `npm run test:coverage` (or `npm run test:ci` in CI). Jest fails when any global business-logic metric drops below 90%.
 
+## 8.1 Copy Audit
+Run `npm run check:copy` before finishing any UI change. The script parses TSX with the TypeScript compiler and fails on literal JSX text or copy-bearing literal props (`accessibilityLabel`, `accessibilityHint`, `placeholder`, `title`, `message`, `label`, `helperText`, `confirmLabel`, `cancelLabel`). User data and technical values are intentionally excluded.
+
+Translation tests also enforce `es`/`en` key parity and the missing-key fallback; see `shared/i18n/__tests__/resources.test.ts`.
+
 ## 9. Checklist
 - [ ] Critical logic covered
 - [ ] Edge cases (0, negative, insufficient balance)

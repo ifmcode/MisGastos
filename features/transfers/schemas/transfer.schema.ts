@@ -23,6 +23,7 @@ export type TransferValidationCode =
   | "TO_WALLET_REQUIRED"
   | "SAME_WALLET"
   | "INVALID_AMOUNT"
+  | "INSUFFICIENT_BALANCE"
   | "INVALID_CURRENCY"
   | "NOTES_TOO_LONG"
   | "INVALID_DATE";
@@ -30,11 +31,10 @@ export type TransferValidationCode =
 export interface TransferValidationIssue {
   field: TransferFormField;
   code: TransferValidationCode;
-  message: string;
 }
 
 export type TransferValidationErrors = Partial<
-  Record<TransferFormField, string>
+  Record<TransferFormField, TransferValidationCode>
 >;
 
 /**
@@ -58,21 +58,13 @@ export function validateTransferInput(
   const fromWalletId =
     typeof input.fromWalletId === "string" ? input.fromWalletId.trim() : "";
   if (fromWalletId.length === 0) {
-    issues.push({
-      field: "fromWalletId",
-      code: "FROM_WALLET_REQUIRED",
-      message: "Selecciona la cartera de origen.",
-    });
+    issues.push({ field: "fromWalletId", code: "FROM_WALLET_REQUIRED" });
   }
 
   const toWalletId =
     typeof input.toWalletId === "string" ? input.toWalletId.trim() : "";
   if (toWalletId.length === 0) {
-    issues.push({
-      field: "toWalletId",
-      code: "TO_WALLET_REQUIRED",
-      message: "Selecciona la cartera de destino.",
-    });
+    issues.push({ field: "toWalletId", code: "TO_WALLET_REQUIRED" });
   }
 
   if (
@@ -80,46 +72,26 @@ export function validateTransferInput(
     toWalletId.length > 0 &&
     fromWalletId === toWalletId
   ) {
-    issues.push({
-      field: "toWalletId",
-      code: "SAME_WALLET",
-      message: "La cartera de origen y destino deben ser distintas.",
-    });
+    issues.push({ field: "toWalletId", code: "SAME_WALLET" });
   }
 
   const amount = parseAmountInput(input.amount);
   if (amount === null || amount <= 0) {
-    issues.push({
-      field: "amount",
-      code: "INVALID_AMOUNT",
-      message: "Introduce un importe mayor que 0 con hasta 2 decimales.",
-    });
+    issues.push({ field: "amount", code: "INVALID_AMOUNT" });
   }
 
   if (!isCurrencyCode(input.currency)) {
-    issues.push({
-      field: "currency",
-      code: "INVALID_CURRENCY",
-      message: "La moneda de la transferencia no es válida.",
-    });
+    issues.push({ field: "currency", code: "INVALID_CURRENCY" });
   }
 
   const notes = typeof input.notes === "string" ? input.notes.trim() : "";
   if (notes.length > TRANSFER_NOTES_MAX_LENGTH) {
-    issues.push({
-      field: "notes",
-      code: "NOTES_TOO_LONG",
-      message: `Las notas no pueden superar los ${TRANSFER_NOTES_MAX_LENGTH} caracteres.`,
-    });
+    issues.push({ field: "notes", code: "NOTES_TOO_LONG" });
   }
 
   const date = parseDateInput(input.date);
   if (!date) {
-    issues.push({
-      field: "date",
-      code: "INVALID_DATE",
-      message: "Introduce una fecha válida con formato DD/MM/AAAA.",
-    });
+    issues.push({ field: "date", code: "INVALID_DATE" });
   }
 
   if (issues.length > 0) {
@@ -144,7 +116,7 @@ export function toTransferFieldErrors(
 ): TransferValidationErrors {
   return issues.reduce<TransferValidationErrors>((errors, issue) => {
     if (!errors[issue.field]) {
-      errors[issue.field] = issue.message;
+      errors[issue.field] = issue.code;
     }
     return errors;
   }, {});

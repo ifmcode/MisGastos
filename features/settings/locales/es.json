@@ -1,0 +1,20 @@
+{
+  "title": "Configuración",
+  "currentUser": "Usuario actual:",
+  "noName": "Sin nombre",
+  "manageCategories": "Gestionar categorías",
+  "categories": "Categorías",
+  "logout": "Cerrar Sesión",
+  "theme": {
+    "label": "Modo oscuro",
+    "on": "Activado",
+    "off": "Desactivado",
+    "accessibility": "Activar modo oscuro"
+  },
+  "language": {
+    "label": "Idioma",
+    "spanish": "Español",
+    "english": "English",
+    "accessibility": "Elegir idioma de la app"
+  }
+}

@@ -56,8 +56,8 @@ export function useWalletMutations({
           );
           setWallets((current) => [wallet, ...current]);
         },
-        "No se pudo crear la cartera. Inténtalo de nuevo.",
-        "Debes iniciar sesión para crear una cartera.",
+        "CREATE_FAILED",
+        "SIGN_IN_CREATE",
       ),
     [runMutation, walletService, setWallets],
   );
@@ -73,8 +73,8 @@ export function useWalletMutations({
           );
           setWallets((current) => replaceWallet(current, wallet));
         },
-        "No se pudo actualizar la cartera. Inténtalo de nuevo.",
-        "Debes iniciar sesión para editar carteras.",
+        "UPDATE_FAILED",
+        "SIGN_IN_UPDATE",
       ),
     [runMutation, walletService, setWallets],
   );
@@ -88,8 +88,8 @@ export function useWalletMutations({
             : await walletService.restoreWallet(currentOwnerId, walletId);
           setWallets((current) => replaceWallet(current, wallet));
         },
-        "No se pudo actualizar el estado de la cartera.",
-        "Debes iniciar sesión para archivar carteras.",
+        "ARCHIVE_FAILED",
+        "SIGN_IN_ARCHIVE",
       ),
     [runMutation, walletService, setWallets],
   );
@@ -112,8 +112,8 @@ export function useWalletMutations({
               : withoutDeleted;
           });
         },
-        "No se pudo eliminar la cartera. Inténtalo de nuevo.",
-        "Debes iniciar sesión para eliminar carteras.",
+        "DELETE_FAILED",
+        "SIGN_IN_DELETE",
       ),
     [runMutation, walletService, setWallets],
   );

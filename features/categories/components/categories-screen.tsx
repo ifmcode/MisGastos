@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -19,6 +20,7 @@ import { CategoryFormModal } from "./category-form-modal";
 export function CategoriesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useTranslation("categories");
   const {
     categories,
     visibleCategories,
@@ -76,7 +78,7 @@ export function CategoriesScreen() {
       {canAdd ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Añadir categoría"
+          accessibilityLabel={t("add")}
           onPress={openCreate}
           style={[styles.fab, { bottom: insets.bottom + 24 }]}
         >

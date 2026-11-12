@@ -45,22 +45,28 @@ describe("getDeleteTransactionConfirmation", () => {
     const confirmation = getDeleteTransactionConfirmation(
       buildTransaction({}),
       [buildWallet({})],
+      "25,50 €",
     );
 
     expect(confirmation).toEqual({
-      title: "Eliminar movimiento",
-      message:
-        'Se eliminará "Cena" (25,50 €) de Cuenta principal y se revertirá el saldo.',
+      titleKey: "deleteDialog.title",
+      messageKey: "deleteDialog.message",
+      values: {
+        concept: "Cena",
+        amount: "25,50 €",
+        wallet: "Cuenta principal",
+      },
     });
   });
 
-  it("falls back to a generic wallet label when the wallet is missing", () => {
+  it("falls back to the generic wallet value when the wallet is missing", () => {
     const confirmation = getDeleteTransactionConfirmation(
       buildTransaction({ walletId: "missing-wallet" }),
       [],
+      "25,50 €",
     );
 
-    expect(confirmation.message).toContain("de esta cartera");
+    expect(confirmation.values.wallet).toBe("");
   });
 
   it("explains that orphaned movements have no balance to revert", () => {
@@ -70,9 +76,22 @@ describe("getDeleteTransactionConfirmation", () => {
         walletName: "[Eliminada] Cuenta principal",
       }),
       [],
+      "25,50 €",
     );
 
-    expect(confirmation.message).toContain("no hay saldo que revertir");
-    expect(confirmation.message).toContain("[Eliminada]");
+    expect(confirmation.messageKey).toBe("deleteDialog.messageOrphan");
+    expect(confirmation.values.wallet).toBe("[Eliminada] Cuenta principal");
+  });
+
+  it("uses the no-wallet orphan message when no stored name exists", () => {
+    const confirmation = getDeleteTransactionConfirmation(
+      buildTransaction({ walletId: "-1", walletName: undefined }),
+      [],
+      "25,50 €",
+    );
+
+    expect(confirmation.messageKey).toBe(
+      "deleteDialog.messageOrphanNoWallet",
+    );
   });
 });

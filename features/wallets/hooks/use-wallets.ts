@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "@/hooks/use-auth";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
-import { getWalletErrorMessage } from "../services/wallet.errors";
+import { getWalletErrorCode } from "../services/wallet.errors";
 import { Wallet } from "../types/wallet.types";
 import { calculateWalletTotals, WalletTotal } from "../utils/money";
 import {
@@ -31,6 +32,7 @@ export interface UseWalletsResult extends WalletMutations {
 
 export function useWallets(): UseWalletsResult {
   const { user } = useAuth();
+  const { tr } = useScopedTranslation("wallets");
   const walletService = useWalletService();
 
   const [wallets, setWallets] = useState<Wallet[]>([]);
@@ -60,12 +62,7 @@ export function useWallets(): UseWalletsResult {
         const result = await walletService.getWallets(user.uid);
         setWallets(result);
       } catch (loadError: unknown) {
-        setError(
-          getWalletErrorMessage(
-            loadError,
-            "No se pudieron cargar las carteras. Inténtalo de nuevo.",
-          ),
-        );
+        setError(tr(`errors.${getWalletErrorCode(loadError, "LOAD_FAILED")}`));
       } finally {
         if (mode === "refresh") {
           setRefreshing(false);
@@ -74,7 +71,7 @@ export function useWallets(): UseWalletsResult {
         }
       }
     },
-    [user, walletService],
+    [user, walletService, tr],
   );
 
   useEffect(() => {

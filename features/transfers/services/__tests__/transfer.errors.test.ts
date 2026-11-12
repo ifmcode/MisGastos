@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
 import {
-  getTransferErrorMessage,
+  getTransferErrorCode,
   TransferOperationCode,
   TransferOperationError,
   TransferValidationError,
@@ -19,87 +19,81 @@ const codes: TransferOperationCode[] = [
 ];
 
 describe("TransferValidationError", () => {
-  it("uses the first issue message and maps the field errors", () => {
+  it("uses the first issue code and maps the field errors", () => {
     const error = new TransferValidationError([
-      { field: "amount", code: "INVALID_AMOUNT", message: "Importe inválido" },
-      { field: "notes", code: "NOTES_TOO_LONG", message: "Notas largas" },
+      { field: "amount", code: "INVALID_AMOUNT" },
+      { field: "notes", code: "NOTES_TOO_LONG" },
     ]);
 
     expect(error.name).toBe("TransferValidationError");
-    expect(error.message).toBe("Importe inválido");
+    expect(error.message).toBe("INVALID_AMOUNT");
     expect(error.fieldErrors).toEqual({
-      amount: "Importe inválido",
-      notes: "Notas largas",
+      amount: "INVALID_AMOUNT",
+      notes: "NOTES_TOO_LONG",
     });
   });
 
-  it("has a fallback message for empty issue lists", () => {
+  it("has a fallback code for empty issue lists", () => {
     const error = new TransferValidationError([]);
 
-    expect(error.message).toBe(
-      "Los datos de la transferencia no son válidos.",
-    );
+    expect(error.message).toBe("VALIDATION");
     expect(error.fieldErrors).toEqual({});
   });
 });
 
 describe("TransferOperationError", () => {
-  it("exposes every operation code with a user-friendly message", () => {
+  it("exposes every operation code", () => {
     for (const code of codes) {
       const error = new TransferOperationError(code);
 
       expect(error.name).toBe("TransferOperationError");
       expect(error.code).toBe(code);
-      expect(error.message.length).toBeGreaterThan(0);
+      expect(error.message).toBe(code);
     }
   });
 });
 
-describe("getTransferErrorMessage", () => {
-  it("returns the message of project errors", () => {
+describe("getTransferErrorCode", () => {
+  it("returns the code of project errors", () => {
     const validation = new TransferValidationError([
-      { field: "amount", code: "INVALID_AMOUNT", message: "Importe inválido" },
+      { field: "amount", code: "INVALID_AMOUNT" },
     ]);
     const operation = new TransferOperationError("SAME_WALLET");
 
-    expect(getTransferErrorMessage(validation, "fallback")).toBe(
-      "Importe inválido",
-    );
-    expect(getTransferErrorMessage(operation, "fallback")).toBe(
-      "La cartera de origen y destino deben ser distintas.",
-    );
+    expect(getTransferErrorCode(validation, "SAVE_FAILED")).toBe("VALIDATION");
+    expect(getTransferErrorCode(operation, "SAVE_FAILED")).toBe("SAME_WALLET");
   });
 
   it("maps infrastructure error codes and messages", () => {
     expect(
-      getTransferErrorMessage(
+      getTransferErrorCode(
         Object.assign(new Error("denied"), { code: "permission-denied" }),
-        "fallback",
+        "SAVE_FAILED",
       ),
-    ).toBe("No tienes permisos para realizar esta operación.");
+    ).toBe("PERMISSION_DENIED");
     expect(
-      getTransferErrorMessage(
+      getTransferErrorCode(
         Object.assign(new Error("offline"), { code: "unavailable" }),
-        "fallback",
+        "SAVE_FAILED",
       ),
-    ).toBe("No hay conexión. Comprueba tu red e inténtalo de nuevo.");
+    ).toBe("NETWORK");
     expect(
-      getTransferErrorMessage(
+      getTransferErrorCode(
         Object.assign(new Error("offline"), {
           code: "network-request-failed",
         }),
-        "fallback",
+        "SAVE_FAILED",
       ),
-    ).toBe("No hay conexión. Comprueba tu red e inténtalo de nuevo.");
+    ).toBe("NETWORK");
     expect(
-      getTransferErrorMessage(new Error("permission_denied"), "fallback"),
-    ).toBe("No tienes permisos para realizar esta operación.");
+      getTransferErrorCode(new Error("permission_denied"), "SAVE_FAILED"),
+    ).toBe("PERMISSION_DENIED");
   });
 
   it("returns the fallback for unknown failures", () => {
-    expect(getTransferErrorMessage("boom", "fallback")).toBe("fallback");
-    expect(getTransferErrorMessage(new Error("other"), "fallback")).toBe(
-      "fallback",
+    expect(getTransferErrorCode("boom", "SAVE_FAILED")).toBe("SAVE_FAILED");
+    expect(getTransferErrorCode(new Error("other"), "LOAD_FAILED")).toBe(
+      "LOAD_FAILED",
     );
   });
 });

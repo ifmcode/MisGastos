@@ -15,6 +15,7 @@ export type TransactionCategoryIcon = CategoryIcon;
 export interface TransactionCategory {
   id: string;
   label: string;
+  labelKey?: string;
   icon: TransactionCategoryIcon;
   color: string;
   type: TransactionType;
@@ -25,22 +26,23 @@ export function isTransactionType(value: unknown): value is TransactionType {
   return value === "expense" || value === "income";
 }
 
-export const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
-  expense: "Gasto",
-  income: "Ingreso",
+export const TRANSACTION_TYPE_KEYS: Record<TransactionType, string> = {
+  expense: "types.expense",
+  income: "types.income",
 };
 
 export const TRANSACTION_TYPE_OPTIONS: ReadonlyArray<{
   value: TransactionType;
-  label: string;
+  labelKey: string;
 }> = [
-  { value: "expense", label: "Gasto" },
-  { value: "income", label: "Ingreso" },
+  { value: "expense", labelKey: TRANSACTION_TYPE_KEYS.expense },
+  { value: "income", labelKey: TRANSACTION_TYPE_KEYS.income },
 ];
 
 export const FALLBACK_CATEGORY: TransactionCategory = {
   id: "unknown",
-  label: "Sin categoría",
+  label: "",
+  labelKey: "fallbackCategory",
   icon: "receipt-outline",
   color: "#5C6B70",
   type: "expense",
@@ -77,6 +79,14 @@ export function getTransactionCategory(
   return findTransactionCategory(categories, categoryId) ?? FALLBACK_CATEGORY;
 }
 
+/** Resolves user data or the translated fallback label. */
+export function getTransactionCategoryLabel(
+  category: TransactionCategory,
+  t: (key: string) => string,
+): string {
+  return category.labelKey ? t(category.labelKey) : category.label;
+}
+
 export function getCategoriesForType(
   categories: readonly Category[],
   type: TransactionType,
@@ -105,6 +115,6 @@ export function isTransactionCategoryId(
   );
 }
 
-export function getTransactionTypeLabel(type: TransactionType): string {
-  return TRANSACTION_TYPE_LABELS[type];
+export function getTransactionTypeKey(type: TransactionType): string {
+  return TRANSACTION_TYPE_KEYS[type];
 }

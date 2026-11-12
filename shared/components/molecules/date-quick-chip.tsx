@@ -1,6 +1,8 @@
 import { Pressable } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { ThemedText } from "@/components/themed-text";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { DateQuickOption } from "@/shared/utils/date-quick-options";
 
@@ -20,11 +22,18 @@ export function DateQuickChip({
   onPress,
 }: DateQuickChipProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("common");
+  const locale = useAppLocale();
+  const label = t(option.labelKey);
+  const displayDate = locale.formatDate(option.isoDate, {
+    day: "2-digit",
+    month: "2-digit",
+  });
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${option.label} ${option.displayDate}`}
+      accessibilityLabel={`${label} ${displayDate}`}
       accessibilityState={{ selected, disabled }}
       disabled={disabled}
       hitSlop={4}
@@ -44,7 +53,7 @@ export function DateQuickChip({
           { color: selected ? theme.primary : theme.text },
         ]}
       >
-        {option.label}
+        {label}
       </ThemedText>
       <ThemedText
         style={[
@@ -52,7 +61,7 @@ export function DateQuickChip({
           { color: selected ? theme.primary : theme.muted },
         ]}
       >
-        {option.displayDate}
+        {displayDate}
       </ThemedText>
     </Pressable>
   );

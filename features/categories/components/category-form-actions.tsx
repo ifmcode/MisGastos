@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -22,13 +23,14 @@ export function CategoryFormActions({
   onDelete,
 }: CategoryFormActionsProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["categories", "common"]);
 
   return (
     <View style={styles.actions}>
       {isEditing && onDelete ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Eliminar categoría"
+          accessibilityLabel={t("form.delete")}
           onPress={onDelete}
           disabled={submitting}
           style={[
@@ -41,14 +43,14 @@ export function CategoryFormActions({
           <ThemedText
             style={[styles.deleteButtonText, { color: theme.danger }]}
           >
-            Eliminar
+            {t("common:actions.delete")}
           </ThemedText>
         </Pressable>
       ) : null}
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Cancelar"
+        accessibilityLabel={t("common:actions.cancel")}
         onPress={onCancel}
         disabled={submitting}
         style={[
@@ -57,12 +59,16 @@ export function CategoryFormActions({
           submitting && styles.disabled,
         ]}
       >
-        <ThemedText type="defaultSemiBold">Cancelar</ThemedText>
+        <ThemedText type="defaultSemiBold">
+          {t("common:actions.cancel")}
+        </ThemedText>
       </Pressable>
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={isEditing ? "Guardar cambios" : "Crear categoría"}
+        accessibilityLabel={
+          isEditing ? t("form.saveChanges") : t("form.create")
+        }
         onPress={onSubmit}
         disabled={submitting}
         style={[styles.primaryButton, submitting && styles.disabled]}
@@ -71,7 +77,7 @@ export function CategoryFormActions({
           <ActivityIndicator color={theme.onPrimary} />
         ) : (
           <ThemedText style={styles.primaryButtonText}>
-            {isEditing ? "Guardar" : "Crear"}
+            {isEditing ? t("form.save") : t("form.create")}
           </ThemedText>
         )}
       </Pressable>

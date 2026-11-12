@@ -68,7 +68,7 @@ describe("validateTransferRequest", () => {
     expect(() => validateTransferRequest(" ", input)).toThrow(
       expect.objectContaining({
         fieldErrors: {
-          ownerId: "Debes iniciar sesión para gestionar tus transferencias.",
+          ownerId: "OWNER_REQUIRED",
         },
       }),
     );

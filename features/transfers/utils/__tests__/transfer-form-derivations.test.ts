@@ -6,8 +6,8 @@ import {
   getAvailableDestinations,
   getAvailableSourceBalance,
   getInitialTransferFormValues,
-  getInsufficientBalanceMessage,
   getProjectedSourceBalance,
+  getTransferAmountHelper,
 } from "../transfer-form-derivations";
 
 function buildWallet(overrides: Partial<Wallet>): Wallet {
@@ -110,8 +110,13 @@ describe("getProjectedSourceBalance", () => {
   });
 });
 
-describe("getInsufficientBalanceMessage", () => {
-  it("includes the formatted available balance", () => {
-    expect(getInsufficientBalanceMessage(74.5, "EUR")).toContain("74,50");
+describe("getTransferAmountHelper", () => {
+  it("passes the localized balances to the translation key", () => {
+    const t = (key: string, options?: Record<string, unknown>) =>
+      `${key}:${options?.available}:${options?.projected}`;
+
+    expect(
+      getTransferAmountHelper(100, 74.5, "EUR", (value) => `${value}`, t),
+    ).toBe("form.amountHelper:100:74.5");
   });
 });

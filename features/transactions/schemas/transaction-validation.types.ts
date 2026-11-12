@@ -31,11 +31,10 @@ export type TransactionValidationCode =
 export interface TransactionValidationIssue {
   field: TransactionFormField;
   code: TransactionValidationCode;
-  message: string;
 }
 
 export type TransactionValidationErrors = Partial<
-  Record<TransactionFormField, string>
+  Record<TransactionFormField, TransactionValidationCode>
 >;
 
 /**

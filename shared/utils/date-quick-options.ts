@@ -1,9 +1,17 @@
 import { parseDateInput, toLocalIsoDate } from "./date";
 
+export type DateQuickOptionKey = "last" | "today" | "yesterday";
+
+export type DateQuickOptionLabelKey =
+  | "date.last"
+  | "date.today"
+  | "date.yesterday";
+
 export interface DateQuickOption {
-  key: "last" | "today" | "yesterday";
-  label: string;
+  key: DateQuickOptionKey;
+  labelKey: DateQuickOptionLabelKey;
   isoDate: string;
+  /** Kept for tests and non-UI callers; UI formats with `Intl`. */
   displayDate: string;
 }
 
@@ -20,14 +28,14 @@ function formatShortDate(isoDate: string): string {
 }
 
 function buildOption(
-  key: DateQuickOption["key"],
-  label: string,
+  key: DateQuickOptionKey,
+  labelKey: DateQuickOptionLabelKey,
   isoDate: string,
 ): DateQuickOption {
-  return { key, label, isoDate, displayDate: formatShortDate(isoDate) };
+  return { key, labelKey, isoDate, displayDate: formatShortDate(isoDate) };
 }
 
-/** Today and yesterday in local calendar days, formatted as DD/MM. */
+/** Today and yesterday in local calendar days. */
 export function getDateQuickOptions(reference = new Date()): DateQuickOptions {
   const todayIso = toLocalIsoDate(reference) ?? "";
   const yesterday = new Date(
@@ -38,14 +46,14 @@ export function getDateQuickOptions(reference = new Date()): DateQuickOptions {
   const yesterdayIso = toLocalIsoDate(yesterday) ?? "";
 
   return {
-    today: buildOption("today", "Hoy", todayIso),
-    yesterday: buildOption("yesterday", "Ayer", yesterdayIso),
+    today: buildOption("today", "date.today", todayIso),
+    yesterday: buildOption("yesterday", "date.yesterday", yesterdayIso),
   };
 }
 
 /**
- * Last used date formatted as DD/MM. Returns null when the value is invalid or
- * already covered by the Hoy/Ayer quick options, so the row never duplicates.
+ * Last used date. Returns null when the value is invalid or already covered by
+ * the Hoy/Ayer quick options, so the row never duplicates.
  */
 export function getLastUsedDateOption(
   isoDate: string | null | undefined,
@@ -59,5 +67,5 @@ export function getLastUsedDateOption(
     return null;
   }
 
-  return buildOption("last", "Último", normalized);
+  return buildOption("last", "date.last", normalized);
 }

@@ -7,6 +7,7 @@ import { AuthNavigator } from '@/features/auth/components/auth-navigator';
 import { AuthProvider } from '@/features/auth/providers/auth-provider';
 import { useAppColorScheme } from '@/shared/hooks/use-app-color-scheme';
 import { useAppTheme } from '@/shared/hooks/use-app-theme';
+import { AppLanguageProvider } from '@/shared/providers/language-provider';
 import { AppThemeProvider } from '@/shared/providers/theme-provider';
 
 export const unstable_settings = {
@@ -27,10 +28,12 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <AppThemeProvider>
-      <AuthProvider>
-        <RootNavigator />
-      </AuthProvider>
-    </AppThemeProvider>
+    <AppLanguageProvider>
+      <AppThemeProvider>
+        <AuthProvider>
+          <RootNavigator />
+        </AuthProvider>
+      </AppThemeProvider>
+    </AppLanguageProvider>
   );
 }

@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
@@ -23,6 +24,7 @@ import { DashboardOverviewScroll } from "./dashboard-overview-scroll";
 export function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useTranslation("dashboard");
   const { user } = useAuth();
   const walletsState = useWallets();
   const transfersState = useTransfers();
@@ -77,7 +79,8 @@ export function DashboardScreen() {
     transfersState.refreshing ||
     transactionsState.refreshing ||
     categoriesState.refreshing;
-  const greeting = user?.displayName ?? user?.email ?? "Usuario";
+  const greetingName = user?.displayName ?? user?.email ?? t("defaultUser");
+  const greeting = t("greeting", { name: greetingName });
 
   function handleRefresh() {
     void walletsState.refresh();
@@ -95,7 +98,7 @@ export function DashboardScreen() {
     <ThemedView
       style={[dashboardStyles.container, { paddingTop: insets.top + 16 }]}
     >
-      <DashboardHeader greeting={`Hola, ${greeting}`} />
+      <DashboardHeader greeting={greeting} />
 
       {walletsState.loading ? (
         <DashboardLoadingState />

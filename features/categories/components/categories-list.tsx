@@ -1,4 +1,7 @@
+import { useTranslation } from "react-i18next";
 import { FlatList, View } from "react-native";
+
+import { asTranslate } from "@/shared/i18n/translate";
 
 import type { CategoryReorder } from "../hooks/use-category-reorder";
 import { categoriesStyles as styles } from "../styles/categories.styles";
@@ -35,6 +38,8 @@ export function CategoriesList({
   onCreateCategory,
   onRefresh,
 }: CategoriesListProps) {
+  const { t } = useTranslation("categories");
+  const tr = asTranslate(t);
   const emptyCopy = getCategoriesEmptyCopy(
     categories.length > 0,
     typeFilter,
@@ -75,8 +80,8 @@ export function CategoriesList({
       }
       ListEmptyComponent={
         <CategoriesEmptyState
-          title={emptyCopy.title}
-          message={emptyCopy.message}
+          title={tr(emptyCopy.titleKey)}
+          message={tr(emptyCopy.messageKey)}
           onCreate={onCreateCategory}
         />
       }

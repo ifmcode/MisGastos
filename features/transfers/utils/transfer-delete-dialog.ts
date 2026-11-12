@@ -1,41 +1,57 @@
 import { Transfer } from "@/features/transfers/types/transfer.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
-import { formatMoney } from "@/features/wallets/utils/money";
 
 export interface DeleteTransferConfirmation {
-  title: string;
-  message: string;
+  titleKey: string;
+  messageKey: string;
+  values: {
+    amount: string;
+    from: string;
+    to: string;
+    balanceMessage: string;
+  };
 }
 
-/** Builds the copy shown before soft-deleting a transfer. */
+/**
+ * Builds the translation keys shown before soft-deleting a transfer. The caller
+ * formats the amount and resolves wallet names with the active locale.
+ */
 export function getDeleteTransferConfirmation(
   transfer: Transfer,
   wallets: readonly Wallet[],
+  amount: string,
+  fallbackWallet: string,
+  fallbackDeletedWallet: string,
+  balanceMessages: {
+    bothOrphaned: string;
+    oneOrphaned: string;
+    noneOrphaned: string;
+  },
 ): DeleteTransferConfirmation {
   const fromOrphaned = isOrphanedWalletId(transfer.fromWalletId);
   const toOrphaned = isOrphanedWalletId(transfer.toWalletId);
   const fromName = fromOrphaned
-    ? transfer.fromWalletName ?? "la cartera eliminada"
+    ? transfer.fromWalletName ?? fallbackDeletedWallet
     : wallets.find((wallet) => wallet.id === transfer.fromWalletId)?.name ??
       transfer.fromWalletName ??
-      "la cartera";
+      fallbackWallet;
   const toName = toOrphaned
-    ? transfer.toWalletName ?? "la cartera eliminada"
+    ? transfer.toWalletName ?? fallbackDeletedWallet
     : wallets.find((wallet) => wallet.id === transfer.toWalletId)?.name ??
       transfer.toWalletName ??
-      "la cartera";
-  const amount = formatMoney(transfer.amount, transfer.currency);
+      fallbackWallet;
 
   const balanceMessage =
     fromOrphaned && toOrphaned
-      ? "Ninguna de las dos carteras existe ya, así que no hay saldos que revertir."
+      ? balanceMessages.bothOrphaned
       : fromOrphaned || toOrphaned
-        ? "Solo se revertirá el saldo de la cartera que sigue existiendo."
-        : "Los saldos se revertirán";
+        ? balanceMessages.oneOrphaned
+        : balanceMessages.noneOrphaned;
 
   return {
-    title: "Eliminar transferencia",
-    message: `Se eliminará la transferencia de ${amount} de ${fromName} a ${toName}. ${balanceMessage} y el registro se conservará para auditoría.`,
+    titleKey: "deleteDialog.title",
+    messageKey: "deleteDialog.message",
+    values: { amount, from: fromName, to: toName, balanceMessage },
   };
 }

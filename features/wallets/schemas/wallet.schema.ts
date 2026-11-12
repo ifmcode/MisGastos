@@ -56,7 +56,7 @@ export function toWalletFieldErrors(
 ): WalletValidationErrors {
   return issues.reduce<WalletValidationErrors>((errors, issue) => {
     if (!errors[issue.field]) {
-      errors[issue.field] = issue.message;
+      errors[issue.field] = issue.code;
     }
     return errors;
   }, {});

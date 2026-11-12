@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Colors } from '@/shared/constants/app-colors';
 import { HapticTab } from '@/components/haptic-tab';
@@ -8,6 +9,7 @@ import { useAppColorScheme } from '@/shared/hooks/use-app-color-scheme';
 
 export default function TabLayout() {
   const colorScheme = useAppColorScheme();
+  const { t } = useTranslation('navigation');
 
   return (
     <Tabs
@@ -19,14 +21,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t('tabs.home'),
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="wallets"
         options={{
-          title: 'Carteras',
+          title: t('tabs.wallets'),
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="creditcard.fill" color={color} />
           ),
@@ -35,14 +37,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="transactions"
         options={{
-          title: 'Movimientos',
+          title: t('tabs.transactions'),
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Configuración',
+          title: t('tabs.settings'),
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="gear" color={color} />,
         }}
       />

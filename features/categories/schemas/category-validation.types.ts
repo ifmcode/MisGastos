@@ -1,6 +1,12 @@
 export const CATEGORY_NAME_MAX_LENGTH = 40;
 
-export type CategoryFormField = "ownerId" | "categoryId" | "name" | "icon" | "color" | "type";
+export type CategoryFormField =
+  | "ownerId"
+  | "categoryId"
+  | "name"
+  | "icon"
+  | "color"
+  | "type";
 
 export type CategoryValidationCode =
   | "OWNER_REQUIRED"
@@ -14,11 +20,10 @@ export type CategoryValidationCode =
 export interface CategoryValidationIssue {
   field: CategoryFormField;
   code: CategoryValidationCode;
-  message: string;
 }
 
 export type CategoryValidationErrors = Partial<
-  Record<CategoryFormField, string>
+  Record<CategoryFormField, CategoryValidationCode>
 >;
 
 /** Input accepted by validation; values are strings for runtime checks. */

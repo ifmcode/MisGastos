@@ -5,23 +5,30 @@ export interface LoginFormValues {
   isRegister: boolean;
 }
 
-export interface LoginFieldErrors {
-  name?: string;
-  email?: string;
-  password?: string;
-}
+export type LoginValidationCode =
+  | "NAME_REQUIRED"
+  | "EMAIL_REQUIRED"
+  | "EMAIL_INVALID"
+  | "PASSWORD_REQUIRED"
+  | "PASSWORD_TOO_SHORT";
+
+export type LoginFieldErrors = Partial<
+  Record<"name" | "email" | "password", LoginValidationCode>
+>;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function getLoginEmailError(email: string): string | undefined {
+export function getLoginEmailError(
+  email: string,
+): LoginValidationCode | undefined {
   const normalizedEmail = email.trim();
 
   if (normalizedEmail.length === 0) {
-    return "Ingresa tu correo electrónico.";
+    return "EMAIL_REQUIRED";
   }
 
   if (!EMAIL_PATTERN.test(normalizedEmail)) {
-    return "Ingresa un correo electrónico válido.";
+    return "EMAIL_INVALID";
   }
 
   return undefined;
@@ -32,7 +39,7 @@ export function validateLoginForm(values: LoginFormValues): LoginFieldErrors {
   const emailError = getLoginEmailError(values.email);
 
   if (values.isRegister && values.name.trim().length === 0) {
-    errors.name = "Ingresa tu nombre.";
+    errors.name = "NAME_REQUIRED";
   }
 
   if (emailError) {
@@ -40,9 +47,9 @@ export function validateLoginForm(values: LoginFormValues): LoginFieldErrors {
   }
 
   if (values.password.length === 0) {
-    errors.password = "Ingresa tu contraseña.";
+    errors.password = "PASSWORD_REQUIRED";
   } else if (values.isRegister && values.password.length < 6) {
-    errors.password = "La contraseña debe tener al menos 6 caracteres.";
+    errors.password = "PASSWORD_TOO_SHORT";
   }
 
   return errors;

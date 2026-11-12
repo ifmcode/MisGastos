@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -21,22 +22,22 @@ export function TransactionsHeader({
   onOpenFilters,
   onCreate,
 }: TransactionsHeaderProps) {
+  const { t } = useTranslation("transactions");
+
   return (
     <View style={styles.header}>
       <View style={styles.headerText}>
         <ThemedText type="title" style={styles.title}>
-          Movimientos
+          {t("title")}
         </ThemedText>
-        <ThemedText style={styles.subtitle}>
-          Gastos, ingresos e historial.
-        </ThemedText>
+        <ThemedText style={styles.subtitle}>{t("subtitle")}</ThemedText>
       </View>
 
       {showActions ? (
         <View style={styles.headerActions}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Abrir filtros"
+            accessibilityLabel={t("filters.openAccessibility")}
             onPress={onOpenFilters}
             style={styles.headerIconButton}
           >
@@ -49,7 +50,7 @@ export function TransactionsHeader({
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Añadir movimiento"
+            accessibilityLabel={t("add")}
             onPress={onCreate}
             style={styles.headerButton}
           >
@@ -58,7 +59,9 @@ export function TransactionsHeader({
               size={20}
               color={transactionsPalette.onPrimary}
             />
-            <ThemedText style={styles.headerButtonText}>Nuevo</ThemedText>
+            <ThemedText style={styles.headerButtonText}>
+              {t("new")}
+            </ThemedText>
           </Pressable>
         </View>
       ) : null}

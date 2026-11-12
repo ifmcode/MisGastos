@@ -5,7 +5,10 @@ import { useWalletService } from "./use-wallet-service";
 
 export interface UseWalletUsageOptions {
   ownerId: string | undefined;
-  reportMutationError: (failure: unknown, fallback: string) => void;
+  reportMutationError: (
+    failure: unknown,
+    fallback: "USAGE_FAILED" | "SIGN_IN_USAGE",
+  ) => void;
 }
 
 export type GetWalletUsage = (walletId: string) => Promise<WalletUsage | null>;
@@ -20,20 +23,14 @@ export function useWalletUsage({
   return useCallback(
     async (walletId: string): Promise<WalletUsage | null> => {
       if (!ownerId) {
-        reportMutationError(
-          new Error("unauthenticated"),
-          "Debes iniciar sesión para consultar el uso de la cartera.",
-        );
+        reportMutationError(new Error("unauthenticated"), "SIGN_IN_USAGE");
         return null;
       }
 
       try {
         return await walletService.getWalletUsage(ownerId, walletId);
       } catch (failure: unknown) {
-        reportMutationError(
-          failure,
-          "No se pudo comprobar el uso de la cartera.",
-        );
+        reportMutationError(failure, "USAGE_FAILED");
         return null;
       }
     },

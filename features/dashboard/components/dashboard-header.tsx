@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -9,6 +10,8 @@ export interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ greeting }: DashboardHeaderProps) {
+  const { t } = useTranslation("dashboard");
+
   return (
     <View style={dashboardStyles.header}>
       <View style={dashboardStyles.headerText}>
@@ -20,7 +23,7 @@ export function DashboardHeader({ greeting }: DashboardHeaderProps) {
           {greeting}
         </ThemedText>
         <ThemedText style={dashboardStyles.subtitle}>
-          Este es el resumen de tus finanzas.
+          {t("subtitle")}
         </ThemedText>
       </View>
     </View>

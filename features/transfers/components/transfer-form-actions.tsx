@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -24,6 +25,7 @@ export function TransferFormActions({
   onDelete,
 }: TransferFormActionsProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["transfers", "common"]);
   const disabled = submitting || !canSubmit;
 
   return (
@@ -31,7 +33,7 @@ export function TransferFormActions({
       {isEditing && onDelete ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Eliminar transferencia"
+          accessibilityLabel={t("form.delete")}
           onPress={onDelete}
           disabled={submitting}
           style={[
@@ -44,14 +46,14 @@ export function TransferFormActions({
           <ThemedText
             style={[styles.deleteButtonText, { color: theme.danger }]}
           >
-            Eliminar
+            {t("common:actions.delete")}
           </ThemedText>
         </Pressable>
       ) : null}
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Cancelar transferencia"
+        accessibilityLabel={t("form.cancelAccessibility")}
         onPress={onCancel}
         disabled={submitting}
         style={[
@@ -60,13 +62,15 @@ export function TransferFormActions({
           submitting && styles.disabled,
         ]}
       >
-        <ThemedText type="defaultSemiBold">Cancelar</ThemedText>
+        <ThemedText type="defaultSemiBold">
+          {t("form.cancel")}
+        </ThemedText>
       </Pressable>
 
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={
-          isEditing ? "Guardar cambios" : "Crear transferencia"
+          isEditing ? t("form.saveChanges") : t("form.create")
         }
         onPress={onSubmit}
         disabled={disabled}
@@ -76,7 +80,7 @@ export function TransferFormActions({
           <ActivityIndicator color={theme.onPrimary} />
         ) : (
           <ThemedText style={styles.primaryButtonText}>
-            {isEditing ? "Guardar" : "Transferir"}
+            {isEditing ? t("form.save") : t("form.transfer")}
           </ThemedText>
         )}
       </Pressable>

@@ -11,7 +11,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Milestone:** M2 - Personal finance complete
 - **Phase:** 3.5 - Dashboard recent data and detail views
 - **Current ticket:** TICKET-033 - Fix the dashboard recent transfers limit and freshness
-- **Last completed:** TICKET-038 - Close Phase 1 foundation: atoms and coverage gate (12/11/2026)
+- **Last completed:** TICKET-031 - Internationalization and text extraction (12/11/2026)
 - **Next:** TICKET-034 - Open movement detail from the dashboard
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
@@ -74,9 +74,9 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ### 3.2 Category ordering (COMPLETED)
 - [x] Reorder categories and reuse the order in every picker (TICKET-030) ✅ 12/11/2026
 
-### 3.3 Internationalization (QUEUED)
-- [ ] Extract all UI copy into per-feature translation files and add a Spanish/English selector in Settings (TICKET-031)
-- [ ] Use `expo-localization` + i18next namespaces, persisted preference, `Intl` formatting and error-code mapping
+### 3.3 Internationalization (COMPLETED)
+- [x] Extract all UI copy into per-feature translation files and add a Spanish/English selector in Settings (TICKET-031) ✅ 12/11/2026
+- [x] Use `expo-localization` + i18next namespaces, persisted preference, `Intl` formatting and error-code mapping
 
 ### 3.4 Wallet transfer entry (COMPLETED)
 - [x] Move **Transferir** from the dashboard header to the **Carteras** tab (TICKET-032) ✅ 12/11/2026

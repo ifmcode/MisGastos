@@ -1,12 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { transactionFormStyles as styles } from "../styles/transaction-form.styles";
 import { getTransactionCategoryChips } from "../utils/transaction-category-chips";
-import { TransactionCategory } from "../utils/transaction-options";
+import {
+  getTransactionCategoryLabel,
+  TransactionCategory,
+} from "../utils/transaction-options";
 
 export interface TransactionFormCategorySelectorProps {
   categories: readonly TransactionCategory[];
@@ -30,21 +35,23 @@ export function TransactionFormCategorySelector({
   onOpenPicker,
 }: TransactionFormCategorySelectorProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("transactions");
   const { visible } = getTransactionCategoryChips(categories, value);
 
   return (
     <View>
-      <ThemedText style={styles.label}>Categoría</ThemedText>
+      <ThemedText style={styles.label}>{t("form.category")}</ThemedText>
       <View style={styles.categoryChips}>
         {visible.map((category) => {
           const selected = value === category.id;
+          const label = getTransactionCategoryLabel(category, asTranslate(t));
 
           return (
             <Pressable
               key={category.id}
               accessibilityRole="radio"
               accessibilityState={{ selected }}
-              accessibilityLabel={category.label}
+              accessibilityLabel={label}
               onPress={() => onChange(category.id)}
               disabled={disabled}
               style={[
@@ -69,7 +76,7 @@ export function TransactionFormCategorySelector({
                 ]}
                 numberOfLines={1}
               >
-                {category.label}
+                {label}
               </ThemedText>
             </Pressable>
           );
@@ -77,8 +84,8 @@ export function TransactionFormCategorySelector({
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Seleccionar categoría"
-          accessibilityHint="Abre la lista completa de categorías"
+          accessibilityLabel={t("form.selectCategory")}
+          accessibilityHint={t("form.selectCategoryHint")}
           onPress={onOpenPicker}
           disabled={disabled}
           style={[
@@ -92,7 +99,7 @@ export function TransactionFormCategorySelector({
       </View>
       {categories.length === 0 ? (
         <ThemedText style={[styles.helper, { color: theme.muted }]}>
-          No hay categorías para este tipo. Usa + para crear una.
+          {t("form.noCategories")}
         </ThemedText>
       ) : null}
       {error ? (

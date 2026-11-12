@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -19,14 +20,17 @@ export function WalletFormActions({
   onSubmit,
 }: WalletFormActionsProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["wallets", "common"]);
   const isEditing = mode === "edit";
-  const submitLabel = isEditing ? "Guardar cambios" : "Crear cartera";
+  const submitLabel = isEditing ? t("form.saveChanges") : t("form.create");
 
   return (
     <View style={styles.actions}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={isEditing ? "Cancelar edición" : "Cancelar creación de cartera"}
+        accessibilityLabel={
+          isEditing ? t("form.cancelEdit") : t("form.cancelCreate")
+        }
         onPress={onCancel}
         disabled={submitting}
         style={[
@@ -35,7 +39,9 @@ export function WalletFormActions({
           submitting && styles.disabled,
         ]}
       >
-        <ThemedText type="defaultSemiBold">Cancelar</ThemedText>
+        <ThemedText type="defaultSemiBold">
+          {t("common:actions.cancel")}
+        </ThemedText>
       </Pressable>
 
       <Pressable

@@ -1,20 +1,19 @@
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { DELETED_WALLET_NAME_PREFIX } from "@/features/wallets/utils/deleted-wallet";
-import { formatMoney } from "@/features/wallets/utils/money";
 import { isWalletArchived } from "@/features/wallets/utils/wallet-status";
-import { formatDateInput } from "@/shared/utils/date";
+import type { CurrencyCode } from "@/shared/constants/currencies";
 
 import { Transaction } from "../types/transaction.types";
 import {
   getTransactionCategory,
-  getTransactionTypeLabel,
+  getTransactionCategoryLabel,
 } from "./transaction-options";
 
 export interface TransactionDetailSummary {
-  typeLabel: string;
+  typeKey: string;
   amountLabel: string;
-  currency: string;
+  currency: CurrencyCode;
   isIncome: boolean;
 }
 
@@ -27,7 +26,7 @@ export type TransactionDetailFieldKey =
 
 export interface TransactionDetailField {
   key: TransactionDetailFieldKey;
-  label: string;
+  labelKey: string;
   value: string;
 }
 
@@ -38,12 +37,16 @@ export interface TransactionWalletInfo {
   status: TransactionWalletStatus;
 }
 
+type Translate = (key: string, options?: Record<string, unknown>) => string;
+
 export function getTransactionDetailSummary(
   transaction: Transaction,
+  formatCurrency: (value: number, currency: CurrencyCode) => string,
 ): TransactionDetailSummary {
   return {
-    typeLabel: getTransactionTypeLabel(transaction.type),
-    amountLabel: formatMoney(transaction.amount, transaction.currency),
+    typeKey:
+      transaction.type === "income" ? "types.income" : "types.expense",
+    amountLabel: formatCurrency(transaction.amount, transaction.currency),
     currency: transaction.currency,
     isIncome: transaction.type === "income",
   };
@@ -67,50 +70,68 @@ export function getTransactionWalletInfo(
   }
 
   return {
-    name: transaction.walletName?.trim() || "Cartera no disponible",
+    name: transaction.walletName?.trim() || "",
     status: "deleted",
   };
 }
 
 export function getTransactionWalletLabel(
   wallet: TransactionWalletInfo,
+  t: Translate,
 ): string {
+  const name = wallet.name || t("detail.unavailableWallet");
+
   if (wallet.status === "archived") {
-    return `${wallet.name} (archivada)`;
+    return `${name} ${t("detail.archivedSuffix")}`;
   }
 
   if (
     wallet.status === "deleted" &&
-    !wallet.name.startsWith(DELETED_WALLET_NAME_PREFIX)
+    !name.startsWith(DELETED_WALLET_NAME_PREFIX)
   ) {
-    return `${wallet.name} (eliminada)`;
+    return `${name} ${t("detail.deletedSuffix")}`;
   }
 
-  return wallet.name;
+  return name;
 }
 
 export function buildTransactionDetailFields(
   transaction: Transaction,
   wallets: readonly Wallet[],
   categories: readonly Category[],
+  t: Translate,
+  formatDate: (isoDate: string) => string,
 ): TransactionDetailField[] {
   const category = getTransactionCategory(categories, transaction.categoryId);
 
   return [
     {
       key: "wallet",
-      label: "Cartera",
+      labelKey: "detail.wallet",
       value: getTransactionWalletLabel(
         getTransactionWalletInfo(transaction, wallets),
+        t,
       ),
     },
-    { key: "category", label: "Categoría", value: category.label },
-    { key: "concept", label: "Concepto", value: transaction.concept },
-    { key: "date", label: "Fecha", value: formatDateInput(transaction.date) },
+    {
+      key: "category",
+      labelKey: "detail.category",
+      value: getTransactionCategoryLabel(category, t),
+    },
+    {
+      key: "concept",
+      labelKey: "detail.concept",
+      value: transaction.concept,
+    },
+    {
+      key: "date",
+      labelKey: "detail.date",
+      value: formatDate(transaction.date),
+    },
     {
       key: "notes",
-      label: "Notas",
-      value: transaction.notes?.trim() || "Sin notas",
+      labelKey: "detail.notes",
+      value: transaction.notes?.trim() || t("common:states.noNotes"),
     },
   ];
 }

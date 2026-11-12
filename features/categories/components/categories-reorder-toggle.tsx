@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -19,11 +20,13 @@ export function CategoriesReorderToggle({
   saving,
   onPress,
 }: CategoriesReorderToggleProps) {
+  const { t } = useTranslation("categories");
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={
-        reordering ? "Terminar de reordenar categorías" : "Reordenar categorías"
+        reordering ? t("reorder.finishAccessibility") : t("reorder.startAccessibility")
       }
       accessibilityState={{ disabled: saving, selected: reordering }}
       disabled={saving}
@@ -49,7 +52,7 @@ export function CategoriesReorderToggle({
           reordering && styles.reorderToggleTextActive,
         ]}
       >
-        {reordering ? "Listo" : "Reordenar"}
+        {reordering ? t("reorder.finish") : t("reorder.start")}
       </ThemedText>
     </Pressable>
   );

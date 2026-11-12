@@ -1,5 +1,6 @@
 import { Stack, useRouter, useSegments, type Href } from "expo-router";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, View } from "react-native";
 
 import { useAuth } from "@/hooks/use-auth";
@@ -11,6 +12,7 @@ export function AuthNavigator() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const segments = useSegments();
+  const { t } = useTranslation("navigation");
 
   useEffect(() => {
     if (loading) {
@@ -41,7 +43,7 @@ export function AuthNavigator() {
       <Stack.Screen name="transfers" options={{ headerShown: false }} />
       <Stack.Screen
         name="modal"
-        options={{ presentation: "modal", title: "Modal" }}
+        options={{ presentation: "modal", title: t("stack.modal") }}
       />
     </Stack>
   );

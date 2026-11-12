@@ -2,9 +2,11 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, Platform, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import {
   parseIsoDateToLocalDate,
@@ -23,6 +25,8 @@ export function DatePickerModal({
   onSelect,
 }: DatePickerModalProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("common");
+  const { locale } = useAppLocale();
   const [draftDate, setDraftDate] = useState<Date>(
     () => parseIsoDateToLocalDate(valueIso) ?? new Date(),
   );
@@ -71,7 +75,7 @@ export function DatePickerModal({
       <View style={styles.root}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Cerrar calendario"
+          accessibilityLabel={t("accessibility.closeCalendar")}
           onPress={onClose}
           style={styles.backdrop}
         />
@@ -79,29 +83,35 @@ export function DatePickerModal({
           <View style={styles.header}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Cancelar"
+              accessibilityLabel={t("accessibility.cancel")}
               hitSlop={8}
               onPress={onClose}
               style={styles.action}
             >
-              <ThemedText style={{ color: theme.muted }}>Cancelar</ThemedText>
+              <ThemedText style={{ color: theme.muted }}>
+                {t("actions.cancel")}
+              </ThemedText>
             </Pressable>
-            <ThemedText type="defaultSemiBold">Seleccionar fecha</ThemedText>
+            <ThemedText type="defaultSemiBold">
+              {t("date.selectDate")}
+            </ThemedText>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Confirmar fecha"
+              accessibilityLabel={t("accessibility.confirmDate")}
               hitSlop={8}
               onPress={confirm}
               style={styles.action}
             >
-              <ThemedText style={{ color: theme.primary }}>Listo</ThemedText>
+              <ThemedText style={{ color: theme.primary }}>
+                {t("actions.done")}
+              </ThemedText>
             </Pressable>
           </View>
           <DateTimePicker
             value={draftDate}
             mode="date"
             display="spinner"
-            locale="es-ES"
+            locale={locale}
             themeVariant={theme.isDark ? "dark" : "light"}
             onChange={handleChange}
           />

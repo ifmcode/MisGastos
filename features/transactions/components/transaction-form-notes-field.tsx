@@ -1,14 +1,18 @@
+import { useTranslation } from "react-i18next";
 import { TextInput, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
-import { TRANSACTION_NOTES_MAX_LENGTH } from "../schemas/transaction.schema";
+import {
+  TRANSACTION_NOTES_MAX_LENGTH,
+  type TransactionValidationCode,
+} from "../schemas/transaction.schema";
 import { transactionFormStyles as styles } from "../styles/transaction-form.styles";
 
 export interface TransactionFormNotesFieldProps {
   value: string;
-  error?: string;
+  error?: TransactionValidationCode;
   disabled: boolean;
   onChange: (value: string) => void;
 }
@@ -20,21 +24,27 @@ export function TransactionFormNotesField({
   onChange,
 }: TransactionFormNotesFieldProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["transactions", "validation"]);
+  const errorText = error
+    ? t(`validation:transactions.${error}`, {
+        max: TRANSACTION_NOTES_MAX_LENGTH,
+      })
+    : null;
 
   return (
     <>
-      <ThemedText style={styles.label}>Notas (opcional)</ThemedText>
+      <ThemedText style={styles.label}>{t("form.notes")}</ThemedText>
       <TextInput
         value={value}
         onChangeText={onChange}
-        placeholder="Añade detalles adicionales"
+        placeholder={t("form.notesPlaceholder")}
         placeholderTextColor={theme.muted}
         maxLength={TRANSACTION_NOTES_MAX_LENGTH}
         editable={!disabled}
         multiline
         numberOfLines={3}
         textAlignVertical="top"
-        accessibilityLabel="Notas"
+        accessibilityLabel={t("form.notesAccessibility")}
         style={[
           styles.input,
           styles.textArea,
@@ -46,9 +56,9 @@ export function TransactionFormNotesField({
         ]}
       />
       <View style={styles.descriptionFooter}>
-        {error ? (
+        {errorText ? (
           <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-            {error}
+            {errorText}
           </ThemedText>
         ) : (
           <View />

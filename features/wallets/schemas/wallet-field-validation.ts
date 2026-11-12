@@ -15,19 +15,11 @@ function getNameIssue(input: WalletInput): WalletValidationIssue | null {
   const name = typeof input.name === "string" ? input.name.trim() : "";
 
   if (name.length === 0) {
-    return {
-      field: "name",
-      code: "NAME_REQUIRED",
-      message: "El nombre de la cartera es obligatorio.",
-    };
+    return { field: "name", code: "NAME_REQUIRED" };
   }
 
   if (name.length > WALLET_NAME_MAX_LENGTH) {
-    return {
-      field: "name",
-      code: "NAME_TOO_LONG",
-      message: `El nombre no puede superar los ${WALLET_NAME_MAX_LENGTH} caracteres.`,
-    };
+    return { field: "name", code: "NAME_TOO_LONG" };
   }
 
   return null;
@@ -36,21 +28,13 @@ function getNameIssue(input: WalletInput): WalletValidationIssue | null {
 function getCurrencyIssue(input: WalletInput): WalletValidationIssue | null {
   if (isCurrencyCode(input.currency)) return null;
 
-  return {
-    field: "currency",
-    code: "INVALID_CURRENCY",
-    message: "Selecciona una moneda válida.",
-  };
+  return { field: "currency", code: "INVALID_CURRENCY" };
 }
 
 function getIconIssue(input: WalletInput): WalletValidationIssue | null {
   if (isWalletIcon(input.icon)) return null;
 
-  return {
-    field: "icon",
-    code: "INVALID_ICON",
-    message: "Selecciona un icono válido.",
-  };
+  return { field: "icon", code: "INVALID_ICON" };
 }
 
 function getColorIssue(input: WalletInput): WalletValidationIssue | null {
@@ -61,11 +45,7 @@ function getColorIssue(input: WalletInput): WalletValidationIssue | null {
     return null;
   }
 
-  return {
-    field: "color",
-    code: "INVALID_COLOR",
-    message: "Selecciona un color válido.",
-  };
+  return { field: "color", code: "INVALID_COLOR" };
 }
 
 function getInitialBalanceIssue(
@@ -78,19 +58,11 @@ function getInitialBalanceIssue(
         input.initialBalance.trim().startsWith("-");
 
   if (isNegativeAmount) {
-    return {
-      field: "initialBalance",
-      code: "NEGATIVE_AMOUNT",
-      message: "El saldo inicial no puede ser negativo.",
-    };
+    return { field: "initialBalance", code: "NEGATIVE_AMOUNT" };
   }
 
   if (parseAmountInput(input.initialBalance) === null) {
-    return {
-      field: "initialBalance",
-      code: "INVALID_AMOUNT",
-      message: "Introduce un importe válido con hasta 2 decimales.",
-    };
+    return { field: "initialBalance", code: "INVALID_AMOUNT" };
   }
 
   return null;
@@ -99,11 +71,7 @@ function getInitialBalanceIssue(
 function getTypeIssue(input: WalletInput): WalletValidationIssue | null {
   if (isWalletType(input.type)) return null;
 
-  return {
-    field: "type",
-    code: "INVALID_TYPE",
-    message: "Selecciona un tipo de cartera válido.",
-  };
+  return { field: "type", code: "INVALID_TYPE" };
 }
 
 function getIncludeInTotalIssue(
@@ -111,11 +79,7 @@ function getIncludeInTotalIssue(
 ): WalletValidationIssue | null {
   if (typeof input.includeInTotal === "boolean") return null;
 
-  return {
-    field: "includeInTotal",
-    code: "INVALID_INCLUDE_IN_TOTAL",
-    message: "El valor de incluir en el total no es válido.",
-  };
+  return { field: "includeInTotal", code: "INVALID_INCLUDE_IN_TOTAL" };
 }
 
 function getDescriptionIssue(
@@ -126,11 +90,7 @@ function getDescriptionIssue(
 
   if (description.length <= WALLET_DESCRIPTION_MAX_LENGTH) return null;
 
-  return {
-    field: "description",
-    code: "DESCRIPTION_TOO_LONG",
-    message: `La descripción no puede superar los ${WALLET_DESCRIPTION_MAX_LENGTH} caracteres.`,
-  };
+  return { field: "description", code: "DESCRIPTION_TOO_LONG" };
 }
 
 /** Collects every field issue of a wallet input in display order. */

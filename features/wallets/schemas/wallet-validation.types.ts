@@ -31,10 +31,11 @@ export type WalletValidationCode =
 export interface WalletValidationIssue {
   field: WalletFormField;
   code: WalletValidationCode;
-  message: string;
 }
 
-export type WalletValidationErrors = Partial<Record<WalletFormField, string>>;
+export type WalletValidationErrors = Partial<
+  Record<WalletFormField, WalletValidationCode>
+>;
 
 /**
  * Input accepted by business validation. `currency`, `type` and `icon` are

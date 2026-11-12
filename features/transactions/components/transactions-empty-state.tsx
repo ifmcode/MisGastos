@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -19,6 +20,8 @@ export function TransactionsEmptyState({
   onCreate,
   onClearFilters,
 }: TransactionsEmptyStateProps) {
+  const { t } = useTranslation("transactions");
+
   return (
     <View style={styles.emptyState}>
       <View style={styles.emptyIcon}>
@@ -29,28 +32,26 @@ export function TransactionsEmptyState({
         />
       </View>
       <ThemedText type="subtitle" style={styles.emptyTitle}>
-        {hasFilters ? "Sin resultados" : "Aún no tienes movimientos"}
+        {hasFilters ? t("emptyFilteredTitle") : t("emptyTitle")}
       </ThemedText>
       <ThemedText style={styles.centeredText}>
-        {hasFilters
-          ? "No hay movimientos con los filtros aplicados. Prueba a cambiarlos."
-          : "Registra tu primer gasto o ingreso para empezar a seguir tu saldo."}
+        {hasFilters ? t("emptyFilteredMessage") : t("emptyMessage")}
       </ThemedText>
       {hasFilters ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Limpiar filtros"
+          accessibilityLabel={t("filters.clearAccessibility")}
           onPress={onClearFilters}
           style={styles.secondaryEmptyButton}
         >
           <ThemedText style={styles.secondaryEmptyButtonText}>
-            Limpiar filtros
+            {t("filters.clearFilters")}
           </ThemedText>
         </Pressable>
       ) : (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Crear primer movimiento"
+          accessibilityLabel={t("createFirst")}
           onPress={onCreate}
           style={styles.createButton}
         >
@@ -60,7 +61,7 @@ export function TransactionsEmptyState({
             color={transactionsPalette.onPrimary}
           />
           <ThemedText style={styles.createButtonText}>
-            Crear movimiento
+            {t("create")}
           </ThemedText>
         </Pressable>
       )}

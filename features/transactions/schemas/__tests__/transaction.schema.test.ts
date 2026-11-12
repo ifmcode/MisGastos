@@ -126,13 +126,16 @@ describe("validateTransactionInput", () => {
 });
 
 describe("toTransactionFieldErrors", () => {
-  it("keeps the first message per field", () => {
+  it("keeps the first code per field", () => {
     expect(
       toTransactionFieldErrors([
-        { field: "amount", code: "INVALID_AMOUNT", message: "Primero" },
-        { field: "amount", code: "INVALID_AMOUNT", message: "Segundo" },
-        { field: "concept", code: "CONCEPT_REQUIRED", message: "Concepto" },
+        { field: "amount", code: "INVALID_AMOUNT" },
+        { field: "amount", code: "INVALID_AMOUNT" },
+        { field: "concept", code: "CONCEPT_REQUIRED" },
       ]),
-    ).toEqual({ amount: "Primero", concept: "Concepto" });
+    ).toEqual({
+      amount: "INVALID_AMOUNT",
+      concept: "CONCEPT_REQUIRED",
+    });
   });
 });

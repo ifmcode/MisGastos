@@ -1,6 +1,7 @@
-import { CurrencyCode } from "@/shared/constants/currencies";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { formatMoney, roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/features/wallets/utils/money";
+import type { CurrencyCode } from "@/shared/constants/currencies";
+import type { Translate } from "@/shared/i18n/translate";
 import { getDefaultMovementIsoDate } from "@/shared/utils/date-defaults";
 
 import { Transfer, TransferFormValues } from "../types/transfer.types";
@@ -15,7 +16,8 @@ export function getInitialTransferFormValues(
   };
 }
 
-/** Wallets that share the source wallet currency, excluding the source itself. */export function getAvailableDestinations(
+/** Wallets that share the source wallet currency, excluding the source itself. */
+export function getAvailableDestinations(
   wallets: readonly Wallet[],
   fromWalletId: string,
 ): Wallet[] {
@@ -58,12 +60,15 @@ export function getProjectedSourceBalance(
   return roundMoney(availableBalance - amount);
 }
 
-export function getInsufficientBalanceMessage(
+export function getTransferAmountHelper(
   availableBalance: number,
+  projectedBalance: number,
   currency: CurrencyCode,
+  formatCurrency: (value: number, currency: CurrencyCode) => string,
+  t: Translate,
 ): string {
-  return `Saldo insuficiente. Disponible: ${formatMoney(
-    availableBalance,
-    currency,
-  )}.`;
+  return t("form.amountHelper", {
+    available: formatCurrency(availableBalance, currency),
+    projected: formatCurrency(projectedBalance, currency),
+  });
 }

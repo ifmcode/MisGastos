@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { ThemedText } from "@/components/themed-text";
 import { DateQuickSelector } from "@/shared/components/molecules/date-quick-selector";
 import { formatDateInput } from "@/shared/utils/date";
@@ -19,17 +21,19 @@ export function TransactionFormDateField({
   disabled,
   onChange,
 }: TransactionFormDateFieldProps) {
+  const { t } = useTranslation("transactions");
+
   return (
     <>
-      <ThemedText style={styles.label}>Fecha</ThemedText>
+      <ThemedText style={styles.label}>{t("form.date")}</ThemedText>
       <DateQuickSelector
         text={text}
         valueIso={value}
         error={error}
         disabled={disabled}
-        helperText="Toca Hoy o Ayer, o elige otra fecha."
+        helperText={t("form.dateHelper")}
         showLastUsedDate
-        accessibilityLabel="Fecha"
+        accessibilityLabel={t("form.dateAccessibility")}
         onChangeText={onChange}
         onSelectDate={(isoDate) => onChange(formatDateInput(isoDate))}
       />

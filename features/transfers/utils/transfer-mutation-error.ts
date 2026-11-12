@@ -1,32 +1,29 @@
 import { TransferValidationErrors } from "../schemas/transfer.schema";
 import {
-  getTransferErrorMessage,
+  getTransferErrorCode,
   TransferOperationError,
   TransferValidationError,
 } from "../services/transfer.errors";
 
 export interface TransferMutationErrorState {
-  message: string | null;
+  code: string | null;
   fieldErrors: TransferValidationErrors;
 }
 
-/** Maps a failed mutation into the message and field errors shown by the form. */
+/** Maps a failed mutation into a stable code and field errors. */
 export function toTransferMutationError(
   failure: unknown,
 ): TransferMutationErrorState {
   if (failure instanceof TransferValidationError) {
-    return { message: failure.message, fieldErrors: failure.fieldErrors };
+    return { code: "VALIDATION", fieldErrors: failure.fieldErrors };
   }
 
   if (failure instanceof TransferOperationError) {
-    return { message: failure.message, fieldErrors: {} };
+    return { code: failure.code, fieldErrors: {} };
   }
 
   return {
-    message: getTransferErrorMessage(
-      failure,
-      "No se pudo crear la transferencia. Inténtalo de nuevo.",
-    ),
+    code: getTransferErrorCode(failure, "SAVE_FAILED"),
     fieldErrors: {},
   };
 }

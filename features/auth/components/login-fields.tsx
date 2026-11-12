@@ -1,8 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { TextInput, View } from "react-native";
 
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
-import type { LoginFieldErrors } from "../schemas/login.schema";
+import type { LoginFieldErrors, LoginValidationCode } from "../schemas/login.schema";
 import { loginStyles as styles } from "../styles/login.styles";
 import { AuthFeedback } from "./auth-feedback";
 
@@ -28,6 +29,11 @@ export function LoginFields({
   onChangePassword,
 }: LoginFieldsProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["auth", "validation"]);
+
+  function message(code: LoginValidationCode | undefined): string | undefined {
+    return code ? t(`validation:auth.${code}`) : undefined;
+  }
 
   return (
     <>
@@ -42,14 +48,14 @@ export function LoginFields({
                 color: theme.text,
               },
             ]}
-            placeholder="Nombre"
+            placeholder={t("login.namePlaceholder")}
             placeholderTextColor={theme.muted}
             autoCapitalize="words"
-            accessibilityLabel="Nombre"
+            accessibilityLabel={t("login.nameLabel")}
             value={name}
             onChangeText={onChangeName}
           />
-          <AuthFeedback message={errors.name} />
+          <AuthFeedback message={message(errors.name)} />
         </View>
       ) : null}
 
@@ -63,16 +69,16 @@ export function LoginFields({
               color: theme.text,
             },
           ]}
-          placeholder="Email"
+          placeholder={t("login.emailPlaceholder")}
           placeholderTextColor={theme.muted}
           keyboardType="email-address"
           autoCapitalize="none"
           autoComplete="email"
-          accessibilityLabel="Correo electrónico"
+          accessibilityLabel={t("login.emailLabel")}
           value={email}
           onChangeText={onChangeEmail}
         />
-        <AuthFeedback message={errors.email} />
+        <AuthFeedback message={message(errors.email)} />
       </View>
 
       <View style={styles.fieldGroup}>
@@ -85,14 +91,14 @@ export function LoginFields({
               color: theme.text,
             },
           ]}
-          placeholder="Contraseña"
+          placeholder={t("login.passwordPlaceholder")}
           placeholderTextColor={theme.muted}
           secureTextEntry
-          accessibilityLabel="Contraseña"
+          accessibilityLabel={t("login.passwordLabel")}
           value={password}
           onChangeText={onChangePassword}
         />
-        <AuthFeedback message={errors.password} />
+        <AuthFeedback message={message(errors.password)} />
       </View>
     </>
   );

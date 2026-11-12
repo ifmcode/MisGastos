@@ -3,7 +3,7 @@ import { useState } from "react";
 import { formatDateInput, parseDateInput } from "@/shared/utils/date";
 import { CurrencyCode } from "@/shared/constants/currencies";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { getCurrencySymbol, formatMoney } from "@/features/wallets/utils/money";
+import { getCurrencySymbol } from "@/features/wallets/utils/money";
 
 import {
   TransferInput,
@@ -152,15 +152,6 @@ export function useTransferForm({
     errors,
     ...derived,
     symbol: getCurrencySymbol(derived.currency),
-    amountHelper: derived.fromWallet
-      ? `Disponible: ${formatMoney(
-          derived.availableSourceBalance,
-          derived.currency,
-        )} · Saldo resultante: ${formatMoney(
-          derived.projectedSourceBalance,
-          derived.currency,
-        )}`
-      : undefined,
     dateText,
     canSubmit: Boolean(derived.fromWallet) && Boolean(derived.toWallet),
     updateValue,

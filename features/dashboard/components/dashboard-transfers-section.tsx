@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -5,9 +6,10 @@ import { TransferItem } from "@/features/transfers/components/transfer-item";
 import { Transfer } from "@/features/transfers/types/transfer.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { dashboardPalette, dashboardStyles } from "../styles/dashboard.styles";
-import { getTransfersEmptyMessage } from "../utils/dashboard-transfers-copy";
+import { getTransfersEmptyMessageKey } from "../utils/dashboard-transfers-copy";
 import { DashboardSectionHeader } from "./dashboard-section-header";
 
 export interface DashboardTransfersSectionProps {
@@ -34,12 +36,14 @@ export function DashboardTransfersSection({
   onPressTransfer,
 }: DashboardTransfersSectionProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("dashboard");
+  const tr = asTranslate(t);
 
   return (
     <View style={dashboardStyles.recentSection}>
       <DashboardSectionHeader
-        title="Transferencias recientes"
-        actionLabel={hasMore ? "Ver historial" : undefined}
+        title={t("transfers.title")}
+        actionLabel={hasMore ? t("transfers.viewHistory") : undefined}
         onActionPress={hasMore ? onOpenHistory : undefined}
       />
 
@@ -47,7 +51,7 @@ export function DashboardTransfersSection({
         <View style={dashboardStyles.inlineLoading}>
           <ActivityIndicator size="small" color={dashboardPalette.primary} />
           <ThemedText style={dashboardStyles.inlineLoadingText}>
-            Cargando transferencias…
+            {t("transfers.loading")}
           </ThemedText>
         </View>
       ) : error ? (
@@ -64,23 +68,23 @@ export function DashboardTransfersSection({
           </ThemedText>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Reintentar carga de transferencias"
+            accessibilityLabel={t("transfers.retryAccessibility")}
             onPress={onRetry}
           >
             <ThemedText
               style={[dashboardStyles.inlineRetryText, { color: theme.danger }]}
             >
-              Reintentar
+              {t("transfers.retry")}
             </ThemedText>
           </Pressable>
         </View>
       ) : transfers.length === 0 ? (
         <View style={dashboardStyles.transferEmptyCard}>
           <ThemedText type="defaultSemiBold">
-            Aún no has hecho transferencias
+            {t("transfers.emptyTitle")}
           </ThemedText>
           <ThemedText style={dashboardStyles.transferEmptyText}>
-            {getTransfersEmptyMessage(canTransfer)}
+            {tr(getTransfersEmptyMessageKey(canTransfer))}
           </ThemedText>
         </View>
       ) : (

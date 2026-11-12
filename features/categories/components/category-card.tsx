@@ -1,15 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { categoriesStyles } from "../styles/categories.styles";
 import { Category } from "../types/category.types";
 import {
   getCategoryIconName,
-  getCategoryTypeLabel,
+  getCategoryTypeKey,
 } from "../utils/category-options";
 import { CategoryReorderActions } from "./category-reorder-actions";
 
@@ -34,6 +36,8 @@ export function CategoryCard({
   reorder,
 }: CategoryCardProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("categories");
+  const tr = asTranslate(t);
 
   const content = (
     <ThemedView
@@ -60,7 +64,7 @@ export function CategoryCard({
           {category.name}
         </ThemedText>
         <ThemedText style={categoriesStyles.cardMeta} numberOfLines={1}>
-          {getCategoryTypeLabel(category.type)}
+          {tr(getCategoryTypeKey(category.type))}
         </ThemedText>
       </ThemedView>
 
@@ -82,7 +86,7 @@ export function CategoryCard({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Editar ${category.name}`}
+      accessibilityLabel={t("editAccessibility", { name: category.name })}
       onPress={onPress}
     >
       {content}

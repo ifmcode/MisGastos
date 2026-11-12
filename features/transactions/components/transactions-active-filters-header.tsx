@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -15,19 +16,22 @@ export function TransactionsActiveFiltersHeader({
   activeFilterCount,
   onClearFilters,
 }: TransactionsActiveFiltersHeaderProps) {
-  const filterLabel = activeFilterCount === 1 ? "filtro" : "filtros";
+  const { t } = useTranslation(["transactions", "common"]);
 
   return (
     <View style={styles.activeFiltersRow}>
       <ThemedText style={styles.activeFiltersText}>
-        {resultCount} resultados · {activeFilterCount} {filterLabel}
+        {t("common:units.results", { count: resultCount })} ·{" "}
+        {t("common:units.filters", { count: activeFilterCount })}
       </ThemedText>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Limpiar filtros"
+        accessibilityLabel={t("filters.clearAccessibility")}
         onPress={onClearFilters}
       >
-        <ThemedText style={styles.clearFiltersText}>Limpiar</ThemedText>
+        <ThemedText style={styles.clearFiltersText}>
+          {t("filters.clear")}
+        </ThemedText>
       </Pressable>
     </View>
   );

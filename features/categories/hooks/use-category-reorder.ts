@@ -5,10 +5,10 @@ import {
   useRef,
   useState,
 } from "react";
-
 import { useAuth } from "@/hooks/use-auth";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
-import { getCategoryErrorMessage } from "../services/category.errors";
+import { getCategoryErrorCode } from "../services/category.errors";
 import { Category } from "../types/category.types";
 import { CategoryMoveDirection, moveCategory } from "../utils/category-order";
 import { useCategoryService } from "./use-category-service";
@@ -37,6 +37,7 @@ export function useCategoryReorder({
   setCategories,
 }: UseCategoryReorderOptions): CategoryReorder {
   const { user } = useAuth();
+  const { t, tr } = useScopedTranslation("categories");
   const categoryService = useCategoryService();
   const [reordering, setReordering] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -54,7 +55,7 @@ export function useCategoryReorder({
       if (savingRef.current) return;
 
       if (!user) {
-        setError("Debes iniciar sesión para reordenar tus categorías.");
+        setError(t("errors.SIGN_IN_REORDER"));
         return;
       }
 
@@ -79,10 +80,7 @@ export function useCategoryReorder({
         .catch((failure: unknown) => {
           setCategories(previous);
           setError(
-            getCategoryErrorMessage(
-              failure,
-              "No se pudo guardar el orden. Inténtalo de nuevo.",
-            ),
+            tr(`errors.${getCategoryErrorCode(failure, "REORDER_FAILED")}`),
           );
         })
         .finally(() => {
@@ -90,7 +88,7 @@ export function useCategoryReorder({
           setSaving(false);
         });
     },
-    [user, categories, visibleCategories, setCategories, categoryService],
+    [user, categories, visibleCategories, setCategories, categoryService, tr],
   );
 
   return {

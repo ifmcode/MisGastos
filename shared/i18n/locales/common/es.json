@@ -1,0 +1,60 @@
+{
+  "appName": "MisGastos",
+  "actions": {
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "delete": "Eliminar",
+    "retry": "Reintentar",
+    "clear": "Limpiar",
+    "clearFilters": "Limpiar filtros",
+    "save": "Guardar",
+    "saveChanges": "Guardar cambios",
+    "create": "Crear",
+    "edit": "Editar",
+    "back": "Volver",
+    "apply": "Aplicar",
+    "reset": "Restablecer",
+    "add": "Añadir",
+    "done": "Listo"
+  },
+  "states": {
+    "loading": "Cargando…",
+    "noNotes": "Sin notas",
+    "optional": "(opcional)"
+  },
+  "date": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "last": "Último",
+    "placeholder": "DD/MM/AAAA",
+    "selectDate": "Seleccionar fecha",
+    "previousMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "openCalendar": "Abrir calendario para {{label}}",
+    "selectToday": "Seleccionar hoy",
+    "dayOfMonth": "Día {{day}} de {{month}}"
+  },
+  "units": {
+    "results_one": "{{count}} resultado",
+    "results_other": "{{count}} resultados",
+    "filters_one": "{{count}} filtro",
+    "filters_other": "{{count}} filtros"
+  },
+  "errors": {
+    "unknown": "Algo salió mal. Inténtalo de nuevo.",
+    "permissionDenied": "No tienes permisos para realizar esta operación.",
+    "network": "No hay conexión. Comprueba tu red e inténtalo de nuevo."
+  },
+  "modal": {
+    "title": "Esto es un modal",
+    "goHome": "Ir a la pantalla de inicio"
+  },
+  "accessibility": {
+    "closeForm": "Cerrar formulario",
+    "closeDetail": "Cerrar detalle",
+    "closeCalendar": "Cerrar calendario",
+    "confirmDate": "Confirmar fecha",
+    "cancel": "Cancelar",
+    "back": "Volver"
+  }
+}

@@ -2,7 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import { Transfer } from "../../types/transfer.types";
 import {
-  EDIT_TRANSFER_HINT,
+  EDIT_TRANSFER_HINT_KEY,
   getTransferEditLabel,
 } from "../transfer-item-accessibility";
 
@@ -23,15 +23,28 @@ function buildTransfer(overrides: Partial<Transfer>): Transfer {
 
 describe("getTransferEditLabel", () => {
   it("summarizes the transfer and announces the edit action", () => {
-    expect(getTransferEditLabel(buildTransfer({}), "Efectivo", "Banco")).toBe(
-      "Editar transferencia: Efectivo a Banco, 10,00 €, 29/10/2026",
-    );
+    expect(
+      getTransferEditLabel(
+        buildTransfer({}),
+        "Efectivo",
+        "Banco",
+        "10,00 €",
+        "29/10/2026",
+      ),
+    ).toEqual({
+      key: "item.editLabel",
+      values: {
+        from: "Efectivo",
+        to: "Banco",
+        amount: "10,00 €",
+        date: "29/10/2026",
+      },
+    });
   });
 });
 
-describe("EDIT_TRANSFER_HINT", () => {
-  it("explains that the form also allows deleting", () => {
-    expect(EDIT_TRANSFER_HINT).toContain("editar");
-    expect(EDIT_TRANSFER_HINT).toContain("eliminar");
+describe("EDIT_TRANSFER_HINT_KEY", () => {
+  it("points to the edit/delete hint key", () => {
+    expect(EDIT_TRANSFER_HINT_KEY).toBe("item.editHint");
   });
 });

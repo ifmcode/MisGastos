@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -21,12 +22,13 @@ export function CategoriesHeader({
   onBack,
 }: CategoriesHeaderProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["categories", "common"]);
 
   return (
     <View style={categoriesStyles.header}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Volver"
+        accessibilityLabel={t("common:accessibility.back")}
         onPress={onBack}
         style={categoriesStyles.backButton}
       >
@@ -35,17 +37,17 @@ export function CategoriesHeader({
 
       <View style={categoriesStyles.headerText}>
         <ThemedText type="title" style={categoriesStyles.title}>
-          Categorías
+          {t("title")}
         </ThemedText>
         <ThemedText style={categoriesStyles.subtitle}>
-          Organiza tus gastos e ingresos.
+          {t("subtitle")}
         </ThemedText>
       </View>
 
       {showAddButton ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Añadir categoría"
+          accessibilityLabel={t("add")}
           onPress={onAddPress}
           style={categoriesStyles.headerButton}
         >
@@ -55,7 +57,7 @@ export function CategoriesHeader({
             color={categoriesPalette.onPrimary}
           />
           <ThemedText style={categoriesStyles.headerButtonText}>
-            Nueva
+            {t("new")}
           </ThemedText>
         </Pressable>
       ) : null}

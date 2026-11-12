@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -13,6 +14,7 @@ export interface WalletsErrorStateProps {
 
 export function WalletsErrorState({ message, onRetry }: WalletsErrorStateProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["wallets", "common"]);
 
   return (
     <View style={walletsStyles.centered}>
@@ -22,16 +24,18 @@ export function WalletsErrorState({ message, onRetry }: WalletsErrorStateProps) 
         color={theme.danger}
       />
       <ThemedText type="defaultSemiBold" style={walletsStyles.errorTitle}>
-        No se pudieron cargar las carteras
+        {t("errorTitle")}
       </ThemedText>
       <ThemedText style={walletsStyles.centeredText}>{message}</ThemedText>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Reintentar carga de carteras"
+        accessibilityLabel={t("retryAccessibility")}
         onPress={onRetry}
         style={walletsStyles.retryButton}
       >
-        <ThemedText style={walletsStyles.retryButtonText}>Reintentar</ThemedText>
+        <ThemedText style={walletsStyles.retryButtonText}>
+          {t("common:actions.retry")}
+        </ThemedText>
       </Pressable>
     </View>
   );

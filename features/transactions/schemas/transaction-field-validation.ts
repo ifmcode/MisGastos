@@ -18,11 +18,7 @@ function getTypeIssue(
 ): TransactionValidationIssue | null {
   if (isTransactionType(input.type)) return null;
 
-  return {
-    field: "type",
-    code: "INVALID_TYPE",
-    message: "Selecciona si es un gasto o un ingreso.",
-  };
+  return { field: "type", code: "INVALID_TYPE" };
 }
 
 function getAmountIssue(
@@ -35,11 +31,7 @@ function getAmountIssue(
     amount <= 0 ||
     amount > TRANSACTION_AMOUNT_MAX
   ) {
-    return {
-      field: "amount",
-      code: "INVALID_AMOUNT",
-      message: "Introduce un importe mayor que 0 con hasta 2 decimales.",
-    };
+    return { field: "amount", code: "INVALID_AMOUNT" };
   }
 
   return null;
@@ -50,11 +42,7 @@ function getCurrencyIssue(
 ): TransactionValidationIssue | null {
   if (isCurrencyCode(input.currency)) return null;
 
-  return {
-    field: "currency",
-    code: "INVALID_CURRENCY",
-    message: "La moneda del movimiento no es válida.",
-  };
+  return { field: "currency", code: "INVALID_CURRENCY" };
 }
 
 function getWalletIssue(
@@ -65,11 +53,7 @@ function getWalletIssue(
 
   if (walletId.length > 0) return null;
 
-  return {
-    field: "walletId",
-    code: "WALLET_REQUIRED",
-    message: "Selecciona una cartera.",
-  };
+  return { field: "walletId", code: "WALLET_REQUIRED" };
 }
 
 function getConceptIssue(
@@ -79,19 +63,11 @@ function getConceptIssue(
     typeof input.concept === "string" ? input.concept.trim() : "";
 
   if (concept.length === 0) {
-    return {
-      field: "concept",
-      code: "CONCEPT_REQUIRED",
-      message: "El concepto es obligatorio.",
-    };
+    return { field: "concept", code: "CONCEPT_REQUIRED" };
   }
 
   if (concept.length > TRANSACTION_CONCEPT_MAX_LENGTH) {
-    return {
-      field: "concept",
-      code: "CONCEPT_TOO_LONG",
-      message: `El concepto no puede superar los ${TRANSACTION_CONCEPT_MAX_LENGTH} caracteres.`,
-    };
+    return { field: "concept", code: "CONCEPT_TOO_LONG" };
   }
 
   return null;
@@ -104,11 +80,7 @@ function getNotesIssue(
 
   if (notes.length <= TRANSACTION_NOTES_MAX_LENGTH) return null;
 
-  return {
-    field: "notes",
-    code: "NOTES_TOO_LONG",
-    message: `Las notas no pueden superar los ${TRANSACTION_NOTES_MAX_LENGTH} caracteres.`,
-  };
+  return { field: "notes", code: "NOTES_TOO_LONG" };
 }
 
 function getDateIssue(
@@ -116,11 +88,7 @@ function getDateIssue(
 ): TransactionValidationIssue | null {
   if (parseDateInput(input.date)) return null;
 
-  return {
-    field: "date",
-    code: "INVALID_DATE",
-    message: "Introduce una fecha válida con formato DD/MM/AAAA.",
-  };
+  return { field: "date", code: "INVALID_DATE" };
 }
 
 /** Collects every field issue of a transaction input in display order. */

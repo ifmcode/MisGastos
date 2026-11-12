@@ -1,11 +1,14 @@
+import { useTranslation } from "react-i18next";
 import { Modal, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { transactionDetailStyles as styles } from "../styles/transaction-detail.styles";
 import { Transaction } from "../types/transaction.types";
@@ -39,9 +42,16 @@ export function TransactionDetailModal({
   onClose,
 }: TransactionDetailModalProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("transactions");
+  const tr = asTranslate(t);
+  const locale = useAppLocale();
   const deleteDialog = useConfirmDialog();
   const deleteConfirmation = transaction
-    ? getDeleteTransactionConfirmation(transaction, wallets)
+    ? getDeleteTransactionConfirmation(
+        transaction,
+        wallets,
+        locale.formatCurrency(transaction.amount, transaction.currency),
+      )
     : null;
 
   function closeDetail() {
@@ -58,7 +68,8 @@ export function TransactionDetailModal({
     if (!transaction || !deleteConfirmation) return;
 
     deleteDialog.open({
-      ...deleteConfirmation,
+      title: tr(deleteConfirmation.titleKey),
+      message: tr(deleteConfirmation.messageKey, deleteConfirmation.values),
       onConfirm: () => {
         void confirmDelete(transaction.id);
       },
@@ -90,7 +101,7 @@ export function TransactionDetailModal({
             {transaction ? (
               <>
                 <TransactionDetailHeader
-                  transaction={transaction}
+                  concept={transaction.concept}
                   disabled={mutating}
                   onEdit={() => onEdit(transaction)}
                   onDelete={requestDelete}

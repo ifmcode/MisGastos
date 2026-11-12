@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Switch, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -17,6 +18,7 @@ export function WalletFormIncludeInTotalSwitch({
   onChange,
 }: WalletFormIncludeInTotalSwitchProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("wallets");
 
   return (
     <View
@@ -26,9 +28,11 @@ export function WalletFormIncludeInTotalSwitch({
       ]}
     >
       <View style={styles.switchText}>
-        <ThemedText type="defaultSemiBold">Incluir en el total</ThemedText>
+        <ThemedText type="defaultSemiBold">
+          {t("form.includeInTotal")}
+        </ThemedText>
         <ThemedText style={[styles.helper, { color: theme.muted }]}>
-          Se sumará al saldo del dashboard.
+          {t("form.includeInTotalHint")}
         </ThemedText>
       </View>
       <Switch
@@ -37,7 +41,7 @@ export function WalletFormIncludeInTotalSwitch({
         disabled={disabled}
         trackColor={{ false: theme.border, true: theme.primary }}
         thumbColor={theme.onPrimary}
-        accessibilityLabel="Incluir cartera en el total"
+        accessibilityLabel={t("form.includeInTotalAccessibility")}
       />
     </View>
   );

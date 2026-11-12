@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -12,7 +13,7 @@ export interface WalletChipSelectorProps {
   wallets: readonly Wallet[];
   selectedId: string;
   disabled: boolean;
-  /** Screen-reader context: "Cartera", "Origen" or "Destino". */
+  /** Screen-reader context, already translated by the caller. */
   accessibilityPrefix: string;
   onSelect: (walletId: string) => void;
   onOpenPicker: () => void;
@@ -31,6 +32,7 @@ export function WalletChipSelector({
   onOpenPicker,
 }: WalletChipSelectorProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("wallets");
   const { visible } = getWalletChips(wallets, selectedId);
 
   return (
@@ -69,8 +71,8 @@ export function WalletChipSelector({
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Seleccionar cartera"
-        accessibilityHint="Abre la lista completa de carteras"
+        accessibilityLabel={t("picker.selectAccessibility")}
+        accessibilityHint={t("picker.selectHint")}
         onPress={onOpenPicker}
         disabled={disabled}
         style={[

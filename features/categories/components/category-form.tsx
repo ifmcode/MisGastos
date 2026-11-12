@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -20,11 +21,9 @@ import { categoryFormStyles as styles } from "../styles/category-form.styles";
 import { Category, CategoryType } from "../types/category.types";
 import { buildCategoryFormValues } from "../utils/category-form-defaults";
 import { CategoryFormActions } from "./category-form-actions";
-import { CategoryFormColorSelector } from "./category-form-color-selector";
+import { CategoryFormAppearance } from "./category-form-appearance";
 import { CategoryFormHeader } from "./category-form-header";
-import { CategoryFormIconSelector } from "./category-form-icon-selector";
 import { CategoryFormNameField } from "./category-form-name-field";
-import { CategoryFormTypeSelector } from "./category-form-type-selector";
 
 export interface CategoryFormProps {
   category: Category | null;
@@ -50,6 +49,7 @@ export function CategoryForm({
   onDelete,
 }: CategoryFormProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("categories");
   const isEditing = Boolean(category);
   const typeLocked = lockType || isEditing;
   const { values, errors, updateValue, submit } = useCategoryForm({
@@ -107,47 +107,13 @@ export function CategoryForm({
               onChange={(value) => updateValue("name", value)}
             />
 
-            <ThemedText style={styles.label}>Tipo</ThemedText>
-            <CategoryFormTypeSelector
-              value={values.type}
-              locked={typeLocked}
+            <CategoryFormAppearance
+              values={values}
+              errors={errors}
+              typeLocked={typeLocked}
               disabled={submitting}
-              onChange={(type) => updateValue("type", type)}
+              onChange={updateValue}
             />
-            {errors.type ? (
-              <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-                {errors.type}
-              </ThemedText>
-            ) : null}
-            {typeLocked ? (
-              <ThemedText style={[styles.helper, { color: theme.muted }]}>
-                El tipo no se puede cambiar una vez creada la categoría.
-              </ThemedText>
-            ) : null}
-
-            <ThemedText style={styles.label}>Icono</ThemedText>
-            <CategoryFormIconSelector
-              value={values.icon}
-              disabled={submitting}
-              onChange={(icon) => updateValue("icon", icon)}
-            />
-            {errors.icon ? (
-              <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-                {errors.icon}
-              </ThemedText>
-            ) : null}
-
-            <ThemedText style={styles.label}>Color</ThemedText>
-            <CategoryFormColorSelector
-              value={values.color}
-              disabled={submitting}
-              onChange={(color) => updateValue("color", color)}
-            />
-            {errors.color ? (
-              <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-                {errors.color}
-              </ThemedText>
-            ) : null}
 
             <CategoryFormActions
               submitting={submitting}

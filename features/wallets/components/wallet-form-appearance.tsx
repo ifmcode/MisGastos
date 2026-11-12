@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { WalletValidationErrors } from "../schemas/wallet.schema";
 import { walletFormStyles as styles } from "../styles/wallet-form.styles";
@@ -31,59 +33,64 @@ export function WalletFormAppearance({
   onChange,
 }: WalletFormAppearanceProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["wallets", "validation"]);
+  const tr = asTranslate(t);
+
+  function errorText(code: string | undefined): string | null {
+    return code ? tr(`validation:wallets.${code}`) : null;
+  }
 
   return (
     <View>
-      <ThemedText style={styles.label}>Moneda</ThemedText>
+      <ThemedText style={styles.label}>{t("form.currency")}</ThemedText>
       <WalletFormCurrencySelector
         value={values.currency}
         disabled={disabled || currencyLocked}
         onChange={(currency) => onChange("currency", currency)}
       />
-      {errors.currency ? (
+      {errorText(errors.currency) ? (
         <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-          {errors.currency}
+          {errorText(errors.currency)}
         </ThemedText>
       ) : currencyLocked ? (
         <ThemedText style={[styles.helper, { color: theme.muted }]}>
-          La moneda no se puede cambiar para no alterar los movimientos
-          existentes.
+          {t("form.currencyLocked")}
         </ThemedText>
       ) : null}
 
-      <ThemedText style={styles.label}>Tipo</ThemedText>
+      <ThemedText style={styles.label}>{t("form.type")}</ThemedText>
       <WalletFormTypeSelector
         value={values.type}
         disabled={disabled}
         onChange={(type) => onChange("type", type)}
       />
-      {errors.type ? (
+      {errorText(errors.type) ? (
         <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-          {errors.type}
+          {errorText(errors.type)}
         </ThemedText>
       ) : null}
 
-      <ThemedText style={styles.label}>Icono</ThemedText>
+      <ThemedText style={styles.label}>{t("form.icon")}</ThemedText>
       <WalletFormIconSelector
         value={values.icon}
         disabled={disabled}
         onChange={(icon) => onChange("icon", icon)}
       />
-      {errors.icon ? (
+      {errorText(errors.icon) ? (
         <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-          {errors.icon}
+          {errorText(errors.icon)}
         </ThemedText>
       ) : null}
 
-      <ThemedText style={styles.label}>Color</ThemedText>
+      <ThemedText style={styles.label}>{t("form.color")}</ThemedText>
       <WalletFormColorSelector
         value={values.color}
         disabled={disabled}
         onChange={(color) => onChange("color", color)}
       />
-      {errors.color ? (
+      {errorText(errors.color) ? (
         <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-          {errors.color}
+          {errorText(errors.color)}
         </ThemedText>
       ) : null}
 

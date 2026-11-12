@@ -1,0 +1,41 @@
+{
+  "greeting": "Hi, {{name}}",
+  "defaultUser": "User",
+  "subtitle": "This is your finance summary.",
+  "loadingSummary": "Loading your summary…",
+  "errorTitle": "Could not load the summary",
+  "retryAccessibility": "Retry loading the summary",
+  "summary": {
+    "total": "Total balance",
+    "wallet": "Balance of {{name}}",
+    "included": "This wallet is included in the global total.",
+    "excluded": "This wallet is outside the global total.",
+    "hint": "Only wallets included in the total are added up.",
+    "emptyTotal": "No balance is included in the total."
+  },
+  "filters": {
+    "all": "All",
+    "allAccessibility": "All wallets",
+    "walletAccessibility": "Filter by {{name}}"
+  },
+  "movements": {
+    "title": "Recent movements",
+    "viewAll": "View all",
+    "loading": "Loading movements…",
+    "retryAccessibility": "Retry loading movements",
+    "retry": "Retry",
+    "emptyTitle": "No movements yet",
+    "emptyMessage": "Create your first expense or income from the Movements tab.",
+    "openHistoryHint": "Open the Movements tab to see the full history."
+  },
+  "transfers": {
+    "title": "Recent transfers",
+    "viewHistory": "View history",
+    "loading": "Loading transfers…",
+    "retryAccessibility": "Retry loading transfers",
+    "retry": "Retry",
+    "emptyTitle": "No transfers yet",
+    "guidance": "Open Wallets and tap Transfer to move money between your wallets.",
+    "requirement": "You need at least two wallets with the same currency."
+  }
+}

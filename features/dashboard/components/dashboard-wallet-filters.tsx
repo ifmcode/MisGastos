@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ScrollView } from "react-native";
 
 import { Wallet } from "@/features/wallets/types/wallet.types";
@@ -16,6 +17,8 @@ export function DashboardWalletFilters({
   selectedWalletId,
   onSelect,
 }: DashboardWalletFiltersProps) {
+  const { t } = useTranslation("dashboard");
+
   return (
     <ScrollView
       horizontal
@@ -23,8 +26,8 @@ export function DashboardWalletFilters({
       contentContainerStyle={dashboardStyles.filterRow}
     >
       <DashboardWalletFilterChip
-        label="Todas"
-        accessibilityLabel="Todas las carteras"
+        label={t("filters.all")}
+        accessibilityLabel={t("filters.allAccessibility")}
         selected={selectedWalletId === ""}
         onPress={() => onSelect("")}
       />
@@ -33,7 +36,9 @@ export function DashboardWalletFilters({
         <DashboardWalletFilterChip
           key={wallet.id}
           label={wallet.name}
-          accessibilityLabel={`Filtrar por ${wallet.name}`}
+          accessibilityLabel={t("filters.walletAccessibility", {
+            name: wallet.name,
+          })}
           dotColor={wallet.color}
           selected={selectedWalletId === wallet.id}
           onPress={() => onSelect(wallet.id)}

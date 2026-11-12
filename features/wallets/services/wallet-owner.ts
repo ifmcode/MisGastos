@@ -1,28 +1,18 @@
-import {
-  WalletValidationIssue,
-} from "../schemas/wallet.schema";
+import { WalletValidationIssue } from "../schemas/wallet.schema";
 import { WalletValidationError } from "./wallet.errors";
 
-export function getOwnerIssue(action: string): WalletValidationIssue {
-  return {
-    field: "ownerId",
-    code: "OWNER_REQUIRED",
-    message: `Debes iniciar sesión para ${action}.`,
-  };
+export function getOwnerIssue(): WalletValidationIssue {
+  return { field: "ownerId", code: "OWNER_REQUIRED" };
 }
 
 function walletIdIssue(): WalletValidationIssue {
-  return {
-    field: "walletId",
-    code: "WALLET_REQUIRED",
-    message: "Selecciona una cartera válida.",
-  };
+  return { field: "walletId", code: "WALLET_REQUIRED" };
 }
 
-export function normalizeOwnerId(ownerId: string, action: string): string {
+export function normalizeOwnerId(ownerId: string): string {
   const normalizedOwnerId = ownerId.trim();
   if (normalizedOwnerId.length === 0) {
-    throw new WalletValidationError([getOwnerIssue(action)]);
+    throw new WalletValidationError([getOwnerIssue()]);
   }
   return normalizedOwnerId;
 }

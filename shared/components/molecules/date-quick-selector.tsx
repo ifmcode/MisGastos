@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, TextInput, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -38,6 +39,7 @@ export function DateQuickSelector({
   onSelectDate,
 }: DateQuickSelectorProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("common");
   const [pickerVisible, setPickerVisible] = useState(false);
   const lastUsedDate = useLastUsedDate();
   const quickOptions = getDateQuickOptions();
@@ -68,7 +70,9 @@ export function DateQuickSelector({
         {DATE_PICKER_SUPPORTED ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Abrir calendario para ${accessibilityLabel}`}
+            accessibilityLabel={t("date.openCalendar", {
+              label: accessibilityLabel,
+            })}
             accessibilityState={{ disabled }}
             disabled={disabled}
             hitSlop={4}
@@ -95,7 +99,7 @@ export function DateQuickSelector({
         <TextInput
           value={text}
           onChangeText={onChangeText}
-          placeholder="DD/MM/AAAA"
+          placeholder={t("date.placeholder")}
           placeholderTextColor={theme.muted}
           editable={!disabled}
           accessibilityLabel={accessibilityLabel}

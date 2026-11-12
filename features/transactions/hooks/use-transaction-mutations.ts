@@ -4,8 +4,8 @@ import {
   useCallback,
   useState,
 } from "react";
-
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import {
   TransactionInput,
@@ -38,6 +38,7 @@ export function useTransactionMutations({
   ownerId,
   setTransactions,
 }: UseTransactionMutationsOptions): TransactionMutations {
+  const { tr } = useScopedTranslation("transactions");
   const transactionService = useTransactionService();
   const { reload: reloadWallets } = useWallets();
 
@@ -51,20 +52,23 @@ export function useTransactionMutations({
     setMutationFieldErrors({});
   }, []);
 
-  const fail = useCallback((failure: unknown): false => {
-    const state = toTransactionMutationError(failure);
-    setMutationError(state.message);
-    setMutationFieldErrors(state.fieldErrors);
-    return false;
-  }, []);
+  const fail = useCallback(
+    (failure: unknown): false => {
+      const state = toTransactionMutationError(failure);
+      setMutationError(state.code ? tr(`errors.${state.code}`) : null);
+      setMutationFieldErrors(state.fieldErrors);
+      return false;
+    },
+    [tr],
+  );
 
   const run = useCallback(
     async (
       operation: (ownerId: string) => Promise<void>,
-      unauthenticatedMessage: string,
+      unauthenticatedKey: string,
     ): Promise<boolean> => {
       if (!ownerId) {
-        setMutationError(unauthenticatedMessage);
+        setMutationError(tr(unauthenticatedKey));
         return false;
       }
 
@@ -81,7 +85,7 @@ export function useTransactionMutations({
         setMutating(false);
       }
     },
-    [ownerId, clearMutationState, fail, reloadWallets],
+    [ownerId, clearMutationState, fail, reloadWallets, tr],
   );
 
   const createTransaction = useCallback(
@@ -92,7 +96,7 @@ export function useTransactionMutations({
           input,
         );
         setTransactions((current) => [result.transaction, ...current]);
-      }, "Debes iniciar sesión para crear un movimiento."),
+      }, "errors.SIGN_IN_CREATE"),
     [run, transactionService, setTransactions],
   );
 
@@ -111,7 +115,7 @@ export function useTransactionMutations({
               : transaction,
           ),
         );
-      }, "Debes iniciar sesión para editar un movimiento."),
+      }, "errors.SIGN_IN_EDIT"),
     [run, transactionService, setTransactions],
   );
 
@@ -125,7 +129,7 @@ export function useTransactionMutations({
         setTransactions((current) =>
           current.filter((transaction) => transaction.id !== transactionId),
         );
-      }, "Debes iniciar sesión para eliminar un movimiento."),
+      }, "errors.SIGN_IN_DELETE"),
     [run, transactionService, setTransactions],
   );
 

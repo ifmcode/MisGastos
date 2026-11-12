@@ -131,20 +131,16 @@ describe("validateTransferInput", () => {
 });
 
 describe("toTransferFieldErrors", () => {
-  it("keeps the first message per field", () => {
+  it("keeps the first code per field", () => {
     const errors = toTransferFieldErrors([
-      { field: "amount", code: "INVALID_AMOUNT", message: "Primero" },
-      { field: "amount", code: "INVALID_AMOUNT", message: "Segundo" },
-      {
-        field: "toWalletId",
-        code: "SAME_WALLET",
-        message: "Misma cartera",
-      },
+      { field: "amount", code: "INVALID_AMOUNT" },
+      { field: "amount", code: "INVALID_AMOUNT" },
+      { field: "toWalletId", code: "SAME_WALLET" },
     ]);
 
     expect(errors).toEqual({
-      amount: "Primero",
-      toWalletId: "Misma cartera",
+      amount: "INVALID_AMOUNT",
+      toWalletId: "SAME_WALLET",
     });
   });
 });

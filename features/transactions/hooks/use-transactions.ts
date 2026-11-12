@@ -3,12 +3,13 @@ import { useCallback, useMemo, useState } from "react";
 import { Category } from "@/features/categories/types/category.types";
 import { useAuth } from "@/hooks/use-auth";
 import { useAsyncCollection } from "@/shared/hooks/use-async-collection";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import {
   TransactionInput,
   TransactionValidationErrors,
 } from "../schemas/transaction.schema";
-import { getTransactionErrorMessage } from "../services/transaction.errors";
+import { getTransactionErrorCode } from "../services/transaction.errors";
 import { Transaction } from "../types/transaction.types";
 import {
   countActiveFilters,
@@ -53,6 +54,7 @@ export function useTransactions({
   categories = [],
 }: UseTransactionsOptions = {}): UseTransactionsResult {
   const { user } = useAuth();
+  const { tr } = useScopedTranslation("transactions");
   const ownerId = user?.uid;
   const transactionService = useTransactionService();
 
@@ -63,11 +65,8 @@ export function useTransactions({
   );
   const describeLoadError = useCallback(
     (error: unknown) =>
-      getTransactionErrorMessage(
-        error,
-        "No se pudieron cargar los movimientos. Inténtalo de nuevo.",
-      ),
-    [],
+      tr(`errors.${getTransactionErrorCode(error, "LOAD_FAILED")}`),
+    [tr],
   );
 
   const {

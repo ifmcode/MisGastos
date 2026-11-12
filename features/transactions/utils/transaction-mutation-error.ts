@@ -1,32 +1,29 @@
 import { TransactionValidationErrors } from "../schemas/transaction.schema";
 import {
-  getTransactionErrorMessage,
+  getTransactionErrorCode,
   TransactionOperationError,
   TransactionValidationError,
 } from "../services/transaction.errors";
 
 export interface TransactionMutationErrorState {
-  message: string | null;
+  code: string | null;
   fieldErrors: TransactionValidationErrors;
 }
 
-/** Maps a failed mutation into the message and field errors shown by the form. */
+/** Maps a failed mutation into a stable code and field errors. */
 export function toTransactionMutationError(
   failure: unknown,
 ): TransactionMutationErrorState {
   if (failure instanceof TransactionValidationError) {
-    return { message: failure.message, fieldErrors: failure.fieldErrors };
+    return { code: "VALIDATION", fieldErrors: failure.fieldErrors };
   }
 
   if (failure instanceof TransactionOperationError) {
-    return { message: failure.message, fieldErrors: {} };
+    return { code: failure.code, fieldErrors: {} };
   }
 
   return {
-    message: getTransactionErrorMessage(
-      failure,
-      "No se pudo guardar el movimiento. Inténtalo de nuevo.",
-    ),
+    code: getTransactionErrorCode(failure, "SAVE_FAILED"),
     fieldErrors: {},
   };
 }

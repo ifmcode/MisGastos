@@ -9,7 +9,6 @@ import {
 } from "../schemas/transfer.schema";
 import { TransferFormValues } from "../types/transfer.types";
 import { hasSufficientBalance } from "./transfer-balance";
-import { getInsufficientBalanceMessage } from "./transfer-form-derivations";
 
 export interface ValidateTransferFormOptions {
   values: TransferFormValues;
@@ -48,9 +47,7 @@ export function validateTransferForm({
   ) {
     return {
       ok: false,
-      errors: {
-        amount: getInsufficientBalanceMessage(availableSourceBalance, currency),
-      },
+      errors: { amount: "INSUFFICIENT_BALANCE" },
     };
   }
 

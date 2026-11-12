@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -18,23 +19,22 @@ export function WalletFormHeader({
   onClose,
 }: WalletFormHeaderProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["wallets", "common"]);
   const isEditing = mode === "edit";
 
   return (
     <View style={styles.header}>
       <View style={styles.headerText}>
         <ThemedText type="title" style={styles.title}>
-          {isEditing ? "Editar cartera" : "Nueva cartera"}
+          {isEditing ? t("form.editTitle") : t("form.createTitle")}
         </ThemedText>
         <ThemedText style={[styles.subtitle, { color: theme.muted }]}>
-          {isEditing
-            ? "Actualiza los datos sin perder tu historial."
-            : "Configura dónde guardarás tu dinero."}
+          {isEditing ? t("form.editSubtitle") : t("form.createSubtitle")}
         </ThemedText>
       </View>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Cerrar formulario"
+        accessibilityLabel={t("common:accessibility.closeForm")}
         hitSlop={10}
         onPress={onClose}
         disabled={disabled}

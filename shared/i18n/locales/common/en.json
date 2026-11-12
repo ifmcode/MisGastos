@@ -1,0 +1,60 @@
+{
+  "appName": "MisGastos",
+  "actions": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "retry": "Retry",
+    "clear": "Clear",
+    "clearFilters": "Clear filters",
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "create": "Create",
+    "edit": "Edit",
+    "back": "Back",
+    "apply": "Apply",
+    "reset": "Reset",
+    "add": "Add",
+    "done": "Done"
+  },
+  "states": {
+    "loading": "Loading…",
+    "noNotes": "No notes",
+    "optional": "(optional)"
+  },
+  "date": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last": "Last",
+    "placeholder": "DD/MM/YYYY",
+    "selectDate": "Select date",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "openCalendar": "Open calendar for {{label}}",
+    "selectToday": "Select today",
+    "dayOfMonth": "Day {{day}} of {{month}}"
+  },
+  "units": {
+    "results_one": "{{count}} result",
+    "results_other": "{{count}} results",
+    "filters_one": "{{count}} filter",
+    "filters_other": "{{count}} filters"
+  },
+  "errors": {
+    "unknown": "Something went wrong. Try again.",
+    "permissionDenied": "You do not have permission to perform this operation.",
+    "network": "No connection. Check your network and try again."
+  },
+  "modal": {
+    "title": "This is a modal",
+    "goHome": "Go to home screen"
+  },
+  "accessibility": {
+    "closeForm": "Close form",
+    "closeDetail": "Close detail",
+    "closeCalendar": "Close calendar",
+    "confirmDate": "Confirm date",
+    "cancel": "Cancel",
+    "back": "Back"
+  }
+}

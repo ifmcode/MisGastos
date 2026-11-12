@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable } from "react-native";
 
 import {
@@ -12,10 +13,12 @@ export interface TransactionsFabProps {
 }
 
 export function TransactionsFab({ bottom, onPress }: TransactionsFabProps) {
+  const { t } = useTranslation("transactions");
+
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Añadir movimiento"
+      accessibilityLabel={t("add")}
       onPress={onPress}
       style={[styles.fab, { bottom }]}
     >

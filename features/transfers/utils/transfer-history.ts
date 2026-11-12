@@ -2,8 +2,8 @@ import { Transfer } from "../types/transfer.types";
 import { sortTransfersByDate } from "./transfer-sort";
 
 export interface TransferHistoryEmptyCopy {
-  title: string;
-  message: string;
+  titleKey: string;
+  messageKey: string;
 }
 
 /**
@@ -29,8 +29,7 @@ export function getTransferHistoryItems(
 
 export function getTransferHistoryEmptyCopy(): TransferHistoryEmptyCopy {
   return {
-    title: "Aún no hay transferencias",
-    message:
-      "Cuando muevas dinero entre tus carteras, la transferencia aparecerá aquí.",
+    titleKey: "emptyTitle",
+    messageKey: "emptyMessage",
   };
 }

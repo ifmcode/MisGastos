@@ -2,22 +2,22 @@ export type WalletsQuickActionKey = "transfer" | "history";
 
 export interface WalletsQuickAction {
   key: WalletsQuickActionKey;
-  label: string;
-  accessibilityLabel: string;
+  labelKey: string;
+  accessibilityKey: string;
   icon: "swap-horizontal" | "time-outline";
 }
 
 const transferAction: WalletsQuickAction = {
   key: "transfer",
-  label: "Transferir",
-  accessibilityLabel: "Nueva transferencia",
+  labelKey: "quick.transfer",
+  accessibilityKey: "quick.transferAccessibility",
   icon: "swap-horizontal",
 };
 
 const historyAction: WalletsQuickAction = {
   key: "history",
-  label: "Historial de transferencias",
-  accessibilityLabel: "Ver historial de transferencias",
+  labelKey: "quick.history",
+  accessibilityKey: "quick.historyAccessibility",
   icon: "time-outline",
 };
 

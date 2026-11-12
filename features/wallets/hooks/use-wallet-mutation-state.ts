@@ -1,8 +1,11 @@
 import { useCallback, useState } from "react";
 
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
+
 import { WalletValidationErrors } from "../schemas/wallet.schema";
 import {
-  getWalletErrorMessage,
+  getWalletErrorCode,
+  type WalletErrorCode,
   WalletValidationError,
 } from "../services/wallet.errors";
 
@@ -11,11 +14,11 @@ export interface WalletMutationState {
   mutationError: string | null;
   mutationFieldErrors: WalletValidationErrors;
   clearMutationState: () => void;
-  reportMutationError: (failure: unknown, fallback: string) => void;
+  reportMutationError: (failure: unknown, fallback: WalletErrorCode) => void;
   runMutation: (
     operation: (ownerId: string) => Promise<void>,
-    fallback: string,
-    unauthenticatedMessage: string,
+    fallback: WalletErrorCode,
+    unauthenticated: WalletErrorCode,
   ) => Promise<boolean>;
 }
 
@@ -23,10 +26,16 @@ export interface WalletMutationState {
 export function useWalletMutationState(
   ownerId: string | undefined,
 ): WalletMutationState {
+  const { tr } = useScopedTranslation("wallets");
   const [mutating, setMutating] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [mutationFieldErrors, setMutationFieldErrors] =
     useState<WalletValidationErrors>({});
+
+  const translate = useCallback(
+    (code: WalletErrorCode) => tr(`errors.${code}`),
+    [tr],
+  );
 
   const clearMutationState = useCallback(() => {
     setMutationError(null);
@@ -34,20 +43,20 @@ export function useWalletMutationState(
   }, []);
 
   const reportMutationError = useCallback(
-    (failure: unknown, fallback: string) => {
-      setMutationError(getWalletErrorMessage(failure, fallback));
+    (failure: unknown, fallback: WalletErrorCode) => {
+      setMutationError(translate(getWalletErrorCode(failure, fallback)));
     },
-    [],
+    [translate],
   );
 
   const runMutation = useCallback(
     async (
       operation: (currentOwnerId: string) => Promise<void>,
-      fallback: string,
-      unauthenticatedMessage: string,
+      fallback: WalletErrorCode,
+      unauthenticated: WalletErrorCode,
     ): Promise<boolean> => {
       if (!ownerId) {
-        setMutationError(unauthenticatedMessage);
+        setMutationError(translate(unauthenticated));
         return false;
       }
 
@@ -61,13 +70,13 @@ export function useWalletMutationState(
         if (failure instanceof WalletValidationError) {
           setMutationFieldErrors(failure.fieldErrors);
         }
-        setMutationError(getWalletErrorMessage(failure, fallback));
+        setMutationError(translate(getWalletErrorCode(failure, fallback)));
         return false;
       } finally {
         setMutating(false);
       }
     },
-    [ownerId, clearMutationState],
+    [ownerId, clearMutationState, translate],
   );
 
   return {

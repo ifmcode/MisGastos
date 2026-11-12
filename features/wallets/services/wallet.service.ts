@@ -25,9 +25,7 @@ export class WalletService {
   constructor(private readonly walletRepository: IWalletRepository) {}
 
   async getWallets(ownerId: string): Promise<Wallet[]> {
-    return this.walletRepository.getWallets(
-      normalizeOwnerId(ownerId, "ver tus carteras"),
-    );
+    return this.walletRepository.getWallets(normalizeOwnerId(ownerId));
   }
 
   async createWallet(ownerId: string, input: WalletInput): Promise<Wallet> {
@@ -36,7 +34,7 @@ export class WalletService {
     const validation = validateWalletInput(input);
 
     if (normalizedOwnerId.length === 0) {
-      issues.push(getOwnerIssue("crear una cartera"));
+      issues.push(getOwnerIssue());
     }
 
     if (!validation.ok) {
@@ -63,23 +61,18 @@ export class WalletService {
   ): Promise<Wallet> {
     return updateWalletWithRepository(
       this.walletRepository,
-      normalizeOwnerId(ownerId, "editar carteras"),
+      normalizeOwnerId(ownerId),
       normalizeWalletId(walletId),
       input,
     );
   }
 
   async archiveWallet(ownerId: string, walletId: string): Promise<Wallet> {
-    return this.setArchived(
-      ownerId,
-      walletId,
-      new Date().toISOString(),
-      "archivar carteras",
-    );
+    return this.setArchived(ownerId, walletId, new Date().toISOString());
   }
 
   async restoreWallet(ownerId: string, walletId: string): Promise<Wallet> {
-    return this.setArchived(ownerId, walletId, null, "restaurar carteras");
+    return this.setArchived(ownerId, walletId, null);
   }
 
   async getWalletUsage(
@@ -87,7 +80,7 @@ export class WalletService {
     walletId: string,
   ): Promise<WalletUsage> {
     return this.walletRepository.getWalletUsage(
-      normalizeOwnerId(ownerId, "ver tus carteras"),
+      normalizeOwnerId(ownerId),
       normalizeWalletId(walletId),
     );
   }
@@ -99,7 +92,7 @@ export class WalletService {
   ): Promise<WalletDeletionResult> {
     return deleteWalletWithRepository(
       this.walletRepository,
-      normalizeOwnerId(ownerId, "eliminar carteras"),
+      normalizeOwnerId(ownerId),
       normalizeWalletId(walletId),
       options,
     );
@@ -109,10 +102,9 @@ export class WalletService {
     ownerId: string,
     walletId: string,
     archivedAt: string | null,
-    action: string,
   ): Promise<Wallet> {
     return this.walletRepository.setWalletArchived(
-      normalizeOwnerId(ownerId, action),
+      normalizeOwnerId(ownerId),
       normalizeWalletId(walletId),
       archivedAt,
     );

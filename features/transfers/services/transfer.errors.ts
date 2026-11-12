@@ -9,7 +9,7 @@ export class TransferValidationError extends Error {
   readonly fieldErrors: TransferValidationErrors;
 
   constructor(issues: TransferValidationIssue[]) {
-    super(issues[0]?.message ?? "Los datos de la transferencia no son válidos.");
+    super(issues[0]?.code ?? "VALIDATION");
     this.name = "TransferValidationError";
     this.issues = issues;
     this.fieldErrors = toTransferFieldErrors(issues);
@@ -26,60 +26,49 @@ export type TransferOperationCode =
   | "CURRENCY_MISMATCH"
   | "INSUFFICIENT_FUNDS";
 
-const OPERATION_MESSAGES: Record<TransferOperationCode, string> = {
-  TRANSFER_INVALID: "La transferencia no contiene datos válidos.",
-  TRANSFER_NOT_FOUND: "La transferencia ya no existe.",
-  SAME_WALLET:
-    "La cartera de origen y destino deben ser distintas.",
-  FROM_WALLET_NOT_FOUND: "La cartera de origen ya no existe.",
-  TO_WALLET_NOT_FOUND: "La cartera de destino ya no existe.",
-  WALLET_NOT_OWNED: "No tienes permisos sobre una de las carteras.",
-  CURRENCY_MISMATCH:
-    "Solo puedes transferir entre carteras con la misma moneda.",
-  INSUFFICIENT_FUNDS:
-    "La cartera de origen no tiene saldo suficiente para esta transferencia.",
-};
+export type TransferErrorCode =
+  | TransferOperationCode
+  | "VALIDATION"
+  | "PERMISSION_DENIED"
+  | "NETWORK"
+  | "LOAD_FAILED"
+  | "SAVE_FAILED"
+  | "SIGN_IN_CREATE"
+  | "SIGN_IN_EDIT"
+  | "SIGN_IN_DELETE";
 
 export class TransferOperationError extends Error {
   readonly code: TransferOperationCode;
 
   constructor(code: TransferOperationCode) {
-    super(OPERATION_MESSAGES[code]);
+    super(code);
     this.name = "TransferOperationError";
     this.code = code;
   }
 }
 
-function getErrorCode(error: Error): string | null {
+function readErrorCode(error: Error): string | null {
   const code = (error as { code?: unknown }).code;
   return typeof code === "string" ? code : null;
 }
 
 /**
- * Translates infrastructure errors into user-friendly messages without
- * exposing stack traces or provider details.
+ * Maps transfer failures to stable codes. The UI translates them; services and
+ * repositories never return user-facing sentences.
  */
-export function getTransferErrorMessage(
+export function getTransferErrorCode(
   error: unknown,
-  fallback: string,
-): string {
-  if (error instanceof TransferValidationError) {
-    return error.message;
-  }
-
-  if (error instanceof TransferOperationError) {
-    return error.message;
-  }
+  fallback: TransferErrorCode = "SAVE_FAILED",
+): TransferErrorCode {
+  if (error instanceof TransferValidationError) return "VALIDATION";
+  if (error instanceof TransferOperationError) return error.code;
 
   if (error instanceof Error) {
-    const code = getErrorCode(error);
+    const code = readErrorCode(error);
 
-    if (code === "permission-denied") {
-      return "No tienes permisos para realizar esta operación.";
-    }
-
+    if (code === "permission-denied") return "PERMISSION_DENIED";
     if (code === "unavailable" || code === "network-request-failed") {
-      return "No hay conexión. Comprueba tu red e inténtalo de nuevo.";
+      return "NETWORK";
     }
 
     const normalizedMessage = error.message.toLowerCase();
@@ -87,7 +76,7 @@ export function getTransferErrorMessage(
       normalizedMessage.includes("permission-denied") ||
       normalizedMessage.includes("permission_denied")
     ) {
-      return "No tienes permisos para realizar esta operación.";
+      return "PERMISSION_DENIED";
     }
   }
 

@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import {
   walletsPalette,
@@ -26,6 +28,8 @@ export function WalletsQuickActions({
   onHistoryPress,
 }: WalletsQuickActionsProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("wallets");
+  const tr = asTranslate(t);
   const actions = getWalletsQuickActions(canTransfer);
   const handlers: Record<WalletsQuickActionKey, () => void> = {
     transfer: onTransferPress,
@@ -41,7 +45,7 @@ export function WalletsQuickActions({
           <Pressable
             key={action.key}
             accessibilityRole="button"
-            accessibilityLabel={action.accessibilityLabel}
+            accessibilityLabel={tr(action.accessibilityKey)}
             onPress={handlers[action.key]}
             style={({ pressed }) => [
               styles.quickAction,
@@ -65,7 +69,7 @@ export function WalletsQuickActions({
                   : { color: theme.text },
               ]}
             >
-              {action.label}
+              {tr(action.labelKey)}
             </ThemedText>
           </Pressable>
         );

@@ -50,10 +50,10 @@ describe("getTransferHistoryItems", () => {
 });
 
 describe("getTransferHistoryEmptyCopy", () => {
-  it("explains that no transfers have been made yet", () => {
+  it("points to the empty-state translation keys", () => {
     const copy = getTransferHistoryEmptyCopy();
 
-    expect(copy.title).toBe("Aún no hay transferencias");
-    expect(copy.message).toContain("Cuando muevas dinero entre tus carteras");
+    expect(copy.titleKey).toBe("emptyTitle");
+    expect(copy.messageKey).toBe("emptyMessage");
   });
 });

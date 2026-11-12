@@ -34,20 +34,20 @@ export const WALLET_COLORS = [
 
 export type WalletColor = (typeof WALLET_COLORS)[number];
 
-export const WALLET_TYPE_LABELS: Record<WalletType, string> = {
-  cash: "Efectivo",
-  bank: "Banco",
-  other: "Otra",
+export const WALLET_TYPE_KEYS: Record<WalletType, string> = {
+  cash: "types.cash",
+  bank: "types.bank",
+  other: "types.other",
 };
 
 export const WALLET_TYPE_OPTIONS: ReadonlyArray<{
   value: WalletType;
-  label: string;
+  labelKey: string;
   icon: WalletIcon;
 }> = [
-  { value: "cash", label: WALLET_TYPE_LABELS.cash, icon: "cash" },
-  { value: "bank", label: WALLET_TYPE_LABELS.bank, icon: "business" },
-  { value: "other", label: WALLET_TYPE_LABELS.other, icon: "wallet" },
+  { value: "cash", labelKey: WALLET_TYPE_KEYS.cash, icon: "cash" },
+  { value: "bank", labelKey: WALLET_TYPE_KEYS.bank, icon: "business" },
+  { value: "other", labelKey: WALLET_TYPE_KEYS.other, icon: "wallet" },
 ];
 
 export const DEFAULT_WALLET_FORM_VALUES: WalletFormValues = {
@@ -90,6 +90,6 @@ export function getWalletIconName(value: string): WalletIcon {
   return isWalletIcon(value) ? value : "wallet";
 }
 
-export function getWalletTypeLabel(type: WalletType): string {
-  return WALLET_TYPE_LABELS[type];
+export function getWalletTypeKey(type: WalletType): string {
+  return WALLET_TYPE_KEYS[type];
 }

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -14,26 +15,30 @@ export function WalletsHeader({
   showAddButton,
   onAddPress,
 }: WalletsHeaderProps) {
+  const { t } = useTranslation("wallets");
+
   return (
     <View style={walletsStyles.header}>
       <View style={walletsStyles.headerText}>
         <ThemedText type="title" style={walletsStyles.title}>
-          Carteras
+          {t("title")}
         </ThemedText>
         <ThemedText style={walletsStyles.subtitle}>
-          Consulta y organiza tus cuentas.
+          {t("subtitle")}
         </ThemedText>
       </View>
 
       {showAddButton ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Añadir cartera"
+          accessibilityLabel={t("add")}
           onPress={onAddPress}
           style={walletsStyles.headerButton}
         >
           <Ionicons name="add" size={20} color={walletsPalette.onPrimary} />
-          <ThemedText style={walletsStyles.headerButtonText}>Nueva</ThemedText>
+          <ThemedText style={walletsStyles.headerButtonText}>
+            {t("new")}
+          </ThemedText>
         </Pressable>
       ) : null}
     </View>

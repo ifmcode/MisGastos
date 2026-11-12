@@ -8,16 +8,16 @@ import {
 describe("transaction filter options", () => {
   it("offers both sort orders", () => {
     expect(TRANSACTION_SORT_OPTIONS).toEqual([
-      { value: "desc", label: "Más recientes primero" },
-      { value: "asc", label: "Más antiguos primero" },
+      { value: "desc", labelKey: "filters.sortNewest" },
+      { value: "asc", labelKey: "filters.sortOldest" },
     ]);
   });
 
   it("starts the type options with all", () => {
     expect(TRANSACTION_TYPE_FILTER_OPTIONS).toEqual([
-      { value: "all", label: "Todos" },
-      { value: "expense", label: "Gasto" },
-      { value: "income", label: "Ingreso" },
+      { value: "all", labelKey: "filters.allTypes" },
+      { value: "expense", labelKey: "types.expense" },
+      { value: "income", labelKey: "types.income" },
     ]);
   });
 });

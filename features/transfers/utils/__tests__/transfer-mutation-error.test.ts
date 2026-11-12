@@ -9,32 +9,31 @@ import { toTransferMutationError } from "../transfer-mutation-error";
 describe("toTransferMutationError", () => {
   it("keeps the field errors of a validation failure", () => {
     const failure = new TransferValidationError([
-      { field: "amount", code: "INVALID_AMOUNT", message: "Importe inválido" },
+      { field: "amount", code: "INVALID_AMOUNT" },
     ]);
 
     expect(toTransferMutationError(failure)).toEqual({
-      message: "Importe inválido",
-      fieldErrors: { amount: "Importe inválido" },
+      code: "VALIDATION",
+      fieldErrors: { amount: "INVALID_AMOUNT" },
     });
   });
 
-  it("returns the operation message without field errors", () => {
+  it("returns the operation code without field errors", () => {
     const failure = new TransferOperationError("INSUFFICIENT_FUNDS");
 
     expect(toTransferMutationError(failure)).toEqual({
-      message:
-        "La cartera de origen no tiene saldo suficiente para esta transferencia.",
+      code: "INSUFFICIENT_FUNDS",
       fieldErrors: {},
     });
   });
 
-  it("falls back for unknown failures", () => {
+  it("maps unknown failures to stable codes", () => {
     expect(toTransferMutationError(new Error("permission-denied"))).toEqual({
-      message: "No tienes permisos para realizar esta operación.",
+      code: "PERMISSION_DENIED",
       fieldErrors: {},
     });
     expect(toTransferMutationError("boom")).toEqual({
-      message: "No se pudo crear la transferencia. Inténtalo de nuevo.",
+      code: "SAVE_FAILED",
       fieldErrors: {},
     });
   });

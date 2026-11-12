@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -26,22 +27,28 @@ export function TransactionFiltersDateRange({
   onSelectFrom,
   onSelectTo,
 }: TransactionFiltersDateRangeProps) {
+  const { t } = useTranslation("transactions");
+
   return (
     <View style={styles.dateFields}>
-      <ThemedText style={styles.dateFieldLabel}>Desde</ThemedText>
+      <ThemedText style={styles.dateFieldLabel}>
+        {t("filters.from")}
+      </ThemedText>
       <DateQuickSelector
         text={fromText}
         valueIso={fromIso}
-        accessibilityLabel="Fecha desde"
+        accessibilityLabel={t("filters.fromAccessibility")}
         onChangeText={onChangeFrom}
         onSelectDate={onSelectFrom}
       />
 
-      <ThemedText style={styles.dateFieldLabel}>Hasta</ThemedText>
+      <ThemedText style={styles.dateFieldLabel}>
+        {t("filters.to")}
+      </ThemedText>
       <DateQuickSelector
         text={toText}
         valueIso={toIso}
-        accessibilityLabel="Fecha hasta"
+        accessibilityLabel={t("filters.toAccessibility")}
         onChangeText={onChangeTo}
         onSelectDate={onSelectTo}
       />

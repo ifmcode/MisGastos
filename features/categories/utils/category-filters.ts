@@ -9,31 +9,31 @@ export function filterCategoriesByType(
 }
 
 export interface CategoriesEmptyCopy {
-  title: string;
-  message: string;
+  titleKey: string;
+  messageKey: string;
 }
 
-/** Copy shown when the list is empty, either globally or for one type. */
+/** Copy keys shown when the list is empty, either globally or for one type. */
 export function getCategoriesEmptyCopy(
   hasCategories: boolean,
   typeFilter: CategoryType,
 ): CategoriesEmptyCopy {
   if (!hasCategories) {
     return {
-      title: "Aún no tienes categorías",
-      message: "Crea categorías para clasificar tus gastos e ingresos.",
+      titleKey: "emptyTitle",
+      messageKey: "emptyMessage",
     };
   }
 
   if (typeFilter === "income") {
     return {
-      title: "No hay categorías de ingreso",
-      message: "Crea una categoría de ingreso o cambia el filtro.",
+      titleKey: "emptyIncomeTitle",
+      messageKey: "emptyIncomeMessage",
     };
   }
 
   return {
-    title: "No hay categorías de gasto",
-    message: "Crea una categoría de gasto o cambia el filtro.",
+    titleKey: "emptyExpenseTitle",
+    messageKey: "emptyExpenseMessage",
   };
 }

@@ -1,4 +1,7 @@
-import type { LoginFieldErrors } from "../schemas/login.schema";
+import type {
+  LoginFieldErrors,
+  LoginValidationCode,
+} from "../schemas/login.schema";
 import type { AuthFeedbackMessage } from "../types/auth.types";
 
 export type LoginFieldName = "name" | "email" | "password";
@@ -35,7 +38,7 @@ export type LoginFormAction =
   | { type: "request-finished" }
   | { type: "email-failed"; message: string }
   | { type: "google-failed"; message: string }
-  | { type: "reset-invalid"; error: string }
+  | { type: "reset-invalid"; error: LoginValidationCode }
   | { type: "reset-succeeded"; message: string }
   | { type: "reset-failed"; message: string };
 

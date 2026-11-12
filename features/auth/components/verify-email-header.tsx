@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -13,6 +14,7 @@ export interface VerifyEmailHeaderProps {
 /** Explains why the user is here and which address must be confirmed. */
 export function VerifyEmailHeader({ email }: VerifyEmailHeaderProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("auth");
 
   return (
     <View style={styles.header}>
@@ -21,12 +23,10 @@ export function VerifyEmailHeader({ email }: VerifyEmailHeaderProps) {
       </View>
 
       <ThemedText type="title" style={styles.title}>
-        Verifica tu correo
+        {t("verify.title")}
       </ThemedText>
 
-      <ThemedText style={styles.subtitle}>
-        Confirma tu dirección para continuar usando la app.
-      </ThemedText>
+      <ThemedText style={styles.subtitle}>{t("verify.subtitle")}</ThemedText>
 
       {email ? (
         <ThemedText type="defaultSemiBold" style={styles.email}>
@@ -34,10 +34,7 @@ export function VerifyEmailHeader({ email }: VerifyEmailHeaderProps) {
         </ThemedText>
       ) : null}
 
-      <ThemedText style={styles.hint}>
-        Abre el enlace del correo y vuelve aquí. Comprobaremos el estado
-        automáticamente.
-      </ThemedText>
+      <ThemedText style={styles.hint}>{t("verify.hint")}</ThemedText>
     </View>
   );
 }

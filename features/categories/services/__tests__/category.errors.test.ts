@@ -4,7 +4,7 @@ import {
   CategoryOperationCode,
   CategoryOperationError,
   CategoryValidationError,
-  getCategoryErrorMessage,
+  getCategoryErrorCode,
 } from "../category.errors";
 
 const codes: CategoryOperationCode[] = [
@@ -14,55 +14,58 @@ const codes: CategoryOperationCode[] = [
 ];
 
 describe("category errors", () => {
-  it("exposes every operation code with a message", () => {
+  it("exposes every operation code", () => {
     for (const code of codes) {
       const error = new CategoryOperationError(code);
 
       expect(error.name).toBe("CategoryOperationError");
       expect(error.code).toBe(code);
-      expect(error.message.length).toBeGreaterThan(0);
+      expect(error.message).toBe(code);
     }
   });
 
-  it("maps validation issues to their first message and field errors", () => {
+  it("maps validation issues to their first code and field errors", () => {
     const error = new CategoryValidationError([
-      { field: "name", code: "NAME_REQUIRED", message: "Nombre obligatorio" },
-      { field: "name", code: "NAME_TOO_LONG", message: "Nombre largo" },
+      { field: "name", code: "NAME_REQUIRED" },
+      { field: "name", code: "NAME_TOO_LONG" },
     ]);
 
     expect(error.name).toBe("CategoryValidationError");
-    expect(error.message).toBe("Nombre obligatorio");
-    expect(error.fieldErrors).toEqual({ name: "Nombre obligatorio" });
+    expect(error.message).toBe("NAME_REQUIRED");
+    expect(error.fieldErrors).toEqual({ name: "NAME_REQUIRED" });
   });
 
-  it("has a fallback message and maps infrastructure failures", () => {
-    expect(new CategoryValidationError([]).message).toBe(
-      "Los datos de la categoría no son válidos.",
-    );
-    expect(getCategoryErrorMessage(new CategoryOperationError("CATEGORY_IN_USE"), "fallback")).toBe(
-      "No puedes eliminar una categoría que ya se usa en movimientos.",
-    );
+  it("has a fallback code and maps infrastructure failures", () => {
+    expect(new CategoryValidationError([]).message).toBe("VALIDATION");
     expect(
-      getCategoryErrorMessage(
+      getCategoryErrorCode(
+        new CategoryOperationError("CATEGORY_IN_USE"),
+        "OPERATION_FAILED",
+      ),
+    ).toBe("CATEGORY_IN_USE");
+    expect(
+      getCategoryErrorCode(
         Object.assign(new Error("denied"), { code: "permission-denied" }),
-        "fallback",
+        "OPERATION_FAILED",
       ),
-    ).toBe("No tienes permisos para realizar esta operación.");
+    ).toBe("PERMISSION_DENIED");
     expect(
-      getCategoryErrorMessage(
+      getCategoryErrorCode(
         Object.assign(new Error("offline"), { code: "unavailable" }),
-        "fallback",
+        "OPERATION_FAILED",
       ),
-    ).toBe("No hay conexión. Comprueba tu red e inténtalo de nuevo.");
+    ).toBe("NETWORK");
     expect(
-      getCategoryErrorMessage(
+      getCategoryErrorCode(
         Object.assign(new Error("offline"), { code: "network-request-failed" }),
-        "fallback",
+        "OPERATION_FAILED",
       ),
-    ).toBe("No hay conexión. Comprueba tu red e inténtalo de nuevo.");
+    ).toBe("NETWORK");
     expect(
-      getCategoryErrorMessage(new Error("permission_denied"), "fallback"),
-    ).toBe("No tienes permisos para realizar esta operación.");
-    expect(getCategoryErrorMessage("boom", "fallback")).toBe("fallback");
+      getCategoryErrorCode(new Error("permission_denied"), "OPERATION_FAILED"),
+    ).toBe("PERMISSION_DENIED");
+    expect(getCategoryErrorCode("boom", "OPERATION_FAILED")).toBe(
+      "OPERATION_FAILED",
+    );
   });
 });

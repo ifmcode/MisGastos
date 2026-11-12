@@ -16,19 +16,11 @@ import {
 import { applyCategoryOrder } from "../utils/category-order";
 
 function ownerIssue(): CategoryValidationIssue {
-  return {
-    field: "ownerId",
-    code: "OWNER_REQUIRED",
-    message: "Debes iniciar sesión para gestionar tus categorías.",
-  };
+  return { field: "ownerId", code: "OWNER_REQUIRED" };
 }
 
 function categoryIdIssue(): CategoryValidationIssue {
-  return {
-    field: "categoryId",
-    code: "CATEGORY_REQUIRED",
-    message: "Selecciona una categoría válida.",
-  };
+  return { field: "categoryId", code: "CATEGORY_REQUIRED" };
 }
 
 export class CategoryService {

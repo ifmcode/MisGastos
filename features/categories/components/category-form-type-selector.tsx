@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { categoryFormStyles as styles } from "../styles/category-form.styles";
 import { CategoryType } from "../types/category.types";
@@ -22,18 +24,21 @@ export function CategoryFormTypeSelector({
   onChange,
 }: CategoryFormTypeSelectorProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("categories");
+  const tr = asTranslate(t);
 
   return (
     <View style={styles.chipsWrap}>
       {CATEGORY_TYPE_OPTIONS.map((option) => {
         const selected = value === option.value;
+        const label = tr(option.labelKey);
 
         return (
           <Pressable
             key={option.value}
             accessibilityRole="radio"
             accessibilityState={{ selected, disabled: locked || disabled }}
-            accessibilityLabel={`Tipo ${option.label}`}
+            accessibilityLabel={t("form.typeAccessibility", { label })}
             onPress={() => onChange(option.value)}
             disabled={disabled || locked}
             style={[
@@ -56,7 +61,7 @@ export function CategoryFormTypeSelector({
                 { color: selected ? theme.onPrimary : theme.text },
               ]}
             >
-              {option.label}
+              {label}
             </ThemedText>
           </Pressable>
         );

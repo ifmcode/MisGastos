@@ -1,16 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 
-import { formatMoney, WalletTotal } from "../utils/money";
+import { WalletTotal } from "../utils/money";
 
 export interface WalletSummaryProps {
   totals: readonly WalletTotal[];
 }
 
 export function WalletSummary({ totals }: WalletSummaryProps) {
+  const { t } = useTranslation("wallets");
+  const locale = useAppLocale();
+
   if (totals.length === 0) return null;
 
   return (
@@ -20,7 +25,7 @@ export function WalletSummary({ totals }: WalletSummaryProps) {
       darkColor="#0B3F52"
     >
       <View style={styles.header}>
-        <ThemedText style={styles.label}>Saldo total</ThemedText>
+        <ThemedText style={styles.label}>{t("summary")}</ThemedText>
         <Ionicons name="wallet-outline" size={20} color="#D8F1F7" />
       </View>
 
@@ -33,14 +38,12 @@ export function WalletSummary({ totals }: WalletSummaryProps) {
           <ThemedText
             style={[styles.amount, total.total < 0 && styles.negative]}
           >
-            {formatMoney(total.total, total.currency)}
+            {locale.formatCurrency(total.total, total.currency)}
           </ThemedText>
         </View>
       ))}
 
-      <ThemedText style={styles.hint}>
-        Solo se suman las carteras incluidas en el total.
-      </ThemedText>
+      <ThemedText style={styles.hint}>{t("summaryHint")}</ThemedText>
     </ThemedView>
   );
 }

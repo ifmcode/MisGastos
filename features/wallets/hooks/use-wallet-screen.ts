@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
 
 import { WalletInput } from "../schemas/wallet.schema";
@@ -28,6 +30,7 @@ export interface WalletScreenController {
 
 /** Coordinates wallet data, modal lifecycle and user actions for the screen. */
 export function useWalletScreen(): WalletScreenController {
+  const { t } = useTranslation("wallets");
   const wallets = useWallets();
   const management = useWalletManagement({
     getWalletUsage: wallets.getWalletUsage,
@@ -65,11 +68,15 @@ export function useWalletScreen(): WalletScreenController {
     wallets.clearMutationState();
 
     archiveDialog.open({
-      title: archived ? "Restaurar cartera" : "Archivar cartera",
+      title: archived
+        ? t("archiveDialog.restoreTitle")
+        : t("archiveDialog.archiveTitle"),
       message: archived
-        ? `«${wallet.name}» volverá a aparecer en los selectores y en los totales.`
-        : `«${wallet.name}» dejará de aparecer en los selectores y en los totales, pero conservará todo su historial.`,
-      confirmLabel: archived ? "Restaurar" : "Archivar",
+        ? t("archiveDialog.restoreMessage", { name: wallet.name })
+        : t("archiveDialog.archiveMessage", { name: wallet.name }),
+      confirmLabel: archived
+        ? t("actions.restore")
+        : t("actions.archive"),
       onConfirm: () => void wallets.setArchived(wallet.id, !archived),
     });
   }

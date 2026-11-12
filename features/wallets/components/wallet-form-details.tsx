@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { TextInput, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -30,18 +31,26 @@ export function WalletFormDetails({
   onChange,
 }: WalletFormDetailsProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["wallets", "validation"]);
+
+  const nameError = errors.name
+    ? t(`validation:wallets.${errors.name}`, { max: WALLET_NAME_MAX_LENGTH })
+    : null;
+  const balanceError = errors.initialBalance
+    ? t(`validation:wallets.${errors.initialBalance}`)
+    : null;
 
   return (
     <View>
-      <ThemedText style={styles.label}>Nombre</ThemedText>
+      <ThemedText style={styles.label}>{t("form.name")}</ThemedText>
       <TextInput
         value={values.name}
         onChangeText={(value) => onChange("name", value)}
-        placeholder="Ej. Cuenta principal"
+        placeholder={t("form.namePlaceholder")}
         placeholderTextColor={theme.muted}
         maxLength={WALLET_NAME_MAX_LENGTH}
         editable={!disabled}
-        accessibilityLabel="Nombre de la cartera"
+        accessibilityLabel={t("form.nameAccessibility")}
         style={[
           styles.input,
           {
@@ -51,13 +60,13 @@ export function WalletFormDetails({
           },
         ]}
       />
-      {errors.name ? (
+      {nameError ? (
         <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-          {errors.name}
+          {nameError}
         </ThemedText>
       ) : null}
 
-      <ThemedText style={styles.label}>Saldo inicial</ThemedText>
+      <ThemedText style={styles.label}>{t("form.initialBalance")}</ThemedText>
       <View
         style={[
           styles.balanceWrapper,
@@ -73,12 +82,12 @@ export function WalletFormDetails({
         <TextInput
           value={values.initialBalance}
           onChangeText={(value) => onChange("initialBalance", value)}
-          placeholder="0,00"
+          placeholder={t("form.amountPlaceholder")}
           placeholderTextColor={theme.muted}
           keyboardType="decimal-pad"
           inputMode="decimal"
           editable={!disabled && !initialBalanceLocked}
-          accessibilityLabel="Saldo inicial"
+          accessibilityLabel={t("form.initialBalance")}
           style={[
             styles.balanceInput,
             { color: theme.text },
@@ -86,15 +95,15 @@ export function WalletFormDetails({
           ]}
         />
       </View>
-      {errors.initialBalance ? (
+      {balanceError ? (
         <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-          {errors.initialBalance}
+          {balanceError}
         </ThemedText>
       ) : (
         <ThemedText style={[styles.helper, { color: theme.muted }]}>
           {initialBalanceLocked
-            ? "No puedes editar el saldo inicial porque la cartera ya tiene movimientos."
-            : "Si lo dejas vacío se usará 0."}
+            ? t("form.initialBalanceLocked")
+            : t("form.initialBalanceHint")}
         </ThemedText>
       )}
     </View>

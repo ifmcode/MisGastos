@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -19,6 +20,8 @@ export function CategoriesEmptyState({
   message,
   onCreate,
 }: CategoriesEmptyStateProps) {
+  const { t } = useTranslation("categories");
+
   return (
     <View style={categoriesStyles.emptyState}>
       <View style={categoriesStyles.emptyIcon}>
@@ -36,13 +39,13 @@ export function CategoriesEmptyState({
       </ThemedText>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Crear primera categoría"
+        accessibilityLabel={t("createFirst")}
         onPress={onCreate}
         style={categoriesStyles.createButton}
       >
         <Ionicons name="add" size={20} color={categoriesPalette.onPrimary} />
         <ThemedText style={categoriesStyles.createButtonText}>
-          Crear categoría
+          {t("create")}
         </ThemedText>
       </Pressable>
     </View>

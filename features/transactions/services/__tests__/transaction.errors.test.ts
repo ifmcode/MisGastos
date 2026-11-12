@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
 import {
-  getTransactionErrorMessage,
+  getTransactionErrorCode,
   TransactionOperationCode,
   TransactionOperationError,
   TransactionValidationError,
@@ -18,89 +18,89 @@ const codes: TransactionOperationCode[] = [
 ];
 
 describe("TransactionValidationError", () => {
-  it("uses the first issue message and maps the field errors", () => {
+  it("uses the first issue code and maps the field errors", () => {
     const error = new TransactionValidationError([
-      { field: "amount", code: "INVALID_AMOUNT", message: "Importe inválido" },
-      { field: "concept", code: "CONCEPT_REQUIRED", message: "Concepto" },
+      { field: "amount", code: "INVALID_AMOUNT" },
+      { field: "concept", code: "CONCEPT_REQUIRED" },
     ]);
 
     expect(error.name).toBe("TransactionValidationError");
-    expect(error.message).toBe("Importe inválido");
+    expect(error.message).toBe("INVALID_AMOUNT");
     expect(error.fieldErrors).toEqual({
-      amount: "Importe inválido",
-      concept: "Concepto",
+      amount: "INVALID_AMOUNT",
+      concept: "CONCEPT_REQUIRED",
     });
   });
 
-  it("has a fallback message for empty issue lists", () => {
+  it("has a fallback code for empty issue lists", () => {
     const error = new TransactionValidationError([]);
 
-    expect(error.message).toBe("Los datos del movimiento no son válidos.");
+    expect(error.message).toBe("VALIDATION");
     expect(error.fieldErrors).toEqual({});
   });
 });
 
 describe("TransactionOperationError", () => {
-  it("exposes every operation code with a user-friendly message", () => {
+  it("exposes every operation code", () => {
     for (const code of codes) {
       const error = new TransactionOperationError(code);
 
       expect(error.name).toBe("TransactionOperationError");
       expect(error.code).toBe(code);
-      expect(error.message.length).toBeGreaterThan(0);
+      expect(error.message).toBe(code);
     }
   });
 });
 
-describe("getTransactionErrorMessage", () => {
-  it("returns the message of project errors", () => {
+describe("getTransactionErrorCode", () => {
+  it("returns the code of project errors", () => {
     const validation = new TransactionValidationError([
-      { field: "amount", code: "INVALID_AMOUNT", message: "Importe inválido" },
+      { field: "amount", code: "INVALID_AMOUNT" },
     ]);
     const operation = new TransactionOperationError("WALLET_NOT_FOUND");
 
-    expect(getTransactionErrorMessage(validation, "fallback")).toBe(
-      "Importe inválido",
+    expect(getTransactionErrorCode(validation, "SAVE_FAILED")).toBe(
+      "VALIDATION",
     );
-    expect(getTransactionErrorMessage(operation, "fallback")).toBe(
-      "La cartera asociada al movimiento ya no existe.",
+    expect(getTransactionErrorCode(operation, "SAVE_FAILED")).toBe(
+      "WALLET_NOT_FOUND",
     );
   });
 
   it("maps infrastructure error codes", () => {
     expect(
-      getTransactionErrorMessage(
+      getTransactionErrorCode(
         Object.assign(new Error("denied"), { code: "permission-denied" }),
-        "fallback",
+        "SAVE_FAILED",
       ),
-    ).toBe("No tienes permisos para realizar esta operación.");
+    ).toBe("PERMISSION_DENIED");
     expect(
-      getTransactionErrorMessage(
+      getTransactionErrorCode(
         Object.assign(new Error("offline"), { code: "unavailable" }),
-        "fallback",
+        "SAVE_FAILED",
       ),
-    ).toBe("No hay conexión. Comprueba tu red e inténtalo de nuevo.");
+    ).toBe("NETWORK");
     expect(
-      getTransactionErrorMessage(
+      getTransactionErrorCode(
         Object.assign(new Error("offline"), { code: "network-request-failed" }),
-        "fallback",
+        "SAVE_FAILED",
       ),
-    ).toBe("No hay conexión. Comprueba tu red e inténtalo de nuevo.");
+    ).toBe("NETWORK");
   });
 
   it("maps permission messages written in the error text", () => {
     expect(
-      getTransactionErrorMessage(new Error("permission-denied"), "fallback"),
-    ).toBe("No tienes permisos para realizar esta operación.");
+      getTransactionErrorCode(new Error("permission-denied"), "SAVE_FAILED"),
+    ).toBe("PERMISSION_DENIED");
     expect(
-      getTransactionErrorMessage(new Error("permission_denied"), "fallback"),
-    ).toBe("No tienes permisos para realizar esta operación.");
+      getTransactionErrorCode(new Error("permission_denied"), "SAVE_FAILED"),
+    ).toBe("PERMISSION_DENIED");
   });
 
   it("returns the fallback for unknown failures", () => {
-    expect(getTransactionErrorMessage("boom", "fallback")).toBe("fallback");
-    expect(getTransactionErrorMessage(new Error("other"), "fallback")).toBe(
-      "fallback",
-    );
+    expect(getTransactionErrorCode("boom", "SAVE_FAILED")).toBe("SAVE_FAILED");
+    expect(
+      getTransactionErrorCode(new Error("other"), "LOAD_FAILED"),
+    ).toBe("LOAD_FAILED");
   });
 });

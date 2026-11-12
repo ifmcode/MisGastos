@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, type Href } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -23,6 +24,7 @@ export function WalletsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const theme = useFormTheme();
+  const { t } = useTranslation("wallets");
   const screen = useWalletScreen();
   const { wallets, management, archiveDialog } = screen;
 
@@ -80,7 +82,7 @@ export function WalletsScreen() {
       {screen.canAddWallet ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Añadir cartera"
+          accessibilityLabel={t("add")}
           onPress={screen.openCreate}
           style={[walletsStyles.fab, { bottom: insets.bottom + 24 }]}
         >

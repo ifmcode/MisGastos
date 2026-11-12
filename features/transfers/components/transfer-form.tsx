@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -52,6 +53,7 @@ export function TransferForm({
   onDelete,
 }: TransferFormProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("transfers");
   const {
     values,
     errors,
@@ -100,7 +102,7 @@ export function TransferForm({
             {wallets.length < 2 ? (
               <TransferFormInfoBanner
                 showIcon
-                message="Necesitas al menos dos carteras para hacer una transferencia."
+                message={t("form.needTwoWallets")}
               />
             ) : null}
 

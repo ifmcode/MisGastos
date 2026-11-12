@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Pressable } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -13,12 +14,12 @@ export function LoginModeToggle({
   isRegister,
   onToggle,
 }: LoginModeToggleProps) {
+  const { t } = useTranslation("auth");
+
   return (
     <Pressable style={styles.toggleButton} onPress={onToggle}>
       <ThemedText style={styles.toggleText}>
-        {isRegister
-          ? "¿Ya tienes cuenta? Inicia sesión"
-          : "¿No tienes cuenta? Regístrate"}
+        {isRegister ? t("login.haveAccount") : t("login.noAccount")}
       </ThemedText>
     </Pressable>
   );

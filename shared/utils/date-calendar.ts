@@ -9,6 +9,7 @@ export interface CalendarMonth {
   year: number;
   month: number;
   label: string;
+  weekdayLabels: string[];
   weeks: Array<Array<CalendarDay | null>>;
 }
 
@@ -17,26 +18,45 @@ export interface CalendarMonthRef {
   month: number;
 }
 
-export const WEEKDAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"] as const;
+const DEFAULT_CALENDAR_LOCALE = "es-ES";
 
-const MONTH_NAMES = [
-  "enero",
-  "febrero",
-  "marzo",
-  "abril",
-  "mayo",
-  "junio",
-  "julio",
-  "agosto",
-  "septiembre",
-  "octubre",
-  "noviembre",
-  "diciembre",
-] as const;
+function capitalize(value: string): string {
+  return value.length > 0 ? `${value.charAt(0).toUpperCase()}${value.slice(1)}` : value;
+}
 
-export function formatMonthLabel(year: number, month: number): string {
-  const name = MONTH_NAMES[month] ?? "";
-  return `${name.charAt(0).toUpperCase()}${name.slice(1)} ${year}`;
+export function formatMonthLabel(
+  year: number,
+  month: number,
+  locale = DEFAULT_CALENDAR_LOCALE,
+): string {
+  const date = new Date(year, month, 1);
+
+  try {
+    const monthName = new Intl.DateTimeFormat(locale, {
+      month: "long",
+    }).format(date);
+    const yearText = new Intl.DateTimeFormat(locale, {
+      year: "numeric",
+    }).format(date);
+
+    return capitalize(`${monthName} ${yearText}`);
+  } catch {
+    return String(year);
+  }
+}
+
+/** Narrow weekday labels starting on Monday, in the requested locale. */
+export function getWeekdayLabels(locale = DEFAULT_CALENDAR_LOCALE): string[] {
+  const monday = new Date(2024, 0, 1);
+
+  try {
+    const formatter = new Intl.DateTimeFormat(locale, { weekday: "narrow" });
+    return Array.from({ length: 7 }, (_, index) =>
+      formatter.format(new Date(2024, 0, 1 + index)),
+    );
+  } catch {
+    return ["L", "M", "X", "J", "V", "S", "D"];
+  }
 }
 
 export function shiftCalendarMonth(
@@ -60,6 +80,7 @@ export function calendarMonthFromIso(
 export function buildCalendarMonth(
   year: number,
   month: number,
+  locale = DEFAULT_CALENDAR_LOCALE,
 ): CalendarMonth {
   const firstWeekday = new Date(year, month, 1).getDay();
   const leadingBlanks = (firstWeekday + 6) % 7;
@@ -81,5 +102,11 @@ export function buildCalendarMonth(
     weeks.push(cells.slice(index, index + 7));
   }
 
-  return { year, month, label: formatMonthLabel(year, month), weeks };
+  return {
+    year,
+    month,
+    label: formatMonthLabel(year, month, locale),
+    weekdayLabels: getWeekdayLabels(locale),
+    weeks,
+  };
 }

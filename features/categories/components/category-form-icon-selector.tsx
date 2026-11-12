@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
@@ -18,6 +19,7 @@ export function CategoryFormIconSelector({
   onChange,
 }: CategoryFormIconSelectorProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("categories");
 
   return (
     <View style={styles.iconGrid}>
@@ -29,7 +31,7 @@ export function CategoryFormIconSelector({
             key={icon}
             accessibilityRole="radio"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Icono ${icon}`}
+            accessibilityLabel={t("form.iconAccessibility", { name: icon })}
             onPress={() => onChange(icon)}
             disabled={disabled}
             style={[

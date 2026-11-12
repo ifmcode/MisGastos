@@ -1,19 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { walletPickerStyles as styles } from "../styles/wallet-picker.styles";
 import { Wallet } from "../types/wallet.types";
-import { formatMoney } from "../utils/money";
-import { getWalletIconName, getWalletTypeLabel } from "../utils/wallet-options";
+import { getWalletIconName, getWalletTypeKey } from "../utils/wallet-options";
 
 export interface WalletPickerOptionProps {
   wallet: Wallet;
   selected: boolean;
   disabled: boolean;
-  /** Screen-reader context: "Cartera", "Origen" or "Destino". */
+  /** Screen-reader context, already translated by the caller. */
   accessibilityPrefix: string;
   onSelect: (walletId: string) => void;
 }
@@ -28,14 +30,23 @@ export function WalletPickerOption({
   onSelect,
 }: WalletPickerOptionProps) {
   const theme = useFormTheme();
-  const typeLabel = getWalletTypeLabel(wallet.type);
-  const balance = formatMoney(wallet.balance, wallet.currency);
+  const { t } = useTranslation("wallets");
+  const tr = asTranslate(t);
+  const locale = useAppLocale();
+  const typeLabel = tr(getWalletTypeKey(wallet.type));
+  const balance = locale.formatCurrency(wallet.balance, wallet.currency);
 
   return (
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      accessibilityLabel={`${accessibilityPrefix} ${wallet.name}, ${typeLabel}, ${wallet.currency}, saldo ${balance}`}
+      accessibilityLabel={t("picker.optionAccessibility", {
+        prefix: accessibilityPrefix,
+        name: wallet.name,
+        type: typeLabel,
+        currency: wallet.currency,
+        balance,
+      })}
       onPress={() => onSelect(wallet.id)}
       disabled={disabled}
       style={({ pressed }) => [

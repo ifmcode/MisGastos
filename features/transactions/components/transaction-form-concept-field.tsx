@@ -1,14 +1,18 @@
+import { useTranslation } from "react-i18next";
 import { TextInput } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
-import { TRANSACTION_CONCEPT_MAX_LENGTH } from "../schemas/transaction.schema";
+import {
+  TRANSACTION_CONCEPT_MAX_LENGTH,
+  type TransactionValidationCode,
+} from "../schemas/transaction.schema";
 import { transactionFormStyles as styles } from "../styles/transaction-form.styles";
 
 export interface TransactionFormConceptFieldProps {
   value: string;
-  error?: string;
+  error?: TransactionValidationCode;
   disabled: boolean;
   onChange: (value: string) => void;
 }
@@ -20,18 +24,24 @@ export function TransactionFormConceptField({
   onChange,
 }: TransactionFormConceptFieldProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation(["transactions", "validation"]);
+  const errorText = error
+    ? t(`validation:transactions.${error}`, {
+        max: TRANSACTION_CONCEPT_MAX_LENGTH,
+      })
+    : null;
 
   return (
     <>
-      <ThemedText style={styles.label}>Concepto</ThemedText>
+      <ThemedText style={styles.label}>{t("form.concept")}</ThemedText>
       <TextInput
         value={value}
         onChangeText={onChange}
-        placeholder="Ej. Compra supermercado"
+        placeholder={t("form.conceptPlaceholder")}
         placeholderTextColor={theme.muted}
         maxLength={TRANSACTION_CONCEPT_MAX_LENGTH}
         editable={!disabled}
-        accessibilityLabel="Concepto"
+        accessibilityLabel={t("form.conceptAccessibility")}
         style={[
           styles.input,
           {
@@ -41,9 +51,9 @@ export function TransactionFormConceptField({
           },
         ]}
       />
-      {error ? (
+      {errorText ? (
         <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-          {error}
+          {errorText}
         </ThemedText>
       ) : null}
     </>

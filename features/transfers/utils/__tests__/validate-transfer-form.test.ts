@@ -64,7 +64,7 @@ describe("validateTransferForm", () => {
 
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.errors.amount).toContain("Saldo insuficiente");
+    expect(result.errors.amount).toBe("INSUFFICIENT_BALANCE");
   });
 
   it("rejects amounts over the available balance", () => {
@@ -72,6 +72,6 @@ describe("validateTransferForm", () => {
 
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.errors.amount).toContain("100,00");
+    expect(result.errors.amount).toBe("INSUFFICIENT_BALANCE");
   });
 });

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -22,6 +23,7 @@ export function DatePickerModal({
   onSelect,
 }: DatePickerModalProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("common");
   const todayIso = getTodayIsoDate();
   const [month, setMonth] = useState(() => calendarMonthFromIso(valueIso));
 
@@ -47,7 +49,7 @@ export function DatePickerModal({
       <View style={styles.root}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Cerrar calendario"
+          accessibilityLabel={t("accessibility.closeCalendar")}
           onPress={onClose}
           style={styles.backdrop}
         />
@@ -55,22 +57,28 @@ export function DatePickerModal({
           <View style={styles.header}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Cancelar"
+              accessibilityLabel={t("accessibility.cancel")}
               hitSlop={8}
               onPress={onClose}
               style={styles.action}
             >
-              <ThemedText style={{ color: theme.muted }}>Cancelar</ThemedText>
+              <ThemedText style={{ color: theme.muted }}>
+                {t("actions.cancel")}
+              </ThemedText>
             </Pressable>
-            <ThemedText type="defaultSemiBold">Seleccionar fecha</ThemedText>
+            <ThemedText type="defaultSemiBold">
+              {t("date.selectDate")}
+            </ThemedText>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Seleccionar hoy"
+              accessibilityLabel={t("date.selectToday")}
               hitSlop={8}
               onPress={() => selectDay(todayIso)}
               style={styles.action}
             >
-              <ThemedText style={{ color: theme.primary }}>Hoy</ThemedText>
+              <ThemedText style={{ color: theme.primary }}>
+                {t("date.today")}
+              </ThemedText>
             </Pressable>
           </View>
 

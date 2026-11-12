@@ -1,12 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { formatMoney } from "@/features/wallets/utils/money";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
-import { formatDateInput } from "@/shared/utils/date";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import {
   transferItemPalette as palette,
@@ -14,7 +15,7 @@ import {
 } from "../styles/transfer-item.styles";
 import { Transfer } from "../types/transfer.types";
 import {
-  EDIT_TRANSFER_HINT,
+  EDIT_TRANSFER_HINT_KEY,
   getTransferEditLabel,
 } from "../utils/transfer-item-accessibility";
 import { getTransferWalletNames } from "../utils/transfer-wallet-names";
@@ -33,22 +34,30 @@ export function TransferItem({
   onPress,
 }: TransferItemProps) {
   const theme = useFormTheme();
-
+  const { t } = useTranslation("transfers");
+  const tr = asTranslate(t);
+  const locale = useAppLocale();
   const { fromName, toName } = getTransferWalletNames(
     transfer,
     fromWallet,
     toWallet,
+    t("deletedWalletName"),
+  );
+  const amount = locale.formatCurrency(transfer.amount, transfer.currency);
+  const date = locale.formatDate(transfer.date);
+  const label = getTransferEditLabel(
+    transfer,
+    fromName,
+    toName,
+    amount,
+    date,
   );
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={getTransferEditLabel(
-        transfer,
-        fromName,
-        toName,
-      )}
-      accessibilityHint={EDIT_TRANSFER_HINT}
+      accessibilityLabel={tr(label.key, label.values)}
+      accessibilityHint={t(EDIT_TRANSFER_HINT_KEY)}
       onPress={onPress}
       style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
     >
@@ -71,7 +80,7 @@ export function TransferItem({
             {fromName} → {toName}
           </ThemedText>
           <ThemedText style={styles.meta} numberOfLines={1}>
-            {formatDateInput(transfer.date)}
+            {date}
             {transfer.notes ? ` · ${transfer.notes}` : ""}
           </ThemedText>
         </View>
@@ -81,7 +90,7 @@ export function TransferItem({
           style={styles.amount}
           numberOfLines={1}
         >
-          {formatMoney(transfer.amount, transfer.currency)}
+          {amount}
         </ThemedText>
 
         <View

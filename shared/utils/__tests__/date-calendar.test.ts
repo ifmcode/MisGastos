@@ -14,9 +14,10 @@ function daysOf(weeks: Array<Array<CalendarDay | null>>): CalendarDay[] {
 
 describe("buildCalendarMonth", () => {
   it("starts weeks on Monday with leading blanks", () => {
-    const month = buildCalendarMonth(2026, 10);
+    const month = buildCalendarMonth(2026, 10, "es-ES");
 
     expect(month.label).toBe("Noviembre 2026");
+    expect(month.weekdayLabels).toEqual(["L", "M", "X", "J", "V", "S", "D"]);
     expect(month.weeks[0]).toEqual([
       null,
       null,
@@ -71,8 +72,8 @@ describe("calendarMonthFromIso", () => {
 });
 
 describe("formatMonthLabel", () => {
-  it("capitalizes Spanish month names", () => {
-    expect(formatMonthLabel(2026, 0)).toBe("Enero 2026");
-    expect(formatMonthLabel(2026, 11)).toBe("Diciembre 2026");
+  it("capitalizes the localized month name", () => {
+    expect(formatMonthLabel(2026, 0, "es-ES")).toBe("Enero 2026");
+    expect(formatMonthLabel(2026, 11, "es-ES")).toBe("Diciembre 2026");
   });
 });

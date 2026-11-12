@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { walletFormStyles as styles } from "../styles/wallet-form.styles";
 import { WalletType } from "../types/wallet.types";
@@ -20,18 +22,21 @@ export function WalletFormTypeSelector({
   onChange,
 }: WalletFormTypeSelectorProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("wallets");
+  const tr = asTranslate(t);
 
   return (
     <View style={styles.chipsWrap}>
       {WALLET_TYPE_OPTIONS.map((option) => {
         const selected = value === option.value;
+        const label = tr(option.labelKey);
 
         return (
           <Pressable
             key={option.value}
             accessibilityRole="radio"
             accessibilityState={{ selected }}
-            accessibilityLabel={`Tipo ${option.label}`}
+            accessibilityLabel={t("types.typeAccessibility", { label })}
             onPress={() => onChange(option.value)}
             disabled={disabled}
             style={[
@@ -53,7 +58,7 @@ export function WalletFormTypeSelector({
                 { color: selected ? theme.onPrimary : theme.text },
               ]}
             >
-              {option.label}
+              {label}
             </ThemedText>
           </Pressable>
         );

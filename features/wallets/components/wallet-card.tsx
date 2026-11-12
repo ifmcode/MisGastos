@@ -1,14 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { walletCardStyles as styles } from "../styles/wallet-card.styles";
 import { Wallet } from "../types/wallet.types";
-import { formatMoney } from "../utils/money";
-import { getWalletIconName, getWalletTypeLabel } from "../utils/wallet-options";
+import { getWalletIconName, getWalletTypeKey } from "../utils/wallet-options";
 import { isWalletArchived } from "../utils/wallet-status";
 
 export interface WalletCardProps {
@@ -18,6 +20,9 @@ export interface WalletCardProps {
 
 export function WalletCard({ wallet, onPress }: WalletCardProps) {
   const theme = useFormTheme();
+  const { t } = useTranslation("wallets");
+  const tr = asTranslate(t);
+  const locale = useAppLocale();
   const isNegative = wallet.balance < 0;
   const archived = isWalletArchived(wallet);
 
@@ -26,7 +31,12 @@ export function WalletCard({ wallet, onPress }: WalletCardProps) {
       accessibilityRole={onPress ? "button" : undefined}
       accessibilityLabel={
         onPress
-          ? `Gestionar cartera ${wallet.name}${archived ? ", archivada" : ""}`
+          ? t(
+              archived
+                ? "manageArchivedAccessibility"
+                : "manageAccessibility",
+              { name: wallet.name },
+            )
           : undefined
       }
       onPress={onPress ? () => onPress(wallet) : undefined}
@@ -61,13 +71,15 @@ export function WalletCard({ wallet, onPress }: WalletCardProps) {
             </ThemedText>
             {archived ? (
               <View style={styles.badge}>
-                <ThemedText style={styles.badgeText}>Archivada</ThemedText>
+                <ThemedText style={styles.badgeText}>
+                  {t("archivedBadge")}
+                </ThemedText>
               </View>
             ) : null}
           </View>
           <ThemedText style={styles.meta} numberOfLines={1}>
-            {getWalletTypeLabel(wallet.type)} · {wallet.currency}
-            {wallet.includeInTotal ? "" : " · Fuera del total"}
+            {tr(getWalletTypeKey(wallet.type))} · {wallet.currency}
+            {wallet.includeInTotal ? "" : ` · ${t("outsideTotal")}`}
           </ThemedText>
         </View>
 
@@ -76,7 +88,7 @@ export function WalletCard({ wallet, onPress }: WalletCardProps) {
           style={[styles.balance, isNegative && { color: theme.danger }]}
           numberOfLines={1}
         >
-          {formatMoney(wallet.balance, wallet.currency)}
+          {locale.formatCurrency(wallet.balance, wallet.currency)}
         </ThemedText>
 
         {onPress ? (

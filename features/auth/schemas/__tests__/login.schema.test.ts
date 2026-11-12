@@ -1,9 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import {
-  getLoginEmailError,
-  validateLoginForm,
-} from "../login.schema";
+import { getLoginEmailError, validateLoginForm } from "../login.schema";
 
 describe("validateLoginForm", () => {
   it("requires email and password on login without requiring the name", () => {
@@ -15,8 +12,8 @@ describe("validateLoginForm", () => {
     });
 
     expect(errors.name).toBeUndefined();
-    expect(errors.email).toBe("Ingresa tu correo electrónico.");
-    expect(errors.password).toBe("Ingresa tu contraseña.");
+    expect(errors.email).toBe("EMAIL_REQUIRED");
+    expect(errors.password).toBe("PASSWORD_REQUIRED");
   });
 
   it("requires the name on registration", () => {
@@ -27,7 +24,7 @@ describe("validateLoginForm", () => {
       isRegister: true,
     });
 
-    expect(errors.name).toBe("Ingresa tu nombre.");
+    expect(errors.name).toBe("NAME_REQUIRED");
     expect(errors.email).toBeUndefined();
     expect(errors.password).toBeUndefined();
   });
@@ -40,7 +37,7 @@ describe("validateLoginForm", () => {
       isRegister: false,
     });
 
-    expect(errors.email).toBe("Ingresa un correo electrónico válido.");
+    expect(errors.email).toBe("EMAIL_INVALID");
   });
 
   it("enforces the minimum password length only on registration", () => {
@@ -58,9 +55,7 @@ describe("validateLoginForm", () => {
     });
 
     expect(loginErrors.password).toBeUndefined();
-    expect(registerErrors.password).toBe(
-      "La contraseña debe tener al menos 6 caracteres.",
-    );
+    expect(registerErrors.password).toBe("PASSWORD_TOO_SHORT");
   });
 
   it("returns no errors for valid values", () => {

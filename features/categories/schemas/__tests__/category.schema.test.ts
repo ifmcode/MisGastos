@@ -59,13 +59,13 @@ describe("validateCategoryInput", () => {
 });
 
 describe("toCategoryFieldErrors", () => {
-  it("keeps the first message per field", () => {
+  it("keeps the first code per field", () => {
     const errors = toCategoryFieldErrors([
-      { field: "name", code: "NAME_REQUIRED", message: "Primero" },
-      { field: "name", code: "NAME_REQUIRED", message: "Segundo" },
-      { field: "color", code: "INVALID_COLOR", message: "Color" },
+      { field: "name", code: "NAME_REQUIRED" },
+      { field: "name", code: "NAME_TOO_LONG" },
+      { field: "color", code: "INVALID_COLOR" },
     ]);
 
-    expect(errors).toEqual({ name: "Primero", color: "Color" });
+    expect(errors).toEqual({ name: "NAME_REQUIRED", color: "INVALID_COLOR" });
   });
 });

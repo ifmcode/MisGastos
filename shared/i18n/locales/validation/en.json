@@ -1,0 +1,57 @@
+{
+  "auth": {
+    "NAME_REQUIRED": "Enter your name.",
+    "EMAIL_REQUIRED": "Enter your email address.",
+    "EMAIL_INVALID": "Enter a valid email address.",
+    "PASSWORD_REQUIRED": "Enter your password.",
+    "PASSWORD_TOO_SHORT": "The password must be at least 6 characters long."
+  },
+  "wallets": {
+    "OWNER_REQUIRED": "You must sign in to manage your wallets.",
+    "WALLET_REQUIRED": "Select a valid wallet.",
+    "NAME_REQUIRED": "The wallet name is required.",
+    "NAME_TOO_LONG": "The name cannot exceed {{max}} characters.",
+    "INVALID_CURRENCY": "Select a valid currency.",
+    "INVALID_ICON": "Select a valid icon.",
+    "INVALID_COLOR": "Select a valid color.",
+    "INVALID_AMOUNT": "Enter a valid amount with up to 2 decimals.",
+    "NEGATIVE_AMOUNT": "The initial balance cannot be negative.",
+    "INVALID_TYPE": "Select a valid wallet type.",
+    "INVALID_INCLUDE_IN_TOTAL": "The include-in-total value is not valid.",
+    "DESCRIPTION_TOO_LONG": "The description cannot exceed {{max}} characters."
+  },
+  "categories": {
+    "OWNER_REQUIRED": "You must sign in to manage your categories.",
+    "CATEGORY_REQUIRED": "Select a valid category.",
+    "NAME_REQUIRED": "The category name is required.",
+    "NAME_TOO_LONG": "The name cannot exceed {{max}} characters.",
+    "INVALID_ICON": "Select a valid icon.",
+    "INVALID_COLOR": "Select a valid color.",
+    "INVALID_TYPE": "Choose whether the category is an expense or an income."
+  },
+  "transactions": {
+    "OWNER_REQUIRED": "You must sign in to manage your movements.",
+    "TRANSACTION_REQUIRED": "Select a valid movement.",
+    "INVALID_TYPE": "Choose whether it is an expense or an income.",
+    "INVALID_AMOUNT": "Enter an amount greater than 0 with up to 2 decimals.",
+    "INVALID_CURRENCY": "The movement currency is not valid.",
+    "WALLET_REQUIRED": "Select a wallet.",
+    "INVALID_CATEGORY": "Select a valid category.",
+    "CATEGORY_TYPE_MISMATCH": "The category does not match the movement type.",
+    "CONCEPT_REQUIRED": "The concept is required.",
+    "CONCEPT_TOO_LONG": "The concept cannot exceed {{max}} characters.",
+    "NOTES_TOO_LONG": "Notes cannot exceed {{max}} characters.",
+    "INVALID_DATE": "Enter a valid date in DD/MM/YYYY format."
+  },
+  "transfers": {
+    "OWNER_REQUIRED": "You must sign in to manage your transfers.",
+    "FROM_WALLET_REQUIRED": "Select the source wallet.",
+    "TO_WALLET_REQUIRED": "Select the destination wallet.",
+    "SAME_WALLET": "The source and destination wallets must be different.",
+    "INVALID_AMOUNT": "Enter an amount greater than 0 with up to 2 decimals.",
+    "INSUFFICIENT_BALANCE": "Insufficient balance for this transfer.",
+    "INVALID_CURRENCY": "The transfer currency is not valid.",
+    "NOTES_TOO_LONG": "Notes cannot exceed {{max}} characters.",
+    "INVALID_DATE": "Enter a valid date in DD/MM/YYYY format."
+  }
+}

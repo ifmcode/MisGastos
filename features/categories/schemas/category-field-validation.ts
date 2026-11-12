@@ -14,19 +14,11 @@ function getNameIssue(input: CategoryInput): CategoryValidationIssue | null {
   const name = typeof input.name === "string" ? input.name.trim() : "";
 
   if (name.length === 0) {
-    return {
-      field: "name",
-      code: "NAME_REQUIRED",
-      message: "El nombre de la categoría es obligatorio.",
-    };
+    return { field: "name", code: "NAME_REQUIRED" };
   }
 
   if (name.length > CATEGORY_NAME_MAX_LENGTH) {
-    return {
-      field: "name",
-      code: "NAME_TOO_LONG",
-      message: `El nombre no puede superar los ${CATEGORY_NAME_MAX_LENGTH} caracteres.`,
-    };
+    return { field: "name", code: "NAME_TOO_LONG" };
   }
 
   return null;
@@ -35,11 +27,7 @@ function getNameIssue(input: CategoryInput): CategoryValidationIssue | null {
 function getIconIssue(input: CategoryInput): CategoryValidationIssue | null {
   if (isCategoryIcon(input.icon)) return null;
 
-  return {
-    field: "icon",
-    code: "INVALID_ICON",
-    message: "Selecciona un icono válido.",
-  };
+  return { field: "icon", code: "INVALID_ICON" };
 }
 
 function getColorIssue(input: CategoryInput): CategoryValidationIssue | null {
@@ -50,21 +38,13 @@ function getColorIssue(input: CategoryInput): CategoryValidationIssue | null {
     return null;
   }
 
-  return {
-    field: "color",
-    code: "INVALID_COLOR",
-    message: "Selecciona un color válido.",
-  };
+  return { field: "color", code: "INVALID_COLOR" };
 }
 
 function getTypeIssue(input: CategoryInput): CategoryValidationIssue | null {
   if (isCategoryType(input.type)) return null;
 
-  return {
-    field: "type",
-    code: "INVALID_TYPE",
-    message: "Selecciona si la categoría es de gasto o de ingreso.",
-  };
+  return { field: "type", code: "INVALID_TYPE" };
 }
 
 /** Collects every field issue of a category input in display order. */
