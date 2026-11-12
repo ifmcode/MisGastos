@@ -95,6 +95,27 @@ describe("mapWalletDocument", () => {
     expect(wallet?.balance).toBe(100.25);
   });
 
+  it("maps an other-type EUR wallet with a non-zero balance", () => {
+    const wallet = mapWalletDocument(
+      "wallet-juanilla",
+      {
+        ...baseData,
+        name: "Juanilla",
+        type: "other",
+        currency: "EUR",
+        balance: 30,
+      },
+      "user-1",
+    );
+
+    expect(wallet).toMatchObject({
+      name: "Juanilla",
+      type: "other",
+      currency: "EUR",
+      balance: 30,
+    });
+  });
+
   it("maps the archived marker when present", () => {
     const wallet = mapWalletDocument(
       "wallet-1",

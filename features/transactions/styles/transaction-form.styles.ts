@@ -146,34 +146,11 @@ export const transactionFormStyles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     padding: 12,
+    marginBottom: 8,
   },
   infoText: {
     fontSize: 13,
     lineHeight: 18,
-  },
-  walletList: {
-    gap: 8,
-  },
-  walletItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  walletItemText: {
-    flex: 1,
-    marginRight: 10,
-  },
-  metaText: {
-    fontSize: 13,
-    marginTop: 2,
-  },
-  walletBalance: {
-    fontSize: 13,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
   },
   categoryChips: {
     flexDirection: "row",

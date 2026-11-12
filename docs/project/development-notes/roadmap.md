@@ -1,10 +1,10 @@
 # Roadmap - MisGastos
 
 ## Current Focus
-- **Phase:** 3 - Post-MVP (Phase A.1 in progress)
-- **Current ticket:** TICKET-029 - Compact Wallet Selector (Phase A.1)
-- **Last completed:** TICKET-028 - Compact Category Selector (12/11/2026)
-- **Next:** TICKET-023 - Offline-first design spike (Phase B)
+- **Phase:** 4 - Platform and Workflow (Phase A.1 complete)
+- **Current ticket:** TICKET-023 - Offline-first design spike (Phase B)
+- **Last completed:** TICKET-029 - Compact Wallet Selector (12/11/2026)
+- **Next:** TICKET-024 - Agents and skills specialization (Phase B)
 - **Source of truth:** `docs/project/implementation-plan/implementation-plan.md` §0
 
 ## Phase 0: Organization (COMPLETED)
@@ -45,12 +45,12 @@
 - [x] Email verification on signup (TICKET-021)
 - [x] Discoverable edit/delete actions (TICKET-022)
 
-## Phase 3.1: Personal Finance UX Follow-up (IN PROGRESS)
+## Phase 3.1: Personal Finance UX Follow-up (COMPLETED)
 - [x] Movement detail view with edit/delete actions (TICKET-025) ✅ 11/11/2026
 - [x] Transfer history from accounts (TICKET-026) ✅ 11/11/2026
 - [x] Home recent movements and transfers (TICKET-027) ✅ 11/11/2026
 - [x] Compact category selector (TICKET-028) ✅ 12/11/2026
-- [ ] Compact wallet selector + missing wallet fix (TICKET-029) ← NEXT
+- [x] Compact wallet selector + missing wallet fix (TICKET-029) ✅ 12/11/2026
 
 ## Phase 4: Platform and Workflow
 - [ ] Offline-first design spike + sync (TICKET-023)

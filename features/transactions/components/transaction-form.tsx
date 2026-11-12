@@ -26,7 +26,7 @@ import { TransactionFormErrorBanner } from "./transaction-form-error-banner";
 import { TransactionFormHeader } from "./transaction-form-header";
 import { TransactionFormNotesField } from "./transaction-form-notes-field";
 import { TransactionFormTypeSelector } from "./transaction-form-type-selector";
-import { TransactionFormWalletSelector } from "./transaction-form-wallet-selector";
+import { TransactionFormWalletField } from "./transaction-form-wallet-field";
 
 export interface TransactionFormProps {
   submitting: boolean;
@@ -97,7 +97,7 @@ export function TransactionForm({
               onChange={(value) => updateValue("amount", value)}
             />
 
-            <TransactionFormWalletSelector
+            <TransactionFormWalletField
               wallets={wallets}
               value={values.walletId}
               error={errors.walletId}

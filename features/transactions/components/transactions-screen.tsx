@@ -24,7 +24,7 @@ import { TransactionsLoadingState } from "./transactions-loading-state";
 
 export function TransactionsScreen() {
   const insets = useSafeAreaInsets();
-  const { wallets } = useWallets();
+  const { wallets, refresh: refreshWallets } = useWallets();
   const {
     categories,
     loading: categoriesLoading,
@@ -57,8 +57,10 @@ export function TransactionsScreen() {
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
   const hasFocusedOnce = useRef(false);
 
-  // Categories can change in the settings flow; refresh them when the tab is
-  // focused again so the form and filters never show stale options.
+  // Categories and wallets can change in other tabs; refresh them when the tab
+  // is focused again so the form and filters never show stale options. The
+  // wallet refresh is what keeps a newly created wallet (for example a third
+  // one) from disappearing from the movement form.
   useFocusEffect(
     useCallback(() => {
       if (!hasFocusedOnce.current) {
@@ -67,7 +69,8 @@ export function TransactionsScreen() {
       }
 
       void refreshCategories();
-    }, [refreshCategories]),
+      void refreshWallets();
+    }, [refreshCategories, refreshWallets]),
   );
 
   const walletMap = useMemo(

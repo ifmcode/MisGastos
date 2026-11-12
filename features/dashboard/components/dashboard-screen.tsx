@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useRouter } from "expo-router";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
@@ -32,6 +32,22 @@ export function DashboardScreen() {
   });
 
   const [selectedWalletId, setSelectedWalletId] = useState("");
+  const hasFocusedOnce = useRef(false);
+
+  // Wallets are edited in the accounts tab. Refresh them when the dashboard is
+  // focused again so totals and the quick transfer form see every active
+  // wallet instead of the list loaded on first mount.
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasFocusedOnce.current) {
+        hasFocusedOnce.current = true;
+        return;
+      }
+
+      void walletsState.refresh();
+    }, [walletsState.refresh]),
+  );
+
   const activeWallets = useMemo(
     () => getActiveWallets(walletsState.wallets),
     [walletsState.wallets],

@@ -148,32 +148,6 @@ export const transferFormStyles = StyleSheet.create({
     marginTop: 6,
   },
 
-  // Wallet selectors
-  walletList: {
-    gap: 8,
-  },
-  walletItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  walletItemText: {
-    flex: 1,
-    marginRight: 10,
-  },
-  metaText: {
-    fontSize: 13,
-    marginTop: 2,
-  },
-  walletBalance: {
-    fontSize: 13,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-  },
-
   // Actions
   actions: {
     flexDirection: "row",
