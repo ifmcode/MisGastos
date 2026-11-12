@@ -91,6 +91,19 @@ describe("TransferService.updateTransfer", () => {
     expect(transferRepository.updateCalls).toEqual([]);
   });
 
+  it("rejects a blank transfer id after validating the input", async () => {
+    const { transferRepository, service } = createService();
+
+    const error = await captureError(
+      service.updateTransfer("user-1", "   ", validInput),
+    );
+
+    expect(error).toBeInstanceOf(TransferOperationError);
+    if (!(error instanceof TransferOperationError)) return;
+    expect(error.code).toBe("TRANSFER_NOT_FOUND");
+    expect(transferRepository.getTransferCalls).toEqual([]);
+  });
+
   it("propagates wallet repository failures", async () => {
     const { walletRepository, transferRepository, service } = createService();
     transferRepository.transferById = buildTransfer();

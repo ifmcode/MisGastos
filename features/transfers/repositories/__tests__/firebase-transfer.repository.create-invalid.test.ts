@@ -76,6 +76,18 @@ describe("FirebaseTransferRepository.createTransfer rejections", () => {
     ).rejects.toMatchObject({ code: "FROM_WALLET_NOT_FOUND" });
   });
 
+  it("rejects a missing destination wallet", async () => {
+    transactionGet
+      .mockResolvedValueOnce(snapshot("wallet-1", walletDocument()))
+      .mockResolvedValueOnce(snapshot("wallet-2"));
+
+    const repository = new FirebaseTransferRepository();
+
+    await expect(
+      repository.createTransfer("user-1", validDto),
+    ).rejects.toMatchObject({ code: "TO_WALLET_NOT_FOUND" });
+  });
+
   it("rejects wallets owned by another user", async () => {
     mockWalletSnapshots({}, { ownerId: "user-2" });
 
