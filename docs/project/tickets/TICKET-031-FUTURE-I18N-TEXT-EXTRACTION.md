@@ -4,7 +4,7 @@
 **Priority:** High  
 **Status:** ⏳ Pending  
 **Related:** PM-031; all feature tickets; TICKET-014 (settings pattern)  
-**Sprint:** Post-MVP / Phase A.3  
+**Sprint:** Post-MVP / Phase 3.3  
 
 ## Description
 Every user-facing string must come from translation files split by feature, so the app can render Spanish or English today and add more languages later. The selected language is managed from the Settings tab, persisted locally and applied immediately without restarting the app.

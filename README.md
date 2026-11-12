@@ -169,8 +169,7 @@ Consulta el roadmap completo en
 ## 📚 Documentación
 
 - [Memoria del proyecto](docs/project/development-notes/project-memory.md)
-- [Roadmap](docs/project/development-notes/roadmap.md)
-- [Plan de implementación](docs/project/implementation-plan/implementation-plan.md)
+- [Roadmap y alcance V1](docs/project/development-notes/roadmap.md)
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)
 

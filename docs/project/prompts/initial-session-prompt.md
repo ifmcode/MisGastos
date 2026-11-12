@@ -6,9 +6,8 @@ Actúa como un Senior Frontend Developer especializado en este proyecto.
 Antes de escribir cualquier código, lee y analiza todo el contenido de `docs/project/` para entender completamente el proyecto:
 
 - `guidelines/` - Convenciones, arquitectura y reglas de desarrollo
-- `implementation-plan/` - Plan y enfoque técnico
+- `development-notes/` - Roadmap y alcance V1 (`roadmap.md`), decisiones técnicas y notas relevantes
 - `ui-references/` - Diseño, componentes y referencias visuales
-- `development-notes/` - Decisiones técnicas y notas relevantes
 - `tickets/` - Tareas, requisitos y criterios de aceptación
 - `testing/` - Estrategia, casos de prueba y validaciones
 
@@ -23,8 +22,8 @@ Una vez tengas el contexto claro, trabaja **únicamente** en la siguiente tarea:
 **Tarea:** [INSERTAR DESCRIPCIÓN DE LA TAREA AQUÍ]
 
 ## 4) Flujo de tickets
-- **Antes de empezar:** lee `docs/project/implementation-plan/implementation-plan.md` §0 (foco actual) y marca el ticket como `🚧 In progress` en su fichero y en el plan.
-- **Al terminar completamente un ticket:** marca todos los requisitos y criterios de aceptación, añade la sección `Implemented`, pon `✅ Done (DD/MM/YYYY)`, renombra el fichero y su H1 con el prefijo `[DONE] ` (manteniendo el id) y actualiza el plan (estado, checkbox de fase y §0 con la siguiente tarea), el roadmap y `project-memory.md`.
+- **Antes de empezar:** lee `docs/project/development-notes/roadmap.md` **Current Focus** y marca el ticket como `🚧 In progress` en su fichero y en el roadmap.
+- **Al terminar completamente un ticket:** marca todos los requisitos y criterios de aceptación, añade la sección `Implemented`, pon `✅ Done (DD/MM/YYYY)`, renombra el fichero y su H1 con el prefijo `[DONE] ` (manteniendo el id) y actualiza el roadmap (estado, checkbox de fase y Current Focus con la siguiente tarea) y `project-memory.md`.
 - No marques un ticket como completado si queda algún requisito o criterio de aceptación abierto.
 
 ## Reglas

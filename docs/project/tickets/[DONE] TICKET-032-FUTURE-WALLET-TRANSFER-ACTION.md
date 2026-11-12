@@ -4,7 +4,7 @@
 **Priority:** Medium  
 **Status:** ✅ Done (12/11/2026)  
 **Related:** PM-032; TICKET-003, TICKET-026, TICKET-029, TICKET-031  
-**Sprint:** Post-MVP / Phase A.4  
+**Sprint:** Post-MVP / Phase 3.4  
 
 ## Description
 The only entry point to create a transfer is the **Transferir** button in the dashboard header. Transfers move money between wallets and belong with the wallet balances, so the create action should live in the **Carteras** tab, next to the existing transfer history link.
