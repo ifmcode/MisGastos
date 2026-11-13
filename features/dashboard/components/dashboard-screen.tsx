@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedView } from "@/components/themed-view";
 import { useAuth } from "@/hooks/use-auth";
 import { useCategories } from "@/features/categories/hooks/use-categories";
-import { useTransferFormDialog } from "@/features/transfers/hooks/use-transfer-form-dialog";
 import { useTransfers } from "@/features/transfers/hooks/use-transfers";
 import { useTransactions } from "@/features/transactions/hooks/use-transactions";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
@@ -15,6 +14,7 @@ import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
 import { useDashboardMovementDialogs } from "../hooks/use-dashboard-movement-dialogs";
 import { useDashboardOverview } from "../hooks/use-dashboard-overview";
 import { useDashboardRefresh } from "../hooks/use-dashboard-refresh";
+import { useDashboardTransferDialogs } from "../hooks/use-dashboard-transfer-dialogs";
 import { dashboardStyles } from "../styles/dashboard.styles";
 import { createDashboardNavigationActions } from "../utils/dashboard-navigation";
 import { DashboardErrorState } from "./dashboard-error-state";
@@ -22,7 +22,7 @@ import { DashboardHeader } from "./dashboard-header";
 import { DashboardLoadingState } from "./dashboard-loading-state";
 import { DashboardMovementModals } from "./dashboard-movement-modals";
 import { DashboardOverviewScroll } from "./dashboard-overview-scroll";
-import { DashboardTransferModal } from "./dashboard-transfer-modal";
+import { DashboardTransferModals } from "./dashboard-transfer-modals";
 
 export function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -62,13 +62,10 @@ export function DashboardScreen() {
     () => createDashboardNavigationActions(router),
     [router],
   );
-  const transferForm = useTransferFormDialog({
-    mutating: transfersState.mutating,
-    createTransfer: transfersState.createTransfer,
-    updateTransfer: transfersState.updateTransfer,
-    deleteTransfer: transfersState.deleteTransfer,
-    clearCreateState: transfersState.clearCreateState,
-    onWalletsChanged: () => void walletsState.reload(),
+  const transferDialogs = useDashboardTransferDialogs({
+    transfers: transfersState.transfers,
+    mutations: transfersState,
+    onWalletsChanged: walletsState.refresh,
   });
   const movementDialogs = useDashboardMovementDialogs({
     transactions: transactionsState.transactions,
@@ -123,15 +120,15 @@ export function DashboardScreen() {
             walletMap: overview.walletMap,
             onRetry: () => void transfersState.reload(),
             onOpenHistory: navigation.openTransferHistory,
-            onPressTransfer: transferForm.openEdit,
+            onPressTransfer: transferDialogs.openDetail,
           }}
           refreshing={dashboardRefresh.refreshing}
           onRefresh={dashboardRefresh.refreshAll}
         />
       )}
 
-      <DashboardTransferModal
-        form={transferForm}
+      <DashboardTransferModals
+        dialogs={transferDialogs}
         state={transfersState}
         wallets={walletsState.wallets}
       />

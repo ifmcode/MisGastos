@@ -9,11 +9,11 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ## Current Focus
 - **Milestone:** M2 - Personal finance complete
-- **Phase:** 3.5 - Dashboard recent data and detail views
-- **Current ticket:** TICKET-035 - Add the transfer detail view with edit/delete
+- **Phase:** 3.6 - Shared component extraction
+- **Current ticket:** TICKET-037 - Audit and extract reusable shared components
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-034 - Open movement detail from the dashboard (13/11/2026)
-- **Next:** TICKET-036 - Open the transfer detail from a recent transfer
+- **Last completed:** TICKET-036 - Open the transfer detail from the dashboard (13/11/2026)
+- **Next:** TICKET-037 - Audit and extract reusable shared components
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -82,13 +82,13 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ### 3.4 Wallet transfer entry (COMPLETED)
 - [x] Move **Transferir** from the dashboard header to the **Carteras** tab (TICKET-032) ✅ 12/11/2026
 
-### 3.5 Dashboard recent data and detail views (NEXT)
+### 3.5 Dashboard recent data and detail views (COMPLETED)
 - [x] Fix the recent-transfers cap/freshness and add **Ver todos** (TICKET-033) ✅ 13/11/2026
 - [x] Open the movement detail from a recent movement (TICKET-034) ✅ 13/11/2026
-- [ ] Add the transfer detail view with edit/delete (TICKET-035)
-- [ ] Open the transfer detail from a recent transfer (TICKET-036)
+- [x] Add the transfer detail view with edit/delete (TICKET-035) ✅ 13/11/2026
+- [x] Open the transfer detail from a recent transfer (TICKET-036) ✅ 13/11/2026
 
-### 3.6 Shared component extraction (QUEUED)
+### 3.6 Shared component extraction (NEXT)
 - [ ] Inventory and extract duplicated loading/error/empty states, form blocks and list rows into `shared/components` (TICKET-037)
 
 ### 3.7 Earlier post-MVP polish (COMPLETED)

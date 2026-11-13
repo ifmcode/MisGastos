@@ -38,7 +38,24 @@
   },
   "item": {
     "editHint": "Abre el formulario para editar o eliminar esta transferencia.",
-    "editLabel": "Editar transferencia: {{from}} a {{to}}, {{amount}}, {{date}}"
+    "editLabel": "Editar transferencia: {{from}} a {{to}}, {{amount}}, {{date}}",
+    "detailHint": "Abre el detalle de la transferencia para editar o eliminar.",
+    "detailLabel": "Ver detalle de la transferencia: {{from}} a {{to}}, {{amount}}, {{date}}"
+  },
+  "detail": {
+    "title": "Detalle de la transferencia",
+    "summaryLabel": "Transferencia",
+    "edit": "Editar transferencia",
+    "editHint": "Abre el formulario con esta transferencia.",
+    "delete": "Eliminar transferencia",
+    "deleteHint": "Pide confirmación antes de eliminar la transferencia y revertir los saldos.",
+    "missingTitle": "Transferencia no disponible",
+    "missingMessage": "Esta transferencia ya no existe o se eliminó desde otro dispositivo.",
+    "closeButton": "Cerrar",
+    "from": "Origen",
+    "to": "Destino",
+    "date": "Fecha",
+    "notes": "Notas"
   },
   "deleteDialog": {
     "title": "Eliminar transferencia",

@@ -1,35 +1,38 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import type { DetailActionLabels } from "@/shared/types/detail.types";
 
-import { transactionDetailStyles as styles } from "../styles/transaction-detail.styles";
+import { detailStyles as styles } from "./detail.styles";
 
-export interface TransactionDetailHeaderProps {
-  concept: string;
+export interface DetailHeaderProps {
+  title: string;
+  subtitle: string;
   disabled: boolean;
+  labels: DetailActionLabels;
   onEdit: () => void;
   onDelete: () => void;
   onClose: () => void;
 }
 
-export function TransactionDetailHeader({
-  concept,
+export function DetailHeader({
+  title,
+  subtitle,
   disabled,
+  labels,
   onEdit,
   onDelete,
   onClose,
-}: TransactionDetailHeaderProps) {
+}: DetailHeaderProps) {
   const theme = useFormTheme();
-  const { t } = useTranslation(["transactions", "common"]);
 
   return (
     <View style={styles.header}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={t("common:accessibility.closeDetail")}
+        accessibilityLabel={labels.close}
         hitSlop={10}
         onPress={onClose}
         disabled={disabled}
@@ -40,21 +43,21 @@ export function TransactionDetailHeader({
 
       <View style={styles.headerText}>
         <ThemedText type="title" style={styles.title}>
-          {t("detail.title")}
+          {title}
         </ThemedText>
         <ThemedText
           style={[styles.subtitle, { color: theme.muted }]}
           numberOfLines={1}
         >
-          {concept}
+          {subtitle}
         </ThemedText>
       </View>
 
       <View style={styles.headerActions}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t("detail.edit")}
-          accessibilityHint={t("detail.editHint")}
+          accessibilityLabel={labels.edit}
+          accessibilityHint={labels.editHint}
           hitSlop={6}
           onPress={onEdit}
           disabled={disabled}
@@ -70,8 +73,8 @@ export function TransactionDetailHeader({
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t("detail.delete")}
-          accessibilityHint={t("detail.deleteHint")}
+          accessibilityLabel={labels.delete}
+          accessibilityHint={labels.deleteHint}
           hitSlop={6}
           onPress={onDelete}
           disabled={disabled}

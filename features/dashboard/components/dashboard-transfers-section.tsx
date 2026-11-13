@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { TransferItem } from "@/features/transfers/components/transfer-item";
 import { Transfer } from "@/features/transfers/types/transfer.types";
+import { OPEN_TRANSFER_DETAIL_HINT_KEY } from "@/features/transfers/utils/transfer-item-accessibility";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { asTranslate } from "@/shared/i18n/translate";
@@ -37,6 +38,7 @@ export function DashboardTransfersSection({
 }: DashboardTransfersSectionProps) {
   const theme = useFormTheme();
   const { t } = useTranslation("dashboard");
+  const { t: tTransfers } = useTranslation("transfers");
   const tr = asTranslate(t);
 
   return (
@@ -98,6 +100,8 @@ export function DashboardTransfersSection({
               transfer={transfer}
               fromWallet={walletMap.get(transfer.fromWalletId)}
               toWallet={walletMap.get(transfer.toWalletId)}
+              labelKind="detail"
+              accessibilityHint={tTransfers(OPEN_TRANSFER_DETAIL_HINT_KEY)}
               onPress={() => onPressTransfer(transfer)}
             />
           ))}

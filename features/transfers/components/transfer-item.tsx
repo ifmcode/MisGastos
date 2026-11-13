@@ -16,7 +16,9 @@ import {
 import { Transfer } from "../types/transfer.types";
 import {
   EDIT_TRANSFER_HINT_KEY,
+  getTransferDetailLabel,
   getTransferEditLabel,
+  OPEN_TRANSFER_DETAIL_HINT_KEY,
 } from "../utils/transfer-item-accessibility";
 import { getTransferWalletNames } from "../utils/transfer-wallet-names";
 
@@ -24,6 +26,10 @@ export interface TransferItemProps {
   transfer: Transfer;
   fromWallet?: Wallet;
   toWallet?: Wallet;
+  /** Switches the announced action when the row opens the read-only detail. */
+  labelKind?: "edit" | "detail";
+  /** Overrides the default hint for the selected label kind. */
+  accessibilityHint?: string;
   onPress: () => void;
 }
 
@@ -31,6 +37,8 @@ export function TransferItem({
   transfer,
   fromWallet,
   toWallet,
+  labelKind = "edit",
+  accessibilityHint,
   onPress,
 }: TransferItemProps) {
   const theme = useFormTheme();
@@ -45,19 +53,23 @@ export function TransferItem({
   );
   const amount = locale.formatCurrency(transfer.amount, transfer.currency);
   const date = locale.formatDate(transfer.date);
-  const label = getTransferEditLabel(
-    transfer,
-    fromName,
-    toName,
-    amount,
-    date,
-  );
+  const label =
+    labelKind === "detail"
+      ? getTransferDetailLabel(transfer, fromName, toName, amount, date)
+      : getTransferEditLabel(transfer, fromName, toName, amount, date);
+  const hint =
+    accessibilityHint ??
+    t(
+      labelKind === "detail"
+        ? OPEN_TRANSFER_DETAIL_HINT_KEY
+        : EDIT_TRANSFER_HINT_KEY,
+    );
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={tr(label.key, label.values)}
-      accessibilityHint={t(EDIT_TRANSFER_HINT_KEY)}
+      accessibilityHint={hint}
       onPress={onPress}
       style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
     >
@@ -98,7 +110,7 @@ export function TransferItem({
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
         >
-          <Ionicons name="pencil-outline" size={15} color={palette.primary} />
+          <Ionicons name="chevron-forward" size={15} color={palette.primary} />
         </View>
       </ThemedView>
     </Pressable>

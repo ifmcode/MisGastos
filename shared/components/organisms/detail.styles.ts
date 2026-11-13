@@ -1,13 +1,13 @@
 import { StyleSheet } from "react-native";
 
-/** Shared tokens so the detail view never repeats raw color values. */
-export const transactionDetailPalette = {
+/** Shared tokens so detail views never repeat raw color values. */
+export const detailPalette = {
   primary: "#0A7EA4",
   primarySoft: "rgba(10, 126, 164, 0.12)",
   onPrimary: "#FFFFFF",
 } as const;
 
-export const transactionDetailStyles = StyleSheet.create({
+export const detailStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
@@ -113,7 +113,7 @@ export const transactionDetailStyles = StyleSheet.create({
     lineHeight: 22,
   },
 
-  // Missing movement
+  // Missing record
   missingContainer: {
     flex: 1,
     alignItems: "center",
@@ -127,7 +127,7 @@ export const transactionDetailStyles = StyleSheet.create({
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: transactionDetailPalette.primarySoft,
+    backgroundColor: detailPalette.primarySoft,
   },
   missingTitle: {
     fontSize: 19,
@@ -143,10 +143,10 @@ export const transactionDetailStyles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: transactionDetailPalette.primary,
+    backgroundColor: detailPalette.primary,
   },
   missingButtonText: {
-    color: transactionDetailPalette.onPrimary,
+    color: detailPalette.onPrimary,
     fontSize: 15,
     fontWeight: "700",
   },

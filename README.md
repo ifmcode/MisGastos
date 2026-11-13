@@ -36,7 +36,7 @@ simplicidad de uso.
 - 💸 **Ingresos y gastos** con actualización atómica del saldo de la cartera.
 - 🧾 **Historial de movimientos** con filtros y ordenamiento.
 - 🔁 **Transferencias entre carteras** de la misma moneda, con historial inmutable.
-- 📊 **Dashboard** con totales globales y por cartera agrupados por moneda, tres movimientos y tres transferencias recientes, detalle del movimiento con editar y eliminar, acceso al historial completo y datos refrescados al volver a la pestaña.
+- 📊 **Dashboard** con totales globales y por cartera agrupados por moneda, tres movimientos y tres transferencias recientes, detalle de movimientos y transferencias con editar y eliminar, acceso al historial completo y datos refrescados al volver a la pestaña.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
 
@@ -66,7 +66,12 @@ MisGastos/
 │       ├── repositories/   # Acceso a datos (Firestore)
 │       ├── schemas/        # Validación
 │       └── types/          # Tipos del dominio
-├── shared/                 # Código reutilizable (componentes, constantes, tipos, utils…)
+├── shared/                 # Código reutilizable
+│   ├── components/         # UI compartida (molecules, organisms)
+│   ├── hooks/              # Hooks reutilizables
+│   ├── constants/          # Tokens y constantes
+│   ├── types/              # Tipos globales
+│   └── utils/              # Utilidades puras
 ├── components/             # Componentes base de la app
 ├── hooks/                  # Hooks compartidos
 ├── lib/                    # Configuración de Firebase y autenticación

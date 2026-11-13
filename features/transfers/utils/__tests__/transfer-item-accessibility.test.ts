@@ -3,7 +3,9 @@ import { describe, expect, it } from "@jest/globals";
 import { Transfer } from "../../types/transfer.types";
 import {
   EDIT_TRANSFER_HINT_KEY,
+  getTransferDetailLabel,
   getTransferEditLabel,
+  OPEN_TRANSFER_DETAIL_HINT_KEY,
 } from "../transfer-item-accessibility";
 
 function buildTransfer(overrides: Partial<Transfer>): Transfer {
@@ -21,6 +23,13 @@ function buildTransfer(overrides: Partial<Transfer>): Transfer {
   };
 }
 
+const values = {
+  from: "Efectivo",
+  to: "Banco",
+  amount: "10,00 €",
+  date: "29/10/2026",
+};
+
 describe("getTransferEditLabel", () => {
   it("summarizes the transfer and announces the edit action", () => {
     expect(
@@ -31,20 +40,30 @@ describe("getTransferEditLabel", () => {
         "10,00 €",
         "29/10/2026",
       ),
-    ).toEqual({
-      key: "item.editLabel",
-      values: {
-        from: "Efectivo",
-        to: "Banco",
-        amount: "10,00 €",
-        date: "29/10/2026",
-      },
-    });
+    ).toEqual({ key: "item.editLabel", values });
   });
 });
 
-describe("EDIT_TRANSFER_HINT_KEY", () => {
-  it("points to the edit/delete hint key", () => {
+describe("getTransferDetailLabel", () => {
+  it("summarizes the transfer and announces the detail action", () => {
+    expect(
+      getTransferDetailLabel(
+        buildTransfer({}),
+        "Efectivo",
+        "Banco",
+        "10,00 €",
+        "29/10/2026",
+      ),
+    ).toEqual({ key: "item.detailLabel", values });
+  });
+});
+
+describe("transfer card hint keys", () => {
+  it("points to the edit/delete hint by default", () => {
     expect(EDIT_TRANSFER_HINT_KEY).toBe("item.editHint");
+  });
+
+  it("exposes the detail hint for rows that open the read-only view", () => {
+    expect(OPEN_TRANSFER_DETAIL_HINT_KEY).toBe("item.detailHint");
   });
 });

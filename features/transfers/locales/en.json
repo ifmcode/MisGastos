@@ -38,7 +38,24 @@
   },
   "item": {
     "editHint": "Open the form to edit or delete this transfer.",
-    "editLabel": "Edit transfer: {{from}} to {{to}}, {{amount}}, {{date}}"
+    "editLabel": "Edit transfer: {{from}} to {{to}}, {{amount}}, {{date}}",
+    "detailHint": "Open the transfer detail to edit or delete it.",
+    "detailLabel": "View transfer detail: {{from}} to {{to}}, {{amount}}, {{date}}"
+  },
+  "detail": {
+    "title": "Transfer detail",
+    "summaryLabel": "Transfer",
+    "edit": "Edit transfer",
+    "editHint": "Open the form with this transfer.",
+    "delete": "Delete transfer",
+    "deleteHint": "Ask for confirmation before deleting the transfer and reverting the balances.",
+    "missingTitle": "Transfer not available",
+    "missingMessage": "This transfer no longer exists or was deleted from another device.",
+    "closeButton": "Close",
+    "from": "From",
+    "to": "To",
+    "date": "Date",
+    "notes": "Notes"
   },
   "deleteDialog": {
     "title": "Delete transfer",

@@ -1,22 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import type { DetailMissingStateLabels } from "@/shared/types/detail.types";
 
-import { transactionDetailStyles as styles } from "../styles/transaction-detail.styles";
+import { detailStyles as styles } from "./detail.styles";
 
-export interface TransactionDetailMissingStateProps {
+export interface DetailMissingStateProps {
+  labels: DetailMissingStateLabels;
   onClose: () => void;
 }
 
-/** Shown when the selected movement disappeared from the live collection. */
-export function TransactionDetailMissingState({
+/** Shown when the selected record disappeared from the live collection. */
+export function DetailMissingState({
+  labels,
   onClose,
-}: TransactionDetailMissingStateProps) {
+}: DetailMissingStateProps) {
   const theme = useFormTheme();
-  const { t } = useTranslation(["transactions", "common"]);
 
   return (
     <View style={styles.missingContainer}>
@@ -24,19 +25,19 @@ export function TransactionDetailMissingState({
         <Ionicons name="document-outline" size={30} color={theme.primary} />
       </View>
       <ThemedText type="defaultSemiBold" style={styles.missingTitle}>
-        {t("detail.missingTitle")}
+        {labels.title}
       </ThemedText>
       <ThemedText style={[styles.missingMessage, { color: theme.muted }]}>
-        {t("detail.missingMessage")}
+        {labels.message}
       </ThemedText>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={t("common:accessibility.closeDetail")}
+        accessibilityLabel={labels.closeAccessibilityLabel}
         onPress={onClose}
         style={styles.missingButton}
       >
         <ThemedText style={styles.missingButtonText}>
-          {t("detail.closeButton")}
+          {labels.close}
         </ThemedText>
       </Pressable>
     </View>

@@ -66,14 +66,14 @@ const formatCurrency = (value: number, currency: string) =>
 const formatDate = (isoDate: string) => isoDate;
 
 describe("getTransactionDetailSummary", () => {
-  it("describes an expense with its formatted amount and currency", () => {
+  it("describes an expense with its signed amount and currency", () => {
     expect(
-      getTransactionDetailSummary(buildTransaction({}), formatCurrency),
+      getTransactionDetailSummary(buildTransaction({}), formatCurrency, t),
     ).toEqual({
-      typeKey: "types.expense",
-      amountLabel: "1234.5 EUR",
-      currency: "EUR",
-      isIncome: false,
+      label: "types.expense",
+      amount: "-1234.5 EUR",
+      meta: "EUR",
+      tone: "negative",
     });
   });
 
@@ -82,8 +82,14 @@ describe("getTransactionDetailSummary", () => {
       getTransactionDetailSummary(
         buildTransaction({ type: "income" }),
         formatCurrency,
+        t,
       ),
-    ).toMatchObject({ typeKey: "types.income", isIncome: true });
+    ).toEqual({
+      label: "types.income",
+      amount: "+1234.5 EUR",
+      meta: "EUR",
+      tone: "positive",
+    });
   });
 });
 
@@ -163,19 +169,19 @@ describe("buildTransactionDetailFields", () => {
     ).toEqual([
       {
         key: "wallet",
-        labelKey: "detail.wallet",
+        label: "detail.wallet",
         value: "Cuenta principal",
       },
       {
         key: "category",
-        labelKey: "detail.category",
+        label: "detail.category",
         value: "Alimentación",
       },
-      { key: "concept", labelKey: "detail.concept", value: "Cena" },
-      { key: "date", labelKey: "detail.date", value: "2026-10-20" },
+      { key: "concept", label: "detail.concept", value: "Cena" },
+      { key: "date", label: "detail.date", value: "2026-10-20" },
       {
         key: "notes",
-        labelKey: "detail.notes",
+        label: "detail.notes",
         value: "Cena con amigos",
       },
     ]);

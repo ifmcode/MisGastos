@@ -3,32 +3,14 @@ import { Wallet } from "@/features/wallets/types/wallet.types";
 import { DELETED_WALLET_NAME_PREFIX } from "@/features/wallets/utils/deleted-wallet";
 import { isWalletArchived } from "@/features/wallets/utils/wallet-status";
 import type { CurrencyCode } from "@/shared/constants/currencies";
+import type { Translate } from "@/shared/i18n/translate";
+import type { DetailField, DetailSummary } from "@/shared/types/detail.types";
 
 import { Transaction } from "../types/transaction.types";
 import {
   getTransactionCategory,
   getTransactionCategoryLabel,
 } from "./transaction-options";
-
-export interface TransactionDetailSummary {
-  typeKey: string;
-  amountLabel: string;
-  currency: CurrencyCode;
-  isIncome: boolean;
-}
-
-export type TransactionDetailFieldKey =
-  | "wallet"
-  | "category"
-  | "concept"
-  | "date"
-  | "notes";
-
-export interface TransactionDetailField {
-  key: TransactionDetailFieldKey;
-  labelKey: string;
-  value: string;
-}
 
 export type TransactionWalletStatus = "active" | "archived" | "deleted";
 
@@ -37,18 +19,18 @@ export interface TransactionWalletInfo {
   status: TransactionWalletStatus;
 }
 
-type Translate = (key: string, options?: Record<string, unknown>) => string;
-
 export function getTransactionDetailSummary(
   transaction: Transaction,
   formatCurrency: (value: number, currency: CurrencyCode) => string,
-): TransactionDetailSummary {
+  t: Translate,
+): DetailSummary {
+  const isIncome = transaction.type === "income";
+
   return {
-    typeKey:
-      transaction.type === "income" ? "types.income" : "types.expense",
-    amountLabel: formatCurrency(transaction.amount, transaction.currency),
-    currency: transaction.currency,
-    isIncome: transaction.type === "income",
+    label: t(isIncome ? "types.income" : "types.expense"),
+    amount: `${isIncome ? "+" : "-"}${formatCurrency(transaction.amount, transaction.currency)}`,
+    meta: transaction.currency,
+    tone: isIncome ? "positive" : "negative",
   };
 }
 
@@ -101,13 +83,13 @@ export function buildTransactionDetailFields(
   categories: readonly Category[],
   t: Translate,
   formatDate: (isoDate: string) => string,
-): TransactionDetailField[] {
+): DetailField[] {
   const category = getTransactionCategory(categories, transaction.categoryId);
 
   return [
     {
       key: "wallet",
-      labelKey: "detail.wallet",
+      label: t("detail.wallet"),
       value: getTransactionWalletLabel(
         getTransactionWalletInfo(transaction, wallets),
         t,
@@ -115,22 +97,22 @@ export function buildTransactionDetailFields(
     },
     {
       key: "category",
-      labelKey: "detail.category",
+      label: t("detail.category"),
       value: getTransactionCategoryLabel(category, t),
     },
     {
       key: "concept",
-      labelKey: "detail.concept",
+      label: t("detail.concept"),
       value: transaction.concept,
     },
     {
       key: "date",
-      labelKey: "detail.date",
+      label: t("detail.date"),
       value: formatDate(transaction.date),
     },
     {
       key: "notes",
-      labelKey: "detail.notes",
+      label: t("detail.notes"),
       value: transaction.notes?.trim() || t("common:states.noNotes"),
     },
   ];
