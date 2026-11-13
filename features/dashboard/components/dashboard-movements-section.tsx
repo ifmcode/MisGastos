@@ -44,6 +44,9 @@ export function DashboardMovementsSection({
       <DashboardSectionHeader
         title={t("movements.title")}
         actionLabel={hasMore ? t("movements.viewAll") : undefined}
+        actionAccessibilityLabel={
+          hasMore ? t("movements.viewAllAccessibility") : undefined
+        }
         onActionPress={hasMore ? onOpenMovements : undefined}
       />
 

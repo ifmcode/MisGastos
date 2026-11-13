@@ -3,7 +3,11 @@ import { describe, expect, it } from "@jest/globals";
 import { Transfer } from "@/features/transfers/types/transfer.types";
 import { Transaction } from "@/features/transactions/types/transaction.types";
 
-import { getRecentMovements, getRecentTransfers } from "../dashboard-recent";
+import {
+  DASHBOARD_RECENT_LIMIT,
+  getRecentMovements,
+  getRecentTransfers,
+} from "../dashboard-recent";
 
 function buildMovement(overrides: Partial<Transaction> = {}): Transaction {
   return {
@@ -36,6 +40,12 @@ function buildTransfer(overrides: Partial<Transfer> = {}): Transfer {
     ...overrides,
   };
 }
+
+describe("DASHBOARD_RECENT_LIMIT", () => {
+  it("is the only cap and stays at three items", () => {
+    expect(DASHBOARD_RECENT_LIMIT).toBe(3);
+  });
+});
 
 describe("getRecentMovements", () => {
   it("returns only the three newest movements and flags more", () => {

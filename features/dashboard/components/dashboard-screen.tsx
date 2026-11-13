@@ -36,9 +36,9 @@ export function DashboardScreen() {
   const [selectedWalletId, setSelectedWalletId] = useState("");
   const hasFocusedOnce = useRef(false);
 
-  // Wallets are edited in the accounts tab. Refresh them when the dashboard is
-  // focused again so totals and the quick transfer form see every active
-  // wallet instead of the list loaded on first mount.
+  // Wallets, transfers and movements are edited in other tabs. Refresh them
+  // when the dashboard is focused again so totals and both recent sections see
+  // the latest data instead of the collections loaded on first mount.
   useFocusEffect(
     useCallback(() => {
       if (!hasFocusedOnce.current) {
@@ -47,7 +47,13 @@ export function DashboardScreen() {
       }
 
       void walletsState.refresh();
-    }, [walletsState.refresh]),
+      void transfersState.refresh();
+      void transactionsState.refresh();
+    }, [
+      walletsState.refresh,
+      transfersState.refresh,
+      transactionsState.refresh,
+    ]),
   );
 
   const activeWallets = useMemo(

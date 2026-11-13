@@ -43,7 +43,10 @@ export function DashboardTransfersSection({
     <View style={dashboardStyles.recentSection}>
       <DashboardSectionHeader
         title={t("transfers.title")}
-        actionLabel={hasMore ? t("transfers.viewHistory") : undefined}
+        actionLabel={hasMore ? t("transfers.viewAll") : undefined}
+        actionAccessibilityLabel={
+          hasMore ? t("transfers.viewAllAccessibility") : undefined
+        }
         onActionPress={hasMore ? onOpenHistory : undefined}
       />
 

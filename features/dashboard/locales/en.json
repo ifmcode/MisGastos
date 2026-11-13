@@ -21,6 +21,7 @@
   "movements": {
     "title": "Recent movements",
     "viewAll": "View all",
+    "viewAllAccessibility": "View all movements",
     "loading": "Loading movements…",
     "retryAccessibility": "Retry loading movements",
     "retry": "Retry",
@@ -30,7 +31,8 @@
   },
   "transfers": {
     "title": "Recent transfers",
-    "viewHistory": "View history",
+    "viewAll": "View all",
+    "viewAllAccessibility": "View transfer history",
     "loading": "Loading transfers…",
     "retryAccessibility": "Retry loading transfers",
     "retry": "Retry",

@@ -2,7 +2,7 @@
 
 > Single source of truth for the V1 scope, phase order and the current ticket.
 > The former `implementation-plan.md` was merged into this file on 12/11/2026.
-> **Last reviewed:** 12/11/2026
+> **Last reviewed:** 13/11/2026
 
 ## Product Vision
 A personal finance manager (wallets, movements, transfers and dashboard) merged with Splitwise-style shared finances (friends, groups, shared expenses, balances and settlements). **V1.0 is everything defined in this roadmap**; the MVP was the first milestone, not the release.
@@ -10,9 +10,10 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M2 - Personal finance complete
 - **Phase:** 3.5 - Dashboard recent data and detail views
-- **Current ticket:** TICKET-033 - Fix the dashboard recent transfers limit and freshness
-- **Last completed:** TICKET-031 - Internationalization and text extraction (12/11/2026)
-- **Next:** TICKET-034 - Open movement detail from the dashboard
+- **Current ticket:** TICKET-034 - Open movement detail from the dashboard
+- **Status:** ⏳ Pending
+- **Last completed:** TICKET-033 - Fix the dashboard recent transfers limit and freshness (13/11/2026)
+- **Next:** TICKET-035 - Add the transfer detail view with edit/delete
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -82,7 +83,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] Move **Transferir** from the dashboard header to the **Carteras** tab (TICKET-032) ✅ 12/11/2026
 
 ### 3.5 Dashboard recent data and detail views (NEXT)
-- [ ] Fix the recent-transfers cap/freshness and add **Ver todos** (TICKET-033)
+- [x] Fix the recent-transfers cap/freshness and add **Ver todos** (TICKET-033) ✅ 13/11/2026
 - [ ] Open the movement detail from a recent movement (TICKET-034)
 - [ ] Add the transfer detail view with edit/delete (TICKET-035)
 - [ ] Open the transfer detail from a recent transfer (TICKET-036)
@@ -140,7 +141,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Rules
 - This roadmap is the single source of truth for V1 scope, phase order and the current ticket
 - **Before starting:** set the ticket `Status` to `🚧 In progress` and update **Current Focus**
-- **When fully done:** tick every requirement and acceptance criterion, add an `Implemented` section, set `✅ Done (DD/MM/YYYY)`, rename the ticket file and H1 with the `[DONE] ` prefix, update the phase checkbox and **Current Focus**, then add a session entry to `project-memory.md`
+- **When fully done:** tick every requirement and acceptance criterion, add an `Implemented` section, set `✅ Done (DD/MM/YYYY)`, rename the ticket file and H1 with the `[DONE] ` prefix, update the phase checkbox and **Current Focus**, refresh `README.md` and then add a session entry to `project-memory.md`
 - **Never** mark a ticket done while any requirement or acceptance criterion is open
 - Follow `AGENTS.md` for code rules, `guidelines/` for architecture/security and `project-memory.md` for decisions and business rules
 - Tests for critical business logic; commit only when the user asks and group changes by logical block; code and docs in English

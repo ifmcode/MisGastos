@@ -7,9 +7,9 @@
 Aplicación multiplataforma para gestionar carteras, ingresos, gastos y transferencias,
 con la meta de incorporar gastos compartidos al estilo Splitwise.
 
-[![Expo](https://img.shields.io/badge/Expo-54-000020?logo=expo&logoColor=white)](https://expo.dev)
-[![React Native](https://img.shields.io/badge/React_Native-0.81-61DAFB?logo=react&logoColor=white)](https://reactnative.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Expo](https://img.shields.io/badge/Expo-58-000020?logo=expo&logoColor=white)](https://expo.dev)
+[![React Native](https://img.shields.io/badge/React_Native-0.88-61DAFB?logo=react&logoColor=white)](https://reactnative.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth_%2B_Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com)
 [![NativeWind](https://img.shields.io/badge/NativeWind-4-06B6D4?logo=tailwindcss&logoColor=white)](https://www.nativewind.dev)
 [![Jest](https://img.shields.io/badge/Jest-30-C21325?logo=jest&logoColor=white)](https://jestjs.io)
@@ -36,16 +36,17 @@ simplicidad de uso.
 - 💸 **Ingresos y gastos** con actualización atómica del saldo de la cartera.
 - 🧾 **Historial de movimientos** con filtros y ordenamiento.
 - 🔁 **Transferencias entre carteras** de la misma moneda, con historial inmutable.
-- 📊 **Dashboard** con totales globales y por cartera, agrupados por moneda.
-- 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema (en pulido).
+- 📊 **Dashboard** con totales globales y por cartera agrupados por moneda, tres movimientos y tres transferencias recientes, acceso al historial completo y datos refrescados al volver a la pestaña.
+- 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
+- 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
 
 ## 🛠️ Stack tecnológico
 
 | Área | Tecnología |
 |---|---|
-| Aplicación | Expo SDK 54 · React Native 0.81 · React 19 |
-| Navegación | Expo Router 6 (rutas basadas en archivos) |
-| Lenguaje | TypeScript 5.9 en modo estricto |
+| Aplicación | Expo SDK 58 · React Native 0.88 · React 19.3 |
+| Navegación | Expo Router 58 (rutas basadas en archivos) |
+| Lenguaje | TypeScript 6.0 en modo estricto |
 | UI | NativeWind 4 (Tailwind CSS) · React Navigation · Reanimated · Gesture Handler |
 | Backend | Firebase Authentication + Cloud Firestore |
 | Persistencia local | AsyncStorage |
@@ -139,6 +140,7 @@ npx firebase-tools deploy --only firestore:rules
 | `npm test` | Ejecuta la suite de Jest. |
 | `npm run test:coverage` | Ejecuta Jest y exige >= 90% en la lógica de negocio. |
 | `npm run test:ci` | Ejecuta la cobertura una sola vez y en serie (CI). |
+| `npm run check:copy` | Comprueba que todo el texto visible sale de las traducciones. |
 
 ## 🧪 Testing y calidad
 

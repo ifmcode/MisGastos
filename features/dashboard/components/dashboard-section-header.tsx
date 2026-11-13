@@ -10,6 +10,8 @@ export interface DashboardSectionHeaderProps {
   count?: number;
   /** Optional action rendered instead of the counter. */
   actionLabel?: string;
+  /** Screen-reader label for the action; defaults to `actionLabel`. */
+  actionAccessibilityLabel?: string;
   onActionPress?: () => void;
 }
 
@@ -17,6 +19,7 @@ export function DashboardSectionHeader({
   title,
   count,
   actionLabel,
+  actionAccessibilityLabel,
   onActionPress,
 }: DashboardSectionHeaderProps) {
   return (
@@ -27,7 +30,7 @@ export function DashboardSectionHeader({
       {actionLabel && onActionPress ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={actionLabel}
+          accessibilityLabel={actionAccessibilityLabel ?? actionLabel}
           onPress={onActionPress}
           style={({ pressed }) => [
             dashboardStyles.sectionActionPressable,

@@ -23,10 +23,11 @@ Una vez tengas el contexto claro, trabaja **únicamente** en la siguiente tarea:
 
 ## 4) Flujo de tickets
 - **Antes de empezar:** lee `docs/project/development-notes/roadmap.md` **Current Focus** y marca el ticket como `🚧 In progress` en su fichero y en el roadmap.
-- **Al terminar completamente un ticket:** marca todos los requisitos y criterios de aceptación, añade la sección `Implemented`, pon `✅ Done (DD/MM/YYYY)`, renombra el fichero y su H1 con el prefijo `[DONE] ` (manteniendo el id) y actualiza el roadmap (estado, checkbox de fase y Current Focus con la siguiente tarea) y `project-memory.md`.
+- **Al terminar completamente un ticket:** marca todos los requisitos y criterios de aceptación, añade la sección `Implemented`, pon `✅ Done (DD/MM/YYYY)`, renombra el fichero y su H1 con el prefijo `[DONE] ` (manteniendo el id) y actualiza el roadmap (estado, checkbox de fase y Current Focus con la siguiente tarea), `README.md` y `project-memory.md`.
 - No marques un ticket como completado si queda algún requisito o criterio de aceptación abierto.
 
 ## Reglas
+- Mantén siempre actualizado `README.md` con cada cambio o progreso (características, estructura, scripts y roadmap).
 - Sé fiel al código existente. No introduzcas nuevos patrones si ya hay uno establecido en el proyecto.
 - Prioriza la consistencia sobre la optimización prematura.
 - Si vas a crear o modificar archivos, sigue la estructura y convenciones documentadas.

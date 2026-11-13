@@ -16,7 +16,8 @@ Instructions for AI agents (OpenCode, Claude, etc.) working on MisGastos.
   2. Set the ticket `Status` to `✅ Done (DD/MM/YYYY)`.
   3. Rename the ticket file with the `[DONE] ` prefix and update its H1, keeping the ticket id: `[DONE] TICKET-022-...md` and `# [DONE] TICKET-022 - ...`.
   4. Update `docs/project/development-notes/roadmap.md`: phase checkbox and **Current Focus** (next ticket).
-  5. Update the session history in `project-memory.md`.
+  5. Update `README.md` with the change or progress (features, structure, scripts and roadmap).
+  6. Update the session history in `project-memory.md`.
 - **Never** rename or mark a ticket as done when any requirement or acceptance criterion is still open.
 
 ## Hard rules
@@ -30,6 +31,7 @@ Instructions for AI agents (OpenCode, Claude, etc.) working on MisGastos.
 - **No `any`**: use `unknown` + type guards.
 - **Copy**: every visible string (including accessibility labels/hints) comes from a translation namespace. Add keys to `features/<feature>/locales/{es,en}.json`; never import JSON from components. Domain errors return codes, not sentences. Run `npm run check:copy`.
 - **Commits**: never commit unless the user explicitly asks.
+- **README**: keep `README.md` updated with every change or progress, including features, structure, scripts and roadmap status.
 - **Tests**: colocated in `__tests__/`; services and utils are expected to be tested.
 
 ## Verification before finishing
