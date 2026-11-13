@@ -1,25 +1,28 @@
-import { useCallback, useMemo, useRef, useState } from "react";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useMemo, useState } from "react";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
 import { useAuth } from "@/hooks/use-auth";
 import { useCategories } from "@/features/categories/hooks/use-categories";
-import { TransferFormModal } from "@/features/transfers/components/transfer-form-modal";
 import { useTransferFormDialog } from "@/features/transfers/hooks/use-transfer-form-dialog";
 import { useTransfers } from "@/features/transfers/hooks/use-transfers";
 import { useTransactions } from "@/features/transactions/hooks/use-transactions";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
 import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
 
+import { useDashboardMovementDialogs } from "../hooks/use-dashboard-movement-dialogs";
 import { useDashboardOverview } from "../hooks/use-dashboard-overview";
+import { useDashboardRefresh } from "../hooks/use-dashboard-refresh";
 import { dashboardStyles } from "../styles/dashboard.styles";
 import { createDashboardNavigationActions } from "../utils/dashboard-navigation";
 import { DashboardErrorState } from "./dashboard-error-state";
 import { DashboardHeader } from "./dashboard-header";
 import { DashboardLoadingState } from "./dashboard-loading-state";
+import { DashboardMovementModals } from "./dashboard-movement-modals";
 import { DashboardOverviewScroll } from "./dashboard-overview-scroll";
+import { DashboardTransferModal } from "./dashboard-transfer-modal";
 
 export function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -34,27 +37,15 @@ export function DashboardScreen() {
   });
 
   const [selectedWalletId, setSelectedWalletId] = useState("");
-  const hasFocusedOnce = useRef(false);
 
-  // Wallets, transfers and movements are edited in other tabs. Refresh them
-  // when the dashboard is focused again so totals and both recent sections see
-  // the latest data instead of the collections loaded on first mount.
-  useFocusEffect(
-    useCallback(() => {
-      if (!hasFocusedOnce.current) {
-        hasFocusedOnce.current = true;
-        return;
-      }
-
-      void walletsState.refresh();
-      void transfersState.refresh();
-      void transactionsState.refresh();
-    }, [
-      walletsState.refresh,
-      transfersState.refresh,
-      transactionsState.refresh,
-    ]),
-  );
+  // Other tabs create and edit this data, so the dashboard refreshes it when
+  // the screen regains focus instead of keeping the first mount.
+  const dashboardRefresh = useDashboardRefresh({
+    wallets: walletsState,
+    transfers: transfersState,
+    transactions: transactionsState,
+    categories: categoriesState,
+  });
 
   const activeWallets = useMemo(
     () => getActiveWallets(walletsState.wallets),
@@ -79,26 +70,14 @@ export function DashboardScreen() {
     clearCreateState: transfersState.clearCreateState,
     onWalletsChanged: () => void walletsState.reload(),
   });
+  const movementDialogs = useDashboardMovementDialogs({
+    transactions: transactionsState.transactions,
+    mutations: transactionsState,
+    onWalletsChanged: walletsState.refresh,
+  });
 
-  const refreshing =
-    walletsState.refreshing ||
-    transfersState.refreshing ||
-    transactionsState.refreshing ||
-    categoriesState.refreshing;
   const greetingName = user?.displayName ?? user?.email ?? t("defaultUser");
   const greeting = t("greeting", { name: greetingName });
-
-  function handleRefresh() {
-    void walletsState.refresh();
-    void transfersState.refresh();
-    void transactionsState.refresh();
-    void categoriesState.refresh();
-  }
-
-  function retryMovements() {
-    void transactionsState.reload();
-    void categoriesState.reload();
-  }
 
   return (
     <ThemedView
@@ -131,9 +110,9 @@ export function DashboardScreen() {
             loading: transactionsState.loading || categoriesState.loading,
             error: transactionsState.error ?? categoriesState.error,
             hasMore: overview.hasMoreMovements,
-            onRetry: retryMovements,
+            onRetry: dashboardRefresh.retryMovements,
             onOpenMovements: navigation.openMovements,
-            onPressMovement: navigation.openMovements,
+            onPressMovement: movementDialogs.openDetail,
           }}
           transfers={{
             transfers: overview.recentTransfers,
@@ -146,22 +125,24 @@ export function DashboardScreen() {
             onOpenHistory: navigation.openTransferHistory,
             onPressTransfer: transferForm.openEdit,
           }}
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
+          refreshing={dashboardRefresh.refreshing}
+          onRefresh={dashboardRefresh.refreshAll}
         />
       )}
 
-      <TransferFormModal
-        visible={transferForm.visible}
-        wallets={activeWallets}
-        walletLookup={walletsState.wallets}
-        editingTransfer={transferForm.editingTransfer}
-        submitting={transfersState.mutating}
-        error={transfersState.createError}
-        fieldErrors={transfersState.createFieldErrors}
-        onSubmit={(input) => void transferForm.submit(input)}
-        onDelete={transferForm.deleteEditing}
-        onClose={transferForm.close}
+      <DashboardTransferModal
+        form={transferForm}
+        state={transfersState}
+        wallets={walletsState.wallets}
+      />
+
+      <DashboardMovementModals
+        dialogs={movementDialogs}
+        mutations={transactionsState}
+        wallets={walletsState.wallets}
+        activeWallets={activeWallets}
+        categories={categoriesState.categories}
+        onCategoryCreated={categoriesState.addCategory}
       />
     </ThemedView>
   );

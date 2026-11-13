@@ -26,8 +26,7 @@
     "retryAccessibility": "Retry loading movements",
     "retry": "Retry",
     "emptyTitle": "No movements yet",
-    "emptyMessage": "Create your first expense or income from the Movements tab.",
-    "openHistoryHint": "Open the Movements tab to see the full history."
+    "emptyMessage": "Create your first expense or income from the Movements tab."
   },
   "transfers": {
     "title": "Recent transfers",

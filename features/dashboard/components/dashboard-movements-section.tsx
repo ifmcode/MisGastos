@@ -37,7 +37,7 @@ export function DashboardMovementsSection({
   onPressMovement,
 }: DashboardMovementsSectionProps) {
   const theme = useFormTheme();
-  const { t } = useTranslation(["dashboard", "transactions"]);
+  const { t } = useTranslation("dashboard");
 
   return (
     <View>
@@ -101,7 +101,6 @@ export function DashboardMovementsSection({
                 categories,
                 movement.categoryId,
               )}
-              accessibilityHint={t("movements.openHistoryHint")}
               onPress={() => onPressMovement(movement)}
             />
           ))}

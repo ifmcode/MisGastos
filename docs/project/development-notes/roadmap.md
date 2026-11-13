@@ -10,10 +10,10 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M2 - Personal finance complete
 - **Phase:** 3.5 - Dashboard recent data and detail views
-- **Current ticket:** TICKET-034 - Open movement detail from the dashboard
+- **Current ticket:** TICKET-035 - Add the transfer detail view with edit/delete
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-033 - Fix the dashboard recent transfers limit and freshness (13/11/2026)
-- **Next:** TICKET-035 - Add the transfer detail view with edit/delete
+- **Last completed:** TICKET-034 - Open movement detail from the dashboard (13/11/2026)
+- **Next:** TICKET-036 - Open the transfer detail from a recent transfer
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -84,7 +84,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ### 3.5 Dashboard recent data and detail views (NEXT)
 - [x] Fix the recent-transfers cap/freshness and add **Ver todos** (TICKET-033) ✅ 13/11/2026
-- [ ] Open the movement detail from a recent movement (TICKET-034)
+- [x] Open the movement detail from a recent movement (TICKET-034) ✅ 13/11/2026
 - [ ] Add the transfer detail view with edit/delete (TICKET-035)
 - [ ] Open the transfer detail from a recent transfer (TICKET-036)
 

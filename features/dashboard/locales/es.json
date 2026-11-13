@@ -26,8 +26,7 @@
     "retryAccessibility": "Reintentar carga de movimientos",
     "retry": "Reintentar",
     "emptyTitle": "Aún no tienes movimientos",
-    "emptyMessage": "Crea tu primer gasto o ingreso desde la pestaña Movimientos.",
-    "openHistoryHint": "Abre la pestaña Movimientos para ver el historial completo."
+    "emptyMessage": "Crea tu primer gasto o ingreso desde la pestaña Movimientos."
   },
   "transfers": {
     "title": "Transferencias recientes",
