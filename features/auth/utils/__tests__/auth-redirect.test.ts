@@ -12,6 +12,7 @@ describe("getAuthRedirect", () => {
     expect(getAuthRedirect({ user: null, segment: "transfers" })).toBe(
       "/login",
     );
+    expect(getAuthRedirect({ user: null, segment: "profile" })).toBe("/login");
     expect(getAuthRedirect({ user: null, segment: "verify-email" })).toBe(
       "/login",
     );
@@ -30,6 +31,9 @@ describe("getAuthRedirect", () => {
     expect(getAuthRedirect({ user, segment: "transfers" })).toBe(
       "/verify-email",
     );
+    expect(getAuthRedirect({ user, segment: "profile" })).toBe(
+      "/verify-email",
+    );
     expect(getAuthRedirect({ user, segment: "login" })).toBe("/verify-email");
     expect(getAuthRedirect({ user, segment: "verify-email" })).toBeNull();
   });
@@ -40,6 +44,7 @@ describe("getAuthRedirect", () => {
     expect(getAuthRedirect({ user, segment: "(tabs)" })).toBeNull();
     expect(getAuthRedirect({ user, segment: "categories" })).toBeNull();
     expect(getAuthRedirect({ user, segment: "transfers" })).toBeNull();
+    expect(getAuthRedirect({ user, segment: "profile" })).toBeNull();
     expect(getAuthRedirect({ user, segment: "login" })).toBe("/(tabs)");
     expect(getAuthRedirect({ user, segment: "verify-email" })).toBe("/(tabs)");
   });

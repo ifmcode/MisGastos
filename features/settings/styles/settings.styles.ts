@@ -13,8 +13,8 @@ export const settingsStyles = StyleSheet.create({
   title: {
     marginBottom: 24,
   },
-  userInfo: {
-    marginBottom: 32,
+  profileSection: {
+    marginBottom: 16,
   },
   menu: {
     gap: 12,

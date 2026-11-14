@@ -6,15 +6,14 @@ import { useTranslation } from "react-i18next";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useAuthService } from "@/features/auth/hooks/use-auth-service";
-import { useAuth } from "@/hooks/use-auth";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { settingsStyles as styles } from "../styles/settings.styles";
 import { SettingsLanguageSelector } from "./settings-language-selector";
+import { SettingsProfileLink } from "./settings-profile-link";
 import { SettingsThemeToggle } from "./settings-theme-toggle";
 
 export function SettingsScreen() {
-  const { user } = useAuth();
   const authService = useAuthService();
   const router = useRouter();
   const theme = useFormTheme();
@@ -30,13 +29,9 @@ export function SettingsScreen() {
         {t("title")}
       </ThemedText>
 
-      {user && (
-        <ThemedView style={styles.userInfo}>
-          <ThemedText type="subtitle">{t("currentUser")}</ThemedText>
-          <ThemedText>{user.email}</ThemedText>
-          <ThemedText>{user.displayName || t("noName")}</ThemedText>
-        </ThemedView>
-      )}
+      <ThemedView style={styles.profileSection}>
+        <SettingsProfileLink />
+      </ThemedView>
 
       <ThemedView style={styles.menu}>
         <Pressable

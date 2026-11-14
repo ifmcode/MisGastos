@@ -17,6 +17,9 @@ export const mockSignOut = jest.fn<(...args: unknown[]) => unknown>();
 export const mockSendEmailVerification = jest.fn<
   (...args: unknown[]) => Promise<unknown>
 >();
+export const mockUpdateProfile = jest.fn<
+  (...args: unknown[]) => Promise<unknown>
+>();
 export const mockGetDocs = jest.fn<
   (...args: unknown[]) => Promise<unknown>
 >();
@@ -38,6 +41,7 @@ jest.mock("firebase/auth", () => ({
     mockSendPasswordResetEmail(...args),
   sendEmailVerification: (...args: unknown[]) =>
     mockSendEmailVerification(...args),
+  updateProfile: (...args: unknown[]) => mockUpdateProfile(...args),
   signOut: (...args: unknown[]) => mockSignOut(...args),
 }));
 

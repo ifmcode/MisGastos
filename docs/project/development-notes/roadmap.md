@@ -8,20 +8,20 @@
 A personal finance manager (wallets, movements, transfers and dashboard) merged with Splitwise-style shared finances (friends, groups, shared expenses, balances and settlements). **V1.0 is everything defined in this roadmap**; the MVP was the first milestone, not the release.
 
 ## Current Focus
-- **Milestone:** M2 - Personal finance complete
-- **Phase:** 3.8 - Profile and preferred currency
-- **Current ticket:** TICKET-006 - Profile editing and preferred-currency selector
+- **Milestone:** M3 - Social and platform
+- **Phase:** 4 - Architecture and workflow spike
+- **Current ticket:** TICKET-023 - Offline-first design spike
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-039 - Open transfer detail from the transfer history (14/11/2026)
-- **Next:** TICKET-006 - Profile editing and preferred-currency selector
+- **Last completed:** TICKET-006 - Profile editing and preferred currency (14/11/2026)
+- **Next:** TICKET-023 - Offline-first design spike
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
 | Milestone | Scope | Phases | Status |
 |---|---|---|---|
 | **M1 - Core personal finance (MVP)** | Auth, wallets, movements, transfers, dashboard and history | 0, 2 | ✅ Done |
-| **M2 - Personal finance complete** | UX follow-up, i18n and shared components | 3 | 🚧 In progress |
-| **M3 - Social and platform** | Architecture spike, friends, shared expenses, balances, groups and group history | 4-6 | ⏳ Pending |
+| **M2 - Personal finance complete** | UX follow-up, i18n and shared components | 3 | ✅ Done |
+| **M3 - Social and platform** | Architecture spike, friends, shared expenses, balances, groups and group history | 4-6 | 🚧 In progress |
 | **M4 - Offline and retention** | Offline-first implementation, budgets, statistics, search, export and final polish | 7-8 | ⏳ Pending |
 
 **V1.0 ships when M1-M4 are complete.** Phase 1 (foundation) is a completed cross-cutting quality track; its coverage gate stays enforced. Anything outside these phases is post-V1.
@@ -32,7 +32,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 | 0 | Organization | ✅ Done |
 | 1 | Foundation | ✅ Done |
 | 2 | MVP core | ✅ Done |
-| 3 | Personal finance complete | 🚧 In progress |
+| 3 | Personal finance complete | ✅ Done |
 | 4 | Architecture and workflow spike | ⏳ Queued |
 | 5 | Social vertical slice | ⏳ Queued |
 | 6 | Groups | ⏳ Queued |
@@ -63,7 +63,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] TICKET-002 Transactions + history + filters
 - [x] TICKET-003 Transfers + dashboard
 
-## Phase 3: Personal finance complete (IN PROGRESS)
+## Phase 3: Personal finance complete (COMPLETED)
 
 ### 3.1 Personal finance UX follow-up (COMPLETED)
 - [x] Movement detail view with edit/delete actions (TICKET-025) ✅ 11/11/2026
@@ -101,8 +101,8 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] Email verification on signup (TICKET-021)
 - [x] Discoverable edit/delete actions (TICKET-022)
 
-### 3.8 Profile and preferred currency (QUEUED)
-- [ ] Profile editing and a preferred-currency selector (TICKET-006)
+### 3.8 Profile and preferred currency (COMPLETED)
+- [x] Profile editing and a preferred-currency selector (TICKET-006) ✅ 14/11/2026
 
 ## Phase 4: Architecture and workflow spike (QUEUED)
 - [ ] TICKET-023 (design spike only): decide local database, outbox, idempotency and conflict policy before groups

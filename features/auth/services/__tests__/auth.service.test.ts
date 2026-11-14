@@ -19,6 +19,7 @@ function createRepository(): IAuthRepository {
     signInWithGoogle: jest.fn(async () => null),
     signInWithEmail: jest.fn(async () => null),
     registerWithEmail: jest.fn(async () => null),
+    updateDisplayName: jest.fn(async () => undefined),
     sendPasswordReset: jest.fn(async () => undefined),
     sendVerificationEmail: jest.fn(async () => undefined),
     reloadCurrentUser: jest.fn(async () => null),
@@ -42,6 +43,15 @@ describe("AuthService", () => {
       email,
       "secret123",
     );
+  });
+
+  it("delegates display-name updates", async () => {
+    const repository = createRepository();
+    const service = new AuthService(repository);
+
+    await service.updateDisplayName("Ada");
+
+    expect(repository.updateDisplayName).toHaveBeenCalledWith("Ada");
   });
 
   it("delegates password reset and logout", async () => {

@@ -5,6 +5,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  updateProfile,
   User,
 } from "firebase/auth";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
@@ -80,6 +81,16 @@ export class FirebaseAuthRepository implements IAuthRepository {
     }
 
     return user;
+  }
+
+  async updateDisplayName(name: string): Promise<void> {
+    const user = auth.currentUser;
+
+    if (!user) {
+      throw new Error("No authenticated user to update.");
+    }
+
+    await updateProfile(user, { displayName: name });
   }
 
   async sendVerificationEmail(): Promise<void> {

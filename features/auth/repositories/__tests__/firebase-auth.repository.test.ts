@@ -4,12 +4,14 @@ import type { Email } from "../../types/auth.types";
 
 import {
   mockAddDoc,
+  mockAuth,
   mockCreateUserWithEmailAndPassword,
   mockGetDocs,
   mockSendPasswordResetEmail,
   mockSignInWithEmailAndPassword,
   mockSignInWithGoogle,
   mockSignOut,
+  mockUpdateProfile,
   setupAuthMocks,
 } from "./auth.test-helpers";
 import { FirebaseAuthRepository } from "../firebase-auth.repository";
@@ -157,5 +159,23 @@ describe("FirebaseAuthRepository.session", () => {
     await new FirebaseAuthRepository().signOut();
 
     expect(mockSignOut).toHaveBeenCalledWith({ currentUser: null });
+  });
+
+  it("updates the Firebase display name", async () => {
+    const user = { uid: "123", email };
+    mockAuth.currentUser = user;
+    mockUpdateProfile.mockResolvedValue(undefined);
+
+    await new FirebaseAuthRepository().updateDisplayName("  Ada Lovelace  ");
+
+    expect(mockUpdateProfile).toHaveBeenCalledWith(user, {
+      displayName: "  Ada Lovelace  ",
+    });
+  });
+
+  it("rejects a display-name update without an authenticated user", async () => {
+    await expect(
+      new FirebaseAuthRepository().updateDisplayName("Ada"),
+    ).rejects.toThrow("No authenticated user to update.");
   });
 });

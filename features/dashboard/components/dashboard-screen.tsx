@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedView } from "@/components/themed-view";
 import { useAuth } from "@/hooks/use-auth";
 import { useCategories } from "@/features/categories/hooks/use-categories";
+import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useTransfers } from "@/features/transfers/hooks/use-transfers";
 import { useTransactions } from "@/features/transactions/hooks/use-transactions";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
@@ -29,6 +30,7 @@ export function DashboardScreen() {
   const router = useRouter();
   const { t } = useTranslation(["dashboard", "common"]);
   const { user } = useAuth();
+  const { profile } = useProfile();
   const walletsState = useWallets();
   const transfersState = useTransfers();
   const categoriesState = useCategories();
@@ -73,8 +75,7 @@ export function DashboardScreen() {
     onWalletsChanged: walletsState.refresh,
   });
 
-  const greetingName = user?.displayName ?? user?.email ?? t("defaultUser");
-  const greeting = t("greeting", { name: greetingName });
+  const greeting = t("greeting", { name: profile?.displayName ?? user?.displayName ?? user?.email ?? t("defaultUser") });
 
   return (
     <ThemedView

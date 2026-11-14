@@ -1,7 +1,8 @@
 {
   "title": "Configuración",
-  "currentUser": "Usuario actual:",
   "noName": "Sin nombre",
+  "profile": "Perfil",
+  "editProfile": "Editar perfil y moneda preferida",
   "manageCategories": "Gestionar categorías",
   "categories": "Categorías",
   "logout": "Cerrar Sesión",

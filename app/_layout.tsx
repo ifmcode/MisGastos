@@ -5,6 +5,7 @@ import '../global.css';
 
 import { AuthNavigator } from '@/features/auth/components/auth-navigator';
 import { AuthProvider } from '@/features/auth/providers/auth-provider';
+import { ProfileProvider } from '@/features/profile/providers/profile-provider';
 import { useAppColorScheme } from '@/shared/hooks/use-app-color-scheme';
 import { useAppTheme } from '@/shared/hooks/use-app-theme';
 import { AppLanguageProvider } from '@/shared/providers/language-provider';
@@ -31,7 +32,9 @@ export default function RootLayout() {
     <AppLanguageProvider>
       <AppThemeProvider>
         <AuthProvider>
-          <RootNavigator />
+          <ProfileProvider>
+            <RootNavigator />
+          </ProfileProvider>
         </AuthProvider>
       </AppThemeProvider>
     </AppLanguageProvider>

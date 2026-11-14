@@ -3,6 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 import { Wallet } from "../../types/wallet.types";
 import {
   buildWalletFormValues,
+  createWalletFormValues,
   getWalletIconName,
   getWalletTypeKey,
   isWalletIcon,
@@ -34,6 +35,17 @@ describe("wallet options", () => {
     expect(
       buildWalletFormValues({ ...wallet, description: "Nómina" }).description,
     ).toBe("Nómina");
+  });
+
+  it("preselects the preferred currency and falls back to EUR", () => {
+    expect(createWalletFormValues("USD")).toMatchObject({
+      currency: "USD",
+      name: "",
+      type: "cash",
+      includeInTotal: true,
+    });
+    expect(createWalletFormValues(undefined).currency).toBe("EUR");
+    expect(createWalletFormValues("BTC").currency).toBe("EUR");
   });
 
   it("guards icons and types", () => {

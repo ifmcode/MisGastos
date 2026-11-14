@@ -1,3 +1,5 @@
+import { resolveCurrencyCode } from "@/shared/constants/currencies";
+
 import { Wallet, WalletFormValues, WalletType } from "../types/wallet.types";
 
 /**
@@ -60,6 +62,19 @@ export const DEFAULT_WALLET_FORM_VALUES: WalletFormValues = {
   includeInTotal: true,
   description: "",
 };
+
+/**
+ * Builds the create form defaults, preselecting the user's preferred currency
+ * and falling back to the project default when it is missing or invalid.
+ */
+export function createWalletFormValues(
+  preferredCurrency?: unknown,
+): WalletFormValues {
+  return {
+    ...DEFAULT_WALLET_FORM_VALUES,
+    currency: resolveCurrencyCode(preferredCurrency),
+  };
+}
 
 /** Converts a stored wallet into the raw values handled by the edit form. */
 export function buildWalletFormValues(wallet: Wallet): WalletFormValues {

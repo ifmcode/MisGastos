@@ -1,7 +1,8 @@
 {
   "title": "Settings",
-  "currentUser": "Current user:",
   "noName": "No name",
+  "profile": "Profile",
+  "editProfile": "Edit profile and preferred currency",
   "manageCategories": "Manage categories",
   "categories": "Categories",
   "logout": "Sign Out",

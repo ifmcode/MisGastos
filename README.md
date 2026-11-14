@@ -37,6 +37,7 @@ simplicidad de uso.
 - 🧾 **Historial de movimientos** con filtros y ordenamiento.
 - 🔁 **Transferencias entre carteras** de la misma moneda, con historial inmutable y detalle de cada transferencia con editar y eliminar.
 - 📊 **Dashboard** con totales globales y por cartera agrupados por moneda, tres movimientos y tres transferencias recientes, detalle de movimientos y transferencias con editar y eliminar, acceso al historial completo y datos refrescados al volver a la pestaña.
+- 👤 **Perfil y moneda preferida** en Ajustes: nombre visible editable y sincronizado con Firebase Auth, correo de la cuenta y moneda por defecto para las nuevas carteras.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
 - 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías y dashboard: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila y botón flotante.
@@ -59,7 +60,7 @@ simplicidad de uso.
 ```text
 MisGastos/
 ├── app/                    # Rutas y layouts de Expo Router
-├── features/               # Módulos por dominio (auth, wallets, transactions, transfers, dashboard…)
+├── features/               # Módulos por dominio (auth, profile, wallets, transactions, transfers, dashboard…)
 │   └── <feature>/
 │       ├── components/     # UI específica del dominio
 │       ├── hooks/          # Orquestación y estado de UI
@@ -172,7 +173,7 @@ Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/gu
 - [x] Transferencias entre carteras
 - [x] Dashboard
 - [x] Estados, formularios y filas compartidas
-- [ ] Perfil y ajustes
+- [x] Perfil y moneda preferida
 - [ ] Amigos
 - [ ] Grupos y gastos compartidos
 - [ ] Liquidación de deudas

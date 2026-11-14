@@ -24,6 +24,7 @@
 | Floating action button | `transactions-fab.tsx`, inline FAB in `wallets-screen.tsx` and `categories-screen.tsx` | **Extract** | `shared/components/molecules/fab.tsx` |
 | Label / input / error / helper / counter / amount styles | duplicated in every feature form style module | **Extract styles** | `shared/components/molecules/form-field.styles.ts` |
 | Row meta separator (` · `) | `transaction-item.tsx`, `transfer-item.tsx` | **Extract helper** | `shared/utils/join-meta.ts` (`joinMetaParts`) |
+| Currency chips | wallet form currency selector and the TICKET-006 profile currency selector | **Extract (TICKET-006)** | `shared/components/molecules/currency-chip-selector.tsx` |
 | Info banner | `transfer-form-info-banner.tsx` only | **Keep** | Single consumer; its bordered/neutral layout differs from the error banner |
 | Text fields | movement concept, wallet name/description, category name | **Keep wrappers** | Validation codes and copy stay in each feature; only the styles moved to `form-field.styles.ts` |
 | Screen headers | wallets, transactions, categories, transfer history, dashboard | **Keep** | Each header owns different actions (add filter, back, greeting) and copy |
@@ -200,6 +201,22 @@ interface FabProps {
 
 Consumers: wallets, transactions and categories screens.
 
+### `CurrencyChipSelector`
+
+```ts
+interface CurrencyChipSelectorProps {
+  value: CurrencyCode;
+  disabled?: boolean;
+  getAccessibilityLabel: (currency: CurrencyOption) => string;
+  onChange: (currency: CurrencyCode) => void;
+}
+```
+
+Consumers: the wallet form through `WalletFormCurrencySelector` and the profile
+form through `ProfileCurrencyField`. The shared constants (`CURRENCIES`) and the
+selected/unselected theme tokens stay in one place; each feature supplies its own
+translated accessibility label.
+
 ## Removed after extraction
 
 - Feature state components: `wallets-*-state`, `transactions-*-state`,
@@ -225,7 +242,7 @@ Consumers: wallets, transactions and categories screens.
 
 - `npx tsc --noEmit`
 - `npx expo lint`
-- `npx jest` (141 suites / 645 tests)
-- `npm run check:copy` (157 TSX files)
+- `npx jest` (148 suites / 674 tests, updated after TICKET-006)
+- `npm run check:copy` (168 TSX files)
 - Dark mode and web follow the same `useFormTheme` tokens as before; shared
   components never import feature palettes.

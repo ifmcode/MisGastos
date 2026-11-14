@@ -4,6 +4,8 @@ import categoriesEn from "@/features/categories/locales/en.json";
 import categoriesEs from "@/features/categories/locales/es.json";
 import dashboardEn from "@/features/dashboard/locales/en.json";
 import dashboardEs from "@/features/dashboard/locales/es.json";
+import profileEn from "@/features/profile/locales/en.json";
+import profileEs from "@/features/profile/locales/es.json";
 import settingsEn from "@/features/settings/locales/en.json";
 import settingsEs from "@/features/settings/locales/es.json";
 import transactionsEn from "@/features/transactions/locales/en.json";
@@ -30,6 +32,7 @@ export const NAMESPACES = [
   "transfers",
   "dashboard",
   "settings",
+  "profile",
 ] as const;
 
 export type AppNamespace = (typeof NAMESPACES)[number];
@@ -47,6 +50,7 @@ export const resources = {
     transfers: transfersEs,
     dashboard: dashboardEs,
     settings: settingsEs,
+    profile: profileEs,
   },
   en: {
     common: commonEn,
@@ -59,5 +63,6 @@ export const resources = {
     transfers: transfersEn,
     dashboard: dashboardEn,
     settings: settingsEn,
+    profile: profileEn,
   },
 } as const;

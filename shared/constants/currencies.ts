@@ -8,9 +8,16 @@ export const CURRENCIES = [
 
 export type CurrencyCode = (typeof CURRENCIES)[number]["code"];
 
+export const DEFAULT_CURRENCY: CurrencyCode = "EUR";
+
 export function isCurrencyCode(value: unknown): value is CurrencyCode {
   return (
     typeof value === "string" &&
     CURRENCIES.some((currency) => currency.code === value)
   );
+}
+
+/** Falls back to the project default when a stored or missing currency is invalid. */
+export function resolveCurrencyCode(value: unknown): CurrencyCode {
+  return isCurrencyCode(value) ? value : DEFAULT_CURRENCY;
 }

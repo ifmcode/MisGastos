@@ -33,6 +33,10 @@ export class AuthService {
     return user;
   }
 
+  async updateDisplayName(name: string): Promise<void> {
+    return this.authRepository.updateDisplayName(name);
+  }
+
   async resetPassword(email: Email): Promise<void> {
     return this.authRepository.sendPasswordReset(email);
   }

@@ -1,0 +1,31 @@
+{
+  "title": "Perfil",
+  "subtitle": "Revisa tu cuenta y elige tu moneda preferida.",
+  "loading": "Cargando tu perfil…",
+  "loadErrorTitle": "No se pudo cargar el perfil",
+  "retryAccessibility": "Reintentar carga del perfil",
+  "account": {
+    "label": "Cuenta",
+    "email": "Correo electrónico",
+    "emailHint": "El correo de tu cuenta no se puede cambiar aquí.",
+    "noEmail": "Sin correo"
+  },
+  "form": {
+    "name": "Nombre visible",
+    "namePlaceholder": "Tu nombre",
+    "nameAccessibility": "Nombre visible",
+    "nameHint": "Se usa en el saludo del inicio y en tu perfil.",
+    "currency": "Moneda preferida",
+    "currencyHint": "Se usará por defecto al crear nuevas carteras. Los totales siguen agrupados por la moneda de cada cartera.",
+    "currencyAccessibility": "Seleccionar moneda {{name}}",
+    "save": "Guardar cambios",
+    "saveAccessibility": "Guardar los cambios del perfil"
+  },
+  "errors": {
+    "LOAD_FAILED": "No se pudo cargar el perfil.",
+    "SAVE_FAILED": "No se pudieron guardar los cambios.",
+    "PERMISSION_DENIED": "No tienes permiso para modificar este perfil.",
+    "NETWORK": "Revisa tu conexión e inténtalo de nuevo.",
+    "VALIDATION": "Revisa los datos del formulario."
+  }
+}

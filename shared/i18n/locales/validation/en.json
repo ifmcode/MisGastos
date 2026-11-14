@@ -6,6 +6,12 @@
     "PASSWORD_REQUIRED": "Enter your password.",
     "PASSWORD_TOO_SHORT": "The password must be at least 6 characters long."
   },
+  "profile": {
+    "UID_REQUIRED": "You must sign in to edit your profile.",
+    "NAME_REQUIRED": "The display name is required.",
+    "NAME_TOO_LONG": "The name cannot exceed {{max}} characters.",
+    "INVALID_CURRENCY": "Select a valid currency."
+  },
   "wallets": {
     "OWNER_REQUIRED": "You must sign in to manage your wallets.",
     "WALLET_REQUIRED": "Select a valid wallet.",

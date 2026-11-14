@@ -10,6 +10,7 @@ export interface IAuthRepository extends IEmailVerificationRepository {
   signInWithGoogle(): Promise<User | null>;
   signInWithEmail(email: Email, password: string): Promise<User | null>;
   registerWithEmail(name: string, email: Email, password: string): Promise<User | null>;
+  updateDisplayName(name: string): Promise<void>;
   sendPasswordReset(email: Email): Promise<void>;
   signOut(): Promise<void>;
 }

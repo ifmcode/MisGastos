@@ -1,0 +1,31 @@
+{
+  "title": "Profile",
+  "subtitle": "Review your account and choose your preferred currency.",
+  "loading": "Loading your profile…",
+  "loadErrorTitle": "The profile could not be loaded",
+  "retryAccessibility": "Retry loading the profile",
+  "account": {
+    "label": "Account",
+    "email": "Email address",
+    "emailHint": "Your account email cannot be changed here.",
+    "noEmail": "No email"
+  },
+  "form": {
+    "name": "Display name",
+    "namePlaceholder": "Your name",
+    "nameAccessibility": "Display name",
+    "nameHint": "Used in the dashboard greeting and on your profile.",
+    "currency": "Preferred currency",
+    "currencyHint": "Used by default when creating new wallets. Totals stay grouped by each wallet's currency.",
+    "currencyAccessibility": "Select currency {{name}}",
+    "save": "Save changes",
+    "saveAccessibility": "Save profile changes"
+  },
+  "errors": {
+    "LOAD_FAILED": "The profile could not be loaded.",
+    "SAVE_FAILED": "The changes could not be saved.",
+    "PERMISSION_DENIED": "You do not have permission to change this profile.",
+    "NETWORK": "Check your connection and try again.",
+    "VALIDATION": "Review the form values."
+  }
+}

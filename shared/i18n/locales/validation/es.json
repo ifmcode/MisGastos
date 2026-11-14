@@ -6,6 +6,12 @@
     "PASSWORD_REQUIRED": "Ingresa tu contraseña.",
     "PASSWORD_TOO_SHORT": "La contraseña debe tener al menos 6 caracteres."
   },
+  "profile": {
+    "UID_REQUIRED": "Debes iniciar sesión para editar tu perfil.",
+    "NAME_REQUIRED": "El nombre visible es obligatorio.",
+    "NAME_TOO_LONG": "El nombre no puede superar los {{max}} caracteres.",
+    "INVALID_CURRENCY": "Selecciona una moneda válida."
+  },
   "wallets": {
     "OWNER_REQUIRED": "Debes iniciar sesión para gestionar tus carteras.",
     "WALLET_REQUIRED": "Selecciona una cartera válida.",

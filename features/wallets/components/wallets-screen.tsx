@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { useProfile } from "@/features/profile/hooks/use-profile";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { Fab } from "@/shared/components/molecules/fab";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
@@ -12,7 +13,10 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useWalletScreen } from "../hooks/use-wallet-screen";
 import { walletManagementStyles as managementStyles } from "../styles/wallet-management.styles";
 import { walletsStyles } from "../styles/wallets.styles";
-import { buildWalletFormValues } from "../utils/wallet-options";
+import {
+  buildWalletFormValues,
+  createWalletFormValues,
+} from "../utils/wallet-options";
 import { WalletActionsModal } from "./wallet-actions-modal";
 import { WalletDeleteModal } from "./wallet-delete-modal";
 import { WalletsFormModal } from "./wallets-form-modal";
@@ -25,6 +29,7 @@ export function WalletsScreen() {
   const router = useRouter();
   const theme = useFormTheme();
   const { t } = useTranslation("wallets");
+  const { profile } = useProfile();
   const screen = useWalletScreen();
   const { wallets, management, archiveDialog } = screen;
 
@@ -105,7 +110,7 @@ export function WalletsScreen() {
         initialValues={
           management.editingWallet
             ? buildWalletFormValues(management.editingWallet)
-            : undefined
+            : createWalletFormValues(profile?.preferredCurrency)
         }
         initialBalanceLocked={
           management.usageLoading ||
