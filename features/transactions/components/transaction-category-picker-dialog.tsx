@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Modal, Pressable, ScrollView, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { formFieldStyles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { transactionFormStyles as styles } from "../styles/transaction-form.styles";
@@ -86,7 +87,7 @@ export function TransactionCategoryPickerDialog({
             showsVerticalScrollIndicator={false}
           >
             {categories.length === 0 ? (
-              <ThemedText style={[styles.helper, { color: theme.muted }]}>
+              <ThemedText style={[formFieldStyles.helper, { color: theme.muted }]}>
                 {t("categoryPicker.empty")}
               </ThemedText>
             ) : null}

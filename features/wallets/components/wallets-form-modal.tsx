@@ -1,4 +1,4 @@
-import { Modal } from "react-native";
+import { PageSheetFormModal } from "@/shared/components/molecules/page-sheet-form-modal";
 
 import { WalletInput, WalletValidationErrors } from "../schemas/wallet.schema";
 import { WalletFormValues } from "../types/wallet.types";
@@ -28,24 +28,17 @@ export function WalletsFormModal({
   onClose,
 }: WalletsFormModalProps) {
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
-      {visible ? (
-        <WalletForm
-          mode={mode}
-          initialValues={initialValues}
-          initialBalanceLocked={initialBalanceLocked}
-          submitting={submitting}
-          error={error}
-          fieldErrors={fieldErrors}
-          onSubmit={onSubmit}
-          onCancel={onClose}
-        />
-      ) : null}
-    </Modal>
+    <PageSheetFormModal visible={visible} onRequestClose={onClose}>
+      <WalletForm
+        mode={mode}
+        initialValues={initialValues}
+        initialBalanceLocked={initialBalanceLocked}
+        submitting={submitting}
+        error={error}
+        fieldErrors={fieldErrors}
+        onSubmit={onSubmit}
+        onCancel={onClose}
+      />
+    </PageSheetFormModal>
   );
 }

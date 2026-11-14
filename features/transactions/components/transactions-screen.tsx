@@ -1,11 +1,14 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useFocusEffect } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
 import { useCategories } from "@/features/categories/hooks/use-categories";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
 import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
+import { ErrorState } from "@/shared/components/molecules/error-state";
+import { LoadingState } from "@/shared/components/molecules/loading-state";
 
 import { useTransactionDetailDialog } from "../hooks/use-transaction-detail-dialog";
 import { useTransactionFormDialog } from "../hooks/use-transaction-form-dialog";
@@ -14,16 +17,15 @@ import { transactionsStyles as styles } from "../styles/transactions.styles";
 import { Transaction } from "../types/transaction.types";
 import { TransactionFilters } from "../utils/transaction-filters";
 import { TransactionDetailModal } from "./transaction-detail-modal";
-import { TransactionsErrorState } from "./transactions-error-state";
 import { TransactionsFab } from "./transactions-fab";
 import { TransactionsFiltersDialog } from "./transactions-filters-dialog";
 import { TransactionsFormModal } from "./transactions-form-modal";
 import { TransactionsHeader } from "./transactions-header";
 import { TransactionsList } from "./transactions-list";
-import { TransactionsLoadingState } from "./transactions-loading-state";
 
 export function TransactionsScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation(["transactions", "common"]);
   const { wallets, refresh: refreshWallets } = useWallets();
   const {
     categories,
@@ -133,9 +135,15 @@ export function TransactionsScreen() {
       />
 
       {screenLoading ? (
-        <TransactionsLoadingState />
+        <LoadingState message={t("loading")} />
       ) : screenError ? (
-        <TransactionsErrorState message={screenError} onRetry={retryLoad} />
+        <ErrorState
+          title={t("errorTitle")}
+          message={screenError}
+          retryLabel={t("common:actions.retry")}
+          retryAccessibilityLabel={t("retryAccessibility")}
+          onRetry={retryLoad}
+        />
       ) : (
         <TransactionsList
           transactions={filteredTransactions}

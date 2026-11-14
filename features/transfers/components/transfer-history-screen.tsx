@@ -1,17 +1,20 @@
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { FlatList, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
+import { EmptyState } from "@/shared/components/molecules/empty-state";
+import { ErrorState } from "@/shared/components/molecules/error-state";
+import { LoadingState } from "@/shared/components/molecules/loading-state";
+import { asTranslate } from "@/shared/i18n/translate";
 
 import { useTransferHistoryScreen } from "../hooks/use-transfer-history-screen";
 import { transferHistoryStyles as styles } from "../styles/transfer-history.styles";
 import { Transfer } from "../types/transfer.types";
+import { getTransferHistoryEmptyCopy } from "../utils/transfer-history";
 import { TransferFormModal } from "./transfer-form-modal";
-import { TransferHistoryEmptyState } from "./transfer-history-empty-state";
-import { TransferHistoryErrorState } from "./transfer-history-error-state";
 import { TransferHistoryHeader } from "./transfer-history-header";
-import { TransferHistoryLoadingState } from "./transfer-history-loading-state";
 import { TransferItem } from "./transfer-item";
 
 function TransferHistorySeparator() {
@@ -21,6 +24,9 @@ function TransferHistorySeparator() {
 export function TransferHistoryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useTranslation(["transfers", "common"]);
+  const tr = asTranslate(t);
+  const emptyCopy = getTransferHistoryEmptyCopy();
   const {
     transfers,
     wallets,
@@ -53,16 +59,28 @@ export function TransferHistoryScreen() {
       <TransferHistoryHeader onBack={() => router.back()} />
 
       {loading ? (
-        <TransferHistoryLoadingState />
+        <LoadingState message={t("loading")} />
       ) : error ? (
-        <TransferHistoryErrorState message={error} onRetry={reload} />
+        <ErrorState
+          title={t("errorTitle")}
+          message={error}
+          retryLabel={t("common:actions.retry")}
+          retryAccessibilityLabel={t("retryAccessibility")}
+          onRetry={reload}
+        />
       ) : (
         <FlatList
           data={transfers}
           keyExtractor={(transfer) => transfer.id}
           renderItem={renderTransfer}
           ItemSeparatorComponent={TransferHistorySeparator}
-          ListEmptyComponent={<TransferHistoryEmptyState />}
+          ListEmptyComponent={
+            <EmptyState
+              icon="swap-horizontal"
+              title={tr(emptyCopy.titleKey)}
+              message={tr(emptyCopy.messageKey)}
+            />
+          }
           contentContainerStyle={[
             styles.listContent,
             transfers.length === 0 && styles.emptyListContent,

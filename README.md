@@ -39,6 +39,7 @@ simplicidad de uso.
 - 📊 **Dashboard** con totales globales y por cartera agrupados por moneda, tres movimientos y tres transferencias recientes, detalle de movimientos y transferencias con editar y eliminar, acceso al historial completo y datos refrescados al volver a la pestaña.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
+- 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías y dashboard: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila y botón flotante.
 
 ## 🛠️ Stack tecnológico
 
@@ -67,7 +68,7 @@ MisGastos/
 │       ├── schemas/        # Validación
 │       └── types/          # Tipos del dominio
 ├── shared/                 # Código reutilizable
-│   ├── components/         # UI compartida (molecules, organisms)
+│   ├── components/         # UI compartida (estados, formularios, modales y filas)
 │   ├── hooks/              # Hooks reutilizables
 │   ├── constants/          # Tokens y constantes
 │   ├── types/              # Tipos globales
@@ -170,6 +171,7 @@ Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/gu
 - [x] Ingresos y gastos
 - [x] Transferencias entre carteras
 - [x] Dashboard
+- [x] Estados, formularios y filas compartidas
 - [ ] Perfil y ajustes
 - [ ] Amigos
 - [ ] Grupos y gastos compartidos
@@ -182,6 +184,7 @@ Consulta el roadmap completo en
 
 - [Memoria del proyecto](docs/project/development-notes/project-memory.md)
 - [Roadmap y alcance V1](docs/project/development-notes/roadmap.md)
+- [Inventario de componentes compartidos](docs/project/development-notes/component-inventory.md)
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)
 

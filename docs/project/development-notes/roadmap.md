@@ -9,11 +9,11 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ## Current Focus
 - **Milestone:** M2 - Personal finance complete
-- **Phase:** 3.6 - Shared component extraction
-- **Current ticket:** TICKET-037 - Audit and extract reusable shared components
+- **Phase:** 3.8 - Profile and preferred currency
+- **Current ticket:** TICKET-006 - Profile editing and preferred-currency selector
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-036 - Open the transfer detail from the dashboard (13/11/2026)
-- **Next:** TICKET-037 - Audit and extract reusable shared components
+- **Last completed:** TICKET-037 - Audit and extract reusable shared components (13/11/2026)
+- **Next:** TICKET-006 - Profile editing and preferred-currency selector
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -88,8 +88,8 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] Add the transfer detail view with edit/delete (TICKET-035) ✅ 13/11/2026
 - [x] Open the transfer detail from a recent transfer (TICKET-036) ✅ 13/11/2026
 
-### 3.6 Shared component extraction (NEXT)
-- [ ] Inventory and extract duplicated loading/error/empty states, form blocks and list rows into `shared/components` (TICKET-037)
+### 3.6 Shared component extraction (COMPLETED)
+- [x] Inventory and extract duplicated loading/error/empty states, form blocks and list rows into `shared/components` (TICKET-037) ✅ 13/11/2026
 
 ### 3.7 Earlier post-MVP polish (COMPLETED)
 - [x] Categories management (TICKET-004)

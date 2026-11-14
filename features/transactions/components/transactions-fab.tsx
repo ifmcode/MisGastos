@@ -1,11 +1,6 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import { Pressable } from "react-native";
 
-import {
-  transactionsPalette,
-  transactionsStyles as styles,
-} from "../styles/transactions.styles";
+import { Fab } from "@/shared/components/molecules/fab";
 
 export interface TransactionsFabProps {
   bottom: number;
@@ -16,13 +11,10 @@ export function TransactionsFab({ bottom, onPress }: TransactionsFabProps) {
   const { t } = useTranslation("transactions");
 
   return (
-    <Pressable
-      accessibilityRole="button"
+    <Fab
       accessibilityLabel={t("add")}
+      bottom={bottom}
       onPress={onPress}
-      style={[styles.fab, { bottom }]}
-    >
-      <Ionicons name="add" size={30} color={transactionsPalette.onPrimary} />
-    </Pressable>
+    />
   );
 }

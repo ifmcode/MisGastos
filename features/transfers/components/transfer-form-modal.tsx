@@ -1,9 +1,8 @@
 import { useTranslation } from "react-i18next";
-import { Modal, View } from "react-native";
 
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
-import { confirmDialogStyles } from "@/shared/components/molecules/confirm-dialog.styles";
+import { PageSheetFormModal } from "@/shared/components/molecules/page-sheet-form-modal";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
 import { asTranslate } from "@/shared/i18n/translate";
@@ -84,41 +83,32 @@ export function TransferFormModal({
   }
 
   return (
-    <Modal
+    <PageSheetFormModal
       visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
       onRequestClose={handleRequestClose}
       onDismiss={deleteDialog.close}
     >
-      {visible ? (
-        <View style={confirmDialogStyles.modalRoot}>
-          <TransferForm
-            submitting={submitting}
-            error={error}
-            fieldErrors={fieldErrors}
-            wallets={wallets}
-            initialValues={buildTransferFormValues(
-              wallets,
-              editingTransfer,
-            )}
-            isEditing={Boolean(editingTransfer)}
-            editingTransfer={editingTransfer}
-            onSubmit={onSubmit}
-            onDelete={editingTransfer ? requestDelete : undefined}
-            onCancel={onClose}
-          />
-          <ConfirmDialog
-            visible={deleteDialog.visible}
-            title={deleteDialog.title}
-            message={deleteDialog.message}
-            confirmLabel={deleteDialog.confirmLabel}
-            cancelLabel={deleteDialog.cancelLabel}
-            onConfirm={deleteDialog.confirm}
-            onCancel={deleteDialog.close}
-          />
-        </View>
-      ) : null}
-    </Modal>
+      <TransferForm
+        submitting={submitting}
+        error={error}
+        fieldErrors={fieldErrors}
+        wallets={wallets}
+        initialValues={buildTransferFormValues(wallets, editingTransfer)}
+        isEditing={Boolean(editingTransfer)}
+        editingTransfer={editingTransfer}
+        onSubmit={onSubmit}
+        onDelete={editingTransfer ? requestDelete : undefined}
+        onCancel={onClose}
+      />
+      <ConfirmDialog
+        visible={deleteDialog.visible}
+        title={deleteDialog.title}
+        message={deleteDialog.message}
+        confirmLabel={deleteDialog.confirmLabel}
+        cancelLabel={deleteDialog.cancelLabel}
+        onConfirm={deleteDialog.confirm}
+        onCancel={deleteDialog.close}
+      />
+    </PageSheetFormModal>
   );
 }

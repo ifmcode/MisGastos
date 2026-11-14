@@ -2,11 +2,11 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { formFieldStyles as styles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { asTranslate } from "@/shared/i18n/translate";
 
 import { CategoryValidationErrors } from "../schemas/category.schema";
-import { categoryFormStyles as styles } from "../styles/category-form.styles";
 import { CategoryFormValues } from "../types/category.types";
 import { CategoryFormColorSelector } from "./category-form-color-selector";
 import { CategoryFormIconSelector } from "./category-form-icon-selector";

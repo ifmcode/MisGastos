@@ -9,9 +9,6 @@ export const confirmDialogPalette = {
 } as const;
 
 export const confirmDialogStyles = StyleSheet.create({
-  modalRoot: {
-    flex: 1,
-  },
   overlay: {
     ...absoluteFill,
     alignItems: "center",

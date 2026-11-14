@@ -1,14 +1,12 @@
-import { Ionicons } from "@expo/vector-icons";
 import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useWalletForm } from "../hooks/use-wallet-form";
@@ -73,25 +71,7 @@ export function WalletForm({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            {error ? (
-              <View
-                style={[
-                  styles.errorBanner,
-                  { backgroundColor: theme.dangerSurface },
-                ]}
-              >
-                <Ionicons
-                  name="alert-circle"
-                  size={20}
-                  color={theme.danger}
-                />
-                <ThemedText
-                  style={[styles.errorBannerText, { color: theme.dangerText }]}
-                >
-                  {error}
-                </ThemedText>
-              </View>
-            ) : null}
+            <ErrorBanner message={error} />
 
             <WalletFormDetails
               values={values}

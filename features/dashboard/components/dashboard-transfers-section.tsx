@@ -1,15 +1,16 @@
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import { View } from "react-native";
 
-import { ThemedText } from "@/components/themed-text";
 import { TransferItem } from "@/features/transfers/components/transfer-item";
 import { Transfer } from "@/features/transfers/types/transfer.types";
 import { OPEN_TRANSFER_DETAIL_HINT_KEY } from "@/features/transfers/utils/transfer-item-accessibility";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { EmptyState } from "@/shared/components/molecules/empty-state";
+import { ErrorState } from "@/shared/components/molecules/error-state";
+import { LoadingState } from "@/shared/components/molecules/loading-state";
 import { asTranslate } from "@/shared/i18n/translate";
 
-import { dashboardPalette, dashboardStyles } from "../styles/dashboard.styles";
+import { dashboardStyles } from "../styles/dashboard.styles";
 import { getTransfersEmptyMessageKey } from "../utils/dashboard-transfers-copy";
 import { DashboardSectionHeader } from "./dashboard-section-header";
 
@@ -36,7 +37,6 @@ export function DashboardTransfersSection({
   onOpenHistory,
   onPressTransfer,
 }: DashboardTransfersSectionProps) {
-  const theme = useFormTheme();
   const { t } = useTranslation("dashboard");
   const { t: tTransfers } = useTranslation("transfers");
   const tr = asTranslate(t);
@@ -53,45 +53,25 @@ export function DashboardTransfersSection({
       />
 
       {loading ? (
-        <View style={dashboardStyles.inlineLoading}>
-          <ActivityIndicator size="small" color={dashboardPalette.primary} />
-          <ThemedText style={dashboardStyles.inlineLoadingText}>
-            {t("transfers.loading")}
-          </ThemedText>
-        </View>
+        <LoadingState
+          message={t("transfers.loading")}
+          variant="inline"
+          size="small"
+        />
       ) : error ? (
-        <View
-          style={[
-            dashboardStyles.inlineError,
-            { backgroundColor: theme.dangerSurface },
-          ]}
-        >
-          <ThemedText
-            style={[dashboardStyles.inlineErrorText, { color: theme.dangerText }]}
-          >
-            {error}
-          </ThemedText>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t("transfers.retryAccessibility")}
-            onPress={onRetry}
-          >
-            <ThemedText
-              style={[dashboardStyles.inlineRetryText, { color: theme.danger }]}
-            >
-              {t("transfers.retry")}
-            </ThemedText>
-          </Pressable>
-        </View>
+        <ErrorState
+          message={error}
+          retryLabel={t("transfers.retry")}
+          retryAccessibilityLabel={t("transfers.retryAccessibility")}
+          onRetry={onRetry}
+          variant="inline"
+        />
       ) : transfers.length === 0 ? (
-        <View style={dashboardStyles.transferEmptyCard}>
-          <ThemedText type="defaultSemiBold">
-            {t("transfers.emptyTitle")}
-          </ThemedText>
-          <ThemedText style={dashboardStyles.transferEmptyText}>
-            {tr(getTransfersEmptyMessageKey(canTransfer))}
-          </ThemedText>
-        </View>
+        <EmptyState
+          title={t("transfers.emptyTitle")}
+          message={tr(getTransfersEmptyMessageKey(canTransfer))}
+          variant="card"
+        />
       ) : (
         <View style={dashboardStyles.transferList}>
           {transfers.map((transfer) => (

@@ -1,14 +1,15 @@
+import { useTranslation } from "react-i18next";
 import { FlatList, View } from "react-native";
 
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { EmptyState } from "@/shared/components/molecules/empty-state";
 
 import { transactionsStyles as styles } from "../styles/transactions.styles";
 import { Transaction } from "../types/transaction.types";
 import { getTransactionCategory } from "../utils/transaction-options";
 import { TransactionItem } from "./transaction-item";
 import { TransactionsActiveFiltersHeader } from "./transactions-active-filters-header";
-import { TransactionsEmptyState } from "./transactions-empty-state";
 
 export interface TransactionsListProps {
   transactions: readonly Transaction[];
@@ -39,6 +40,8 @@ export function TransactionsList({
   onCreate,
   onClearFilters,
 }: TransactionsListProps) {
+  const { t } = useTranslation("transactions");
+
   return (
     <FlatList
       data={transactions}
@@ -62,10 +65,29 @@ export function TransactionsList({
         ) : undefined
       }
       ListEmptyComponent={
-        <TransactionsEmptyState
-          hasFilters={hasFilters}
-          onCreate={onCreate}
-          onClearFilters={onClearFilters}
+        <EmptyState
+          icon="receipt-outline"
+          title={hasFilters ? t("emptyFilteredTitle") : t("emptyTitle")}
+          message={hasFilters ? t("emptyFilteredMessage") : t("emptyMessage")}
+          primaryAction={
+            hasFilters
+              ? undefined
+              : {
+                  label: t("create"),
+                  accessibilityLabel: t("createFirst"),
+                  onPress: onCreate,
+                  icon: "add",
+                }
+          }
+          secondaryAction={
+            hasFilters
+              ? {
+                  label: t("filters.clearFilters"),
+                  accessibilityLabel: t("filters.clearAccessibility"),
+                  onPress: onClearFilters,
+                }
+              : undefined
+          }
         />
       }
       contentContainerStyle={[

@@ -1,4 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { FlatList, View } from "react-native";
+
+import { EmptyState } from "@/shared/components/molecules/empty-state";
+import { ErrorState } from "@/shared/components/molecules/error-state";
+import { LoadingState } from "@/shared/components/molecules/loading-state";
 
 import { walletsStyles } from "../styles/wallets.styles";
 import { Wallet } from "../types/wallet.types";
@@ -6,9 +11,6 @@ import { WalletTotal } from "../utils/money";
 import { WalletCard } from "./wallet-card";
 import { WalletSummary } from "./wallet-summary";
 import { WalletsArchivedSection } from "./wallets-archived-section";
-import { WalletsEmptyState } from "./wallets-empty-state";
-import { WalletsErrorState } from "./wallets-error-state";
-import { WalletsLoadingState } from "./wallets-loading-state";
 
 export interface WalletsListProps {
   wallets: readonly Wallet[];
@@ -42,9 +44,21 @@ export function WalletsList({
   onCreate,
   onWalletPress,
 }: WalletsListProps) {
-  if (loading) return <WalletsLoadingState />;
+  const { t } = useTranslation(["wallets", "common"]);
 
-  if (error) return <WalletsErrorState message={error} onRetry={onReload} />;
+  if (loading) return <LoadingState message={t("loading")} />;
+
+  if (error) {
+    return (
+      <ErrorState
+        title={t("errorTitle")}
+        message={error}
+        retryLabel={t("common:actions.retry")}
+        retryAccessibilityLabel={t("retryAccessibility")}
+        onRetry={onReload}
+      />
+    );
+  }
 
   return (
     <FlatList
@@ -59,7 +73,17 @@ export function WalletsList({
       }
       ListEmptyComponent={
         wallets.length === 0 ? (
-          <WalletsEmptyState onCreate={onCreate} />
+          <EmptyState
+            icon="wallet-outline"
+            title={t("emptyTitle")}
+            message={t("emptyMessage")}
+            primaryAction={{
+              label: t("create"),
+              accessibilityLabel: t("createFirst"),
+              onPress: onCreate,
+              icon: "add",
+            }}
+          />
         ) : undefined
       }
       ListFooterComponent={

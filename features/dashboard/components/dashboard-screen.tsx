@@ -10,6 +10,8 @@ import { useTransfers } from "@/features/transfers/hooks/use-transfers";
 import { useTransactions } from "@/features/transactions/hooks/use-transactions";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
 import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
+import { ErrorState } from "@/shared/components/molecules/error-state";
+import { LoadingState } from "@/shared/components/molecules/loading-state";
 
 import { useDashboardMovementDialogs } from "../hooks/use-dashboard-movement-dialogs";
 import { useDashboardOverview } from "../hooks/use-dashboard-overview";
@@ -17,9 +19,7 @@ import { useDashboardRefresh } from "../hooks/use-dashboard-refresh";
 import { useDashboardTransferDialogs } from "../hooks/use-dashboard-transfer-dialogs";
 import { dashboardStyles } from "../styles/dashboard.styles";
 import { createDashboardNavigationActions } from "../utils/dashboard-navigation";
-import { DashboardErrorState } from "./dashboard-error-state";
 import { DashboardHeader } from "./dashboard-header";
-import { DashboardLoadingState } from "./dashboard-loading-state";
 import { DashboardMovementModals } from "./dashboard-movement-modals";
 import { DashboardOverviewScroll } from "./dashboard-overview-scroll";
 import { DashboardTransferModals } from "./dashboard-transfer-modals";
@@ -27,7 +27,7 @@ import { DashboardTransferModals } from "./dashboard-transfer-modals";
 export function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { t } = useTranslation("dashboard");
+  const { t } = useTranslation(["dashboard", "common"]);
   const { user } = useAuth();
   const walletsState = useWallets();
   const transfersState = useTransfers();
@@ -83,10 +83,13 @@ export function DashboardScreen() {
       <DashboardHeader greeting={greeting} />
 
       {walletsState.loading ? (
-        <DashboardLoadingState />
+        <LoadingState message={t("loadingSummary")} />
       ) : walletsState.error ? (
-        <DashboardErrorState
+        <ErrorState
+          title={t("errorTitle")}
           message={walletsState.error}
+          retryLabel={t("common:actions.retry")}
+          retryAccessibilityLabel={t("retryAccessibility")}
           onRetry={() => void walletsState.reload()}
         />
       ) : (

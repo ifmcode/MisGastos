@@ -2,13 +2,13 @@ import { useTranslation } from "react-i18next";
 import { TextInput } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { formFieldStyles as styles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import {
   TRANSACTION_CONCEPT_MAX_LENGTH,
   type TransactionValidationCode,
 } from "../schemas/transaction.schema";
-import { transactionFormStyles as styles } from "../styles/transaction-form.styles";
 
 export interface TransactionFormConceptFieldProps {
   value: string;

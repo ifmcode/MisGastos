@@ -2,13 +2,13 @@ import { useTranslation } from "react-i18next";
 import { TextInput, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { formFieldStyles as styles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import {
   CATEGORY_NAME_MAX_LENGTH,
   type CategoryValidationCode,
 } from "../schemas/category.schema";
-import { categoryFormStyles as styles } from "../styles/category-form.styles";
 
 export interface CategoryFormNameFieldProps {
   value: string;

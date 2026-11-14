@@ -1,17 +1,17 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter, type Href } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
+import { Fab } from "@/shared/components/molecules/fab";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useWalletScreen } from "../hooks/use-wallet-screen";
 import { walletManagementStyles as managementStyles } from "../styles/wallet-management.styles";
-import { walletsPalette, walletsStyles } from "../styles/wallets.styles";
+import { walletsStyles } from "../styles/wallets.styles";
 import { buildWalletFormValues } from "../utils/wallet-options";
 import { WalletActionsModal } from "./wallet-actions-modal";
 import { WalletDeleteModal } from "./wallet-delete-modal";
@@ -80,14 +80,11 @@ export function WalletsScreen() {
       />
 
       {screen.canAddWallet ? (
-        <Pressable
-          accessibilityRole="button"
+        <Fab
           accessibilityLabel={t("add")}
+          bottom={insets.bottom + 24}
           onPress={screen.openCreate}
-          style={[walletsStyles.fab, { bottom: insets.bottom + 24 }]}
-        >
-          <Ionicons name="add" size={30} color={walletsPalette.onPrimary} />
-        </Pressable>
+        />
       ) : null}
 
       <WalletActionsModal

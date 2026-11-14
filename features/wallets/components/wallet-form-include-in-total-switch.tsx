@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Switch, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { formFieldStyles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { walletFormStyles as styles } from "../styles/wallet-form.styles";
@@ -31,7 +32,7 @@ export function WalletFormIncludeInTotalSwitch({
         <ThemedText type="defaultSemiBold">
           {t("form.includeInTotal")}
         </ThemedText>
-        <ThemedText style={[styles.helper, { color: theme.muted }]}>
+        <ThemedText style={[formFieldStyles.helper, { color: theme.muted }]}>
           {t("form.includeInTotalHint")}
         </ThemedText>
       </View>

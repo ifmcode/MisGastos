@@ -1,13 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { FlatList, View } from "react-native";
 
+import { EmptyState } from "@/shared/components/molecules/empty-state";
 import { asTranslate } from "@/shared/i18n/translate";
 
 import type { CategoryReorder } from "../hooks/use-category-reorder";
 import { categoriesStyles as styles } from "../styles/categories.styles";
 import { Category, CategoryType } from "../types/category.types";
 import { getCategoriesEmptyCopy } from "../utils/category-filters";
-import { CategoriesEmptyState } from "./categories-empty-state";
 import { CategoriesListHeader } from "./categories-list-header";
 import { CategoryCard } from "./category-card";
 
@@ -79,10 +79,16 @@ export function CategoriesList({
         ) : undefined
       }
       ListEmptyComponent={
-        <CategoriesEmptyState
+        <EmptyState
+          icon="pricetags-outline"
           title={tr(emptyCopy.titleKey)}
           message={tr(emptyCopy.messageKey)}
-          onCreate={onCreateCategory}
+          primaryAction={{
+            label: t("create"),
+            accessibilityLabel: t("createFirst"),
+            onPress: onCreateCategory,
+            icon: "add",
+          }}
         />
       }
       contentContainerStyle={[

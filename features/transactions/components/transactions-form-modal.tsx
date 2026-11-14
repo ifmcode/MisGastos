@@ -1,10 +1,9 @@
 import { useTranslation } from "react-i18next";
-import { Modal, View } from "react-native";
 
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
-import { confirmDialogStyles } from "@/shared/components/molecules/confirm-dialog.styles";
+import { PageSheetFormModal } from "@/shared/components/molecules/page-sheet-form-modal";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
 import { asTranslate } from "@/shared/i18n/translate";
@@ -83,43 +82,37 @@ export function TransactionsFormModal({
   }
 
   return (
-    <Modal
+    <PageSheetFormModal
       visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
       onRequestClose={handleRequestClose}
       onDismiss={deleteDialog.close}
     >
-      {visible ? (
-        <View style={confirmDialogStyles.modalRoot}>
-          <TransactionForm
-            submitting={mutating}
-            error={error}
-            fieldErrors={fieldErrors}
-            wallets={wallets}
-            categories={categories}
-            initialValues={buildTransactionFormValues(
-              wallets,
-              editingTransaction,
-              categories,
-            )}
-            isEditing={Boolean(editingTransaction)}
-            onSubmit={onSubmit}
-            onDelete={editingTransaction ? requestDelete : undefined}
-            onCancel={onClose}
-            onCategoryCreated={onCategoryCreated}
-          />
-          <ConfirmDialog
-            visible={deleteDialog.visible}
-            title={deleteDialog.title}
-            message={deleteDialog.message}
-            confirmLabel={deleteDialog.confirmLabel}
-            cancelLabel={deleteDialog.cancelLabel}
-            onConfirm={deleteDialog.confirm}
-            onCancel={deleteDialog.close}
-          />
-        </View>
-      ) : null}
-    </Modal>
+      <TransactionForm
+        submitting={mutating}
+        error={error}
+        fieldErrors={fieldErrors}
+        wallets={wallets}
+        categories={categories}
+        initialValues={buildTransactionFormValues(
+          wallets,
+          editingTransaction,
+          categories,
+        )}
+        isEditing={Boolean(editingTransaction)}
+        onSubmit={onSubmit}
+        onDelete={editingTransaction ? requestDelete : undefined}
+        onCancel={onClose}
+        onCategoryCreated={onCategoryCreated}
+      />
+      <ConfirmDialog
+        visible={deleteDialog.visible}
+        title={deleteDialog.title}
+        message={deleteDialog.message}
+        confirmLabel={deleteDialog.confirmLabel}
+        cancelLabel={deleteDialog.cancelLabel}
+        onConfirm={deleteDialog.confirm}
+        onCancel={deleteDialog.close}
+      />
+    </PageSheetFormModal>
   );
 }

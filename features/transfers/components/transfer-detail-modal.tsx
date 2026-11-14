@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { DetailModal } from "@/shared/components/organisms/detail-modal";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { asTranslate } from "@/shared/i18n/translate";
@@ -12,7 +13,6 @@ import {
   getTransferDetailSubtitle,
   getTransferDetailSummary,
 } from "../utils/transfer-detail";
-import { TransferFormErrorBanner } from "./transfer-form-error-banner";
 
 export interface TransferDetailModalProps {
   visible: boolean;
@@ -101,7 +101,7 @@ export function TransferDetailModal({
         closeAccessibilityLabel: t("common:accessibility.closeDetail"),
       }}
       errorContent={
-        error ? <TransferFormErrorBanner message={error} /> : undefined
+        error ? <ErrorBanner message={error} /> : undefined
       }
       deleteConfirmation={deleteConfirmation}
       onEdit={() => {

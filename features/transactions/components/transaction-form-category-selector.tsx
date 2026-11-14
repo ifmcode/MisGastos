@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { formFieldStyles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { asTranslate } from "@/shared/i18n/translate";
 
@@ -40,7 +41,7 @@ export function TransactionFormCategorySelector({
 
   return (
     <View>
-      <ThemedText style={styles.label}>{t("form.category")}</ThemedText>
+      <ThemedText style={formFieldStyles.label}>{t("form.category")}</ThemedText>
       <View style={styles.categoryChips}>
         {visible.map((category) => {
           const selected = value === category.id;
@@ -98,12 +99,12 @@ export function TransactionFormCategorySelector({
         </Pressable>
       </View>
       {categories.length === 0 ? (
-        <ThemedText style={[styles.helper, { color: theme.muted }]}>
+        <ThemedText style={[formFieldStyles.helper, { color: theme.muted }]}>
           {t("form.noCategories")}
         </ThemedText>
       ) : null}
       {error ? (
-        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+        <ThemedText style={[formFieldStyles.fieldError, { color: theme.danger }]}>
           {error}
         </ThemedText>
       ) : null}

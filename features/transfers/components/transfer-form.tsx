@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useTransferForm } from "../hooks/use-transfer-form";
@@ -21,7 +22,6 @@ import { TransferFormActions } from "./transfer-form-actions";
 import { TransferFormAmountField } from "./transfer-form-amount-field";
 import { TransferFormDateField } from "./transfer-form-date-field";
 import { TransferFormDestinationSelector } from "./transfer-form-destination-selector";
-import { TransferFormErrorBanner } from "./transfer-form-error-banner";
 import { TransferFormHeader } from "./transfer-form-header";
 import { TransferFormInfoBanner } from "./transfer-form-info-banner";
 import { TransferFormNotesField } from "./transfer-form-notes-field";
@@ -97,7 +97,7 @@ export function TransferForm({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            {error ? <TransferFormErrorBanner message={error} /> : null}
+            <ErrorBanner message={error} />
 
             {wallets.length < 2 ? (
               <TransferFormInfoBanner

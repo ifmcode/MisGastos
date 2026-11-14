@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { TextInput, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { formFieldStyles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import {
@@ -42,7 +43,7 @@ export function WalletFormDetails({
 
   return (
     <View>
-      <ThemedText style={styles.label}>{t("form.name")}</ThemedText>
+      <ThemedText style={formFieldStyles.label}>{t("form.name")}</ThemedText>
       <TextInput
         value={values.name}
         onChangeText={(value) => onChange("name", value)}
@@ -52,7 +53,7 @@ export function WalletFormDetails({
         editable={!disabled}
         accessibilityLabel={t("form.nameAccessibility")}
         style={[
-          styles.input,
+          formFieldStyles.input,
           {
             backgroundColor: theme.surface,
             borderColor: errors.name ? theme.danger : theme.border,
@@ -61,12 +62,16 @@ export function WalletFormDetails({
         ]}
       />
       {nameError ? (
-        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+        <ThemedText
+          style={[formFieldStyles.fieldError, { color: theme.danger }]}
+        >
           {nameError}
         </ThemedText>
       ) : null}
 
-      <ThemedText style={styles.label}>{t("form.initialBalance")}</ThemedText>
+      <ThemedText style={formFieldStyles.label}>
+        {t("form.initialBalance")}
+      </ThemedText>
       <View
         style={[
           styles.balanceWrapper,
@@ -96,11 +101,15 @@ export function WalletFormDetails({
         />
       </View>
       {balanceError ? (
-        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+        <ThemedText
+          style={[formFieldStyles.fieldError, { color: theme.danger }]}
+        >
           {balanceError}
         </ThemedText>
       ) : (
-        <ThemedText style={[styles.helper, { color: theme.muted }]}>
+        <ThemedText
+          style={[formFieldStyles.helper, { color: theme.muted }]}
+        >
           {initialBalanceLocked
             ? t("form.initialBalanceLocked")
             : t("form.initialBalanceHint")}

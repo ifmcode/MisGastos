@@ -1,11 +1,6 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import { Pressable, View } from "react-native";
 
-import { ThemedText } from "@/components/themed-text";
-import { useFormTheme } from "@/shared/hooks/use-form-theme";
-
-import { transactionFiltersStyles as styles } from "../styles/transaction-filters.styles";
+import { FormHeader } from "@/shared/components/molecules/form-header";
 
 export interface TransactionFiltersHeaderProps {
   onClose: () => void;
@@ -14,28 +9,14 @@ export interface TransactionFiltersHeaderProps {
 export function TransactionFiltersHeader({
   onClose,
 }: TransactionFiltersHeaderProps) {
-  const theme = useFormTheme();
-  const { t } = useTranslation(["transactions", "common"]);
+  const { t } = useTranslation("transactions");
 
   return (
-    <View style={styles.header}>
-      <View style={styles.headerText}>
-        <ThemedText type="title" style={styles.title}>
-          {t("filters.title")}
-        </ThemedText>
-        <ThemedText style={[styles.subtitle, { color: theme.muted }]}>
-          {t("filters.subtitle")}
-        </ThemedText>
-      </View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t("filters.close")}
-        hitSlop={10}
-        onPress={onClose}
-        style={styles.closeButton}
-      >
-        <Ionicons name="close" size={24} color={theme.muted} />
-      </Pressable>
-    </View>
+    <FormHeader
+      title={t("filters.title")}
+      subtitle={t("filters.subtitle")}
+      closeAccessibilityLabel={t("filters.close")}
+      onClose={onClose}
+    />
   );
 }

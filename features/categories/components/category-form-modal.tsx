@@ -1,8 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { Modal, View } from "react-native";
 
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
-import { confirmDialogStyles } from "@/shared/components/molecules/confirm-dialog.styles";
+import { PageSheetFormModal } from "@/shared/components/molecules/page-sheet-form-modal";
 import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
 import { asTranslate } from "@/shared/i18n/translate";
 
@@ -69,37 +68,32 @@ export function CategoryFormModal({
   }
 
   return (
-    <Modal
+    <PageSheetFormModal
       visible={visible}
-      animationType="slide"
-      presentationStyle={presentationStyle}
       onRequestClose={handleRequestClose}
       onDismiss={deleteDialog.close}
+      presentationStyle={presentationStyle}
     >
-      {visible ? (
-        <View style={confirmDialogStyles.modalRoot}>
-          <CategoryForm
-            category={category}
-            defaultType={defaultType}
-            lockType={lockType}
-            submitting={submitting}
-            error={error}
-            fieldErrors={fieldErrors}
-            onSubmit={onSubmit}
-            onCancel={onClose}
-            onDelete={category && onDelete ? requestDelete : undefined}
-          />
-          <ConfirmDialog
-            visible={deleteDialog.visible}
-            title={deleteDialog.title}
-            message={deleteDialog.message}
-            confirmLabel={deleteDialog.confirmLabel}
-            cancelLabel={deleteDialog.cancelLabel}
-            onConfirm={deleteDialog.confirm}
-            onCancel={deleteDialog.close}
-          />
-        </View>
-      ) : null}
-    </Modal>
+      <CategoryForm
+        category={category}
+        defaultType={defaultType}
+        lockType={lockType}
+        submitting={submitting}
+        error={error}
+        fieldErrors={fieldErrors}
+        onSubmit={onSubmit}
+        onCancel={onClose}
+        onDelete={category && onDelete ? requestDelete : undefined}
+      />
+      <ConfirmDialog
+        visible={deleteDialog.visible}
+        title={deleteDialog.title}
+        message={deleteDialog.message}
+        confirmLabel={deleteDialog.confirmLabel}
+        cancelLabel={deleteDialog.cancelLabel}
+        onConfirm={deleteDialog.confirm}
+        onCancel={deleteDialog.close}
+      />
+    </PageSheetFormModal>
   );
 }

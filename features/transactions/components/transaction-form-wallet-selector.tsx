@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { formFieldStyles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { WalletChipSelector } from "@/features/wallets/components/wallet-chip-selector";
 import { Wallet } from "@/features/wallets/types/wallet.types";
@@ -30,7 +31,7 @@ export function TransactionFormWalletSelector({
 
   return (
     <View>
-      <ThemedText style={styles.label}>{t("form.wallet")}</ThemedText>
+      <ThemedText style={formFieldStyles.label}>{t("form.wallet")}</ThemedText>
 
       {wallets.length === 0 ? (
         <View
@@ -55,7 +56,7 @@ export function TransactionFormWalletSelector({
       />
 
       {error ? (
-        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+        <ThemedText style={[formFieldStyles.fieldError, { color: theme.danger }]}>
           {error}
         </ThemedText>
       ) : null}

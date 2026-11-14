@@ -2,12 +2,11 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 
 import { ThemedText } from "@/components/themed-text";
+import { formFieldStyles } from "@/shared/components/molecules/form-field.styles";
 import { WalletChipSelector } from "@/features/wallets/components/wallet-chip-selector";
 import { WalletPickerDialog } from "@/features/wallets/components/wallet-picker-dialog";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
-
-import { transferFormStyles as styles } from "../styles/transfer-form.styles";
 
 export interface TransferFormSourceSelectorProps {
   wallets: Wallet[];
@@ -35,7 +34,7 @@ export function TransferFormSourceSelector({
 
   return (
     <>
-      <ThemedText style={styles.label}>{t("form.from")}</ThemedText>
+      <ThemedText style={formFieldStyles.label}>{t("form.from")}</ThemedText>
       <WalletChipSelector
         wallets={wallets}
         selectedId={selectedId}
@@ -45,7 +44,7 @@ export function TransferFormSourceSelector({
         onOpenPicker={() => setPickerVisible(true)}
       />
       {error ? (
-        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+        <ThemedText style={[formFieldStyles.fieldError, { color: theme.danger }]}>
           {error}
         </ThemedText>
       ) : null}

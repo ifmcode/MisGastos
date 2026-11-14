@@ -4,7 +4,6 @@ import { StyleSheet } from "react-native";
 export const categoriesPalette = {
   primary: "#0A7EA4",
   primarySoftStrong: "rgba(10, 126, 164, 0.08)",
-  primarySoftIcon: "rgba(10, 126, 164, 0.12)",
   primaryBorder: "rgba(10, 126, 164, 0.25)",
   onPrimary: "#FFFFFF",
   danger: "#C62828",
@@ -196,85 +195,5 @@ export const categoriesStyles = StyleSheet.create({
   },
   reorderButtonDisabled: {
     opacity: 0.35,
-  },
-
-  // Feedback states
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-    paddingBottom: 40,
-  },
-  centeredText: {
-    fontSize: 14,
-    lineHeight: 20,
-    opacity: 0.7,
-    textAlign: "center",
-    marginTop: 8,
-  },
-  errorTitle: {
-    marginTop: 14,
-    textAlign: "center",
-  },
-  retryButton: {
-    marginTop: 18,
-    backgroundColor: categoriesPalette.primary,
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 11,
-  },
-  retryButtonText: {
-    color: categoriesPalette.onPrimary,
-    fontSize: 15,
-    fontWeight: "700",
-  },
-
-  // Empty state
-  emptyState: {
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingBottom: 40,
-  },
-  emptyIcon: {
-    width: 74,
-    height: 74,
-    borderRadius: 24,
-    backgroundColor: categoriesPalette.primarySoftIcon,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 19,
-    textAlign: "center",
-  },
-  createButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: categoriesPalette.primary,
-    borderRadius: 12,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    marginTop: 20,
-  },
-  createButtonText: {
-    color: categoriesPalette.onPrimary,
-    fontSize: 15,
-    fontWeight: "700",
-  },
-
-  // Floating action button
-  fab: {
-    position: "absolute",
-    right: 24,
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: categoriesPalette.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
   },
 });

@@ -1,26 +1,22 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
+import { ErrorState } from "@/shared/components/molecules/error-state";
+import { Fab } from "@/shared/components/molecules/fab";
+import { LoadingState } from "@/shared/components/molecules/loading-state";
 
 import { useCategoriesScreen } from "../hooks/use-categories-screen";
-import {
-  categoriesPalette,
-  categoriesStyles as styles,
-} from "../styles/categories.styles";
-import { CategoriesErrorState } from "./categories-error-state";
+import { categoriesStyles as styles } from "../styles/categories.styles";
 import { CategoriesHeader } from "./categories-header";
 import { CategoriesList } from "./categories-list";
-import { CategoriesLoadingState } from "./categories-loading-state";
 import { CategoryFormModal } from "./category-form-modal";
 
 export function CategoriesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { t } = useTranslation("categories");
+  const { t } = useTranslation(["categories", "common"]);
   const {
     categories,
     visibleCategories,
@@ -48,9 +44,7 @@ export function CategoriesScreen() {
   const canAdd = !loading && !error && !reorder.reordering;
 
   return (
-    <ThemedView
-      style={[styles.container, { paddingTop: insets.top + 16 }]}
-    >
+    <ThemedView style={[styles.container, { paddingTop: insets.top + 16 }]}>
       <CategoriesHeader
         showAddButton={canAdd}
         onAddPress={openCreate}
@@ -58,9 +52,15 @@ export function CategoriesScreen() {
       />
 
       {loading ? (
-        <CategoriesLoadingState />
+        <LoadingState message={t("loading")} />
       ) : error ? (
-        <CategoriesErrorState message={error} onRetry={() => void reload()} />
+        <ErrorState
+          title={t("errorTitle")}
+          message={error}
+          retryLabel={t("common:actions.retry")}
+          retryAccessibilityLabel={t("retryAccessibility")}
+          onRetry={() => void reload()}
+        />
       ) : (
         <CategoriesList
           categories={categories}
@@ -76,14 +76,11 @@ export function CategoriesScreen() {
       )}
 
       {canAdd ? (
-        <Pressable
-          accessibilityRole="button"
+        <Fab
           accessibilityLabel={t("add")}
+          bottom={insets.bottom + 24}
           onPress={openCreate}
-          style={[styles.fab, { bottom: insets.bottom + 24 }]}
-        >
-          <Ionicons name="add" size={30} color={categoriesPalette.onPrimary} />
-        </Pressable>
+        />
       ) : null}
 
       <CategoryFormModal

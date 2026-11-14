@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemedView } from "@/components/themed-view";
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useTransactionForm } from "../hooks/use-transaction-form";
@@ -22,7 +23,6 @@ import { TransactionFormAmountField } from "./transaction-form-amount-field";
 import { TransactionFormCategoryField } from "./transaction-form-category-field";
 import { TransactionFormConceptField } from "./transaction-form-concept-field";
 import { TransactionFormDateField } from "./transaction-form-date-field";
-import { TransactionFormErrorBanner } from "./transaction-form-error-banner";
 import { TransactionFormHeader } from "./transaction-form-header";
 import { TransactionFormNotesField } from "./transaction-form-notes-field";
 import { TransactionFormTypeSelector } from "./transaction-form-type-selector";
@@ -81,7 +81,7 @@ export function TransactionForm({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <TransactionFormErrorBanner error={error} />
+            <ErrorBanner message={error} />
 
             <TransactionFormTypeSelector
               value={values.type}

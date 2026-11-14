@@ -2,11 +2,11 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { formFieldStyles as styles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { asTranslate } from "@/shared/i18n/translate";
 
 import { WalletValidationErrors } from "../schemas/wallet.schema";
-import { walletFormStyles as styles } from "../styles/wallet-form.styles";
 import { WalletFormValues } from "../types/wallet.types";
 import { WalletFormColorSelector } from "./wallet-form-color-selector";
 import { WalletFormCurrencySelector } from "./wallet-form-currency-selector";

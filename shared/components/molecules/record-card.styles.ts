@@ -1,12 +1,6 @@
 import { StyleSheet } from "react-native";
 
-/** Shared tokens so the transfer card never repeats raw color values. */
-export const transferItemPalette = {
-  primary: "#0A7EA4",
-  primarySoft: "rgba(10, 126, 164, 0.12)",
-} as const;
-
-export const transferItemStyles = StyleSheet.create({
+export const recordCardStyles = StyleSheet.create({
   pressable: {
     borderRadius: 16,
   },
@@ -27,7 +21,6 @@ export const transferItemStyles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: transferItemPalette.primarySoft,
   },
   details: {
     flex: 1,
@@ -40,17 +33,24 @@ export const transferItemStyles = StyleSheet.create({
     opacity: 0.65,
     marginTop: 2,
   },
+  amountColumn: {
+    alignItems: "flex-end",
+  },
   amount: {
     fontSize: 15,
     fontVariant: ["tabular-nums"],
   },
-  editAffordance: {
+  secondaryAmount: {
+    fontSize: 12,
+    opacity: 0.6,
+    marginTop: 2,
+  },
+  affordance: {
     width: 30,
     height: 30,
     borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
-    backgroundColor: transferItemPalette.primarySoft,
   },
 });

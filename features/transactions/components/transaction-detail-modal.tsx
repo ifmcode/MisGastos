@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { DetailModal } from "@/shared/components/organisms/detail-modal";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { asTranslate } from "@/shared/i18n/translate";
@@ -12,7 +13,6 @@ import {
   buildTransactionDetailFields,
   getTransactionDetailSummary,
 } from "../utils/transaction-detail";
-import { TransactionFormErrorBanner } from "./transaction-form-error-banner";
 
 export interface TransactionDetailModalProps {
   visible: boolean;
@@ -92,7 +92,7 @@ export function TransactionDetailModal({
         close: t("detail.closeButton"),
         closeAccessibilityLabel: t("common:accessibility.closeDetail"),
       }}
-      errorContent={<TransactionFormErrorBanner error={error} />}
+      errorContent={<ErrorBanner message={error} />}
       deleteConfirmation={deleteConfirmation}
       onEdit={() => {
         if (transaction) onEdit(transaction);

@@ -2,13 +2,13 @@ import { useTranslation } from "react-i18next";
 import { TextInput, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { formFieldStyles as styles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import {
   WALLET_DESCRIPTION_MAX_LENGTH,
   type WalletValidationCode,
 } from "../schemas/wallet.schema";
-import { walletFormStyles as styles } from "../styles/wallet-form.styles";
 
 export interface WalletFormDescriptionFieldProps {
   value: string;
