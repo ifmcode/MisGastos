@@ -8,6 +8,26 @@ Instructions for AI agents (OpenCode, Claude, etc.) working on MisGastos.
 3. `docs/project/guidelines/architecture-and-solid.md`
 4. `docs/project/guidelines/security-and-validation.md`
 5. `docs/project/testing/test-guide.md`
+6. `docs/project/guidelines/agents-and-skills.md`
+
+## Agents and skills
+- The project OpenCode config lives in `.opencode/agents/` and `.opencode/skills/`; each agent file carries its instructions and its enforced permissions.
+- Delegation belongs to the **primary** agent: every custom agent is `subagent` mode and cannot launch other subagents.
+- Agents: `architect` (design spikes/ADRs, docs only), `mobile-ui` (screens, styles, a11y, i18n), `firebase-data` (repositories, operations, rules), `reviewer` (read-only), `docs-writer` (`docs/**`, `README.md`, `AGENTS.md`).
+- Skills: `misgastos-feature`, `firestore-rules`, `money-and-balances`, `react-native-ui`, `jest-testing`, `docs-ticket`; `offline-sync` is deferred to roadmap Phase 7.
+- Each task type maps to one agent. Routing by task, permission model and evolution rules live in `docs/project/guidelines/agents-and-skills.md`; do not duplicate them here.
+- **Anti-sprawl**: create a new agent or skill only when a task repeats or a permission boundary is needed. Otherwise extend the existing one.
+
+## Routing and delegation (mandatory)
+- **Before implementing**, pick the agent and skills from the routing table and state the choice in one line (for example: "UI work → `mobile-ui` + `react-native-ui`, `misgastos-feature`").
+- **Load the matching skill** with the `skill` tool before working; do not re-derive its rules from memory.
+- **Delegate** when the core work belongs to a specialist: UI → `mobile-ui`; Firestore/data/money → `firebase-data`; design spike/ADR → `architect`; review → `reviewer`; ticket/roadmap/memory/README → `docs-writer`.
+- **Chain specialists from the primary agent** (they cannot delegate): `firebase-data` then `reviewer`, or `architect` then `firebase-data`. Pass the ticket id, files in scope, decisions already taken and the expected output; subagents start with fresh context.
+- **Small mechanical edits** (one file, a typo, a single line) may stay in the primary agent; say so when skipping delegation.
+- **After a subagent returns**, review its changes and run the full verification yourself; delegation never replaces `tsc`/`lint`/`jest`/`check:copy`.
+
+## Communication
+- **Always ask clarifying questions in Spanish.** Whenever a doubt, ambiguity or decision needs the user's input, the question (and its options) must be written in Spanish, even when the code, docs or commits are in English.
 
 ## Ticket workflow
 - **Before starting**: set the ticket `Status` to `🚧 In progress` and update the roadmap **Current Focus** with the phase, current ticket and status.

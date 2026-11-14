@@ -9,11 +9,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
-- **Phase:** 4 - Architecture and workflow spike
-- **Current ticket:** TICKET-023 - Offline-first design spike
+- **Phase:** 5 - Social vertical slice
+- **Current ticket:** TICKET-007 - Friends and requests
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-006 - Profile editing and preferred currency (14/11/2026)
-- **Next:** TICKET-023 - Offline-first design spike
+- **Last completed:** TICKET-024 - Agents and skills (14/11/2026)
+- **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
+- **Next:** TICKET-007 - Friends and requests
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -33,8 +34,8 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 | 1 | Foundation | ✅ Done |
 | 2 | MVP core | ✅ Done |
 | 3 | Personal finance complete | ✅ Done |
-| 4 | Architecture and workflow spike | ⏳ Queued |
-| 5 | Social vertical slice | ⏳ Queued |
+| 4 | Architecture and workflow spike | ✅ Done |
+| 5 | Social vertical slice | 🚧 In progress |
 | 6 | Groups | ⏳ Queued |
 | 7 | Offline-first implementation | ⏳ Queued |
 | 8 | Retention and final polish | ⏳ Queued |
@@ -104,13 +105,13 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ### 3.8 Profile and preferred currency (COMPLETED)
 - [x] Profile editing and a preferred-currency selector (TICKET-006) ✅ 14/11/2026
 
-## Phase 4: Architecture and workflow spike (QUEUED)
-- [ ] TICKET-023 (design spike only): decide local database, outbox, idempotency and conflict policy before groups
-- [ ] TICKET-024: define the first 3-4 agents and their skills; avoid agent sprawl
-- Record the decisions in ADRs or development notes
+## Phase 4: Architecture and workflow spike (COMPLETED)
+- [x] TICKET-023 (design spike only): decided SQLite + outbox, idempotency and conflict policy before groups ✅ 14/11/2026
+- [x] TICKET-024: defined the 5 project agents (`architect`, `mobile-ui`, `firebase-data`, `reviewer`, `docs-writer`) and 6 skills, with routing, permissions and two validation runs ✅ 14/11/2026
+- [x] Record the decisions in development notes: `2026-11-14-offline-first-architecture.md` (schema, sync protocol, conflict policy, phases) and `guidelines/agents-and-skills.md` (routing, permissions, add/retire workflow)
 - This phase runs before Phase 5; the full offline implementation is Phase 7
 
-## Phase 5: Social vertical slice (QUEUED)
+## Phase 5: Social vertical slice (IN PROGRESS)
 - [ ] TICKET-007: friends and requests
 - [ ] Minimal subset of TICKET-009: 1:1 shared expense
 - [ ] Minimal subset of TICKET-010: balance and settlement between two people
@@ -122,9 +123,16 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [ ] Full TICKET-009: equal, percentage, fixed-amount and share splits
 - [ ] TICKET-010: group balances and settlements
 - [ ] TICKET-011: group history
+- Build shared expenses and settlements as append-only ledger entries folded by a shared pure function, so offline group movements work without a rewrite (constraint from the TICKET-023 spike)
 
 ## Phase 7: Offline-first implementation (QUEUED)
-- [ ] Full TICKET-023: local persistence, offline mutations, sync queue, conflict handling and offline group/friend movements
+- [ ] Full TICKET-023: local persistence, offline mutations, sync queue, conflict handling and offline group/friend movements (design accepted 14/11/2026, see `2026-11-14-offline-first-architecture.md`)
+  - [ ] Foundations: local SQLite DB, client-generated ids, `revision`/`deletedAt`/`appliedMutations` and rules
+  - [ ] Local read cache for personal data and offline banner
+  - [ ] Offline write queue for expenses, incomes and transfers with local balance derivation
+  - [ ] Sync engine, retry/backoff, exactly-once and conflict UI
+  - [ ] Offline group/friend movements (after Phase 6)
+  - [ ] Offline UX, observability, account purge on logout/switch and web decision
 - If offline is a launch requirement, move this phase before Phase 6
 - Do not retrofit offline after groups without the Phase 4 decisions; the current Firestore transaction-based balance model may need to change
 

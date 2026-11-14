@@ -77,6 +77,7 @@ MisGastos/
 ├── components/             # Componentes base de la app
 ├── hooks/                  # Hooks compartidos
 ├── lib/                    # Configuración de Firebase y autenticación
+├── .opencode/              # Configuración de OpenCode: agentes y skills del proyecto
 ├── docs/project/           # Documentación, guías, roadmap y notas de desarrollo
 ├── firestore.rules         # Reglas de seguridad de Firestore
 ├── app.json                # Configuración de Expo
@@ -86,6 +87,12 @@ MisGastos/
 La arquitectura sigue un enfoque **feature-first** con capas separadas para UI, lógica de
 negocio y acceso a datos. Más detalles en
 [`docs/project/guidelines/architecture-and-solid.md`](docs/project/guidelines/architecture-and-solid.md).
+
+El trabajo recurrente se delega a los agentes de `.opencode/agents/`, que cargan las skills
+de `.opencode/skills/`. El agente principal anuncia en cada tarea qué agente y skills usa,
+carga la skill correspondiente y delega en el especialista salvo en ediciones triviales. El
+inventario de agentes, el ruteo por tipo de tarea y las restricciones de permisos están en
+[`docs/project/guidelines/agents-and-skills.md`](docs/project/guidelines/agents-and-skills.md).
 
 ## 🚀 Empezando
 
@@ -149,6 +156,11 @@ npx firebase-tools deploy --only firestore:rules
 | `npm run test:ci` | Ejecuta la cobertura una sola vez y en serie (CI). |
 | `npm run check:copy` | Comprueba que todo el texto visible sale de las traducciones. |
 
+El flujo de agentes usa
+`.opencode/skills/misgastos-feature/scripts/verify.ps1`, que encadena `tsc`, `lint`,
+`jest` y `check:copy` y se detiene en el primer fallo
+(`powershell -NoProfile -File .opencode/skills/misgastos-feature/scripts/verify.ps1`).
+
 ## 🧪 Testing y calidad
 
 La lógica de negocio (servicios, repositorios, validaciones y utilidades) se prueba con
@@ -177,6 +189,8 @@ Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/gu
 - [ ] Amigos
 - [ ] Grupos y gastos compartidos
 - [ ] Liquidación de deudas
+- [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización; implementación en la fase 7)
+- [x] Especialización del flujo de desarrollo con agentes y skills de OpenCode
 
 Consulta el roadmap completo en
 [`docs/project/development-notes/roadmap.md`](docs/project/development-notes/roadmap.md).
@@ -186,8 +200,10 @@ Consulta el roadmap completo en
 - [Memoria del proyecto](docs/project/development-notes/project-memory.md)
 - [Roadmap y alcance V1](docs/project/development-notes/roadmap.md)
 - [Inventario de componentes compartidos](docs/project/development-notes/component-inventory.md)
+- [Arquitectura offline-first (diseño y ADR)](docs/project/development-notes/2026-11-14-offline-first-architecture.md)
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)
+- [Guía de agentes y skills (OpenCode)](docs/project/guidelines/agents-and-skills.md)
 
 ---
 

@@ -2,7 +2,8 @@
 
 **Type:** Epic / Architecture  
 **Priority:** High  
-**Status:** ⏳ Pending  
+**Status:** 🚧 In progress  
+**Design spike:** ✅ Accepted (14/11/2026) — implementation queued in roadmap Phase 7  
 **Related:** PM-023; TICKET-002, TICKET-003, TICKET-007, TICKET-009, TICKET-010  
 **Sprint:** Platform / Post-MVP  
 
@@ -10,7 +11,7 @@
 Make the app usable without an internet connection. The user must be able to create expenses, incomes, transfers and shared movements while offline, see the changes immediately, and sync them with Firebase when connectivity returns.
 
 ## Requirements
-- [ ] Choose the local persistence and sync architecture before implementation
+- [x] Choose the local persistence and sync architecture before implementation — decided on 14/11/2026 (see **Design Spike**)
 - [ ] Persist wallets, transactions, transfers, categories, friends, groups, shared expenses and settlements locally
 - [ ] Allow creating, editing and deleting expenses/incomes and transfers while offline
 - [ ] Allow creating group expenses and settlements while offline
@@ -33,6 +34,70 @@ Make the app usable without an internet connection. The user must be able to cre
 - [ ] Logging out removes local access to the previous account's data
 - [ ] Existing online behaviour and balance rules do not regress
 
+## Design Spike (14/11/2026)
+
+**Status:** ✅ Accepted. **No app code changed** in this session; the epic stays in progress until the
+implementation phases below are delivered.
+
+**Full document:** [`docs/project/development-notes/2026-11-14-offline-first-architecture.md`](../development-notes/2026-11-14-offline-first-architecture.md)
+
+### Decisions
+
+1. **Persistence:** `expo-sqlite` as the on-device source of truth, explicit schema + migrations,
+   `DatabasePort` abstraction with an in-memory adapter for Jest. AsyncStorage keeps preferences only.
+2. **Sync model:** local-first repositories + one coalesced, ordered **outbox** per account, drained by a
+   sync engine that calls the existing Firestore operations. Feature hooks, screens and domain types
+   do not change.
+3. **Idempotency:** client-generated ids plus a `clientMutationId`. A new
+   `appliedMutations/{ownerId}__{clientMutationId}` marker is written inside the same
+   `runTransaction` as the balance change, giving exactly-once replay after a crash or lost ack.
+4. **Balances:** the server stays authoritative; the UI shows `serverBalance + pendingDelta`, where the
+   delta is recomputed from the outbox with the **same pure helpers** as the online path
+   (`getSignedTransactionAmount`, `applyTransferToBalances`, `roundMoney`). No second balance formula.
+5. **Conflicts:** per-record `revision` optimistic concurrency. A mismatch stops the mutation and
+   opens an explicit conflict UI (`REMOTE_CHANGED`, `DELETED_REMOTELY`, `WALLET_UNAVAILABLE`,
+   `INSUFFICIENT_FUNDS`, `INVALID`). No last-write-wins on money; nothing is discarded without a user
+   choice.
+6. **Ordering:** strict `seq` order per account plus `dependsOn` for entities created offline (a
+   movement waits for its wallet). Retry with exponential backoff and jitter for transient errors.
+7. **Reads:** full pull on login/first start, then owner-scoped `onSnapshot` listeners while foreground
+   and logged in; tombstones are pulled and filtered locally.
+8. **Isolation:** every row is scoped by `ownerId`; logout/account switch stops the engine, removes
+   listeners and purges that account's rows, outbox and conflicts (with a warning if changes are pending).
+9. **Soft deletes:** transactions move from hard delete to `deletedAt` (business rule + offline order);
+   `deletedAt` becomes updateable in the rules. Wallets keep `archivedAt`.
+10. **Security:** OS-level storage protection for V1, no secrets in SQLite; SQLCipher is a documented
+    upgrade path behind `DatabasePort`.
+11. **Social phase constraint:** from TICKET-009/TICKET-010 onward, shared expenses and settlements are
+    **append-only ledger entries** folded by a shared pure function. Edits are compensating entries.
+    Offline group creation is allowed; invites/joining stay online.
+12. **Web:** offline support is a separate later phase; mobile is the primary target.
+
+### Delivery phases (implementation)
+
+| # | Phase | Roadmap |
+|---|---|---|
+| 1 | Architecture spike and ADR | ✅ Phase 4 (this session) |
+| 2 | Local DB foundations, client ids, `revision`/`deletedAt`/`appliedMutations` + rules | Phase 7 |
+| 3 | Local read cache for personal data | Phase 7 |
+| 4 | Offline write queue for expenses, incomes and transfers | Phase 7 |
+| 5 | Sync engine, retry, exactly-once and conflicts | Phase 7 |
+| 6 | Offline group/friend movements | Phase 7 (after TICKET-009/010) |
+| 7 | Offline UX, observability, account purge and web decision | Phase 7 |
+
+### Acceptance criteria mapping
+
+| Acceptance criterion | Phase |
+|---|---|
+| Offline create survives an app restart | 4 |
+| Exactly-once sync on reconnect | 5 |
+| Offline group/friend movements keep balances correct | 6 |
+| Conflicting edit reported, never silently discarded | 5 |
+| User sees pending changes and can retry a failed sync | 7 (basic banner in 3) |
+| App usable while Firebase is unavailable | 3-4 |
+| Logout removes local access to the previous account's data | 7 |
+| Existing online behaviour and balance rules do not regress | 2 + parity tests in every phase |
+
 ## Technical Notes
 - The app currently writes directly to Firestore and uses `runTransaction` for wallet balance consistency. Firestore's built-in offline cache handles some writes but does not reliably solve multi-document transactions, shared ledgers or conflict resolution while offline. Do not assume it is enough.
 - Evaluate these options in a short design spike:
@@ -50,9 +115,10 @@ Make the app usable without an internet connection. The user must be able to cre
   6. Offline UX polish and observability.
 - Mobile is the primary target. Web offline support may use IndexedDB, but it can be a separate phase if it delays the mobile release.
 
-## Open Questions
-- How long must offline data be retained?
-- Are multi-device edits expected, or is one device per account the norm?
-- Should users be able to create a brand-new group while offline?
-- Is local encryption required, or is OS-level storage protection enough?
-- Can Firebase be replaced by a custom backend if the sync requirements outgrow it?
+## Open Questions (resolved 14/11/2026)
+- How long must offline data be retained? → Until logout, account switch or an explicit local purge. Confirmed financial records are not expired by TTL; outbox and conflicts never expire automatically.
+- Are multi-device edits expected, or is one device per account the norm? → **Multi-device is expected**; revision-based conflicts are part of the design from the start.
+- Should users be able to create a brand-new group while offline? → Yes for groups the user creates; inviting/joining/accepting requires connectivity.
+- Is local encryption required, or is OS-level storage protection enough? → OS-level protection is enough for V1; SQLCipher stays as an upgrade path behind `DatabasePort`.
+- Can Firebase be replaced by a custom backend if the sync requirements outgrow it? → Out of V1. The outbox depends on a `RemoteMutationExecutor` interface, so a server-authoritative Cloud Function (first) or an HTTP backend (later) can replace Firestore without touching the UI or the local schema.
+
