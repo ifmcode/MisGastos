@@ -191,6 +191,7 @@ Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/gu
 - [ ] Liquidación de deudas
 - [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización; implementación en la fase 7)
 - [x] Especialización del flujo de desarrollo con agentes y skills de OpenCode
+- [ ] Librería de componentes con Storybook
 
 Consulta el roadmap completo en
 [`docs/project/development-notes/roadmap.md`](docs/project/development-notes/roadmap.md).

@@ -138,6 +138,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ## Phase 8: Retention and final polish (QUEUED)
 - [ ] TICKET-012 budgets, TICKET-016 statistics, TICKET-015 advanced search, TICKET-013 export, TICKET-017 history grouping and TICKET-019 dashboard quick add
+- [ ] TICKET-040 Storybook component catalog (developer tooling; can move earlier if the social UI needs it)
 - Then invest in final visual polish with real social screens
 
 ## Ordering Rules
