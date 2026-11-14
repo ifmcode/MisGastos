@@ -13,8 +13,7 @@ import {
   TransferValidationErrors,
 } from "@/features/transfers/schemas/transfer.schema";
 import { Transfer } from "@/features/transfers/types/transfer.types";
-
-import { createDashboardTransferActions } from "../utils/dashboard-transfer-actions";
+import { createTransferDialogActions } from "@/features/transfers/utils/transfer-dialog-actions";
 
 export interface DashboardTransferMutations {
   mutating: boolean;
@@ -77,7 +76,7 @@ export function useDashboardTransferDialogs({
     onWalletsChanged: () => void onWalletsChanged(),
   });
 
-  const actions = createDashboardTransferActions({
+  const actions = createTransferDialogActions({
     openDetail: detail.open,
     closeDetail: detail.close,
     openEdit: form.openEdit,

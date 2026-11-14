@@ -35,7 +35,7 @@ simplicidad de uso.
 - ⚖️ **Inclusión en el total** configurable por cartera.
 - 💸 **Ingresos y gastos** con actualización atómica del saldo de la cartera.
 - 🧾 **Historial de movimientos** con filtros y ordenamiento.
-- 🔁 **Transferencias entre carteras** de la misma moneda, con historial inmutable.
+- 🔁 **Transferencias entre carteras** de la misma moneda, con historial inmutable y detalle de cada transferencia con editar y eliminar.
 - 📊 **Dashboard** con totales globales y por cartera agrupados por moneda, tres movimientos y tres transferencias recientes, detalle de movimientos y transferencias con editar y eliminar, acceso al historial completo y datos refrescados al volver a la pestaña.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.

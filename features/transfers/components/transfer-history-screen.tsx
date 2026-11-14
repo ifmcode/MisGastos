@@ -13,6 +13,7 @@ import { useTransferHistoryScreen } from "../hooks/use-transfer-history-screen";
 import { transferHistoryStyles as styles } from "../styles/transfer-history.styles";
 import { Transfer } from "../types/transfer.types";
 import { getTransferHistoryEmptyCopy } from "../utils/transfer-history";
+import { TransferDetailModal } from "./transfer-detail-modal";
 import { TransferFormModal } from "./transfer-form-modal";
 import { TransferHistoryHeader } from "./transfer-history-header";
 import { TransferItem } from "./transfer-item";
@@ -38,7 +39,11 @@ export function TransferHistoryScreen() {
     mutating,
     createError,
     createFieldErrors,
+    detail,
     form,
+    openDetail,
+    editFromDetail,
+    deleteTransfer,
     reload,
     refresh,
   } = useTransferHistoryScreen();
@@ -49,7 +54,8 @@ export function TransferHistoryScreen() {
         transfer={item}
         fromWallet={walletMap.get(item.fromWalletId)}
         toWallet={walletMap.get(item.toWalletId)}
-        onPress={() => form.openEdit(item)}
+        labelKind="detail"
+        onPress={() => openDetail(item)}
       />
     );
   }
@@ -90,6 +96,17 @@ export function TransferHistoryScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      <TransferDetailModal
+        visible={detail.visible}
+        transfer={detail.transfer}
+        wallets={wallets}
+        mutating={mutating}
+        error={createError}
+        onEdit={editFromDetail}
+        onDelete={deleteTransfer}
+        onClose={detail.close}
+      />
 
       <TransferFormModal
         visible={form.visible}

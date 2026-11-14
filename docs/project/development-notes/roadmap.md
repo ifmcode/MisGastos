@@ -2,7 +2,7 @@
 
 > Single source of truth for the V1 scope, phase order and the current ticket.
 > The former `implementation-plan.md` was merged into this file on 12/11/2026.
-> **Last reviewed:** 13/11/2026
+> **Last reviewed:** 14/11/2026
 
 ## Product Vision
 A personal finance manager (wallets, movements, transfers and dashboard) merged with Splitwise-style shared finances (friends, groups, shared expenses, balances and settlements). **V1.0 is everything defined in this roadmap**; the MVP was the first milestone, not the release.
@@ -12,7 +12,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Phase:** 3.8 - Profile and preferred currency
 - **Current ticket:** TICKET-006 - Profile editing and preferred-currency selector
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-037 - Audit and extract reusable shared components (13/11/2026)
+- **Last completed:** TICKET-039 - Open transfer detail from the transfer history (14/11/2026)
 - **Next:** TICKET-006 - Profile editing and preferred-currency selector
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
@@ -87,6 +87,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] Open the movement detail from a recent movement (TICKET-034) ✅ 13/11/2026
 - [x] Add the transfer detail view with edit/delete (TICKET-035) ✅ 13/11/2026
 - [x] Open the transfer detail from a recent transfer (TICKET-036) ✅ 13/11/2026
+- [x] Open the transfer detail from the transfer history (TICKET-039) ✅ 14/11/2026
 
 ### 3.6 Shared component extraction (COMPLETED)
 - [x] Inventory and extract duplicated loading/error/empty states, form blocks and list rows into `shared/components` (TICKET-037) ✅ 13/11/2026

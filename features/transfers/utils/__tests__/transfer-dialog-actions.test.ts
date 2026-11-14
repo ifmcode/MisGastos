@@ -1,8 +1,7 @@
 import { describe, expect, it, jest } from "@jest/globals";
 
-import { Transfer } from "@/features/transfers/types/transfer.types";
-
-import { createDashboardTransferActions } from "../dashboard-transfer-actions";
+import { Transfer } from "../../types/transfer.types";
+import { createTransferDialogActions } from "../transfer-dialog-actions";
 
 function buildTransfer(overrides: Partial<Transfer>): Transfer {
   return {
@@ -19,10 +18,10 @@ function buildTransfer(overrides: Partial<Transfer>): Transfer {
   };
 }
 
-describe("createDashboardTransferActions", () => {
+describe("createTransferDialogActions", () => {
   it("opens the read-only detail of the selected transfer", () => {
     const openDetail = jest.fn();
-    const actions = createDashboardTransferActions({
+    const actions = createTransferDialogActions({
       openDetail,
       closeDetail: jest.fn(),
       openEdit: jest.fn(),
@@ -36,7 +35,7 @@ describe("createDashboardTransferActions", () => {
 
   it("closes the detail before opening the shared edit form", () => {
     const calls: string[] = [];
-    const actions = createDashboardTransferActions({
+    const actions = createTransferDialogActions({
       openDetail: jest.fn(),
       closeDetail: () => calls.push("closeDetail"),
       openEdit: () => calls.push("openEdit"),
