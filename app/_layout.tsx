@@ -5,6 +5,7 @@ import '../global.css';
 
 import { AuthNavigator } from '@/features/auth/components/auth-navigator';
 import { AuthProvider } from '@/features/auth/providers/auth-provider';
+import { FriendsPublicProfileSync } from '@/features/friends/components/friends-public-profile-sync';
 import { ProfileProvider } from '@/features/profile/providers/profile-provider';
 import { useAppColorScheme } from '@/shared/hooks/use-app-color-scheme';
 import { useAppTheme } from '@/shared/hooks/use-app-theme';
@@ -33,6 +34,7 @@ export default function RootLayout() {
       <AppThemeProvider>
         <AuthProvider>
           <ProfileProvider>
+            <FriendsPublicProfileSync />
             <RootNavigator />
           </ProfileProvider>
         </AuthProvider>

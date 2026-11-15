@@ -16,6 +16,7 @@ const MAPPING = {
   'house.fill': 'home',
   'creditcard.fill': 'account-balance-wallet',
   'list.bullet': 'list',
+  'person.2.fill': 'people',
   gear: 'settings',
 } as const satisfies Record<string, MaterialIconName>;
 

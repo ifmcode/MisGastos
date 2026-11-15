@@ -10,6 +10,49 @@ service cloud.firestore {
       return isSignedIn() && data.ownerId == request.auth.uid;
     }
 
+    // Friend pairs use a deterministic id: both uids sorted lexicographically
+    // and joined with "__". Every request and friendship of a pair lives in that
+    // single document, so no lookup query or composite index is required.
+    function hasSortedPair(memberIds) {
+      return memberIds is list
+        && memberIds.size() == 2
+        && memberIds[0] < memberIds[1];
+    }
+
+    function pairIdMatches(documentId, memberIds) {
+      return documentId == memberIds[0] + '__' + memberIds[1];
+    }
+
+    function isRequestParticipant(data) {
+      return isSignedIn() && request.auth.uid in data.participantIds;
+    }
+
+    function isFriendMember(data) {
+      return isSignedIn() && request.auth.uid in data.memberIds;
+    }
+
+    // The public profile email is not client-claimed: it must match the ID
+    // token claim, so nobody can publish someone else's address.
+    function isOwnTokenEmail(data) {
+      return request.auth.token.email != null
+        && data.email is string
+        && data.email == request.auth.token.email.lower();
+    }
+
+    // Bounded by FRIEND_DISPLAY_NAME_MAX_LENGTH (50) in the public profile
+    // schema, so a client cannot publish an oversized display name.
+    function isDisplayNameValue(value) {
+      return value == null || (value is string && value.size() <= 50);
+    }
+
+    // The accept batch creates the friendship while the request still exists, so
+    // this validates the incoming friendship against the pre-batch request.
+    function requestMatchesAcceptance(data, memberIds) {
+      return data.status == 'pending'
+        && data.recipientId == request.auth.uid
+        && data.participantIds == memberIds;
+    }
+
     // Profiles keep the Firebase uid in the `uid` field and are looked up by
     // it. Only the owner can read or update the document, and the uid cannot
     // be reassigned after creation.
@@ -72,6 +115,175 @@ service cloud.firestore {
       allow update: if isWalletOwner(resource.data)
         && request.resource.data.ownerId == resource.data.ownerId
         && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    // Public identity shared with other signed-in users: display name plus the
+    // normalized email used by the exact-match search. The document id is the
+    // uid, only its owner writes it and the uid cannot be reassigned.
+    match /publicProfiles/{profileId} {
+      allow get, list: if isSignedIn();
+
+      allow create: if isSignedIn()
+        && profileId == request.auth.uid
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(
+             ['uid', 'displayName', 'email', 'createdAt', 'updatedAt']
+           )
+        && isOwnTokenEmail(request.resource.data)
+        && isDisplayNameValue(request.resource.data.displayName)
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string;
+
+      allow update: if isSignedIn()
+        && profileId == request.auth.uid
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+             ['displayName', 'email', 'updatedAt']
+           )
+        && isOwnTokenEmail(request.resource.data)
+        && isDisplayNameValue(request.resource.data.displayName)
+        && request.resource.data.updatedAt is string;
+
+      allow delete: if false;
+    }
+
+    // Friend requests live in the deterministic pair document. Only the two
+    // participants read it, and only three transitions are allowed:
+    // cancel (sender), reject (recipient) and re-open (either member, whose
+    // requester/recipient pair is swapped when the other user now asks).
+    match /friendRequests/{requestId} {
+      // A `get` on a missing pair document must resolve to "not found" instead
+      // of permission-denied, so sending a first request can decide whether to
+      // create or re-open it. This is a deliberate existence oracle trade-off:
+      // a signed-in caller can learn whether a pair document exists, but a
+      // missing document holds no data. Never loosen reads of existing
+      // documents, which stay participant-only.
+      allow get: if isSignedIn()
+        && (
+          !exists(/databases/$(database)/documents/friendRequests/$(requestId))
+          || isRequestParticipant(resource.data)
+        );
+
+      allow list: if isRequestParticipant(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.requesterId == request.auth.uid
+        && request.resource.data.recipientId != request.auth.uid
+        && request.resource.data.status == 'pending'
+        && hasSortedPair(request.resource.data.participantIds)
+        && pairIdMatches(requestId, request.resource.data.participantIds)
+        && request.resource.data.requesterId
+             in request.resource.data.participantIds
+        && request.resource.data.recipientId
+             in request.resource.data.participantIds
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string
+        && request.resource.data.keys().hasOnly(
+             [
+               'requesterId',
+               'recipientId',
+               'participantIds',
+               'status',
+               'createdAt',
+               'updatedAt'
+             ]
+           )
+        && exists(/databases/$(database)/documents/publicProfiles/$(request.resource.data.recipientId))
+        // A live request and an accepted friendship must never coexist.
+        && !exists(/databases/$(database)/documents/friendships/$(requestId));
+
+      allow update: if isRequestParticipant(resource.data)
+        && isRequestParticipant(request.resource.data)
+        && request.resource.data.participantIds == resource.data.participantIds
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (
+          (
+            resource.data.status == 'pending'
+            && request.resource.data.status == 'cancelled'
+            && resource.data.requesterId == request.auth.uid
+            && request.resource.data.requesterId == resource.data.requesterId
+            && request.resource.data.recipientId == resource.data.recipientId
+            && request.resource.data.updatedAt is string
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['status', 'updatedAt'])
+          )
+          || (
+            resource.data.status == 'pending'
+            && request.resource.data.status == 'rejected'
+            && resource.data.recipientId == request.auth.uid
+            && request.resource.data.requesterId == resource.data.requesterId
+            && request.resource.data.recipientId == resource.data.recipientId
+            && request.resource.data.updatedAt is string
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['status', 'updatedAt'])
+          )
+          || (
+            resource.data.status in ['rejected', 'cancelled']
+            && request.resource.data.status == 'pending'
+            && request.resource.data.requesterId == request.auth.uid
+            && request.resource.data.recipientId != request.auth.uid
+            && request.resource.data.requesterId
+                 in request.resource.data.participantIds
+            && request.resource.data.recipientId
+                 in request.resource.data.participantIds
+            && request.resource.data.updatedAt is string
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+                 ['status', 'requesterId', 'recipientId', 'updatedAt']
+               )
+            // Re-opening must not resurrect a request for an existing friend.
+            && !exists(/databases/$(database)/documents/friendships/$(requestId))
+          )
+        );
+
+      // Inside the accept batch, rules see the pre-batch request, so only the
+      // recipient deletes it and only while it is still pending.
+      allow delete: if isRequestParticipant(resource.data)
+        && resource.data.recipientId == request.auth.uid
+        && resource.data.status == 'pending';
+    }
+
+    // Accepted relationships. The friendship is the single source of truth and
+    // is created by the accept batch, which deletes the pending request in the
+    // same write; either member can remove the friend (no blocking).
+    match /friendships/{friendshipId} {
+      // Same "missing means not a friend" contract as the requests: a `get` on
+      // a pair without friendship resolves to not-found so `removeFriend` can
+      // answer FRIEND_NOT_FOUND instead of permission-denied. The trade-off is
+      // a harmless existence oracle: missing documents hold no data, while
+      // existing friendships stay member-only.
+      allow get: if isSignedIn()
+        && (
+          !exists(/databases/$(database)/documents/friendships/$(friendshipId))
+          || isFriendMember(resource.data)
+        );
+
+      allow list: if isFriendMember(resource.data);
+
+      allow delete: if isFriendMember(resource.data);
+
+      allow create: if isSignedIn()
+        && hasSortedPair(request.resource.data.memberIds)
+        && pairIdMatches(friendshipId, request.resource.data.memberIds)
+        && request.auth.uid in request.resource.data.memberIds
+        && request.resource.data.recipientId == request.auth.uid
+        && request.resource.data.requesterId != request.auth.uid
+        && request.resource.data.requesterId
+             in request.resource.data.memberIds
+        && request.resource.data.recipientId
+             in request.resource.data.memberIds
+        && request.resource.data.createdAt is string
+        && request.resource.data.keys().hasOnly(
+             ['memberIds', 'requesterId', 'recipientId', 'createdAt']
+           )
+        && exists(/databases/$(database)/documents/friendRequests/$(friendshipId))
+        && requestMatchesAcceptance(
+             get(/databases/$(database)/documents/friendRequests/$(friendshipId)).data,
+             request.resource.data.memberIds
+           );
+
+      // Friendships are immutable; removing a friend deletes the document.
+      allow update: if false;
     }
   }
 }

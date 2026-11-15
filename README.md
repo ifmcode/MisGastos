@@ -38,6 +38,7 @@ simplicidad de uso.
 - 🔁 **Transferencias entre carteras** de la misma moneda, con historial inmutable y detalle de cada transferencia con editar y eliminar.
 - 📊 **Dashboard** con totales globales y por cartera agrupados por moneda, tres movimientos y tres transferencias recientes, detalle de movimientos y transferencias con editar y eliminar, acceso al historial completo y datos refrescados al volver a la pestaña.
 - 👤 **Perfil y moneda preferida** en Ajustes: nombre visible editable y sincronizado con Firebase Auth, correo de la cuenta y moneda por defecto para las nuevas carteras.
+- 👥 **Amigos y solicitudes** con búsqueda por correo exacto, solicitudes recibidas y enviadas con aceptar, rechazar y cancelar, lista de amigos con saldo derivado (**Te debe** / **Le debes** / **En paz**), eliminación con confirmación y una pestaña **Amigos**. El saldo queda en 0 hasta que los gastos compartidos y las liquidaciones (TICKET-009 y TICKET-010) registren movimientos compartidos.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
 - 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías y dashboard: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila y botón flotante.
@@ -60,7 +61,7 @@ simplicidad de uso.
 ```text
 MisGastos/
 ├── app/                    # Rutas y layouts de Expo Router
-├── features/               # Módulos por dominio (auth, profile, wallets, transactions, transfers, dashboard…)
+├── features/               # Módulos por dominio (auth, profile, wallets, transactions, transfers, dashboard, categories, friends…)
 │   └── <feature>/
 │       ├── components/     # UI específica del dominio
 │       ├── hooks/          # Orquestación y estado de UI
@@ -139,8 +140,13 @@ npm run web        # Navegador
 ### Desplegar reglas de Firestore
 
 ```bash
-npx firebase-tools deploy --only firestore:rules
+npm run firebase-deploy:rules      # despliega firestore.rules
+npm run firestore-update-rules     # inicia sesión en Firebase y luego despliega
 ```
+
+> El despliegue es manual: cada cambio en `firestore.rules` debe publicarse desde una
+> máquina con credenciales de Firebase. Las reglas de `publicProfiles`, `friendRequests`
+> y `friendships` (TICKET-007) todavía están **pendientes de despliegue**.
 
 ## 📜 Scripts disponibles
 
@@ -155,6 +161,8 @@ npx firebase-tools deploy --only firestore:rules
 | `npm run test:coverage` | Ejecuta Jest y exige >= 90% en la lógica de negocio. |
 | `npm run test:ci` | Ejecuta la cobertura una sola vez y en serie (CI). |
 | `npm run check:copy` | Comprueba que todo el texto visible sale de las traducciones. |
+| `npm run firebase-deploy:rules` | Despliega las reglas de Firestore. |
+| `npm run firestore-update-rules` | Inicia sesión en Firebase y despliega las reglas. |
 
 El flujo de agentes usa
 `.opencode/skills/misgastos-feature/scripts/verify.ps1`, que encadena `tsc`, `lint`,
@@ -177,6 +185,10 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
+Estado actual (15/11/2026): **166 suites / 809 tests**; la cobertura acotada a la
+lógica de negocio está en **98.87% de sentencias, 94.21% de ramas, 98.93% de
+funciones y 99.39% de líneas**, y `npm run check:copy` audita **180 archivos TSX**.
+
 ## 🗺️ Roadmap
 
 - [x] Autenticación
@@ -186,7 +198,7 @@ Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/gu
 - [x] Dashboard
 - [x] Estados, formularios y filas compartidas
 - [x] Perfil y moneda preferida
-- [ ] Amigos
+- [x] Amigos
 - [ ] Grupos y gastos compartidos
 - [ ] Liquidación de deudas
 - [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización; implementación en la fase 7)
@@ -202,6 +214,7 @@ Consulta el roadmap completo en
 - [Roadmap y alcance V1](docs/project/development-notes/roadmap.md)
 - [Inventario de componentes compartidos](docs/project/development-notes/component-inventory.md)
 - [Arquitectura offline-first (diseño y ADR)](docs/project/development-notes/2026-11-14-offline-first-architecture.md)
+- [Amigos y solicitudes (TICKET-007)](docs/project/development-notes/2026-11-15-friends-and-requests.md): modelo de datos, ciclo de vida de las solicitudes, reglas y límites actuales.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)
 - [Guía de agentes y skills (OpenCode)](docs/project/guidelines/agents-and-skills.md)

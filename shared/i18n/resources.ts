@@ -4,6 +4,8 @@ import categoriesEn from "@/features/categories/locales/en.json";
 import categoriesEs from "@/features/categories/locales/es.json";
 import dashboardEn from "@/features/dashboard/locales/en.json";
 import dashboardEs from "@/features/dashboard/locales/es.json";
+import friendsEn from "@/features/friends/locales/en.json";
+import friendsEs from "@/features/friends/locales/es.json";
 import profileEn from "@/features/profile/locales/en.json";
 import profileEs from "@/features/profile/locales/es.json";
 import settingsEn from "@/features/settings/locales/en.json";
@@ -30,6 +32,7 @@ export const NAMESPACES = [
   "categories",
   "transactions",
   "transfers",
+  "friends",
   "dashboard",
   "settings",
   "profile",
@@ -48,6 +51,7 @@ export const resources = {
     categories: categoriesEs,
     transactions: transactionsEs,
     transfers: transfersEs,
+    friends: friendsEs,
     dashboard: dashboardEs,
     settings: settingsEs,
     profile: profileEs,
@@ -61,6 +65,7 @@ export const resources = {
     categories: categoriesEn,
     transactions: transactionsEn,
     transfers: transfersEn,
+    friends: friendsEn,
     dashboard: dashboardEn,
     settings: settingsEn,
     profile: profileEn,

@@ -2,7 +2,7 @@
 
 > Single source of truth for the V1 scope, phase order and the current ticket.
 > The former `implementation-plan.md` was merged into this file on 12/11/2026.
-> **Last reviewed:** 14/11/2026
+> **Last reviewed:** 15/11/2026
 
 ## Product Vision
 A personal finance manager (wallets, movements, transfers and dashboard) merged with Splitwise-style shared finances (friends, groups, shared expenses, balances and settlements). **V1.0 is everything defined in this roadmap**; the MVP was the first milestone, not the release.
@@ -10,11 +10,11 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 5 - Social vertical slice
-- **Current ticket:** TICKET-007 - Friends and requests
+- **Current ticket:** Minimal subset of TICKET-009 - 1:1 shared expense
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-024 - Agents and skills (14/11/2026)
+- **Last completed:** TICKET-007 - Friends and requests (15/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Next:** TICKET-007 - Friends and requests
+- **Next:** Minimal subset of TICKET-009 - 1:1 shared expense
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -112,11 +112,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - This phase runs before Phase 5; the full offline implementation is Phase 7
 
 ## Phase 5: Social vertical slice (IN PROGRESS)
-- [ ] TICKET-007: friends and requests
+- [x] TICKET-007: friends and requests ✅ 15/11/2026
 - [ ] Minimal subset of TICKET-009: 1:1 shared expense
 - [ ] Minimal subset of TICKET-010: balance and settlement between two people
 - Validate with 3-5 real users
 - Do not build a friends list without shared expenses; it does not validate the product
+- Delivered model, request state machine, rules and limitations: [`2026-11-15-friends-and-requests.md`](2026-11-15-friends-and-requests.md)
 
 ## Phase 6: Groups (QUEUED)
 - [ ] TICKET-008: create groups

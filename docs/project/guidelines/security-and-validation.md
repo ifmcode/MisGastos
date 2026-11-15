@@ -33,7 +33,10 @@ function validateAmount(amount: number): {ok: boolean, error?: string} {
 - Rules live in `firestore.rules` at the repository root.
 - `users/{uid}` documents are only readable/writable by their owner (the current auth flow stores the uid in a field).
 - The root `wallets/{walletId}` collection is owner-only; reads/deletes require `resource.data.ownerId == uid`, creates require `request.resource.data.ownerId == uid`, and updates cannot change `ownerId`.
-- Deploy with `npx firebase-tools login` and then `npx firebase-tools deploy --only firestore:rules`.
+- `publicProfiles/{uid}` is a minimal projection (display name + normalized email) readable by any **signed-in** user and writable only by its owner, with a field allow-list, an immutable `uid`, a stored email equal to the caller's token email (`isOwnTokenEmail`) and `delete` denied.
+- `friendRequests/{id}` and `friendships/{id}` use the deterministic pair id `sortedUidA__sortedUidB` (`createFriendPairId`). Requests are participant-only and friendships member-only; a `get` on a missing pair resolves to not-found, so rules can be existence-only. Request updates only allow `pending → cancelled` (sender), `pending → rejected` (recipient) and `rejected|cancelled → pending` (re-send with swapped roles), with the pair and `createdAt` immutable; deletes only by the recipient while pending. A friendship is created by that same recipient in the transaction that deletes the request, is immutable, and either member can delete it.
+- Transactions, transfers, categories, `publicProfiles`, `friendRequests` and `friendships` share the same manual deployment command; the rules for the friends collections (`publicProfiles`, `friendRequests`, `friendships`) are **pending deployment**.
+- Deploy with `npm run firestore-update-rules` (login + deploy) or `npm run firebase-deploy:rules` when the session is already authenticated.
 - Keep `firestore.indexes.json` updated when new composite indexes are needed.
 
 ## 5. Security Checklist
