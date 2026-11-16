@@ -1,10 +1,11 @@
 import { useRouter, type Href } from "expo-router";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { RefreshControl, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
-import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
+import type { Friend } from "@/features/friends/types/friend.types";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
 import { LoadingState } from "@/shared/components/molecules/loading-state";
@@ -29,6 +30,13 @@ export function SocialScreen() {
   const hasData = screen.friends.length > 0 || screen.pendingCount > 0;
   const showFullError = !!screen.error && !hasData;
   const loaded = !screen.loading && !showFullError;
+
+  const openFriend = useCallback(
+    (friend: Friend) => {
+      router.push(`/social/friends/${friend.uid}` as Href);
+    },
+    [router],
+  );
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + 16 }]}>
@@ -58,7 +66,6 @@ export function SocialScreen() {
           }
         >
           <ErrorBanner message={screen.error} />
-          <ErrorBanner message={screen.actionError} />
 
           <SocialPendingRow
             count={screen.pendingCount}
@@ -73,8 +80,7 @@ export function SocialScreen() {
           {screen.segment === "friends" ? (
             <SocialFriendsSegment
               friends={screen.friends}
-              pendingId={screen.pendingId}
-              onRemove={screen.requestRemove}
+              onOpen={openFriend}
             />
           ) : (
             <SocialGroupsSegment />
@@ -91,16 +97,6 @@ export function SocialScreen() {
           onAddFriend={() => router.push("/social/add-friend" as Href)}
         />
       ) : null}
-
-      <ConfirmDialog
-        visible={screen.confirm.visible}
-        title={screen.confirm.title}
-        message={screen.confirm.message}
-        confirmLabel={screen.confirm.confirmLabel}
-        cancelLabel={screen.confirm.cancelLabel}
-        onConfirm={screen.confirm.confirm}
-        onCancel={screen.confirm.close}
-      />
     </ThemedView>
   );
 }

@@ -34,7 +34,12 @@ export function Fab({
         { bottom, backgroundColor: theme.primary },
       ]}
     >
-      <Ionicons name="add" size={30} color={theme.onPrimary} />
+      <Ionicons
+        name="add"
+        size={30}
+        color={theme.onPrimary}
+        accessible={false}
+      />
     </Pressable>
   );
 }

@@ -14,6 +14,8 @@ export interface SharedExpenseFormModalProps {
   error: string | null;
   submitting: boolean;
   isEditing: boolean;
+  /** Create entry point that already knows the friend: the field stays locked. */
+  friendLocked?: boolean;
   onSubmit: (input: SharedExpenseInput) => void;
   onCancel: () => void;
 }
@@ -27,6 +29,7 @@ export function SharedExpenseFormModal({
   error,
   submitting,
   isEditing,
+  friendLocked,
   onSubmit,
   onCancel,
 }: SharedExpenseFormModalProps) {
@@ -43,6 +46,7 @@ export function SharedExpenseFormModal({
         error={error}
         submitting={submitting}
         isEditing={isEditing}
+        friendLocked={friendLocked}
         onSubmit={onSubmit}
         onCancel={onCancel}
       />

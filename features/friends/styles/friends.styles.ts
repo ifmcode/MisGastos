@@ -111,6 +111,7 @@ export const friendsStyles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 14,
     padding: 14,
+    minHeight: 44,
   },
   friendBody: {
     flex: 1,
@@ -120,13 +121,6 @@ export const friendsStyles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     fontWeight: "600",
-  },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: "center",
-    justifyContent: "center",
   },
 
   pressed: {

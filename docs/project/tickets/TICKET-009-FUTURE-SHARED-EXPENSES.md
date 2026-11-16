@@ -94,9 +94,11 @@ Add expenses inside a group, choose who paid and split the amount equally, by pe
   grouping, and `FriendRow` renders one balance line per currency.
 
 ### UI
-- A **Gastos compartidos** section at the end of the **Amigos** tab
-  (`SharedExpensesSection`) with add, edit and delete, inline loading/error/empty
-  states and the parent pull-to-refresh passed down.
+- The **Gastos compartidos** list of one friend pair lives in the friend detail
+  (`/social/friends/[uid]`, TICKET-042) through `FriendSharedExpensesList`: add
+  from that screen's FAB with the friend preselected and locked, plus edit and
+  delete, loading/error/empty states and pull-to-refresh. The old tab section was
+  removed by TICKET-041 and deleted by TICKET-042.
 - `SharedExpenseFormModal` (page-sheet) with friend picker, description, amount,
   currency chips, date field, payer chips, the split-mode chips (**Igual** and
   **Importe**) and the per-mode inputs. Changing the amount resets the fixed

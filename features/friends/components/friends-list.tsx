@@ -11,17 +11,11 @@ import { FriendRow } from "./friend-row";
 
 export interface FriendsListProps {
   friends: readonly Friend[];
-  /** Id of the row or profile with an operation in flight, if any. */
-  pendingId: string | null;
-  onRemove: (friend: Friend) => void;
+  onOpen: (friend: Friend) => void;
 }
 
 /** Accepted friends section with its empty state. */
-export function FriendsList({
-  friends,
-  pendingId,
-  onRemove,
-}: FriendsListProps) {
+export function FriendsList({ friends, onOpen }: FriendsListProps) {
   const theme = useFormTheme();
   const { t } = useScopedTranslation("friends");
 
@@ -39,12 +33,7 @@ export function FriendsList({
         />
       ) : (
         friends.map((friend) => (
-          <FriendRow
-            key={friend.uid}
-            friend={friend}
-            pendingId={pendingId}
-            onRemove={onRemove}
-          />
+          <FriendRow key={friend.uid} friend={friend} onOpen={onOpen} />
         ))
       )}
     </View>

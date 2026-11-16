@@ -54,7 +54,12 @@ export function EmptyState({
         }
       >
         {action.icon ? (
-          <Ionicons name={action.icon} size={20} color={color} />
+          <Ionicons
+            name={action.icon}
+            size={20}
+            color={color}
+            accessible={false}
+          />
         ) : null}
         <ThemedText
           style={

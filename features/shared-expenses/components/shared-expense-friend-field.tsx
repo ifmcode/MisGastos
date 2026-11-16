@@ -11,11 +11,15 @@ import { sharedExpensesStyles as styles } from "../styles/shared-expenses.styles
 import { getSharedExpenseParticipantName } from "../utils/shared-expense-friends";
 import { SharedExpenseFriendPickerDialog } from "./shared-expense-friend-picker-dialog";
 
+export type SharedExpenseFriendLockReason = "editing" | "preselected";
+
 export interface SharedExpenseFriendFieldProps {
   friends: readonly Friend[];
   selectedUid: string;
   /** Editing locks the pair: the service rejects retargeting it. */
   locked: boolean;
+  /** Editing keeps the stored friend; a create entry point preselects it. */
+  lockedReason?: SharedExpenseFriendLockReason;
   onSelect: (friendUid: string) => void;
 }
 
@@ -24,6 +28,7 @@ export function SharedExpenseFriendField({
   friends,
   selectedUid,
   locked,
+  lockedReason = "editing",
   onSelect,
 }: SharedExpenseFriendFieldProps) {
   const theme = useFormTheme();
@@ -37,7 +42,11 @@ export function SharedExpenseFriendField({
         t("friendFallback"),
       )
     : "";
-  const hint = locked ? t("form.friendLockedHint") : t("form.friendHint");
+  const lockedHint =
+    lockedReason === "preselected"
+      ? t("form.friendPreselectedHint", { name })
+      : t("form.friendLockedHint");
+  const hint = locked ? lockedHint : t("form.friendHint");
 
   function selectFriend(friendUid: string) {
     setPickerVisible(false);
@@ -85,7 +94,7 @@ export function SharedExpenseFriendField({
 
       {locked ? (
         <ThemedText style={[styles.helper, { color: theme.muted }]}>
-          {t("form.friendLockedHint")}
+          {lockedHint}
         </ThemedText>
       ) : null}
 

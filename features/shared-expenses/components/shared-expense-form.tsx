@@ -10,18 +10,13 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { useSharedExpenseForm } from "../hooks/use-shared-expense-form";
-import type {
-  SharedExpenseFieldErrors,
-  SharedExpenseValidationCode,
-} from "../schemas/shared-expense.schema";
+import type { SharedExpenseFieldErrors } from "../schemas/shared-expense.schema";
 import { sharedExpensesStyles as styles } from "../styles/shared-expenses.styles";
 import type { SharedExpenseInput } from "../types/shared-expense.types";
 import type { SharedExpenseFormValues } from "../utils/shared-expense-form";
-import { getSharedExpenseParticipantName } from "../utils/shared-expense-friends";
 import { SharedExpenseFormMainFields } from "./shared-expense-form-main-fields";
+import { SharedExpenseFormParticipants } from "./shared-expense-form-participants";
 import { SharedExpenseFriendField } from "./shared-expense-friend-field";
-import { SharedExpensePayerSelector } from "./shared-expense-payer-selector";
-import { SharedExpenseSplitSection } from "./shared-expense-split-section";
 
 export interface SharedExpenseFormProps {
   friends: readonly Friend[];
@@ -30,6 +25,8 @@ export interface SharedExpenseFormProps {
   error: string | null;
   submitting: boolean;
   isEditing: boolean;
+  /** Locked friend on create: the entry point already resolved the pair. */
+  friendLocked?: boolean;
   onSubmit: (input: SharedExpenseInput) => void;
   onCancel: () => void;
 }
@@ -42,23 +39,17 @@ export function SharedExpenseForm({
   error,
   submitting,
   isEditing,
+  friendLocked,
   onSubmit,
   onCancel,
 }: SharedExpenseFormProps) {
   const theme = useFormTheme();
-  const { t, tr } = useScopedTranslation("sharedExpenses");
+  const { t } = useScopedTranslation("sharedExpenses");
   const form = useSharedExpenseForm({ initialValues, fieldErrors, onSubmit });
   const { values, errors, submit } = form;
-
-  function errorText(code: SharedExpenseValidationCode | undefined) {
-    return code ? tr(`errors.${code}`) : null;
-  }
-
-  const friendName = getSharedExpenseParticipantName(
-    friends,
-    values.friendUid,
-    t("friendFallback"),
-  );
+  const locked = isEditing || friendLocked === true;
+  const lockedReason =
+    friendLocked === true && !isEditing ? "preselected" : "editing";
 
   return (
     <SafeAreaView style={[styles.flex, { backgroundColor: theme.background }]}>
@@ -89,7 +80,8 @@ export function SharedExpenseForm({
             <SharedExpenseFriendField
               friends={friends}
               selectedUid={values.friendUid}
-              locked={isEditing}
+              locked={locked}
+              lockedReason={lockedReason}
               onSelect={form.changeFriend}
             />
 
@@ -103,28 +95,14 @@ export function SharedExpenseForm({
               onDateTextChange={form.changeDateText}
             />
 
-            <SharedExpensePayerSelector
-              viewerUid={values.viewerUid}
-              friendUid={values.friendUid}
-              friendName={friendName}
-              payerId={values.payerId}
-              errorText={errorText(errors.payerId)}
+            <SharedExpenseFormParticipants
+              friends={friends}
+              values={values}
+              errors={errors}
               disabled={submitting}
-              onChange={form.changePayer}
-            />
-
-            <SharedExpenseSplitSection
-              mode={values.splitMode}
-              currency={values.currency}
-              viewerUid={values.viewerUid}
-              friendUid={values.friendUid}
-              friendName={friendName}
-              values={values.splitValues[values.splitMode]}
-              errorText={errorText(errors.participants)}
-              modeErrorText={errorText(errors.splitMode)}
-              disabled={submitting}
-              onModeChange={form.changeSplitMode}
-              onValueChange={form.changeSplitValue}
+              onPayerChange={form.changePayer}
+              onSplitModeChange={form.changeSplitMode}
+              onSplitValueChange={form.changeSplitValue}
             />
 
             <FormActions

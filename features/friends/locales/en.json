@@ -34,9 +34,14 @@
     "sectionTitle": "Your friends",
     "emptyTitle": "No friends yet",
     "emptyMessage": "Search by email to send your first request.",
+    "openAccessibility": "Open {{name}}'s details",
+    "openHint": "Shows your balances and shared expenses with this person.",
     "removeAccessibility": "Remove {{name}} from your friends",
     "removeHint": "Asks for confirmation before removing this person from your list.",
     "removingHint": "Removing this person from your friends…"
+  },
+  "detail": {
+    "since": "Friends since {{date}}"
   },
   "balance": {
     "owesYou": "Owes you {{amount}}",

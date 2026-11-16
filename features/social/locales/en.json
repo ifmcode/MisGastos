@@ -45,5 +45,19 @@
     "title": "Add friend",
     "subtitle": "Search an account by its exact email to send a request.",
     "retrySearchAccessibility": "Retry the email search"
+  },
+  "friendDetail": {
+    "title": "Friend details",
+    "loading": "Loading the friend details…",
+    "errorTitle": "Could not load this friend",
+    "retryAccessibility": "Retry loading the friend details",
+    "notFoundTitle": "This friend is no longer in your list",
+    "notFoundMessage": "The friendship may have been removed or the account may no longer be available.",
+    "notFoundAction": "Back to your friends",
+    "notFoundActionAccessibility": "Go back to the friends list",
+    "emptyTitle": "You have not shared any expense with this friend yet",
+    "emptyMessage": "Add an expense with the + button to split it and see what you owe each other here.",
+    "fabAccessibility": "Add a shared expense with {{name}}",
+    "fabHint": "Opens the form with this friend already selected."
   }
 }

@@ -25,6 +25,7 @@ export interface UseSharedExpenseEditorOptions {
   viewerUid: string | undefined;
   friends: readonly Friend[];
   preferredCurrency: CurrencyCode;
+  lockedFriendUid?: string;
   onSaved: () => void;
 }
 
@@ -35,6 +36,7 @@ export interface SharedExpenseEditorController {
   formError: string | null;
   fieldErrors: SharedExpenseFieldErrors;
   submitting: boolean;
+  friendLocked: boolean;
   openCreate: () => void;
   openEdit: (expense: SharedExpense) => void;
   closeForm: () => void;
@@ -46,6 +48,7 @@ export function useSharedExpenseEditor({
   viewerUid,
   friends,
   preferredCurrency,
+  lockedFriendUid,
   onSaved,
 }: UseSharedExpenseEditorOptions): SharedExpenseEditorController {
   const service = useSharedExpensesService();
@@ -65,12 +68,12 @@ export function useSharedExpenseEditor({
 
     return createSharedExpenseFormValues({
       viewerUid: viewer,
-      friendUid: friends[0]?.uid ?? "",
+      friendUid: lockedFriendUid ?? friends[0]?.uid ?? "",
       currency: preferredCurrency,
       date: getTodayIsoDate(),
       payerId: viewer,
     });
-  }, [editingExpense, friends, preferredCurrency, viewerUid]);
+  }, [editingExpense, friends, lockedFriendUid, preferredCurrency, viewerUid]);
 
   const openCreate = useCallback(() => {
     setEditingExpense(null);
@@ -93,44 +96,41 @@ export function useSharedExpenseEditor({
     setEditingExpense(null);
   }, [submitting]);
 
-  const submit = useCallback(
-    (input: SharedExpenseInput) => {
-      if (!viewerUid) {
-        setFormError(tr("errors.SIGN_IN_REQUIRED"));
-        return;
-      }
+  const submit = useCallback((input: SharedExpenseInput) => {
+    if (!viewerUid) {
+      setFormError(tr("errors.SIGN_IN_REQUIRED"));
+      return;
+    }
 
-      const persist = async () => {
-        setSubmitting(true);
-        setFormError(null);
-        setFieldErrors({});
+    const persist = async () => {
+      setSubmitting(true);
+      setFormError(null);
+      setFieldErrors({});
 
-        try {
-          if (editingExpense) {
-            await service.updateExpense(viewerUid, editingExpense.id, input);
-          } else {
-            await service.createExpense(viewerUid, input);
-          }
-
-          setFormVisible(false);
-          setEditingExpense(null);
-          onSaved();
-        } catch (error: unknown) {
-          if (error instanceof SharedExpenseValidationError) {
-            setFieldErrors(error.fieldErrors);
-          }
-          setFormError(
-            tr(`errors.${getSharedExpenseErrorCode(error, "SAVE_FAILED")}`),
-          );
-        } finally {
-          setSubmitting(false);
+      try {
+        if (editingExpense) {
+          await service.updateExpense(viewerUid, editingExpense.id, input);
+        } else {
+          await service.createExpense(viewerUid, input);
         }
-      };
 
-      void persist();
-    },
-    [editingExpense, onSaved, service, tr, viewerUid],
-  );
+        setFormVisible(false);
+        setEditingExpense(null);
+        onSaved();
+      } catch (error: unknown) {
+        if (error instanceof SharedExpenseValidationError) {
+          setFieldErrors(error.fieldErrors);
+        }
+        setFormError(
+          tr(`errors.${getSharedExpenseErrorCode(error, "SAVE_FAILED")}`),
+        );
+      } finally {
+        setSubmitting(false);
+      }
+    };
+
+    void persist();
+  }, [editingExpense, onSaved, service, tr, viewerUid]);
 
   return {
     formVisible,
@@ -139,6 +139,7 @@ export function useSharedExpenseEditor({
     formError,
     fieldErrors,
     submitting,
+    friendLocked: (lockedFriendUid ?? "").trim().length > 0,
     openCreate,
     openEdit,
     closeForm,

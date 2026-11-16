@@ -45,5 +45,19 @@
     "title": "Añadir amigo",
     "subtitle": "Busca una cuenta por su email exacto para enviarle una solicitud.",
     "retrySearchAccessibility": "Reintentar la búsqueda por email"
+  },
+  "friendDetail": {
+    "title": "Detalle del amigo",
+    "loading": "Cargando el detalle del amigo…",
+    "errorTitle": "No se pudo cargar este amigo",
+    "retryAccessibility": "Reintentar la carga del detalle del amigo",
+    "notFoundTitle": "Este amigo ya no está en tu lista",
+    "notFoundMessage": "Puede que hayas eliminado la amistad o que la cuenta ya no esté disponible.",
+    "notFoundAction": "Volver a tus amigos",
+    "notFoundActionAccessibility": "Volver a la lista de amigos",
+    "emptyTitle": "Aún no compartes gastos con este amigo",
+    "emptyMessage": "Añade un gasto con el botón + para repartirlo y ver aquí lo que os debéis.",
+    "fabAccessibility": "Añadir un gasto compartido con {{name}}",
+    "fabHint": "Abre el formulario con este amigo ya seleccionado."
   }
 }

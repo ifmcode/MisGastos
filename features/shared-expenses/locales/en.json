@@ -2,18 +2,8 @@
   "title": "Shared expenses",
   "loading": "Loading shared expenses…",
   "retryAccessibility": "Retry loading shared expenses",
-  "add": "Add expense",
-  "addAccessibility": "Add a shared expense",
-  "addHint": "Opens the form to split an expense with a friend.",
-  "addDisabledHelper": "Add a friend to share expenses.",
   "friendFallback": "Friend",
   "viewerName": "You",
-  "empty": {
-    "noFriendsTitle": "Add a friend to share expenses",
-    "noFriendsMessage": "Shared expenses need at least one accepted friend.",
-    "noExpensesTitle": "You have not shared any expense yet",
-    "noExpensesMessage": "Add an expense to split it with a friend."
-  },
   "row": {
     "youPaid": "You paid",
     "friendPaid": "{{name}} paid",
@@ -46,6 +36,7 @@
     "friendSelectedAccessibility": "Selected friend: {{name}}",
     "friendHint": "Opens the friend list to choose who shares the expense.",
     "friendLockedHint": "You cannot change the friend of an existing expense.",
+    "friendPreselectedHint": "This expense is being created with {{name}}; you cannot change the friend here.",
     "pickerTitle": "Select friend",
     "pickerClose": "Close the friend list",
     "pickerEmpty": "You have no accepted friends yet.",

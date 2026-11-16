@@ -34,9 +34,14 @@
     "sectionTitle": "Tus amigos",
     "emptyTitle": "Aún no tienes amigos",
     "emptyMessage": "Busca por email para enviar tu primera solicitud.",
+    "openAccessibility": "Abrir el detalle de {{name}}",
+    "openHint": "Muestra los saldos y los gastos compartidos con esta persona.",
     "removeAccessibility": "Eliminar a {{name}} de tus amigos",
     "removeHint": "Pide confirmación antes de eliminar a esta persona de tu lista.",
     "removingHint": "Eliminando a esta persona de tus amigos…"
+  },
+  "detail": {
+    "since": "Amigos desde {{date}}"
   },
   "balance": {
     "owesYou": "Te debe {{amount}}",

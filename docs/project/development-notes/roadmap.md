@@ -10,12 +10,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 5 - Social vertical slice
-- **Current ticket:** TICKET-042 - Friend detail screen with shared expenses
+- **Current ticket:** TICKET-043 - Shared expense detail screen
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-041 - Social tab shell, add-friend screen and pending requests (16/11/2026)
+- **Last completed:** TICKET-042 - Friend detail screen with shared expenses (16/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-043..TICKET-047 (shared-expense detail, wallet link, movements menu, 1:1 settlement and notifications) and TICKET-008 in Phase 6
-- **Next:** TICKET-042 - Friend detail screen with shared expenses
+- **Queued:** TICKET-044..TICKET-047 (wallet link, movements menu, 1:1 settlement and notifications) and TICKET-008 in Phase 6
+- **Next:** TICKET-043 - Shared expense detail screen
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -120,11 +120,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ### 5.1 Social navigation and shared-expense UX
 - [x] TICKET-041: Social tab shell, add-friend screen and pending requests ✅ 16/11/2026
-- [ ] TICKET-042: friend detail screen with shared expenses
+- [x] TICKET-042: friend detail screen with shared expenses ✅ 16/11/2026
 - [ ] TICKET-043: shared expense detail screen
 - [ ] TICKET-044: shared expense wallet and linked personal movement
 - [ ] TICKET-045: movements FAB create menu
 - Delivered Social shell, pending requests, add-friend and requests routes, the shared `FabActionMenu` and the accepted shared-expense entry gap: [`2026-11-16-social-tab.md`](2026-11-16-social-tab.md)
+- Delivered friend detail, header balances, filtered 1:1 expense list, locked-friend FAB and the removal move: [`2026-11-16-friend-detail.md`](2026-11-16-friend-detail.md)
 
 ### 5.2 1:1 settlement and notifications
 - [ ] TICKET-046: 1:1 debt settlement with bilateral confirmation

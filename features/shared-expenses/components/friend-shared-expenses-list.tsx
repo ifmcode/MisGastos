@@ -2,39 +2,41 @@ import { View } from "react-native";
 
 import type { Friend } from "@/features/friends/types/friend.types";
 import { EmptyState } from "@/shared/components/molecules/empty-state";
-import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { sharedExpensesStyles as styles } from "../styles/shared-expenses.styles";
 import type { SharedExpense } from "../types/shared-expense.types";
 import { SharedExpenseRow } from "./shared-expense-row";
 
-export interface SharedExpensesListProps {
-  friends: readonly Friend[];
+export interface FriendSharedExpensesListProps {
   expenses: readonly SharedExpense[];
+  friends: readonly Friend[];
   viewerUid: string;
+  /** Id of the expense with an operation in flight, if any. */
   pendingId: string | null;
+  /** Already translated empty copy: each surface owns its own tone. */
+  emptyTitle: string;
+  emptyMessage: string;
   onEdit: (expense: SharedExpense) => void;
   onDelete: (expense: SharedExpense) => void;
 }
 
-/** Active expenses with their empty state. */
-export function SharedExpensesList({
-  friends,
+/**
+ * Expenses of one friend pair, without a friend picker and without a section
+ * header, so the friend detail and any later surface can share it.
+ */
+export function FriendSharedExpensesList({
   expenses,
+  friends,
   viewerUid,
   pendingId,
+  emptyTitle,
+  emptyMessage,
   onEdit,
   onDelete,
-}: SharedExpensesListProps) {
-  const { t } = useScopedTranslation("sharedExpenses");
-
+}: FriendSharedExpensesListProps) {
   if (expenses.length === 0) {
     return (
-      <EmptyState
-        variant="card"
-        title={t("empty.noExpensesTitle")}
-        message={t("empty.noExpensesMessage")}
-      />
+      <EmptyState variant="card" title={emptyTitle} message={emptyMessage} />
     );
   }
 

@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
@@ -16,34 +16,30 @@ import { getFriendDisplayName } from "../utils/friend-display";
 
 export interface FriendRowProps {
   friend: Friend;
-  /** Id of the row or profile with an operation in flight, if any. */
-  pendingId: string | null;
-  onRemove: (friend: Friend) => void;
+  /** Opens the friend detail; removal lives on that screen (TICKET-042). */
+  onOpen: (friend: Friend) => void;
 }
 
 /**
- * Accepted friend with one derived balance line per currency and the remove
- * action. Currencies are never converted, so each debt keeps its own line.
+ * Accepted friend row: identity, one derived balance line per currency and a
+ * chevron that opens the detail. Currencies are never converted.
  */
-export function FriendRow({ friend, pendingId, onRemove }: FriendRowProps) {
+export function FriendRow({ friend, onOpen }: FriendRowProps) {
   const theme = useFormTheme();
   const locale = useAppLocale();
   const { t } = useScopedTranslation("friends");
   const name = getFriendDisplayName(friend);
 
-  const busy = pendingId !== null;
-  const removing = pendingId === friend.uid;
-  const hint = removing
-    ? t("friends.removingHint")
-    : busy
-      ? t("requests.busyHint")
-      : t("friends.removeHint");
-
   return (
-    <View
-      style={[
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t("friends.openAccessibility", { name })}
+      accessibilityHint={t("friends.openHint")}
+      onPress={() => onOpen(friend)}
+      style={({ pressed }) => [
         styles.friendCard,
         { borderColor: theme.border, backgroundColor: theme.surface },
+        pressed && styles.pressed,
       ]}
     >
       <View style={styles.friendBody}>
@@ -92,31 +88,12 @@ export function FriendRow({ friend, pendingId, onRemove }: FriendRowProps) {
         )}
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t("friends.removeAccessibility", { name })}
-        accessibilityHint={hint}
-        accessibilityState={{ busy: removing, disabled: busy && !removing }}
-        disabled={busy}
-        onPress={() => onRemove(friend)}
-        style={({ pressed }) => [
-          styles.iconButton,
-          { backgroundColor: theme.dangerSurface },
-          busy && styles.actionButtonDisabled,
-          pressed && styles.pressed,
-        ]}
-      >
-        {removing ? (
-          <ActivityIndicator size="small" color={theme.danger} />
-        ) : (
-          <Ionicons
-            name="person-remove-outline"
-            size={20}
-            color={theme.danger}
-            accessible={false}
-          />
-        )}
-      </Pressable>
-    </View>
+      <Ionicons
+        name="chevron-forward"
+        size={20}
+        color={theme.muted}
+        accessible={false}
+      />
+    </Pressable>
   );
 }

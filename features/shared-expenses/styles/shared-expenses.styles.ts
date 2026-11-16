@@ -8,40 +8,7 @@ export const sharedExpensesPalette = {
 } as const;
 
 export const sharedExpensesStyles = StyleSheet.create({
-  // Section
-  section: {
-    gap: 12,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  sectionTitle: {
-    flexShrink: 1,
-    fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-    textTransform: "uppercase",
-  },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    minHeight: 44,
-  },
-  addButtonDisabled: {
-    opacity: 0.5,
-  },
-  addButtonText: {
-    fontSize: 14,
-    fontWeight: "700",
-  },
+  // Expense list
   list: {
     gap: 10,
   },

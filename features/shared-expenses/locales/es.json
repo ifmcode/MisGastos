@@ -2,18 +2,8 @@
   "title": "Gastos compartidos",
   "loading": "Cargando gastos compartidos…",
   "retryAccessibility": "Reintentar la carga de gastos compartidos",
-  "add": "Añadir gasto",
-  "addAccessibility": "Añadir un gasto compartido",
-  "addHint": "Abre el formulario para repartir un gasto con un amigo.",
-  "addDisabledHelper": "Añade un amigo para compartir gastos.",
   "friendFallback": "Amigo",
   "viewerName": "Tú",
-  "empty": {
-    "noFriendsTitle": "Añade un amigo para compartir gastos",
-    "noFriendsMessage": "Los gastos compartidos necesitan al menos un amigo aceptado.",
-    "noExpensesTitle": "Aún no compartes gastos",
-    "noExpensesMessage": "Añade un gasto para repartirlo con un amigo."
-  },
   "row": {
     "youPaid": "Pagaste tú",
     "friendPaid": "Pagó {{name}}",
@@ -46,6 +36,7 @@
     "friendSelectedAccessibility": "Amigo seleccionado: {{name}}",
     "friendHint": "Abre la lista de amigos para elegir con quién compartes el gasto.",
     "friendLockedHint": "No puedes cambiar el amigo de un gasto existente.",
+    "friendPreselectedHint": "Este gasto se está creando con {{name}}; no puedes cambiar el amigo desde aquí.",
     "pickerTitle": "Seleccionar amigo",
     "pickerClose": "Cerrar la lista de amigos",
     "pickerEmpty": "Aún no tienes amigos aceptados.",

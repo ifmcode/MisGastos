@@ -19,10 +19,8 @@ export interface SharedExpenseListController {
   expenses: SharedExpense[];
   loading: boolean;
   error: string | null;
-  actionError: string | null;
   reload: () => void;
   refresh: () => Promise<void>;
-  setActionError: (message: string | null) => void;
 }
 
 /** Loads the viewer's expenses with initial, refresh and focus reloads. */
@@ -34,7 +32,6 @@ export function useSharedExpenseList({
   const [stored, setStored] = useState<SharedExpense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
   const requestRef = useRef(0);
 
   const load = useCallback(
@@ -99,9 +96,7 @@ export function useSharedExpenseList({
     expenses,
     loading,
     error,
-    actionError,
     reload,
     refresh,
-    setActionError,
   };
 }
