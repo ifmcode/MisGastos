@@ -1,5 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
+import type { CurrencyCode } from "@/shared/constants/currencies";
+
 import { FriendValidationError } from "../friend.errors";
 import { FriendsService } from "../friends.service";
 import {
@@ -20,12 +22,14 @@ function seedLedger(
   toUserId: string,
   amountCents: number,
   deletedAt: string | null = null,
+  currency: CurrencyCode = "EUR",
 ): void {
   ledger.entries.push({
-    id: `${fromUserId}-${toUserId}-${amountCents}`,
+    id: `${fromUserId}-${toUserId}-${amountCents}-${currency}`,
     fromUserId,
     toUserId,
     amountCents,
+    currency,
     deletedAt,
   });
 }
@@ -42,7 +46,7 @@ describe("FriendsService.getOverview", () => {
     expect(repository.profileBatchCalls).toEqual([]);
   });
 
-  it("folds the ledger into the net balance of each friend", async () => {
+  it("folds the ledger into one balance per currency", async () => {
     const { repository, ledger, service } = createService();
     repository.seedProfile("user-b", "Bea", "bea@example.com");
     repository.seedProfile("user-c", "Cid", "cid@example.com");
@@ -50,6 +54,7 @@ describe("FriendsService.getOverview", () => {
     repository.seedFriendship("user-a", "user-c", "2026-11-02T10:00:00.000Z");
     seedLedger(ledger, "user-b", "user-a", 1500);
     seedLedger(ledger, "user-b", "user-a", 500, "2026-11-10T10:00:00.000Z");
+    seedLedger(ledger, "user-b", "user-a", 700, null, "USD");
     seedLedger(ledger, "user-a", "user-c", 2400);
     seedLedger(ledger, "user-c", "someone-else", 9999);
 
@@ -60,14 +65,17 @@ describe("FriendsService.getOverview", () => {
         uid: "user-b",
         displayName: "Bea",
         email: "bea@example.com",
-        netBalanceCents: 1500,
+        balances: [
+          { currency: "EUR", netBalanceCents: 1500 },
+          { currency: "USD", netBalanceCents: 700 },
+        ],
         since: "2026-11-01T10:00:00.000Z",
       },
       {
         uid: "user-c",
         displayName: "Cid",
         email: "cid@example.com",
-        netBalanceCents: -2400,
+        balances: [{ currency: "EUR", netBalanceCents: -2400 }],
         since: "2026-11-02T10:00:00.000Z",
       },
     ]);
@@ -90,7 +98,7 @@ describe("FriendsService.getOverview", () => {
       uid: "user-b",
       displayName: null,
       email: "",
-      netBalanceCents: 0,
+      balances: [],
     });
   });
 

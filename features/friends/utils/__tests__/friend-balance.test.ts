@@ -2,7 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import type { FriendLedgerEntry } from "../../types/friend.types";
 import {
-  calculateFriendNetBalance,
+  calculateFriendBalances,
   centsToAmount,
   filterFriendLedgerEntries,
   getFriendBalanceDirection,
@@ -16,6 +16,7 @@ function entry(
     fromUserId: "user-b",
     toUserId: "user-a",
     amountCents: 1000,
+    currency: "EUR",
     deletedAt: null,
     ...overrides,
   };
@@ -43,13 +44,13 @@ describe("filterFriendLedgerEntries", () => {
   });
 });
 
-describe("calculateFriendNetBalance", () => {
+describe("calculateFriendBalances", () => {
   it("is positive when the friend owes the viewer", () => {
-    const entries = [
-      entry({ fromUserId: "user-b", toUserId: "user-a", amountCents: 1500 }),
-    ];
+    const entries = [entry({ amountCents: 1500 })];
 
-    expect(calculateFriendNetBalance(entries, "user-a", "user-b")).toBe(1500);
+    expect(calculateFriendBalances(entries, "user-a", "user-b")).toEqual([
+      { currency: "EUR", netBalanceCents: 1500 },
+    ]);
   });
 
   it("is negative when the viewer owes the friend", () => {
@@ -57,60 +58,96 @@ describe("calculateFriendNetBalance", () => {
       entry({ fromUserId: "user-a", toUserId: "user-b", amountCents: 2500 }),
     ];
 
-    expect(calculateFriendNetBalance(entries, "user-a", "user-b")).toBe(-2500);
+    expect(calculateFriendBalances(entries, "user-a", "user-b")).toEqual([
+      { currency: "EUR", netBalanceCents: -2500 },
+    ]);
   });
 
-  it("folds several entries of both directions", () => {
+  it("groups by currency and never converts between them", () => {
     const entries = [
-      entry({ id: "1", amountCents: 3000 }),
-      entry({
-        id: "2",
-        fromUserId: "user-a",
-        toUserId: "user-b",
-        amountCents: 1250,
-      }),
+      entry({ id: "1", amountCents: 3000, currency: "EUR" }),
+      entry({ id: "2", amountCents: 1250, currency: "USD" }),
       entry({
         id: "3",
         fromUserId: "user-a",
         toUserId: "user-b",
         amountCents: 500,
+        currency: "EUR",
+      }),
+    ];
+
+    expect(calculateFriendBalances(entries, "user-a", "user-b")).toEqual([
+      { currency: "EUR", netBalanceCents: 2500 },
+      { currency: "USD", netBalanceCents: 1250 },
+    ]);
+  });
+
+  it("drops currencies whose net is zero and deleted entries", () => {
+    const entries = [
+      entry({ id: "1", amountCents: 1200, currency: "EUR" }),
+      entry({
+        id: "2",
+        fromUserId: "user-a",
+        toUserId: "user-b",
+        amountCents: 1200,
+        currency: "EUR",
+      }),
+      entry({
+        id: "3",
+        amountCents: 900,
+        currency: "GBP",
         deletedAt: "2026-11-14T00:00:00.000Z",
       }),
       entry({ id: "4", toUserId: "user-c", amountCents: 9999 }),
     ];
 
-    expect(calculateFriendNetBalance(entries, "user-a", "user-b")).toBe(1750);
+    expect(calculateFriendBalances(entries, "user-a", "user-b")).toEqual([]);
   });
 
-  it("returns 0 without entries and rounds malformed amounts to integer cents", () => {
-    expect(calculateFriendNetBalance([], "user-a", "user-b")).toBe(0);
+  it("orders EUR first and then the currency code ascending", () => {
+    const entries = [
+      entry({ id: "1", currency: "USD", amountCents: 100 }),
+      entry({ id: "2", currency: "CHF", amountCents: 200 }),
+      entry({ id: "3", currency: "GBP", amountCents: 300 }),
+      entry({ id: "4", currency: "EUR", amountCents: 400 }),
+    ];
+
     expect(
-      calculateFriendNetBalance(
+      calculateFriendBalances(entries, "user-a", "user-b").map(
+        (balance) => balance.currency,
+      ),
+    ).toEqual(["EUR", "CHF", "GBP", "USD"]);
+  });
+
+  it("rounds malformed amounts to integer cents and settles NaN at 0", () => {
+    expect(
+      calculateFriendBalances(
         [entry({ amountCents: 1000.4 })],
         "user-a",
         "user-b",
       ),
-    ).toBe(1000);
+    ).toEqual([{ currency: "EUR", netBalanceCents: 1000 }]);
+
     expect(
-      calculateFriendNetBalance(
+      calculateFriendBalances(
         [entry({ amountCents: Number.NaN })],
         "user-a",
         "user-b",
       ),
-    ).toBe(0);
+    ).toEqual([]);
   });
 
   it("is symmetric with the opposite sign for the other viewer", () => {
     const entries = [
-      entry({
-        fromUserId: "user-a",
-        toUserId: "user-b",
-        amountCents: 900,
-      }),
+      entry({ fromUserId: "user-a", toUserId: "user-b", amountCents: 900 }),
     ];
 
-    expect(calculateFriendNetBalance(entries, "user-a", "user-b")).toBe(-900);
-    expect(calculateFriendNetBalance(entries, "user-b", "user-a")).toBe(900);
+    expect(calculateFriendBalances(entries, "user-a", "user-b")).toEqual([
+      { currency: "EUR", netBalanceCents: -900 },
+    ]);
+    expect(calculateFriendBalances(entries, "user-b", "user-a")).toEqual([
+      { currency: "EUR", netBalanceCents: 900 },
+    ]);
   });
 });
 

@@ -10,7 +10,7 @@ function friend(overrides: Partial<Friend> = {}): Friend {
     uid: "user-b",
     displayName: "Ada",
     email: "b@example.com",
-    netBalanceCents: 0,
+    balances: [],
     since: createdAt,
     ...overrides,
   };

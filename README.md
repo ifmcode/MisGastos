@@ -38,7 +38,8 @@ simplicidad de uso.
 - 🔁 **Transferencias entre carteras** de la misma moneda, con historial inmutable y detalle de cada transferencia con editar y eliminar.
 - 📊 **Dashboard** con totales globales y por cartera agrupados por moneda, tres movimientos y tres transferencias recientes, detalle de movimientos y transferencias con editar y eliminar, acceso al historial completo y datos refrescados al volver a la pestaña.
 - 👤 **Perfil y moneda preferida** en Ajustes: nombre visible editable y sincronizado con Firebase Auth, correo de la cuenta y moneda por defecto para las nuevas carteras.
-- 👥 **Amigos y solicitudes** con búsqueda por correo exacto, solicitudes recibidas y enviadas con aceptar, rechazar y cancelar, lista de amigos con saldo derivado (**Te debe** / **Le debes** / **En paz**), eliminación con confirmación y una pestaña **Amigos**. El saldo queda en 0 hasta que los gastos compartidos y las liquidaciones (TICKET-009 y TICKET-010) registren movimientos compartidos.
+- 👥 **Amigos y solicitudes** con búsqueda por correo exacto, solicitudes recibidas y enviadas con aceptar, rechazar y cancelar, lista de amigos con saldo derivado (**Te debe** / **Le debes** / **En paz**), eliminación con confirmación y una pestaña **Amigos**. El saldo ya no es fijo: se calcula a partir de los gastos compartidos activos y se agrupa por moneda.
+- 🤝 **Gastos compartidos 1:1** entre dos amigos, con reparto **igual o por importes fijos** y redondeo determinista que siempre suma el total exacto (el dominio mantiene además porcentaje y participaciones para la fase de grupos). Moneda por gasto, formulario en hoja con selector de amigo, moneda, fecha, quién pagó y los campos de cada modo; editar y eliminar (borrado lógico con historial) desde la sección al final de la pestaña **Amigos**.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
 - 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías y dashboard: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila y botón flotante.
@@ -61,7 +62,7 @@ simplicidad de uso.
 ```text
 MisGastos/
 ├── app/                    # Rutas y layouts de Expo Router
-├── features/               # Módulos por dominio (auth, profile, wallets, transactions, transfers, dashboard, categories, friends…)
+├── features/               # Módulos por dominio (auth, profile, wallets, transactions, transfers, dashboard, categories, friends, shared-expenses…)
 │   └── <feature>/
 │       ├── components/     # UI específica del dominio
 │       ├── hooks/          # Orquestación y estado de UI
@@ -102,9 +103,9 @@ inventario de agentes, el ruteo por tipo de tarea y las restricciones de permiso
 - Node.js 20 LTS o superior
 - npm
 - Un proyecto de Firebase con **Authentication** y **Cloud Firestore** habilitados
-
 - Android: Android Studio con su JBR (**JDK 21**) apuntado por `JAVA_HOME`; Gradle 9.4.1 exige JDK 17 o superior
 - Android en Windows: **ninja 1.13.2** en `...\Android\Sdk\cmake\<versión>\bin`, porque el ninja que trae el SDK no supera las rutas de 260 caracteres ([detalles](docs/project/development-notes/2026-11-15-android-dev-environment.md))
+
 ### Instalación
 
 ```bash
@@ -139,12 +140,12 @@ npm run ios        # iOS (requiere macOS)
 npm run web        # Navegador
 ```
 
-### Desplegar reglas de Firestore
 > En Android hace falta una **development build** (`npm run android` la compila e instala) y Metro
 > sirviendo el JS en el puerto 8081; Expo Go no carga los módulos nativos. Flujo diario y
 > diagnóstico del entorno en
 > [`2026-11-15-android-dev-environment.md`](docs/project/development-notes/2026-11-15-android-dev-environment.md).
 
+### Desplegar reglas de Firestore
 
 ```bash
 npm run firebase-deploy:rules      # despliega firestore.rules
@@ -152,8 +153,9 @@ npm run firestore-update-rules     # inicia sesión en Firebase y luego desplieg
 ```
 
 > El despliegue es manual: cada cambio en `firestore.rules` debe publicarse desde una
-> máquina con credenciales de Firebase. Las reglas de `publicProfiles`, `friendRequests`
-> y `friendships` (TICKET-007) todavía están **pendientes de despliegue**.
+> máquina con credenciales de Firebase. Las reglas de `publicProfiles`, `friendRequests`,
+> `friendships` (TICKET-007) y `sharedExpenses` (TICKET-009, subconjunto 1:1) todavía
+> están **pendientes de despliegue**.
 
 ## 📜 Scripts disponibles
 
@@ -192,9 +194,9 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
-Estado actual (15/11/2026): **166 suites / 809 tests**; la cobertura acotada a la
-lógica de negocio está en **98.87% de sentencias, 94.21% de ramas, 98.93% de
-funciones y 99.39% de líneas**, y `npm run check:copy` audita **180 archivos TSX**.
+Estado actual (15/11/2026): **192 suites / 997 tests**; la cobertura acotada a la
+lógica de negocio está en **99.00% de sentencias, 94.70% de ramas, 99.00% de
+funciones y 99.48% de líneas**, y `npm run check:copy` audita **193 archivos TSX**.
 
 ## 🗺️ Roadmap
 
@@ -206,6 +208,7 @@ funciones y 99.39% de líneas**, y `npm run check:copy` audita **180 archivos TS
 - [x] Estados, formularios y filas compartidas
 - [x] Perfil y moneda preferida
 - [x] Amigos
+- [x] Gastos compartidos 1:1
 - [ ] Grupos y gastos compartidos
 - [ ] Liquidación de deudas
 - [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización; implementación en la fase 7)
@@ -222,10 +225,11 @@ Consulta el roadmap completo en
 - [Inventario de componentes compartidos](docs/project/development-notes/component-inventory.md)
 - [Arquitectura offline-first (diseño y ADR)](docs/project/development-notes/2026-11-14-offline-first-architecture.md)
 - [Amigos y solicitudes (TICKET-007)](docs/project/development-notes/2026-11-15-friends-and-requests.md): modelo de datos, ciclo de vida de las solicitudes, reglas y límites actuales.
+- [Gastos compartidos 1:1 (TICKET-009, subconjunto)](docs/project/development-notes/2026-11-15-shared-expenses-1to1.md): modelo de datos, modos de reparto y redondeo, saldos por moneda, reglas y límites actuales.
+- [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)
 - [Guía de agentes y skills (OpenCode)](docs/project/guidelines/agents-and-skills.md)
-- [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 
 ---
 

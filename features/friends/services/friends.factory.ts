@@ -1,4 +1,5 @@
-import { EmptyFriendLedgerRepository } from "../repositories/friend-ledger.repository";
+import { SharedExpenseLedgerRepository } from "@/features/shared-expenses/repositories/shared-expense-ledger.repository";
+
 import { FirebaseFriendsRepository } from "../repositories/firebase-friends.repository";
 import { FriendsService } from "./friends.service";
 
@@ -8,7 +9,7 @@ export function getFriendsService(): FriendsService {
   if (!friendsServiceInstance) {
     friendsServiceInstance = new FriendsService(
       new FirebaseFriendsRepository(),
-      new EmptyFriendLedgerRepository(),
+      new SharedExpenseLedgerRepository(),
     );
   }
 

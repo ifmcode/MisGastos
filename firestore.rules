@@ -53,6 +53,76 @@ service cloud.firestore {
         && data.participantIds == memberIds;
     }
 
+    // Shared expenses are 1:1 records between two accepted friends. Rules cannot
+    // sum list values, so the "shares sum to amountCents" invariant stays in the
+    // expense schema; rules only check the shape of every stored value.
+    function isExpenseParticipant(data) {
+      return isSignedIn() && request.auth.uid in data.participantIds;
+    }
+
+    function isExpenseShareRow(row) {
+      return row is map
+        && row.keys().hasOnly(['userId', 'shareCents', 'percentageBps', 'weight'])
+        && row.userId is string
+        && row.shareCents is int
+        && row.shareCents >= 0
+        && row.shareCents <= 100000000;
+    }
+
+    function hasExpenseShares(data) {
+      return data.participants is list
+        && data.participants.size() == 2
+        && isExpenseShareRow(data.participants[0])
+        && isExpenseShareRow(data.participants[1])
+        && data.participants[0].userId in data.participantIds
+        && data.participants[1].userId in data.participantIds;
+    }
+
+    // Bounded by SHARED_EXPENSE_AMOUNT_MAX (1,000,000.00) and
+    // SHARED_EXPENSE_DESCRIPTION_MAX_LENGTH (120) in the expense schema.
+    function hasExpenseMoney(data) {
+      return data.amountCents is int
+        && data.amountCents > 0
+        && data.amountCents <= 100000000
+        && data.splitMode in ['equal', 'percentage', 'fixed', 'shares']
+        && data.description is string
+        && data.description.size() > 0
+        && data.description.size() <= 120
+        && data.date is string;
+    }
+
+    function hasExpensePair(data) {
+      return hasSortedPair(data.participantIds)
+        && data.pairId == data.participantIds[0] + '__' + data.participantIds[1]
+        && data.payerId in data.participantIds
+        && request.auth.uid in data.participantIds;
+    }
+
+    // `null` on an edit, an ISO string on a soft delete: never anything else.
+    function isExpenseDeletedAt(value) {
+      return value == null || value is string;
+    }
+
+    function hasExpenseFields(data) {
+      return data.keys().hasOnly(
+        [
+          'participantIds',
+          'pairId',
+          'payerId',
+          'amountCents',
+          'currency',
+          'splitMode',
+          'participants',
+          'description',
+          'date',
+          'createdBy',
+          'createdAt',
+          'updatedAt',
+          'deletedAt'
+        ]
+      );
+    }
+
     // Profiles keep the Firebase uid in the `uid` field and are looked up by
     // it. Only the owner can read or update the document, and the uid cannot
     // be reassigned after creation.
@@ -284,6 +354,47 @@ service cloud.firestore {
 
       // Friendships are immutable; removing a friend deletes the document.
       allow update: if false;
+    }
+
+    // 1:1 shared expenses. Both participants read the record and either one can
+    // edit it or mark it deleted; nothing is ever hard-deleted. The pair and the
+    // creation stamp are immutable, and a soft-deleted record cannot be edited
+    // back to life (`resource.data.deletedAt == null` on update).
+    //
+    // No composite index: `getSharedExpensesOperation` filters only with
+    // `where('participantIds', 'array-contains', uid)` and sorts client-side.
+    match /sharedExpenses/{expenseId} {
+      allow get, list: if isExpenseParticipant(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && hasExpensePair(request.resource.data)
+        && hasExpenseMoney(request.resource.data)
+        && hasExpenseShares(request.resource.data)
+        && hasExpenseFields(request.resource.data)
+        && request.resource.data.currency is string
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string
+        && request.resource.data.deletedAt == null
+        && exists(
+             /databases/$(database)/documents/friendships/$(request.resource.data.pairId)
+           );
+
+      allow update: if isExpenseParticipant(resource.data)
+        && resource.data.deletedAt == null
+        && request.resource.data.participantIds == resource.data.participantIds
+        && request.resource.data.pairId == resource.data.pairId
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && hasExpensePair(request.resource.data)
+        && hasExpenseMoney(request.resource.data)
+        && hasExpenseShares(request.resource.data)
+        && hasExpenseFields(request.resource.data)
+        && request.resource.data.currency is string
+        && request.resource.data.updatedAt is string
+        && isExpenseDeletedAt(request.resource.data.deletedAt);
+
+      allow delete: if false;
     }
   }
 }

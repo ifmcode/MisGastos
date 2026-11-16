@@ -10,11 +10,11 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 5 - Social vertical slice
-- **Current ticket:** Minimal subset of TICKET-009 - 1:1 shared expense
+- **Current ticket:** Minimal subset of TICKET-010 - balance and settlement between two people
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-007 - Friends and requests (15/11/2026)
+- **Last completed:** TICKET-009 minimal subset - 1:1 shared expense (15/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Next:** Minimal subset of TICKET-009 - 1:1 shared expense
+- **Next:** Minimal subset of TICKET-010 - balance and settlement between two people
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -113,11 +113,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ## Phase 5: Social vertical slice (IN PROGRESS)
 - [x] TICKET-007: friends and requests ✅ 15/11/2026
-- [ ] Minimal subset of TICKET-009: 1:1 shared expense
+- [x] Minimal subset of TICKET-009: 1:1 shared expense ✅ 15/11/2026 (ticket stays open for the group requirements)
 - [ ] Minimal subset of TICKET-010: balance and settlement between two people
 - Validate with 3-5 real users
 - Do not build a friends list without shared expenses; it does not validate the product
 - Delivered model, request state machine, rules and limitations: [`2026-11-15-friends-and-requests.md`](2026-11-15-friends-and-requests.md)
+- Delivered 1:1 shared expenses, split rounding, per-currency balances, rules status and limitations: [`2026-11-15-shared-expenses-1to1.md`](2026-11-15-shared-expenses-1to1.md)
 
 ## Phase 6: Groups (QUEUED)
 - [ ] TICKET-008: create groups

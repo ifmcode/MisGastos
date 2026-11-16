@@ -3,6 +3,7 @@ import { RefreshControl, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
+import { SharedExpensesSection } from "@/features/shared-expenses/components/shared-expenses-section";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
@@ -94,9 +95,15 @@ export function FriendsScreen() {
 
           <FriendsList
             friends={screen.friends}
-            currency={screen.preferredCurrency}
             pendingId={screen.pendingId}
             onRemove={screen.requestRemove}
+          />
+
+          <SharedExpensesSection
+            friends={screen.friends}
+            preferredCurrency={screen.preferredCurrency}
+            onBalancesChanged={screen.refresh}
+            refreshing={screen.refreshing}
           />
         </ScrollView>
       )}

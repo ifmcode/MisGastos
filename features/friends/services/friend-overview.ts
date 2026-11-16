@@ -7,7 +7,7 @@ import type {
   Friendship,
   FriendsOverview,
 } from "../types/friend.types";
-import { calculateFriendNetBalance } from "../utils/friend-balance";
+import { calculateFriendBalances } from "../utils/friend-balance";
 import { getFriendDisplayName } from "../utils/friend-display";
 import { getOtherMemberId } from "../utils/friend-pair";
 
@@ -62,7 +62,7 @@ function buildFriends(
       uid,
       displayName: profile.displayName,
       email: profile.email,
-      netBalanceCents: calculateFriendNetBalance(
+      balances: calculateFriendBalances(
         ledgerEntries,
         viewerUid,
         uid,

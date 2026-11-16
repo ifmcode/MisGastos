@@ -1,3 +1,5 @@
+import type { CurrencyCode } from "@/shared/constants/currencies";
+
 /** Minimal identity shared with other signed-in users. */
 export interface FriendProfile {
   uid: string;
@@ -47,10 +49,16 @@ export interface Friend {
   uid: string;
   displayName: string | null;
   email: string;
-  /** Positive: the friend owes the viewer. Negative: the viewer owes. */
-  netBalanceCents: number;
+  /** Per-currency nets, EUR first. Empty means the pair is settled. */
+  balances: FriendBalance[];
   /** Creation date of the friendship. */
   since: string;
+}
+
+/** Net balance of one friend in one currency. Positive: the friend owes. */
+export interface FriendBalance {
+  currency: CurrencyCode;
+  netBalanceCents: number;
 }
 
 export type FriendRequestDirection = "incoming" | "outgoing";
@@ -84,12 +92,14 @@ export interface FriendsOverview {
   outgoing: FriendRequestItem[];
 }
 
-/** Append-only ledger entry: `fromUserId` owes `toUserId`. */
+/** Append-only ledger entry: `fromUserId` owes `toUserId` `amountCents` of `currency`. */
 export interface FriendLedgerEntry {
   id: string;
   fromUserId: string;
   toUserId: string;
   amountCents: number;
+  /** Currency of the source record: balances are grouped, never converted. */
+  currency: CurrencyCode;
   deletedAt: string | null;
 }
 

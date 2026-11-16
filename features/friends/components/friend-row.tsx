@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
-import type { CurrencyCode } from "@/shared/constants/currencies";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
@@ -17,28 +16,20 @@ import { getFriendDisplayName } from "../utils/friend-display";
 
 export interface FriendRowProps {
   friend: Friend;
-  currency: CurrencyCode;
   /** Id of the row or profile with an operation in flight, if any. */
   pendingId: string | null;
   onRemove: (friend: Friend) => void;
 }
 
-/** Accepted friend with the derived net balance and the remove action. */
-export function FriendRow({
-  friend,
-  currency,
-  pendingId,
-  onRemove,
-}: FriendRowProps) {
+/**
+ * Accepted friend with one derived balance line per currency and the remove
+ * action. Currencies are never converted, so each debt keeps its own line.
+ */
+export function FriendRow({ friend, pendingId, onRemove }: FriendRowProps) {
   const theme = useFormTheme();
   const locale = useAppLocale();
   const { t } = useScopedTranslation("friends");
   const name = getFriendDisplayName(friend);
-  const direction = getFriendBalanceDirection(friend.netBalanceCents);
-  const amount = locale.formatCurrency(
-    Math.abs(centsToAmount(friend.netBalanceCents)),
-    currency,
-  );
 
   const busy = pendingId !== null;
   const removing = pendingId === friend.uid;
@@ -47,20 +38,6 @@ export function FriendRow({
     : busy
       ? t("requests.busyHint")
       : t("friends.removeHint");
-
-  const balanceLabel =
-    direction === "friend-owes-viewer"
-      ? t("balance.owesYou", { amount })
-      : direction === "viewer-owes-friend"
-        ? t("balance.youOwe", { amount })
-        : t("balance.settled");
-
-  const balanceColor =
-    direction === "friend-owes-viewer"
-      ? theme.success
-      : direction === "viewer-owes-friend"
-        ? theme.danger
-        : theme.muted;
 
   return (
     <View
@@ -81,9 +58,38 @@ export function FriendRow({
             {friend.email}
           </ThemedText>
         ) : null}
-        <ThemedText style={[styles.friendBalance, { color: balanceColor }]}>
-          {balanceLabel}
-        </ThemedText>
+
+        {friend.balances.length === 0 ? (
+          <ThemedText style={[styles.friendBalance, { color: theme.muted }]}>
+            {t("balance.settled")}
+          </ThemedText>
+        ) : (
+          friend.balances.map((balance) => {
+            const direction = getFriendBalanceDirection(
+              balance.netBalanceCents,
+            );
+            const owesViewer = direction === "friend-owes-viewer";
+            const amount = locale.formatCurrency(
+              Math.abs(centsToAmount(balance.netBalanceCents)),
+              balance.currency,
+            );
+            const label = owesViewer
+              ? t("balance.owesYou", { amount })
+              : t("balance.youOwe", { amount });
+
+            return (
+              <ThemedText
+                key={balance.currency}
+                style={[
+                  styles.friendBalance,
+                  { color: owesViewer ? theme.success : theme.danger },
+                ]}
+              >
+                {label}
+              </ThemedText>
+            );
+          })
+        )}
       </View>
 
       <Pressable

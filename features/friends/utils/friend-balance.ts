@@ -1,4 +1,6 @@
-import type { FriendLedgerEntry } from "../types/friend.types";
+import type { CurrencyCode } from "@/shared/constants/currencies";
+
+import type { FriendBalance, FriendLedgerEntry } from "../types/friend.types";
 
 export type FriendBalanceDirection =
   | "settled"
@@ -50,22 +52,45 @@ export function filterFriendLedgerEntries(
   );
 }
 
+// EUR first (the default currency), then the code ascending: a deterministic
+// order that does not depend on the device locale.
+function compareBalances(left: FriendBalance, right: FriendBalance): number {
+  if (left.currency === right.currency) return 0;
+  if (left.currency === "EUR") return -1;
+  if (right.currency === "EUR") return 1;
+
+  return left.currency < right.currency ? -1 : 1;
+}
+
 /**
- * Folds the ledger of one pair into the net balance seen by `viewerUid`.
+ * Folds the ledger of one pair per currency. Currencies are never converted nor
+ * summed together, so a EUR debt and a USD debt stay two separate lines.
  * Positive means the friend owes the viewer; negative means the viewer owes.
+ * Settled currencies are dropped so the UI can render one line per real debt.
  */
-export function calculateFriendNetBalance(
+export function calculateFriendBalances(
   entries: readonly FriendLedgerEntry[],
   viewerUid: string,
   friendUid: string,
-): number {
-  return filterFriendLedgerEntries(entries, viewerUid, friendUid).reduce(
-    (total, entry) => {
-      const amount = toCents(entry.amountCents);
-      return entry.fromUserId === friendUid ? total + amount : total - amount;
-    },
-    0,
-  );
+): FriendBalance[] {
+  const totals = new Map<CurrencyCode, number>();
+
+  for (const entry of filterFriendLedgerEntries(entries, viewerUid, friendUid)) {
+    const amount = toCents(entry.amountCents);
+    const current = totals.get(entry.currency) ?? 0;
+
+    totals.set(
+      entry.currency,
+      entry.fromUserId === friendUid ? current + amount : current - amount,
+    );
+  }
+
+  return Array.from(totals, ([currency, netBalanceCents]) => ({
+    currency,
+    netBalanceCents,
+  }))
+    .filter((balance) => balance.netBalanceCents !== 0)
+    .sort(compareBalances);
 }
 
 export function getFriendBalanceDirection(
