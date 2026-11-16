@@ -2,7 +2,7 @@
 
 > Single source of truth for the V1 scope, phase order and the current ticket.
 > The former `implementation-plan.md` was merged into this file on 12/11/2026.
-> **Last reviewed:** 15/11/2026
+> **Last reviewed:** 16/11/2026
 
 ## Product Vision
 A personal finance manager (wallets, movements, transfers and dashboard) merged with Splitwise-style shared finances (friends, groups, shared expenses, balances and settlements). **V1.0 is everything defined in this roadmap**; the MVP was the first milestone, not the release.
@@ -10,12 +10,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 5 - Social vertical slice
-- **Current ticket:** TICKET-041 - Social tab shell, add-friend screen and pending requests
+- **Current ticket:** TICKET-042 - Friend detail screen with shared expenses
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-009 minimal subset - 1:1 shared expense (15/11/2026)
+- **Last completed:** TICKET-041 - Social tab shell, add-friend screen and pending requests (16/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-042..TICKET-047 (friend and expense detail, wallet link, movements menu, 1:1 settlement and notifications)
-- **Next:** TICKET-041 - Social tab shell, add-friend screen and pending requests
+- **Queued:** TICKET-043..TICKET-047 (shared-expense detail, wallet link, movements menu, 1:1 settlement and notifications) and TICKET-008 in Phase 6
+- **Next:** TICKET-042 - Friend detail screen with shared expenses
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -119,11 +119,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - Delivered 1:1 shared expenses, split rounding, per-currency balances, rules status and limitations: [`2026-11-15-shared-expenses-1to1.md`](2026-11-15-shared-expenses-1to1.md)
 
 ### 5.1 Social navigation and shared-expense UX
-- [ ] TICKET-041: Social tab shell, add-friend screen and pending requests
+- [x] TICKET-041: Social tab shell, add-friend screen and pending requests ✅ 16/11/2026
 - [ ] TICKET-042: friend detail screen with shared expenses
 - [ ] TICKET-043: shared expense detail screen
 - [ ] TICKET-044: shared expense wallet and linked personal movement
 - [ ] TICKET-045: movements FAB create menu
+- Delivered Social shell, pending requests, add-friend and requests routes, the shared `FabActionMenu` and the accepted shared-expense entry gap: [`2026-11-16-social-tab.md`](2026-11-16-social-tab.md)
 
 ### 5.2 1:1 settlement and notifications
 - [ ] TICKET-046: 1:1 debt settlement with bilateral confirmation

@@ -6,6 +6,7 @@ const PRIVATE_SEGMENTS = new Set([
   "categories",
   "transfers",
   "profile",
+  "social",
 ]);
 const VERIFY_SEGMENT = "verify-email";
 

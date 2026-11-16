@@ -42,6 +42,8 @@ export function AuthNavigator() {
       <Stack.Screen name="categories" options={{ headerShown: false }} />
       <Stack.Screen name="transfers" options={{ headerShown: false }} />
       <Stack.Screen name="profile" options={{ headerShown: false }} />
+      <Stack.Screen name="social/add-friend" options={{ headerShown: false }} />
+      <Stack.Screen name="social/requests" options={{ headerShown: false }} />
       <Stack.Screen
         name="modal"
         options={{ presentation: "modal", title: t("stack.modal") }}

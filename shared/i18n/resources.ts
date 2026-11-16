@@ -12,6 +12,8 @@ import settingsEn from "@/features/settings/locales/en.json";
 import settingsEs from "@/features/settings/locales/es.json";
 import sharedExpensesEn from "@/features/shared-expenses/locales/en.json";
 import sharedExpensesEs from "@/features/shared-expenses/locales/es.json";
+import socialEn from "@/features/social/locales/en.json";
+import socialEs from "@/features/social/locales/es.json";
 import transactionsEn from "@/features/transactions/locales/en.json";
 import transactionsEs from "@/features/transactions/locales/es.json";
 import transfersEn from "@/features/transfers/locales/en.json";
@@ -39,6 +41,7 @@ export const NAMESPACES = [
   "settings",
   "profile",
   "sharedExpenses",
+  "social",
 ] as const;
 
 export type AppNamespace = (typeof NAMESPACES)[number];
@@ -59,6 +62,7 @@ export const resources = {
     settings: settingsEs,
     profile: profileEs,
     sharedExpenses: sharedExpensesEs,
+    social: socialEs,
   },
   en: {
     common: commonEn,
@@ -74,5 +78,6 @@ export const resources = {
     settings: settingsEn,
     profile: profileEn,
     sharedExpenses: sharedExpensesEn,
+    social: socialEn,
   },
 } as const;

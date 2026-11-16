@@ -1,9 +1,4 @@
 {
-  "title": "Amigos",
-  "subtitle": "Busca por email, gestiona solicitudes y revisa lo que compartís.",
-  "loading": "Cargando amigos…",
-  "errorTitle": "No se pudieron cargar tus amigos",
-  "retryAccessibility": "Reintentar la carga de amigos",
   "search": {
     "title": "Buscar por email",
     "hint": "La búsqueda solo encuentra cuentas cuyo email coincida exactamente.",

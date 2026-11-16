@@ -1,9 +1,4 @@
 {
-  "title": "Friends",
-  "subtitle": "Search by email, manage requests and review what you share.",
-  "loading": "Loading friends…",
-  "errorTitle": "Could not load your friends",
-  "retryAccessibility": "Retry loading friends",
   "search": {
     "title": "Search by email",
     "hint": "The search only finds accounts whose email matches exactly.",

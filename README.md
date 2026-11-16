@@ -38,11 +38,11 @@ simplicidad de uso.
 - 🔁 **Transferencias entre carteras** de la misma moneda, con historial inmutable y detalle de cada transferencia con editar y eliminar.
 - 📊 **Dashboard** con totales globales y por cartera agrupados por moneda, tres movimientos y tres transferencias recientes, detalle de movimientos y transferencias con editar y eliminar, acceso al historial completo y datos refrescados al volver a la pestaña.
 - 👤 **Perfil y moneda preferida** en Ajustes: nombre visible editable y sincronizado con Firebase Auth, correo de la cuenta y moneda por defecto para las nuevas carteras.
-- 👥 **Amigos y solicitudes** con búsqueda por correo exacto, solicitudes recibidas y enviadas con aceptar, rechazar y cancelar, lista de amigos con saldo derivado (**Te debe** / **Le debes** / **En paz**), eliminación con confirmación y una pestaña **Amigos**. El saldo ya no es fijo: se calcula a partir de los gastos compartidos activos y se agrupa por moneda.
-- 🤝 **Gastos compartidos 1:1** entre dos amigos, con reparto **igual o por importes fijos** y redondeo determinista que siempre suma el total exacto (el dominio mantiene además porcentaje y participaciones para la fase de grupos). Moneda por gasto, formulario en hoja con selector de amigo, moneda, fecha, quién pagó y los campos de cada modo; editar y eliminar (borrado lógico con historial) desde la sección al final de la pestaña **Amigos**.
+- 👥 **Social y solicitudes**: la pestaña **Social** reúne una fila de peticiones pendientes (recibidas + enviadas, con contador visible solo cuando hay alguna) que abre `/social/requests`, un selector **Tus amigos** / **Tus grupos** (los grupos muestran un estado *próximamente* sin acciones) y la lista de amigos con su saldo derivado (**Te debe** / **Le debes** / **En paz**) y eliminación con confirmación. El botón flotante abre el menú **Añadir amigo**, que lleva a `/social/add-friend`, donde viven la búsqueda por correo exacto y el envío de solicitudes. El saldo se calcula a partir de los gastos compartidos activos y se agrupa por moneda.
+- 🤝 **Gastos compartidos 1:1** entre dos amigos, con reparto **igual o por importes fijos** y redondeo determinista que siempre suma el total exacto (el dominio mantiene además porcentaje y participaciones para la fase de grupos). Moneda por gasto, formulario en hoja con selector de amigo, moneda, fecha, quién pagó y los campos de cada modo; editar y eliminar (borrado lógico con historial). La sección **Gastos compartidos** ya no vive en la pestaña **Social**: vuelve en el detalle de amigo (TICKET-042). Mientras tanto **no hay punto de entrada para crear un gasto 1:1**, así que TICKET-041 y TICKET-042 deben publicarse juntos.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
-- 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías y dashboard: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila y botón flotante.
+- 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías, dashboard y Social: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila, botón flotante y el menú de acciones del FAB (`FabActionMenu`), que hoy usa el FAB de Social y está previsto para el de movimientos.
 
 ## 🛠️ Stack tecnológico
 
@@ -62,7 +62,7 @@ simplicidad de uso.
 ```text
 MisGastos/
 ├── app/                    # Rutas y layouts de Expo Router
-├── features/               # Módulos por dominio (auth, profile, wallets, transactions, transfers, dashboard, categories, friends, shared-expenses…)
+├── features/               # Módulos por dominio (auth, profile, wallets, transactions, transfers, dashboard, categories, friends, social, shared-expenses…)
 │   └── <feature>/
 │       ├── components/     # UI específica del dominio
 │       ├── hooks/          # Orquestación y estado de UI
@@ -194,9 +194,9 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
-Estado actual (15/11/2026): **192 suites / 997 tests**; la cobertura acotada a la
-lógica de negocio está en **99.00% de sentencias, 94.70% de ramas, 99.00% de
-funciones y 99.48% de líneas**, y `npm run check:copy` audita **193 archivos TSX**.
+Estado actual (16/11/2026): **194 suites / 1004 tests**; la cobertura acotada a la
+lógica de negocio está en **99.00% de sentencias, 94.70% de ramas, 99.01% de
+funciones y 99.49% de líneas**, y `npm run check:copy` audita **204 archivos TSX**.
 
 ## 🗺️ Roadmap
 
@@ -209,7 +209,8 @@ funciones y 99.48% de líneas**, y `npm run check:copy` audita **193 archivos TS
 - [x] Perfil y moneda preferida
 - [x] Amigos
 - [x] Gastos compartidos 1:1
-- [ ] Pestaña Social con peticiones y detalle de amigo
+- [x] Pestaña Social con peticiones y alta de amigo
+- [ ] Detalle de amigo con gastos compartidos
 - [ ] Detalle de gasto compartido y cartera enlazada
 - [ ] Liquidación de deudas 1:1 con confirmación y notificaciones
 - [ ] Bandeja de notificaciones
@@ -230,6 +231,7 @@ Consulta el roadmap completo en
 - [Arquitectura offline-first (diseño y ADR)](docs/project/development-notes/2026-11-14-offline-first-architecture.md)
 - [Amigos y solicitudes (TICKET-007)](docs/project/development-notes/2026-11-15-friends-and-requests.md): modelo de datos, ciclo de vida de las solicitudes, reglas y límites actuales.
 - [Gastos compartidos 1:1 (TICKET-009, subconjunto)](docs/project/development-notes/2026-11-15-shared-expenses-1to1.md): modelo de datos, modos de reparto y redondeo, saldos por moneda, reglas y límites actuales.
+- [Pestaña Social (TICKET-041, 16/11/2026)](docs/project/development-notes/2026-11-16-social-tab.md): shell Social, rutas de alta de amigo y peticiones, contador de pendientes, `FabActionMenu` y el hueco temporal de gastos compartidos.
 - [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)

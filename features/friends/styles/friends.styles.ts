@@ -5,31 +5,6 @@ import { StyleSheet } from "react-native";
  * share the same composition.
  */
 export const friendsStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 120,
-    gap: 24,
-  },
-
-  // Header
-  header: {
-    paddingHorizontal: 24,
-    paddingBottom: 18,
-  },
-  title: {
-    fontSize: 30,
-    lineHeight: 36,
-  },
-  subtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-    opacity: 0.65,
-    marginTop: 2,
-  },
-
   // Search
   searchCard: {
     borderWidth: 1,

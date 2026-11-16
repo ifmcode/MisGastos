@@ -1,0 +1,49 @@
+{
+  "title": "Social",
+  "subtitle": "Tus amigos, tus solicitudes y, muy pronto, tus grupos.",
+  "loading": "Cargando tus amigos…",
+  "errorTitle": "No se pudo cargar Social",
+  "retryAccessibility": "Reintentar la carga de Social",
+  "pending": {
+    "title": "Peticiones pendientes",
+    "count_one": "{{count}} solicitud esperando respuesta",
+    "count_other": "{{count}} solicitudes esperando respuesta",
+    "empty": "No tienes solicitudes pendientes",
+    "rowAccessibility_one": "Peticiones pendientes: {{count}} solicitud",
+    "rowAccessibility_other": "Peticiones pendientes: {{count}} solicitudes",
+    "hint": "Abre la lista de solicitudes recibidas y enviadas"
+  },
+  "segments": {
+    "accessibility": "Secciones de Social",
+    "friends": "Tus amigos",
+    "friendsHint": "Muestra a tus amigos y lo que tenéis pendiente",
+    "groups": "Tus grupos",
+    "groupsHint": "Muestra tus grupos, disponibles próximamente"
+  },
+  "groups": {
+    "comingSoonTitle": "Tus grupos llegan pronto",
+    "comingSoonMessage": "Estamos preparando los gastos compartidos en grupo. Mientras tanto, organiza lo que compartes desde la pestaña Tus amigos."
+  },
+  "routeBackHint": "Vuelve a la pantalla anterior",
+  "fab": {
+    "openAccessibility": "Abrir el menú de acciones de Social",
+    "openHint": "Abre las acciones para añadir amigos",
+    "menuTitle": "Acciones de Social",
+    "addFriend": "Añadir amigo",
+    "addFriendHint": "Busca una cuenta por email y envíale una solicitud"
+  },
+  "requests": {
+    "title": "Peticiones pendientes",
+    "loading": "Cargando solicitudes…",
+    "subtitle_one": "{{count}} solicitud pendiente",
+    "subtitle_other": "{{count}} solicitudes pendientes",
+    "subtitleEmpty": "Nada pendiente por ahora",
+    "emptyTitle": "No hay solicitudes pendientes",
+    "emptyMessage": "Cuando envíes o recibas una solicitud, aparecerá aquí hasta que se acepte, rechace o cancele."
+  },
+  "addFriend": {
+    "title": "Añadir amigo",
+    "subtitle": "Busca una cuenta por su email exacto para enviarle una solicitud.",
+    "retrySearchAccessibility": "Reintentar la búsqueda por email"
+  }
+}

@@ -5,6 +5,8 @@
 > detail-view scaffold (TICKET-035), `ConfirmDialog`, `DateQuickSelector`,
 > `WalletChipSelector` and the translation layer were already shared and are listed
 > here only to state that they stay as they are.
+> Updated by TICKET-041 (16/11/2026) with the FAB action menu; the TICKET-037
+> decisions above are unchanged.
 
 ## Decisions
 
@@ -22,6 +24,7 @@
 | Form modal shell | `transactions-form-modal.tsx`, `transfer-form-modal.tsx`, `wallets-form-modal.tsx`, `category-form-modal.tsx` | **Extract** | `shared/components/molecules/page-sheet-form-modal.tsx` |
 | List row | `transactions/components/transaction-item.tsx`, `transfers/components/transfer-item.tsx` | **Extract** | `shared/components/molecules/record-card.tsx` |
 | Floating action button | `transactions-fab.tsx`, inline FAB in `wallets-screen.tsx` and `categories-screen.tsx` | **Extract** | `shared/components/molecules/fab.tsx` |
+| FAB action menu | no prior implementation; `ActionSheetIOS` rejected (Android/web) | **Extract (TICKET-041)** | `shared/components/molecules/fab-action-menu.tsx` |
 | Label / input / error / helper / counter / amount styles | duplicated in every feature form style module | **Extract styles** | `shared/components/molecules/form-field.styles.ts` |
 | Row meta separator (` · `) | `transaction-item.tsx`, `transfer-item.tsx` | **Extract helper** | `shared/utils/join-meta.ts` (`joinMetaParts`) |
 | Currency chips | wallet form currency selector and the TICKET-006 profile currency selector | **Extract (TICKET-006)** | `shared/components/molecules/currency-chip-selector.tsx` |
@@ -193,13 +196,46 @@ accessibility labels: `getTransactionDetailLabel`, `getTransferEditLabel` and
 
 ```ts
 interface FabProps {
-  accessibilityLabel: string;
+  accessibilityLabel: string;      // already translated
+  accessibilityHint?: string;      // already translated; explains what the FAB opens
   bottom: number;
   onPress: () => void;
 }
 ```
 
-Consumers: wallets, transactions and categories screens.
+Consumers: wallets, transactions, categories and the Social hub (`social-fab.tsx`).
+The optional hint was added in TICKET-041 so the Social FAB can announce that it
+opens the action menu.
+
+### `FabActionMenu`
+
+```ts
+interface FabActionMenuAction {
+  key: string;
+  label: string;                   // already translated
+  icon: IoniconsName;
+  hint?: string;                   // already translated, rendered under the label
+  disabled?: boolean;
+  onPress: () => void;
+}
+
+interface FabActionMenuProps {
+  visible: boolean;
+  title: string;                   // already translated menu header
+  onClose: () => void;
+  actions: readonly FabActionMenuAction[];
+}
+```
+
+Consumers: `features/social/components/social-fab.tsx` with one action
+(**Añadir amigo** → `/social/add-friend`); TICKET-045 reuses the same API for the
+movements FAB. The component owns the transparent `Modal`
+(`overFullScreen`/`fade`/`statusBarTranslucent`/`onRequestClose`), the backdrop
+that closes on press, the themed card with safe-area padding, one accessible row
+per action (`accessibilityRole="button"` + `accessibilityState.disabled`), the
+disabled rendering and the close-then-`onPress` order. It knows nothing about
+friends, groups or movements: every string arrives translated and `disabled`
+actions are simply absent or flagged by the caller.
 
 ### `CurrencyChipSelector`
 
@@ -242,7 +278,7 @@ translated accessibility label.
 
 - `npx tsc --noEmit`
 - `npx expo lint`
-- `npx jest` (148 suites / 674 tests, updated after TICKET-006)
-- `npm run check:copy` (168 TSX files)
+- `npx jest` (194 suites / 1004 tests, updated after TICKET-041)
+- `npm run check:copy` (204 TSX files)
 - Dark mode and web follow the same `useFormTheme` tokens as before; shared
   components never import feature palettes.

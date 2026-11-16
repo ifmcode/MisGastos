@@ -1,0 +1,49 @@
+{
+  "title": "Social",
+  "subtitle": "Your friends, your requests and, very soon, your groups.",
+  "loading": "Loading your friends…",
+  "errorTitle": "Could not load Social",
+  "retryAccessibility": "Retry loading Social",
+  "pending": {
+    "title": "Pending requests",
+    "count_one": "{{count}} request waiting for an answer",
+    "count_other": "{{count}} requests waiting for an answer",
+    "empty": "You have no pending requests",
+    "rowAccessibility_one": "Pending requests: {{count}} request",
+    "rowAccessibility_other": "Pending requests: {{count}} requests",
+    "hint": "Open the list of received and sent requests"
+  },
+  "segments": {
+    "accessibility": "Social sections",
+    "friends": "Your friends",
+    "friendsHint": "Shows your friends and what you still share",
+    "groups": "Your groups",
+    "groupsHint": "Shows your groups, available soon"
+  },
+  "groups": {
+    "comingSoonTitle": "Your groups are coming soon",
+    "comingSoonMessage": "We are building shared expenses for groups. Meanwhile, manage what you share from the Your friends segment."
+  },
+  "routeBackHint": "Go back to the previous screen",
+  "fab": {
+    "openAccessibility": "Open the Social actions menu",
+    "openHint": "Open the actions to add friends",
+    "menuTitle": "Social actions",
+    "addFriend": "Add friend",
+    "addFriendHint": "Search an account by email and send a request"
+  },
+  "requests": {
+    "title": "Pending requests",
+    "loading": "Loading requests…",
+    "subtitle_one": "{{count}} pending request",
+    "subtitle_other": "{{count}} pending requests",
+    "subtitleEmpty": "Nothing pending right now",
+    "emptyTitle": "No pending requests",
+    "emptyMessage": "When you send or receive a request, it shows up here until it is accepted, rejected or cancelled."
+  },
+  "addFriend": {
+    "title": "Add friend",
+    "subtitle": "Search an account by its exact email to send a request.",
+    "retrySearchAccessibility": "Retry the email search"
+  }
+}
