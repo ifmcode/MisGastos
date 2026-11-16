@@ -103,6 +103,8 @@ inventario de agentes, el ruteo por tipo de tarea y las restricciones de permiso
 - npm
 - Un proyecto de Firebase con **Authentication** y **Cloud Firestore** habilitados
 
+- Android: Android Studio con su JBR (**JDK 21**) apuntado por `JAVA_HOME`; Gradle 9.4.1 exige JDK 17 o superior
+- Android en Windows: **ninja 1.13.2** en `...\Android\Sdk\cmake\<versión>\bin`, porque el ninja que trae el SDK no supera las rutas de 260 caracteres ([detalles](docs/project/development-notes/2026-11-15-android-dev-environment.md))
 ### Instalación
 
 ```bash
@@ -138,6 +140,11 @@ npm run web        # Navegador
 ```
 
 ### Desplegar reglas de Firestore
+> En Android hace falta una **development build** (`npm run android` la compila e instala) y Metro
+> sirviendo el JS en el puerto 8081; Expo Go no carga los módulos nativos. Flujo diario y
+> diagnóstico del entorno en
+> [`2026-11-15-android-dev-environment.md`](docs/project/development-notes/2026-11-15-android-dev-environment.md).
+
 
 ```bash
 npm run firebase-deploy:rules      # despliega firestore.rules
@@ -218,6 +225,7 @@ Consulta el roadmap completo en
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)
 - [Guía de agentes y skills (OpenCode)](docs/project/guidelines/agents-and-skills.md)
+- [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 
 ---
 

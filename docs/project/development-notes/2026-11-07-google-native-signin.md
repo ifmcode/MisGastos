@@ -64,6 +64,11 @@ Expo Go is not supported for this feature.
 
 ## Windows build caveat (MAX_PATH)
 
+> **Superseded (15/11/2026):** replacing the SDK `ninja.exe` with 1.13.2
+> (`longPathAware`) fixes the error without moving the project. The recipe below
+> is kept as history; see
+> [`2026-11-15-android-dev-environment.md`](2026-11-15-android-dev-environment.md).
+
 CMake/ninja (3.22.1) cannot `mkdir` paths over 260 characters. `expo prebuild`
 places module build dirs under `node_modules`, and the gesture-handler codegen
 paths exceed the limit (`ninja: error: mkdir(...): No such file or directory`).
