@@ -20,6 +20,9 @@ export function buildExpenseDocument(
     ],
     description: "Dinner",
     date: "2026-11-10",
+    walletId: null,
+    categoryId: null,
+    linkedTransactionId: null,
     createdBy: "user-a",
     createdAt: "2026-11-10T20:00:00.000Z",
     updatedAt: "2026-11-10T20:00:00.000Z",
@@ -42,6 +45,9 @@ export function buildCreateExpenseDto(): CreateSharedExpenseDto {
     ],
     description: "Dinner",
     date: "2026-11-10",
+    walletId: null,
+    categoryId: null,
+    linkedTransactionId: null,
     createdBy: "user-a",
     createdAt: "2026-11-10T20:00:00.000Z",
     updatedAt: "2026-11-10T20:00:00.000Z",
@@ -61,6 +67,8 @@ export function buildUpdateExpenseDto(): UpdateSharedExpenseDto {
     ],
     description: "Lunch",
     date: "2026-11-11",
+    walletId: null,
+    categoryId: null,
     updatedAt: "2026-11-11T10:00:00.000Z",
   };
 }

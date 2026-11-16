@@ -9,16 +9,29 @@ import {
 import { buildSharedExpense } from "../../utils/__tests__/shared-expense.fixtures";
 import { SharedExpenseValidationError } from "../shared-expense.errors";
 import { SharedExpensesService } from "../shared-expenses.service";
-import { FakeSharedExpensesRepository } from "./shared-expenses-service.fakes";
+import {
+  FakeSharedExpenseCategoryRepository,
+  FakeSharedExpenseLinkRepository,
+  FakeSharedExpensesRepository,
+} from "./shared-expenses-service.fakes";
 
 function createService() {
   const repository = new FakeSharedExpensesRepository();
   const friendsRepository = new FakeFriendsRepository();
+  const linkRepository = new FakeSharedExpenseLinkRepository();
+  const categoryRepository = new FakeSharedExpenseCategoryRepository();
 
   return {
     repository,
     friendsRepository,
-    service: new SharedExpensesService(repository, friendsRepository),
+    linkRepository,
+    categoryRepository,
+    service: new SharedExpensesService(
+      repository,
+      friendsRepository,
+      linkRepository,
+      categoryRepository,
+    ),
   };
 }
 
@@ -47,6 +60,8 @@ describe("SharedExpensesService.updateExpense", () => {
       ],
       description: "Lunch",
       date: "2026-11-10",
+      walletId: null,
+      categoryId: null,
       updatedAt: expect.any(String),
     });
     expect(expense.createdAt).toBe("2026-11-10T20:00:00.000Z");
@@ -131,5 +146,119 @@ describe("SharedExpensesService.updateExpense", () => {
       ),
     ).rejects.toBeInstanceOf(SharedExpenseValidationError);
     expect(repository.updateCalls).toEqual([]);
+  });
+});
+
+describe("SharedExpensesService.updateExpense link routing", () => {
+  it("routes to the link repository when a wallet is added", async () => {
+    const { repository, linkRepository, categoryRepository, friendsRepository, service } =
+      createService();
+    friendsRepository.seedFriendship("user-a", "user-b");
+    repository.seed(buildSharedExpense());
+    linkRepository.seed(buildSharedExpense());
+
+    await service.updateExpense(
+      "user-a",
+      "expense-1",
+      buildInput({ walletId: "wallet-1" }),
+    );
+
+    expect(repository.updateCalls).toEqual([]);
+    expect(linkRepository.updateCalls[0]).toMatchObject({
+      viewerUid: "user-a",
+      expenseId: "expense-1",
+      update: {
+        walletId: "wallet-1",
+        categoryId: "user-a__shared-expense",
+      },
+    });
+    expect(categoryRepository.ensureCalls).toHaveLength(1);
+  });
+
+  it("keeps the social path while no wallet is involved", async () => {
+    const { repository, linkRepository, friendsRepository, service } =
+      createService();
+    friendsRepository.seedFriendship("user-a", "user-b");
+    repository.seed(buildSharedExpense());
+
+    await service.updateExpense("user-a", "expense-1", buildInput());
+
+    expect(linkRepository.updateCalls).toEqual([]);
+    expect(repository.updateCalls[0].update).toMatchObject({
+      walletId: null,
+      categoryId: null,
+    });
+  });
+
+  it("rejects editing a linked expense owned by the friend", async () => {
+    const { repository, linkRepository, friendsRepository, service } =
+      createService();
+    friendsRepository.seedFriendship("user-a", "user-b");
+    repository.seed(
+      buildSharedExpense({
+        payerId: "user-b",
+        walletId: "wallet-b",
+        categoryId: "category-1",
+        linkedTransactionId: "movement-b",
+      }),
+    );
+
+    await expect(
+      service.updateExpense(
+        "user-a",
+        "expense-1",
+        buildInput({ payerId: "user-b", description: "Lunch" }),
+      ),
+    ).rejects.toMatchObject({ code: "LINKED_MOVEMENT_FOREIGN" });
+
+    expect(repository.updateCalls).toEqual([]);
+    expect(linkRepository.updateCalls).toEqual([]);
+  });
+
+  it("creates the viewer's own movement when taking over a social expense", async () => {
+    const { repository, linkRepository, categoryRepository, friendsRepository, service } =
+      createService();
+    friendsRepository.seedFriendship("user-a", "user-b");
+    const friendPaid = buildSharedExpense({ payerId: "user-b" });
+    repository.seed(friendPaid);
+    linkRepository.seed(friendPaid);
+
+    await service.updateExpense(
+      "user-a",
+      "expense-1",
+      buildInput({ payerId: "user-a", walletId: "wallet-1" }),
+    );
+
+    expect(repository.updateCalls).toEqual([]);
+    expect(linkRepository.updateCalls[0]).toMatchObject({
+      viewerUid: "user-a",
+      update: {
+        payerId: "user-a",
+        walletId: "wallet-1",
+        categoryId: "user-a__shared-expense",
+      },
+    });
+    expect(categoryRepository.ensureCalls).toHaveLength(1);
+  });
+
+  it("keeps the link path when a linked expense clears its wallet", async () => {
+    const { repository, linkRepository, friendsRepository, service } =
+      createService();
+    friendsRepository.seedFriendship("user-a", "user-b");
+    const linked = buildSharedExpense({
+      walletId: "wallet-1",
+      categoryId: "category-1",
+      linkedTransactionId: "movement-1",
+    });
+    repository.seed(linked);
+    linkRepository.seed(linked);
+
+    await service.updateExpense("user-a", "expense-1", buildInput());
+
+    expect(repository.updateCalls).toEqual([]);
+    expect(linkRepository.updateCalls[0].update).toMatchObject({
+      walletId: null,
+      categoryId: null,
+    });
   });
 });

@@ -1,49 +1,50 @@
+import type { ICategoryRepository } from "@/features/categories/repositories/category.repository";
 import type { IFriendsRepository } from "@/features/friends/repositories/friends.repository";
 
-import type { ISharedExpensesRepository } from "../repositories/shared-expenses.repository";
-import { validateSharedExpenseInput } from "../schemas/shared-expense.schema";
+import type {
+  ISharedExpensesRepository,
+  ISharedExpenseLinkRepository,
+} from "../repositories/shared-expenses.repository";
 import type {
   SharedExpense,
   SharedExpenseInput,
-  ValidatedSharedExpense,
 } from "../types/shared-expense.types";
 import { sortSharedExpenses } from "../utils/expense-ledger";
+import { ensureSharedExpenseCategory as ensureCategoryDocument } from "./shared-expense-category";
+import { SharedExpenseOperationError } from "./shared-expense.errors";
+import { assertSharedExpenseFriendship } from "./shared-expense-persist";
 import {
-  SharedExpenseOperationError,
-  SharedExpenseValidationError,
-} from "./shared-expense.errors";
-import {
-  assertSharedExpenseFriendship,
-  buildCreateSharedExpenseDto,
-  buildUpdateSharedExpenseDto,
-} from "./shared-expense-persist";
+  createSharedExpenseRecord,
+  deleteSharedExpenseRecord,
+  updateSharedExpenseRecord,
+  type SharedExpenseWriteDeps,
+} from "./shared-expense-write";
 import {
   assertExpenseParticipant,
   assertSameExpensePair,
   requireSharedExpense,
   requireSharedExpenseViewer,
+  validateSharedExpenseOrThrow,
 } from "./shared-expenses.guards";
-
-function validateInput(
-  input: SharedExpenseInput,
-  viewerUid: string,
-): ValidatedSharedExpense {
-  const validation = validateSharedExpenseInput(input, viewerUid);
-
-  if (!validation.ok) throw new SharedExpenseValidationError(validation.error);
-
-  return validation.value;
-}
 
 /**
  * 1:1 shared expenses. The service owns the participant and friendship guards;
- * the repository only talks to Firestore and the UI translates the error codes.
+ * the repositories only talk to Firestore and the UI translates error codes.
+ *
+ * `linkRepository` handles the atomic pair "expense + personal movement" and is
+ * only used when a wallet is selected; social-only expenses keep the old path.
  */
 export class SharedExpensesService {
+  private readonly writeDeps: SharedExpenseWriteDeps;
+
   constructor(
     private readonly repository: ISharedExpensesRepository,
     private readonly friendsRepository: IFriendsRepository,
-  ) {}
+    linkRepository: ISharedExpenseLinkRepository,
+    categoryRepository: ICategoryRepository,
+  ) {
+    this.writeDeps = { repository, linkRepository, categoryRepository };
+  }
 
   /** Every expense of the viewer, soft-deleted included for the audit trail. */
   async getExpenses(viewerUid: string): Promise<SharedExpense[]> {
@@ -64,12 +65,20 @@ export class SharedExpensesService {
     return expense;
   }
 
+  /**
+   * Returns the deterministic "Gastos compartidos" category id, creating it the
+   * first time a payer links a movement. Existing categories are never rewritten.
+   */
+  ensureSharedExpenseCategory(ownerId: string): Promise<string> {
+    return ensureCategoryDocument(this.writeDeps.categoryRepository, ownerId);
+  }
+
   async createExpense(
     viewerUid: string,
     input: SharedExpenseInput,
   ): Promise<SharedExpense> {
     const viewer = requireSharedExpenseViewer(viewerUid);
-    const value = validateInput(input, viewer);
+    const value = validateSharedExpenseOrThrow(input, viewer);
 
     await assertSharedExpenseFriendship(
       this.friendsRepository,
@@ -77,10 +86,11 @@ export class SharedExpensesService {
       value.participantIds,
     );
 
-    const now = new Date().toISOString();
-
-    return this.repository.createExpense(
-      buildCreateSharedExpenseDto(value, viewer, now),
+    return createSharedExpenseRecord(
+      this.writeDeps,
+      value,
+      viewer,
+      new Date().toISOString(),
     );
   }
 
@@ -97,7 +107,7 @@ export class SharedExpensesService {
       throw new SharedExpenseOperationError("ALREADY_DELETED");
     }
 
-    const value = validateInput(input, viewer);
+    const value = validateSharedExpenseOrThrow(input, viewer);
     assertSameExpensePair(value.participantIds, existing);
 
     await assertSharedExpenseFriendship(
@@ -106,9 +116,12 @@ export class SharedExpensesService {
       value.participantIds,
     );
 
-    return this.repository.updateExpense(
-      existing.id,
-      buildUpdateSharedExpenseDto(value, new Date().toISOString()),
+    return updateSharedExpenseRecord(
+      this.writeDeps,
+      existing,
+      value,
+      viewer,
+      new Date().toISOString(),
     );
   }
 
@@ -120,8 +133,10 @@ export class SharedExpensesService {
 
     if (existing.deletedAt !== null) return;
 
-    await this.repository.softDeleteExpense(
-      existing.id,
+    return deleteSharedExpenseRecord(
+      this.writeDeps,
+      existing,
+      viewer,
       new Date().toISOString(),
     );
   }

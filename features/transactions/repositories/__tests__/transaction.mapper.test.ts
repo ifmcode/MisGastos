@@ -51,3 +51,72 @@ describe("mapTransactionDocument wallet names", () => {
     ).toBeNull();
   });
 });
+
+describe("mapTransactionDocument shared links and soft delete", () => {
+  it("reads a trimmed shared expense id on expenses", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, sharedExpenseId: "  expense-1  " },
+      "user-1",
+    );
+
+    expect(transaction?.sharedExpenseId).toBe("expense-1");
+    expect(transaction?.deletedAt).toBeNull();
+  });
+
+  it("drops the shared expense id on income movements", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, type: "income", sharedExpenseId: "expense-1" },
+      "user-1",
+    );
+
+    expect(transaction && "sharedExpenseId" in transaction).toBe(false);
+  });
+
+  it("keeps a soft delete stamp so the list can filter it", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, deletedAt: " 2026-11-16T10:00:00.000Z " },
+      "user-1",
+    );
+
+    expect(transaction?.deletedAt).toBe("2026-11-16T10:00:00.000Z");
+  });
+
+  it("treats an empty delete stamp as active", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, deletedAt: "   " },
+      "user-1",
+    );
+
+    expect(transaction?.deletedAt).toBeNull();
+  });
+});
+
+describe("mapTransactionDocument invalid documents", () => {
+  it("drops an unknown type, a non-positive amount or an unknown currency", () => {
+    expect(
+      mapTransactionDocument("tx-1", { ...baseData, type: "transfer" }, "u"),
+    ).toBeNull();
+    expect(
+      mapTransactionDocument("tx-1", { ...baseData, amount: 0 }, "u"),
+    ).toBeNull();
+    expect(
+      mapTransactionDocument("tx-1", { ...baseData, amount: "10" }, "u"),
+    ).toBeNull();
+    expect(
+      mapTransactionDocument("tx-1", { ...baseData, currency: "XYZ" }, "u"),
+    ).toBeNull();
+  });
+
+  it("drops an empty concept or an invalid date", () => {
+    expect(
+      mapTransactionDocument("tx-1", { ...baseData, concept: "  " }, "u"),
+    ).toBeNull();
+    expect(
+      mapTransactionDocument("tx-1", { ...baseData, date: "not-a-date" }, "u"),
+    ).toBeNull();
+  });
+});

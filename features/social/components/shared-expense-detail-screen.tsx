@@ -1,16 +1,10 @@
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
 import { SharedExpenseEditorModal } from "@/features/shared-expenses/components/shared-expense-editor-modal";
 import { SharedExpenseParticipants } from "@/features/shared-expenses/components/shared-expense-participants";
-import {
-  getSharedExpenseDetailSummary,
-  getSharedExpenseParticipantFields,
-} from "@/features/shared-expenses/utils/shared-expense-detail";
-import { buildSharedExpenseDetailFields } from "@/features/shared-expenses/utils/shared-expense-detail-fields";
-import type { SharedExpenseDetailContext } from "@/features/shared-expenses/utils/shared-expense-detail.types";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
@@ -21,6 +15,7 @@ import { useDetailActions } from "@/shared/hooks/use-detail-actions";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { useSharedExpenseDetailScreen } from "../hooks/use-shared-expense-detail-screen";
+import { useSharedExpenseDetailView } from "../hooks/use-shared-expense-detail-view";
 import { sharedExpenseDetailStyles as styles } from "../styles/shared-expense-detail.styles";
 import { SocialRouteHeader } from "./social-route-header";
 import {
@@ -60,24 +55,14 @@ export function SharedExpenseDetailScreen() {
     router.replace("/(tabs)/social" as Href);
   }, [router]);
 
-  const detail = useMemo(() => {
-    const context: SharedExpenseDetailContext = {
-      viewerUid: screen.viewerUid,
-      friends: screen.friends,
-      formatCurrency: locale.formatCurrency,
-      formatDate: locale.formatDate,
-      formatDateTime: locale.formatDateTime,
-      t: tr,
-    };
-
-    if (!expense) return null;
-
-    return {
-      summary: getSharedExpenseDetailSummary(expense, locale.formatCurrency, tr),
-      fields: buildSharedExpenseDetailFields(expense, context),
-      participants: getSharedExpenseParticipantFields(expense, context),
-    };
-  }, [expense, locale, screen.friends, screen.viewerUid, tr]);
+  const detail = useSharedExpenseDetailView({
+    expense,
+    viewerUid: screen.viewerUid,
+    friends: screen.friends,
+    linkedMovement: screen.linkedMovement,
+    locale,
+    tr,
+  });
 
   const deleteConfirmation = expense
     ? getSharedExpenseDetailDeleteConfirmation(tr, expense.description)

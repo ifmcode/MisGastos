@@ -62,6 +62,10 @@ export function validateSharedExpenseInput(
       participants: shares.value,
       description: parsed.description,
       date: parsed.date,
+      walletId: parsed.walletId,
+      categoryId: parsed.categoryId,
+      // Only persistence can set the link, so a validated payload never has one.
+      linkedTransactionId: null,
     },
   };
 }

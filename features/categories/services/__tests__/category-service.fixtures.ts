@@ -32,6 +32,11 @@ export class FakeCategoryRepository implements ICategoryRepository {
   usage = 0;
   seedCalls = 0;
   createCalls: CreateCategoryDto[] = [];
+  ensureCalls: Array<{
+    ownerId: string;
+    categoryId: string;
+    dto: CreateCategoryDto;
+  }> = [];
   updateCalls: UpdateCategoryDto[] = [];
   deleteCalls: string[] = [];
   orderCalls: Array<{
@@ -60,6 +65,20 @@ export class FakeCategoryRepository implements ICategoryRepository {
   ): Promise<Category> {
     this.createCalls.push(dto);
     const category = buildCategory({ id: "category-new", ownerId, ...dto });
+    this.categories.push(category);
+    return category;
+  }
+
+  async ensureCategory(
+    ownerId: string,
+    categoryId: string,
+    dto: CreateCategoryDto,
+  ): Promise<Category> {
+    this.ensureCalls.push({ ownerId, categoryId, dto });
+    const existing = this.categories.find((item) => item.id === categoryId);
+    if (existing) return existing;
+
+    const category = buildCategory({ id: categoryId, ownerId, ...dto });
     this.categories.push(category);
     return category;
   }

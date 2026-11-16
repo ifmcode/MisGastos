@@ -22,6 +22,10 @@ export interface SharedExpenseFormValues {
   payerId: string;
   splitMode: ExpenseSplitMode;
   splitValues: Record<ExpenseSplitMode, SplitValueTexts>;
+  /** Payer-owned wallet of the linked movement; empty keeps the expense social. */
+  walletId: string;
+  /** Expense category of the linked movement; empty leaves it to persistence. */
+  categoryId: string;
 }
 
 export interface SharedExpenseFormDefaults {
@@ -51,6 +55,8 @@ export function createSharedExpenseFormValues(
     payerId: defaults.payerId ?? defaults.viewerUid,
     splitMode: "equal",
     splitValues: emptySplitValues(),
+    walletId: "",
+    categoryId: "",
   };
 }
 
@@ -82,6 +88,8 @@ export function toSharedExpenseInput(
       userId,
       value: activeValues[userId] ?? "",
     })),
+    walletId: values.walletId,
+    categoryId: values.categoryId,
   };
 }
 

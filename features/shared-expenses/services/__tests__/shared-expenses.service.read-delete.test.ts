@@ -4,16 +4,24 @@ import { FakeFriendsRepository } from "@/features/friends/services/__tests__/fri
 
 import { buildSharedExpense } from "../../utils/__tests__/shared-expense.fixtures";
 import { SharedExpensesService } from "../shared-expenses.service";
-import { FakeSharedExpensesRepository } from "./shared-expenses-service.fakes";
+import {
+  FakeSharedExpenseCategoryRepository,
+  FakeSharedExpenseLinkRepository,
+  FakeSharedExpensesRepository,
+} from "./shared-expenses-service.fakes";
 
 function createService() {
   const repository = new FakeSharedExpensesRepository();
+  const linkRepository = new FakeSharedExpenseLinkRepository();
+  const categoryRepository = new FakeSharedExpenseCategoryRepository();
   const service = new SharedExpensesService(
     repository,
     new FakeFriendsRepository(),
+    linkRepository,
+    categoryRepository,
   );
 
-  return { repository, service };
+  return { repository, linkRepository, categoryRepository, service };
 }
 
 describe("SharedExpensesService.getExpenses", () => {
@@ -126,5 +134,42 @@ describe("SharedExpensesService.deleteExpense", () => {
       service.deleteExpense("user-a", "expense-1"),
     ).resolves.toBeUndefined();
     expect(repository.deleteCalls).toEqual([]);
+  });
+
+  it("rejects deleting a linked expense owned by the friend", async () => {
+    const { repository, linkRepository, service } = createService();
+    repository.seed(
+      buildSharedExpense({
+        payerId: "user-b",
+        walletId: "wallet-b",
+        categoryId: "category-1",
+        linkedTransactionId: "movement-b",
+      }),
+    );
+
+    await expect(
+      service.deleteExpense("user-a", "expense-1"),
+    ).rejects.toMatchObject({ code: "LINKED_MOVEMENT_FOREIGN" });
+
+    expect(linkRepository.deleteCalls).toEqual([]);
+    expect(repository.deleteCalls).toEqual([]);
+  });
+
+  it("soft-deletes a linked expense through the link repository", async () => {
+    const { repository, linkRepository, service } = createService();
+    repository.seed(
+      buildSharedExpense({
+        walletId: "wallet-1",
+        categoryId: "category-1",
+        linkedTransactionId: "movement-1",
+      }),
+    );
+
+    await service.deleteExpense("user-a", "expense-1");
+
+    expect(repository.deleteCalls).toEqual([]);
+    expect(linkRepository.deleteCalls).toEqual([
+      { viewerUid: "user-a", expenseId: "expense-1", deletedAt: expect.any(String) },
+    ]);
   });
 });

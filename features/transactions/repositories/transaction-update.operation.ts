@@ -12,6 +12,8 @@ import {
   buildTransaction,
   getMappedWallet,
   getSignedTransactionAmount,
+  readStoredDeletedAt,
+  readStoredSharedExpenseId,
   toTransactionData,
   toWalletBalance,
 } from "./transaction-firestore.utils";
@@ -138,7 +140,13 @@ export async function updateTransactionOperation({
     const patch: Record<string, unknown> = {
       ...toTransactionData(ownerId, dto, now),
       createdAt: toIsoTimestamp(transactionData.createdAt) ?? now,
+      // Linked movements are only edited by the shared-expense operations; a
+      // personal edit keeps the link and the soft-delete stamp untouched.
+      deletedAt: readStoredDeletedAt(transactionData),
     };
+
+    const sharedExpenseId = readStoredSharedExpenseId(transactionData);
+    if (sharedExpenseId) patch.sharedExpenseId = sharedExpenseId;
 
     if (!(sameWallet && previousIsOrphaned)) {
       patch.walletName = deleteField();

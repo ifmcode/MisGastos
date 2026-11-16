@@ -1,6 +1,14 @@
 import type { ISharedExpensesRepository } from "../repositories/shared-expenses.repository";
-import type { SharedExpense } from "../types/shared-expense.types";
-import { SharedExpenseOperationError } from "./shared-expense.errors";
+import { validateSharedExpenseInput } from "../schemas/shared-expense.schema";
+import type {
+  SharedExpense,
+  SharedExpenseInput,
+  ValidatedSharedExpense,
+} from "../types/shared-expense.types";
+import {
+  SharedExpenseOperationError,
+  SharedExpenseValidationError,
+} from "./shared-expense.errors";
 
 /** Shared expenses always belong to a signed-in user; blank ids are rejected. */
 export function requireSharedExpenseViewer(viewerUid: unknown): string {
@@ -50,4 +58,18 @@ export function assertSameExpensePair(
   if (!sameIds || participantIds.join("__") !== expense.pairId) {
     throw new SharedExpenseOperationError("NOT_PARTICIPANT");
   }
+}
+
+/** Validates the form payload and throws the domain validation error. */
+export function validateSharedExpenseOrThrow(
+  input: SharedExpenseInput,
+  viewerUid: string,
+): ValidatedSharedExpense {
+  const validation = validateSharedExpenseInput(input, viewerUid);
+
+  if (!validation.ok) {
+    throw new SharedExpenseValidationError(validation.error);
+  }
+
+  return validation.value;
 }

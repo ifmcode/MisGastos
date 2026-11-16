@@ -96,6 +96,8 @@ describe("updateSharedExpenseOperation", () => {
         participants: updateDto.participants,
         description: "Lunch",
         date: "2026-11-11",
+        walletId: null,
+        categoryId: null,
         updatedAt: "2026-11-11T10:00:00.000Z",
       },
     );
@@ -109,6 +111,23 @@ describe("updateSharedExpenseOperation", () => {
     await expect(
       updateSharedExpenseOperation("expense-1", updateDto),
     ).rejects.toMatchObject({ code: "EXPENSE_NOT_FOUND" });
+  });
+
+  it("writes the link id only when the caller supplies it", async () => {
+    mockUpdateDoc.mockResolvedValue(undefined);
+    mockGetDoc.mockResolvedValue(
+      documentSnapshot("expense-1", buildExpenseDocument(updateDto)),
+    );
+
+    await updateSharedExpenseOperation("expense-1", {
+      ...updateDto,
+      linkedTransactionId: "movement-1",
+    });
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith(
+      { id: "expense-1", path: "sharedExpenses/expense-1" },
+      expect.objectContaining({ linkedTransactionId: "movement-1" }),
+    );
   });
 });
 

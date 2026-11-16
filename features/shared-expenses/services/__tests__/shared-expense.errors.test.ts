@@ -52,6 +52,10 @@ describe("getSharedExpenseErrorCode", () => {
       "NOT_PARTICIPANT",
       "NOT_FRIEND",
       "ALREADY_DELETED",
+      "INSUFFICIENT_BALANCE",
+      "WALLET_NOT_FOUND",
+      "WALLET_NOT_OWNED",
+      "CURRENCY_MISMATCH",
     ] as const;
 
     for (const code of codes) {

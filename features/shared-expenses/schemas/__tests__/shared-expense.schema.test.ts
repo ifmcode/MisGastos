@@ -29,6 +29,9 @@ describe("validateSharedExpenseInput - happy paths", () => {
         ],
         description: "Dinner",
         date: "2026-11-10",
+        walletId: null,
+        categoryId: null,
+        linkedTransactionId: null,
       },
     });
   });
@@ -104,5 +107,53 @@ describe("validateSharedExpenseInput - happy paths", () => {
     );
 
     expect(result.ok && result.value.amountCents).toBe(100_000_000);
+  });
+});
+
+describe("validateSharedExpenseInput - optional wallet link", () => {
+  it("trims the wallet and keeps the supplied category", () => {
+    const result = validateSharedExpenseInput(
+      buildInput({ walletId: " wallet-1 ", categoryId: " category-1 " }),
+      VIEWER,
+    );
+
+    expect(result.ok && result.value).toMatchObject({
+      walletId: "wallet-1",
+      categoryId: "category-1",
+      linkedTransactionId: null,
+    });
+  });
+
+  it("nulls the wallet and category when no wallet is selected", () => {
+    const result = validateSharedExpenseInput(
+      buildInput({ walletId: "   ", categoryId: "category-1" }),
+      VIEWER,
+    );
+
+    expect(result.ok && result.value).toMatchObject({
+      walletId: null,
+      categoryId: null,
+    });
+  });
+
+  it("drops a category sent without a wallet", () => {
+    const result = validateSharedExpenseInput(
+      buildInput({ categoryId: "category-1" }),
+      VIEWER,
+    );
+
+    expect(result.ok && result.value.categoryId).toBeNull();
+  });
+
+  it("never accepts the linked movement id from the form", () => {
+    const result = validateSharedExpenseInput(
+      {
+        ...buildInput({ walletId: "wallet-1" }),
+        linkedTransactionId: "movement-1",
+      } as unknown as Parameters<typeof validateSharedExpenseInput>[0],
+      VIEWER,
+    );
+
+    expect(result.ok && result.value.linkedTransactionId).toBeNull();
   });
 });

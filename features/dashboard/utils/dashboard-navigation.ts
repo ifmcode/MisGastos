@@ -8,6 +8,8 @@ export interface DashboardRouter {
 export interface DashboardNavigationActions {
   openMovements: () => void;
   openTransferHistory: () => void;
+  /** A linked movement opens its shared expense, never the personal detail. */
+  openSharedExpense: (expenseId: string) => void;
 }
 
 /** Keeps dashboard destinations in one place so sections stay presentation-only. */
@@ -17,5 +19,7 @@ export function createDashboardNavigationActions(
   return {
     openMovements: () => router.navigate("/transactions"),
     openTransferHistory: () => router.push("/transfers"),
+    openSharedExpense: (expenseId) =>
+      router.push(`/social/expenses/${expenseId}` as Href),
   };
 }

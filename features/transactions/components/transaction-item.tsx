@@ -26,6 +26,10 @@ export interface TransactionItemProps {
   onPress: () => void;
 }
 
+/**
+ * Movement row. A linked movement shows the "Compartido" pill and announces the
+ * shared-expense detail, because its personal edit/delete path does not exist.
+ */
 export function TransactionItem({
   transaction,
   wallet,
@@ -35,6 +39,7 @@ export function TransactionItem({
 }: TransactionItemProps) {
   const theme = useFormTheme();
   const { t } = useTranslation("transactions");
+  const { t: tShared } = useTranslation("sharedExpenses");
   const tr = asTranslate(t);
   const locale = useAppLocale();
   const isIncome = transaction.type === "income";
@@ -54,20 +59,26 @@ export function TransactionItem({
     date,
     walletName,
   );
-  const hint = accessibilityHint ?? t(OPEN_TRANSACTION_DETAIL_HINT_KEY);
+  const isLinked = Boolean(transaction.sharedExpenseId);
+  const badge = isLinked ? tShared("badge.label") : undefined;
+  const hint =
+    accessibilityHint ??
+    (isLinked ? tShared("badge.hint") : t(OPEN_TRANSACTION_DETAIL_HINT_KEY));
+  const summary = tr(detailLabel.key, {
+    ...detailLabel.values,
+    type: tr(detailLabel.values.typeKey),
+  });
 
   return (
     <RecordCard
-      accessibilityLabel={tr(detailLabel.key, {
-        ...detailLabel.values,
-        type: tr(detailLabel.values.typeKey),
-      })}
+      accessibilityLabel={badge ? `${badge} · ${summary}` : summary}
       accessibilityHint={hint}
       onPress={onPress}
       icon={category.icon}
       title={transaction.concept}
       meta={joinMetaParts([date, categoryLabel, walletName])}
       amount={`${amountPrefix}${amount}`}
+      badge={badge}
       amountColor={amountColor}
       secondaryAmount={transaction.currency}
     />

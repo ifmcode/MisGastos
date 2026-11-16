@@ -43,7 +43,34 @@ describe("toTransactionData", () => {
       ownerId: "user-1",
       createdAt: "now",
       updatedAt: "now",
+      deletedAt: null,
     });
+  });
+
+  it("keeps an explicit soft-delete stamp from the DTO", () => {
+    const data = toTransactionData(
+      "user-1",
+      { ...validDto, deletedAt: "2026-11-16T10:00:00.000Z" },
+      "now",
+    );
+
+    expect(data.deletedAt).toBe("2026-11-16T10:00:00.000Z");
+  });
+
+  it("persists a shared expense link only on expense movements", () => {
+    const linked = toTransactionData(
+      "user-1",
+      { ...validDto, sharedExpenseId: "  expense-1  " },
+      "now",
+    );
+    const income = toTransactionData(
+      "user-1",
+      { ...validDto, type: "income", sharedExpenseId: "expense-1" },
+      "now",
+    );
+
+    expect(linked.sharedExpenseId).toBe("expense-1");
+    expect(income).not.toHaveProperty("sharedExpenseId");
   });
 
   it("omits empty notes", () => {
@@ -69,8 +96,27 @@ describe("buildTransaction", () => {
         ownerId: "user-1",
         createdAt: "now",
         updatedAt: "now",
+        deletedAt: null,
       },
     );
+  });
+
+  it("keeps the shared expense id only on expense movements", () => {
+    const expense = buildTransaction(
+      "transaction-1",
+      "user-1",
+      { ...validDto, sharedExpenseId: "expense-1" },
+      "now",
+    );
+    const income = buildTransaction(
+      "transaction-1",
+      "user-1",
+      { ...validDto, type: "income", sharedExpenseId: "expense-1" },
+      "now",
+    );
+
+    expect(expense.sharedExpenseId).toBe("expense-1");
+    expect(income).not.toHaveProperty("sharedExpenseId");
   });
 
   it("omits empty notes", () => {

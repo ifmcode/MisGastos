@@ -20,6 +20,7 @@ function buildTransaction(): Transaction {
     ownerId: "user-1",
     createdAt: "2026-11-13T10:00:00.000Z",
     updatedAt: "2026-11-13T10:00:00.000Z",
+    deletedAt: null,
   };
 }
 
@@ -38,6 +39,9 @@ function createPort() {
     openEdit: jest.fn<(transaction: Transaction) => void>(() => {
       calls.push("edit");
     }),
+    openSharedExpense: jest.fn<(expenseId: string) => void>(() => {
+      calls.push("shared");
+    }),
   };
 
   return { port, calls };
@@ -53,6 +57,20 @@ describe("createDashboardMovementActions", () => {
 
     expect(calls).toEqual(["clear", "detail"]);
     expect(port.openDetail).toHaveBeenCalledWith(transaction);
+  });
+
+  it("navigates to the shared expense instead of the personal detail", () => {
+    const { port, calls } = createPort();
+    const transaction = buildTransaction();
+    transaction.sharedExpenseId = "expense-1";
+    const actions = createDashboardMovementActions(port);
+
+    actions.openDetail(transaction);
+
+    expect(calls).toEqual(["shared"]);
+    expect(port.openSharedExpense).toHaveBeenCalledWith("expense-1");
+    expect(port.openDetail).not.toHaveBeenCalled();
+    expect(port.clearMutationState).not.toHaveBeenCalled();
   });
 
   it("closes the detail before opening the edit form", () => {

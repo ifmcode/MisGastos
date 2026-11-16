@@ -32,7 +32,10 @@ export class FirebaseTransactionRepository implements ITransactionRepository {
         document.data() as Record<string, unknown>,
         ownerId,
       );
-      if (transaction) transactions.push(transaction);
+      // Soft-deleted linked movements keep their audit trail but leave the list.
+      if (transaction && transaction.deletedAt === null) {
+        transactions.push(transaction);
+      }
     }
 
     return transactions;

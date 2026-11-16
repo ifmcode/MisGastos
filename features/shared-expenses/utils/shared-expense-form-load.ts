@@ -1,3 +1,6 @@
+import type { Friend } from "@/features/friends/types/friend.types";
+import type { Wallet } from "@/features/wallets/types/wallet.types";
+import type { CurrencyCode } from "@/shared/constants/currencies";
 import { formatDateInput } from "@/shared/utils/date";
 
 import type {
@@ -9,7 +12,10 @@ import type {
   SharedExpenseFormValues,
   SplitValueTexts,
 } from "./shared-expense-form";
-import { emptySplitValues } from "./shared-expense-form";
+import {
+  createSharedExpenseFormValues,
+  emptySplitValues,
+} from "./shared-expense-form";
 import { formatBpsText, formatCentsText } from "./shared-expense-split-text";
 
 function participantText(
@@ -64,5 +70,59 @@ export function fromSharedExpense(
     payerId: expense.payerId,
     splitMode: expense.splitMode,
     splitValues,
+    walletId: expense.walletId ?? "",
+    categoryId: expense.categoryId ?? "",
   };
 }
+
+export interface SharedExpenseInitialValuesOptions {
+  editingExpense: SharedExpense | null;
+  viewerUid: string;
+  friends: readonly Friend[];
+  lockedFriendUid?: string;
+  preferredCurrency: CurrencyCode;
+  today: string;
+  wallets: readonly Wallet[];
+  walletsLoading: boolean;
+  walletsError: string | null;
+}
+
+/**
+ * Initial form values of the create and edit flows. A stored wallet that no
+ * longer exists (permanently deleted) is cleared, but never while the wallet
+ * list is still loading or failed: that would drop a valid link silently.
+ */
+export function getSharedExpenseInitialValues({
+  editingExpense,
+  viewerUid,
+  friends,
+  lockedFriendUid,
+  preferredCurrency,
+  today,
+  wallets,
+  walletsLoading,
+  walletsError,
+}: SharedExpenseInitialValuesOptions): SharedExpenseFormValues {
+  if (editingExpense) {
+    const loaded = fromSharedExpense(editingExpense, viewerUid);
+    const walletIsGone =
+      loaded.walletId.length > 0 &&
+      !walletsLoading &&
+      walletsError === null &&
+      !wallets.some((wallet) => wallet.id === loaded.walletId);
+
+    return walletIsGone
+      ? { ...loaded, walletId: "", categoryId: "" }
+      : loaded;
+  }
+
+  return createSharedExpenseFormValues({
+    viewerUid,
+    friendUid: lockedFriendUid ?? friends[0]?.uid ?? "",
+    currency: preferredCurrency,
+    date: today,
+    payerId: viewerUid,
+  });
+}
+
+

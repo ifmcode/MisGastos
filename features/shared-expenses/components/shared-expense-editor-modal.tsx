@@ -20,6 +20,8 @@ export function SharedExpenseEditorModal({
     <SharedExpenseFormModal
       visible={editor.formVisible}
       friends={friends}
+      wallets={editor.wallets}
+      categories={editor.categories}
       initialValues={editor.initialValues}
       fieldErrors={editor.fieldErrors}
       error={editor.formError}

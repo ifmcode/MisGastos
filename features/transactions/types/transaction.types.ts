@@ -16,6 +16,10 @@ export interface Transaction extends BaseEntity {
   /** Calendar date stored as YYYY-MM-DD to avoid timezone shifts. */
   date: string;
   ownerId: string;
+  /** Linked `sharedExpenses` record. Only expense movements can carry one. */
+  sharedExpenseId?: string;
+  /** Soft-delete marker; linked movements are never hard-deleted. */
+  deletedAt: string | null;
 }
 
 export interface CreateTransactionDto {
@@ -27,6 +31,10 @@ export interface CreateTransactionDto {
   concept: string;
   notes?: string;
   date: string;
+  /** Ignored unless `type` is `expense`; the mapper drops it otherwise. */
+  sharedExpenseId?: string;
+  /** Optional soft-delete stamp; new movements default to `null`. */
+  deletedAt?: string | null;
 }
 
 export type UpdateTransactionDto = CreateTransactionDto;

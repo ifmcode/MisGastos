@@ -24,4 +24,15 @@ describe("createDashboardNavigationActions", () => {
     expect(push).toHaveBeenCalledWith("/transfers");
     expect(navigate).not.toHaveBeenCalled();
   });
+
+  it("pushes the shared expense detail of a linked movement", () => {
+    const navigate = jest.fn();
+    const push = jest.fn();
+    const actions = createDashboardNavigationActions({ navigate, push });
+
+    actions.openSharedExpense("expense-1");
+
+    expect(push).toHaveBeenCalledWith("/social/expenses/expense-1");
+    expect(navigate).not.toHaveBeenCalled();
+  });
 });

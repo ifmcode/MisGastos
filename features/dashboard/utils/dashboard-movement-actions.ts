@@ -5,10 +5,15 @@ export interface DashboardMovementDialogPort {
   openDetail: (transaction: Transaction) => void;
   closeDetail: () => void;
   openEdit: (transaction: Transaction) => void;
+  /** Linked movements live in the social feature, not in the personal detail. */
+  openSharedExpense: (expenseId: string) => void;
 }
 
 export interface DashboardMovementActions {
-  /** Opens the detail without a stale mutation error from a previous attempt. */
+  /**
+   * Opens the detail without a stale mutation error from a previous attempt, or
+   * navigates to the shared expense when the movement carries a link.
+   */
   openDetail: (transaction: Transaction) => void;
   /** Closes the read-only detail before the edit form replaces it. */
   editFromDetail: (transaction: Transaction) => void;
@@ -17,12 +22,19 @@ export interface DashboardMovementActions {
 /**
  * Keeps the dashboard movement callbacks in one place: a recent movement opens
  * the shared detail and its pencil hands the movement over to the shared form.
+ * A linked movement never opens the personal detail, so no edit or delete is
+ * reachable from the dashboard for it.
  */
 export function createDashboardMovementActions(
   port: DashboardMovementDialogPort,
 ): DashboardMovementActions {
   return {
     openDetail: (transaction) => {
+      if (transaction.sharedExpenseId) {
+        port.openSharedExpense(transaction.sharedExpenseId);
+        return;
+      }
+
       port.clearMutationState();
       port.openDetail(transaction);
     },

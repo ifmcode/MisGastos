@@ -21,6 +21,7 @@ function buildTransaction(overrides: Partial<Transaction> = {}): Transaction {
     ownerId: "user-1",
     createdAt: "2026-10-30T20:00:00.000Z",
     updatedAt: "2026-10-30T20:00:00.000Z",
+    deletedAt: null,
     ...overrides,
   };
 }

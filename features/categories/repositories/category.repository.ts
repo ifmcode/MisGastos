@@ -10,6 +10,15 @@ export interface ICategoryRepository {
   /** Resolves a category by document id or by its legacy transaction id. */
   getCategory(ownerId: string, categoryId: string): Promise<Category | null>;
   createCategory(ownerId: string, dto: CreateCategoryDto): Promise<Category>;
+  /**
+   * Creates the category under a caller-chosen deterministic id when it does
+   * not exist yet; an existing document is returned untouched.
+   */
+  ensureCategory(
+    ownerId: string,
+    categoryId: string,
+    dto: CreateCategoryDto,
+  ): Promise<Category>;
   updateCategory(
     ownerId: string,
     categoryId: string,

@@ -25,10 +25,18 @@ export interface ParsedSharedExpense {
   payerId: string;
   participantIds: string[];
   splitMode: ExpenseSplitMode;
+  walletId: string | null;
+  categoryId: string | null;
 }
 
 function readText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+/** Optional ids are trimmed; an empty string means "not selected". */
+function readOptionalId(value: unknown): string | null {
+  const id = readText(value);
+  return id.length > 0 ? id : null;
 }
 
 function readDescription(
@@ -121,6 +129,9 @@ export function parseSharedExpenseFields(
   const splitMode = readSplitMode(input.splitMode, issues);
   const participantIds = readParticipantIds(input, viewerUid, issues);
   const payerId = readPayerId(input.payerId, participantIds, issues);
+  const walletId = readOptionalId(input.walletId);
+  // No wallet means no personal movement, so the category cannot survive alone.
+  const categoryId = walletId === null ? null : readOptionalId(input.categoryId);
 
   if (
     description === null ||
@@ -142,5 +153,7 @@ export function parseSharedExpenseFields(
     payerId,
     participantIds,
     splitMode,
+    walletId,
+    categoryId,
   };
 }

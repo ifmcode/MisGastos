@@ -1,5 +1,7 @@
 import { PageSheetFormModal } from "@/shared/components/molecules/page-sheet-form-modal";
+import type { Category } from "@/features/categories/types/category.types";
 import type { Friend } from "@/features/friends/types/friend.types";
+import type { Wallet } from "@/features/wallets/types/wallet.types";
 
 import type { SharedExpenseFieldErrors } from "../schemas/shared-expense.schema";
 import type { SharedExpenseInput } from "../types/shared-expense.types";
@@ -9,6 +11,8 @@ import { SharedExpenseForm } from "./shared-expense-form";
 export interface SharedExpenseFormModalProps {
   visible: boolean;
   friends: readonly Friend[];
+  wallets: readonly Wallet[];
+  categories: readonly Category[];
   initialValues: SharedExpenseFormValues;
   fieldErrors: SharedExpenseFieldErrors;
   error: string | null;
@@ -24,6 +28,8 @@ export interface SharedExpenseFormModalProps {
 export function SharedExpenseFormModal({
   visible,
   friends,
+  wallets,
+  categories,
   initialValues,
   fieldErrors,
   error,
@@ -41,6 +47,8 @@ export function SharedExpenseFormModal({
     >
       <SharedExpenseForm
         friends={friends}
+        wallets={wallets}
+        categories={categories}
         initialValues={initialValues}
         fieldErrors={fieldErrors}
         error={error}

@@ -73,8 +73,8 @@ export function DashboardScreen() {
     transactions: transactionsState.transactions,
     mutations: transactionsState,
     onWalletsChanged: walletsState.refresh,
+    onOpenSharedExpense: navigation.openSharedExpense,
   });
-
   const greeting = t("greeting", { name: profile?.displayName ?? user?.displayName ?? user?.email ?? t("defaultUser") });
 
   return (

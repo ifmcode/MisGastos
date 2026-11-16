@@ -1,3 +1,4 @@
+import { FirebaseCategoryRepository } from "@/features/categories/repositories/firebase-category.repository";
 import { FirebaseFriendsRepository } from "@/features/friends/repositories/firebase-friends.repository";
 
 import { FirebaseSharedExpensesRepository } from "../repositories/firebase-shared-expenses.repository";
@@ -7,9 +8,14 @@ let sharedExpensesServiceInstance: SharedExpensesService | null = null;
 
 export function getSharedExpensesService(): SharedExpensesService {
   if (!sharedExpensesServiceInstance) {
+    // The same instance serves the social and the linked paths.
+    const expensesRepository = new FirebaseSharedExpensesRepository();
+
     sharedExpensesServiceInstance = new SharedExpensesService(
-      new FirebaseSharedExpensesRepository(),
+      expensesRepository,
       new FirebaseFriendsRepository(),
+      expensesRepository,
+      new FirebaseCategoryRepository(),
     );
   }
 

@@ -3,6 +3,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   query,
   setDoc,
@@ -141,6 +142,44 @@ export class FirebaseCategoryRepository implements ICategoryRepository {
   ): Promise<void> {
     void ownerId;
     await deleteDoc(doc(db, CATEGORY_COLLECTION, categoryId));
+  }
+
+  /**
+   * Creates a category under a deterministic id only when it is missing, so
+   * concurrent devices resolve to one document and an existing (even renamed)
+   * category is never rewritten.
+   */
+  async ensureCategory(
+    ownerId: string,
+    categoryId: string,
+    dto: CreateCategoryDto,
+  ): Promise<Category> {
+    const reference = doc(db, CATEGORY_COLLECTION, categoryId);
+    const snapshot = await getDoc(reference);
+
+    if (snapshot.exists()) {
+      const existing = mapCategoryDocument(
+        snapshot.id,
+        snapshot.data() as Record<string, unknown>,
+        ownerId,
+      );
+      if (existing) return existing;
+    }
+
+    const now = new Date().toISOString();
+    const data = {
+      name: dto.name,
+      icon: dto.icon,
+      color: dto.color,
+      type: dto.type,
+      ownerId,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await setDoc(reference, data);
+
+    return { id: categoryId, ...data };
   }
 
   async seedDefaultCategories(ownerId: string): Promise<Category[]> {

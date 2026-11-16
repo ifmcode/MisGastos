@@ -35,7 +35,25 @@ describe("deleteTransactionOperation", () => {
       amount: 0,
       ownerId: "user-1",
     });
+    expect(result.transaction.deletedAt).toEqual(expect.any(String));
     expect(result.wallets).toEqual([]);
+  });
+
+  it("keeps the shared expense id in the deleted placeholder", async () => {
+    transactionGet
+      .mockResolvedValueOnce(
+        snapshot(
+          "transaction-1",
+          transactionDocument({ sharedExpenseId: "expense-1" }),
+        ),
+      )
+      .mockResolvedValueOnce(
+        snapshot("wallet-1", walletDocument({ balance: 74.5 })),
+      );
+
+    const result = await deleteTransactionOperation("user-1", "transaction-1");
+
+    expect(result.transaction.sharedExpenseId).toBe("expense-1");
   });
 
   it("reverts an income from the wallet", async () => {

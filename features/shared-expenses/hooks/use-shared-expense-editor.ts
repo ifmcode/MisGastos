@@ -1,25 +1,21 @@
 import { useCallback, useMemo, useState } from "react";
 
+import { useCategories } from "@/features/categories/hooks/use-categories";
+import type { Category } from "@/features/categories/types/category.types";
 import type { Friend } from "@/features/friends/types/friend.types";
+import { useWallets } from "@/features/wallets/hooks/use-wallets";
+import type { Wallet } from "@/features/wallets/types/wallet.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
-import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 import { getTodayIsoDate } from "@/shared/utils/date";
 
 import type { SharedExpenseFieldErrors } from "../schemas/shared-expense.schema";
-import {
-  getSharedExpenseErrorCode,
-  SharedExpenseValidationError,
-} from "../services/shared-expense.errors";
 import type {
   SharedExpense,
   SharedExpenseInput,
 } from "../types/shared-expense.types";
-import {
-  createSharedExpenseFormValues,
-  type SharedExpenseFormValues,
-} from "../utils/shared-expense-form";
-import { fromSharedExpense } from "../utils/shared-expense-form-load";
-import { useSharedExpensesService } from "./use-shared-expenses-service";
+import type { SharedExpenseFormValues } from "../utils/shared-expense-form";
+import { getSharedExpenseInitialValues } from "../utils/shared-expense-form-load";
+import { useSharedExpenseEditorSubmit } from "./use-shared-expense-editor-submit";
 
 export interface UseSharedExpenseEditorOptions {
   viewerUid: string | undefined;
@@ -37,13 +33,20 @@ export interface SharedExpenseEditorController {
   fieldErrors: SharedExpenseFieldErrors;
   submitting: boolean;
   friendLocked: boolean;
+  /** Owner wallets and expense categories of the linked movement. */
+  wallets: Wallet[];
+  categories: Category[];
   openCreate: () => void;
   openEdit: (expense: SharedExpense) => void;
   closeForm: () => void;
   submit: (input: SharedExpenseInput) => void;
 }
 
-/** Create/edit orchestration of the page-sheet form and its error mapping. */
+/**
+ * Create/edit orchestration of the page-sheet form and its error mapping. It
+ * owns the wallet and category collections so both entry points (friend detail
+ * and expense detail) mount one form contract without extra wiring.
+ */
 export function useSharedExpenseEditor({
   viewerUid,
   friends,
@@ -51,98 +54,91 @@ export function useSharedExpenseEditor({
   lockedFriendUid,
   onSaved,
 }: UseSharedExpenseEditorOptions): SharedExpenseEditorController {
-  const service = useSharedExpensesService();
-  const { tr } = useScopedTranslation("sharedExpenses");
+  const walletsState = useWallets();
+  const categoriesState = useCategories();
   const [formVisible, setFormVisible] = useState(false);
   const [editingExpense, setEditingExpense] = useState<SharedExpense | null>(
     null,
   );
-  const [formError, setFormError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<SharedExpenseFieldErrors>({});
-  const [submitting, setSubmitting] = useState(false);
 
-  const initialValues = useMemo<SharedExpenseFormValues>(() => {
-    const viewer = viewerUid ?? "";
+  const refreshResources = useCallback(() => {
+    void walletsState.refresh();
+    void categoriesState.refresh();
+  }, [categoriesState.refresh, walletsState.refresh]);
 
-    if (editingExpense) return fromSharedExpense(editingExpense, viewer);
+  const handleSaved = useCallback(() => {
+    setFormVisible(false);
+    setEditingExpense(null);
+    onSaved();
+  }, [onSaved]);
 
-    return createSharedExpenseFormValues({
-      viewerUid: viewer,
-      friendUid: lockedFriendUid ?? friends[0]?.uid ?? "",
-      currency: preferredCurrency,
-      date: getTodayIsoDate(),
-      payerId: viewer,
-    });
-  }, [editingExpense, friends, lockedFriendUid, preferredCurrency, viewerUid]);
+  const submitState = useSharedExpenseEditorSubmit({
+    viewerUid,
+    editingExpense,
+    onResourcesChanged: refreshResources,
+    onSaved: handleSaved,
+  });
+
+  const initialValues = useMemo<SharedExpenseFormValues>(
+    () =>
+      getSharedExpenseInitialValues({
+        editingExpense,
+        viewerUid: viewerUid ?? "",
+        friends,
+        lockedFriendUid,
+        preferredCurrency,
+        today: getTodayIsoDate(),
+        wallets: walletsState.wallets,
+        walletsLoading: walletsState.loading,
+        walletsError: walletsState.error,
+      }),
+    [
+      editingExpense,
+      friends,
+      lockedFriendUid,
+      preferredCurrency,
+      viewerUid,
+      walletsState.error,
+      walletsState.loading,
+      walletsState.wallets,
+    ],
+  );
 
   const openCreate = useCallback(() => {
     setEditingExpense(null);
-    setFormError(null);
-    setFieldErrors({});
+    submitState.resetErrors();
     setFormVisible(true);
-  }, []);
+  }, [submitState.resetErrors]);
 
-  const openEdit = useCallback((expense: SharedExpense) => {
-    setEditingExpense(expense);
-    setFormError(null);
-    setFieldErrors({});
-    setFormVisible(true);
-  }, []);
+  const openEdit = useCallback(
+    (expense: SharedExpense) => {
+      setEditingExpense(expense);
+      submitState.resetErrors();
+      setFormVisible(true);
+    },
+    [submitState.resetErrors],
+  );
 
   const closeForm = useCallback(() => {
-    if (submitting) return;
+    if (submitState.submitting) return;
 
     setFormVisible(false);
     setEditingExpense(null);
-  }, [submitting]);
-
-  const submit = useCallback((input: SharedExpenseInput) => {
-    if (!viewerUid) {
-      setFormError(tr("errors.SIGN_IN_REQUIRED"));
-      return;
-    }
-
-    const persist = async () => {
-      setSubmitting(true);
-      setFormError(null);
-      setFieldErrors({});
-
-      try {
-        if (editingExpense) {
-          await service.updateExpense(viewerUid, editingExpense.id, input);
-        } else {
-          await service.createExpense(viewerUid, input);
-        }
-
-        setFormVisible(false);
-        setEditingExpense(null);
-        onSaved();
-      } catch (error: unknown) {
-        if (error instanceof SharedExpenseValidationError) {
-          setFieldErrors(error.fieldErrors);
-        }
-        setFormError(
-          tr(`errors.${getSharedExpenseErrorCode(error, "SAVE_FAILED")}`),
-        );
-      } finally {
-        setSubmitting(false);
-      }
-    };
-
-    void persist();
-  }, [editingExpense, onSaved, service, tr, viewerUid]);
+  }, [submitState.submitting]);
 
   return {
     formVisible,
     editingExpense,
     initialValues,
-    formError,
-    fieldErrors,
-    submitting,
+    formError: submitState.formError,
+    fieldErrors: submitState.fieldErrors,
+    submitting: submitState.submitting,
     friendLocked: (lockedFriendUid ?? "").trim().length > 0,
+    wallets: walletsState.wallets,
+    categories: categoriesState.categories,
     openCreate,
     openEdit,
     closeForm,
-    submit,
+    submit: submitState.submit,
   };
 }

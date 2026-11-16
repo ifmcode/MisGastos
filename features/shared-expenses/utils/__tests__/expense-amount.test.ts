@@ -1,6 +1,10 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { amountToCents, parseCentsAmount } from "../expense-amount";
+import {
+  amountToCents,
+  centsToAmount,
+  parseCentsAmount,
+} from "../expense-amount";
 
 describe("amountToCents", () => {
   it("converts a decimal amount into integer cents", () => {
@@ -54,5 +58,24 @@ describe("parseCentsAmount", () => {
     expect(parseCentsAmount("0")).toBeNull();
     expect(parseCentsAmount("abc", true)).toBeNull();
     expect(parseCentsAmount(-1, true)).toBeNull();
+  });
+});
+
+describe("centsToAmount", () => {
+  it("converts integer cents into the rounded decimal amount", () => {
+    expect(centsToAmount(1234)).toBe(12.34);
+    expect(centsToAmount(1)).toBe(0.01);
+    expect(centsToAmount(1000)).toBe(10);
+    expect(centsToAmount(0)).toBe(0);
+  });
+
+  it("round-trips with amountToCents", () => {
+    expect(amountToCents(centsToAmount(1234))).toBe(1234);
+    expect(amountToCents(centsToAmount(29))).toBe(29);
+  });
+
+  it("returns zero for non-finite input", () => {
+    expect(centsToAmount(Number.NaN)).toBe(0);
+    expect(centsToAmount(Number.POSITIVE_INFINITY)).toBe(0);
   });
 });

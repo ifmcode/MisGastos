@@ -2,7 +2,7 @@ import type { Friend } from "@/features/friends/types/friend.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 import type { Translate } from "@/shared/i18n/translate";
 
-/** Wallet and movement a TICKET-044 expense will point at; empty until then. */
+/** Wallet and movement the payer's linked expense points at, already resolved. */
 export interface SharedExpenseDetailLinkedMovement {
   walletName: string;
   movementLabel?: string | null;

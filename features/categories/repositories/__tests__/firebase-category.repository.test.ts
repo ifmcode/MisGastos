@@ -6,6 +6,7 @@ const mockAddDoc = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 const mockCollection = jest.fn<(...args: unknown[]) => unknown>();
 const mockDeleteDoc = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 const mockDoc = jest.fn<(...args: unknown[]) => unknown>();
+const mockGetDoc = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 const mockGetDocs = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 const mockQuery = jest.fn<(...args: unknown[]) => unknown>();
 const mockSetDoc = jest.fn<(...args: unknown[]) => Promise<unknown>>();
@@ -20,6 +21,7 @@ jest.mock("firebase/firestore", () => ({
   collection: (...args: unknown[]) => mockCollection(...args),
   deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
   doc: (...args: unknown[]) => mockDoc(...args),
+  getDoc: (...args: unknown[]) => mockGetDoc(...args),
   getDocs: (...args: unknown[]) => mockGetDocs(...args),
   query: (...args: unknown[]) => mockQuery(...args),
   setDoc: (...args: unknown[]) => mockSetDoc(...args),
@@ -232,5 +234,86 @@ describe("FirebaseCategoryRepository writes", () => {
 
     expect(mockWriteBatch).not.toHaveBeenCalled();
     expect(mockBatchCommit).not.toHaveBeenCalled();
+  });
+});
+
+describe("FirebaseCategoryRepository.ensureCategory", () => {
+  const sharedExpenseCategory = {
+    name: "Gastos compartidos",
+    icon: "people-outline",
+    color: "#0A7EA4",
+    type: "expense" as const,
+  };
+
+  it("returns the stored document without writing when it exists", async () => {
+    mockGetDoc.mockResolvedValue({
+      id: "user-1__shared-expense",
+      exists: () => true,
+      data: () => ({ ...documentData, name: "Viajes" }),
+    });
+
+    const category = await new FirebaseCategoryRepository().ensureCategory(
+      "user-1",
+      "user-1__shared-expense",
+      sharedExpenseCategory,
+    );
+
+    expect(mockGetDoc).toHaveBeenCalledWith({ id: "user-1__shared-expense" });
+    expect(mockSetDoc).not.toHaveBeenCalled();
+    expect(category).toMatchObject({ name: "Viajes", ownerId: "user-1" });
+  });
+
+  it("creates the deterministic document only when it is missing", async () => {
+    mockGetDoc.mockResolvedValue({
+      id: "user-1__shared-expense",
+      exists: () => false,
+      data: () => undefined,
+    });
+    mockSetDoc.mockResolvedValue(undefined);
+
+    const category = await new FirebaseCategoryRepository().ensureCategory(
+      "user-1",
+      "user-1__shared-expense",
+      sharedExpenseCategory,
+    );
+
+    expect(mockDoc).toHaveBeenCalledWith(
+      { name: "test-db" },
+      "categories",
+      "user-1__shared-expense",
+    );
+    expect(mockSetDoc).toHaveBeenCalledWith(
+      { id: "user-1__shared-expense" },
+      expect.objectContaining({
+        name: "Gastos compartidos",
+        icon: "people-outline",
+        color: "#0A7EA4",
+        type: "expense",
+        ownerId: "user-1",
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      }),
+    );
+    expect(category).toMatchObject({
+      id: "user-1__shared-expense",
+      ownerId: "user-1",
+    });
+  });
+
+  it("rewrites a stored document that cannot be mapped", async () => {
+    mockGetDoc.mockResolvedValue({
+      id: "user-1__shared-expense",
+      exists: () => true,
+      data: () => ({ name: "" }),
+    });
+    mockSetDoc.mockResolvedValue(undefined);
+
+    await new FirebaseCategoryRepository().ensureCategory(
+      "user-1",
+      "user-1__shared-expense",
+      sharedExpenseCategory,
+    );
+
+    expect(mockSetDoc).toHaveBeenCalledTimes(1);
   });
 });

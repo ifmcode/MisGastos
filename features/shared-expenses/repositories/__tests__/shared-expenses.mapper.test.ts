@@ -84,4 +84,34 @@ describe("mapSharedExpenseDocument", () => {
       undefined,
     ]);
   });
+
+  it("reads the trimmed wallet link of a linked expense", () => {
+    const expense = mapSharedExpenseDocument(
+      "expense-1",
+      buildExpenseDocument({
+        walletId: " wallet-1 ",
+        categoryId: " category-1 ",
+        linkedTransactionId: " movement-1 ",
+      }),
+    );
+
+    expect(expense).toMatchObject({
+      walletId: "wallet-1",
+      categoryId: "category-1",
+      linkedTransactionId: "movement-1",
+    });
+  });
+
+  it("defaults missing or blank link fields to null", () => {
+    const expense = mapSharedExpenseDocument(
+      "expense-1",
+      buildExpenseDocument({ walletId: "   ", categoryId: undefined }),
+    );
+
+    expect(expense).toMatchObject({
+      walletId: null,
+      categoryId: null,
+      linkedTransactionId: null,
+    });
+  });
 });

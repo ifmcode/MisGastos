@@ -40,6 +40,7 @@ export function toTransactionData(
     ownerId,
     createdAt: now,
     updatedAt: now,
+    deletedAt: dto.deletedAt ?? null,
   };
 
   const notes = dto.notes?.trim();
@@ -47,7 +48,24 @@ export function toTransactionData(
     data.notes = notes;
   }
 
+  const sharedExpenseId = readSharedExpenseId(dto);
+  if (sharedExpenseId) data.sharedExpenseId = sharedExpenseId;
+
   return data;
+}
+
+/**
+ * Linked ids only exist on expenses: income movements never carry one, so the
+ * mapper drops the value instead of rejecting the whole record.
+ */
+function readSharedExpenseId(dto: CreateTransactionDto): string | null {
+  if (dto.type !== "expense") return null;
+
+  const id = typeof dto.sharedExpenseId === "string"
+    ? dto.sharedExpenseId.trim()
+    : "";
+
+  return id.length > 0 ? id : null;
 }
 
 export function buildTransaction(
@@ -56,6 +74,8 @@ export function buildTransaction(
   dto: CreateTransactionDto,
   now: string,
 ): Transaction {
+  const sharedExpenseId = readSharedExpenseId(dto);
+
   return {
     id,
     type: dto.type,
@@ -67,8 +87,10 @@ export function buildTransaction(
     ...(dto.notes?.trim() ? { notes: dto.notes.trim() } : {}),
     date: dto.date,
     ownerId,
+    ...(sharedExpenseId ? { sharedExpenseId } : {}),
     createdAt: now,
     updatedAt: now,
+    deletedAt: dto.deletedAt ?? null,
   };
 }
 
@@ -96,8 +118,29 @@ export function getSignedTransactionAmountObj({
   return roundMoney(type === "income" ? amount : -amount);
 }
 
-/** Reads and maps the wallet after a write so callers can refresh their state. */
-export async function getMappedWallet(
+/**
+ * Soft-delete stamp of a stored movement. A non-empty value keeps the record
+ * out of the movements list, so it is never normalized away.
+ */
+export function readStoredDeletedAt(
+  data: Record<string, unknown>,
+): string | null {
+  return typeof data.deletedAt === "string" && data.deletedAt.trim().length > 0
+    ? data.deletedAt.trim()
+    : null;
+}
+
+/** Stored `sharedExpenseId`, if any; personal movements never have one. */
+export function readStoredSharedExpenseId(
+  data: Record<string, unknown>,
+): string | undefined {
+  const id =
+    typeof data.sharedExpenseId === "string" ? data.sharedExpenseId.trim() : "";
+
+  return id.length > 0 ? id : undefined;
+}
+
+/** Reads and maps the wallet after a write so callers can refresh their state. */export async function getMappedWallet(
   walletRef: DocumentReference,
   ownerId: string,
 ): Promise<Wallet | null> {

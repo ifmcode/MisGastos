@@ -27,6 +27,23 @@ export const recordCardStyles = StyleSheet.create({
     marginLeft: 12,
     marginRight: 10,
   },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  title: {
+    flexShrink: 1,
+  },
+  badge: {
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+  },
   meta: {
     fontSize: 13,
     lineHeight: 18,

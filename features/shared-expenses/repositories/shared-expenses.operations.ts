@@ -15,47 +15,12 @@ import { SharedExpenseOperationError } from "../services/shared-expense.errors";
 import type {
   CreateSharedExpenseDto,
   SharedExpense,
-  SharedExpenseParticipant,
   UpdateSharedExpenseDto,
 } from "../types/shared-expense.types";
+import { toExpenseData, toExpenseUpdateData } from "./shared-expenses.data";
 import { mapSharedExpenseDocument } from "./shared-expenses.mapper";
 
 export const SHARED_EXPENSES_COLLECTION = "sharedExpenses";
-
-/** Drops `undefined` optionals: Firestore rejects undefined field values. */
-function toParticipantData(
-  participant: SharedExpenseParticipant,
-): Record<string, unknown> {
-  const data: Record<string, unknown> = {
-    userId: participant.userId,
-    shareCents: participant.shareCents,
-  };
-
-  if (participant.percentageBps !== undefined) {
-    data.percentageBps = participant.percentageBps;
-  }
-  if (participant.weight !== undefined) data.weight = participant.weight;
-
-  return data;
-}
-
-function toExpenseData(dto: CreateSharedExpenseDto): Record<string, unknown> {
-  return {
-    participantIds: dto.participantIds,
-    pairId: dto.pairId,
-    payerId: dto.payerId,
-    amountCents: dto.amountCents,
-    currency: dto.currency,
-    splitMode: dto.splitMode,
-    participants: dto.participants.map(toParticipantData),
-    description: dto.description,
-    date: dto.date,
-    createdBy: dto.createdBy,
-    createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
-    deletedAt: dto.deletedAt,
-  };
-}
 
 export async function getSharedExpenseOperation(
   expenseId: string,
@@ -114,16 +79,10 @@ export async function updateSharedExpenseOperation(
   expenseId: string,
   update: UpdateSharedExpenseDto,
 ): Promise<SharedExpense> {
-  await updateDoc(doc(db, SHARED_EXPENSES_COLLECTION, expenseId), {
-    payerId: update.payerId,
-    amountCents: update.amountCents,
-    currency: update.currency,
-    splitMode: update.splitMode,
-    participants: update.participants.map(toParticipantData),
-    description: update.description,
-    date: update.date,
-    updatedAt: update.updatedAt,
-  });
+  await updateDoc(
+    doc(db, SHARED_EXPENSES_COLLECTION, expenseId),
+    toExpenseUpdateData(update),
+  );
 
   const expense = await getSharedExpenseOperation(expenseId);
   if (!expense) throw new SharedExpenseOperationError("EXPENSE_NOT_FOUND");

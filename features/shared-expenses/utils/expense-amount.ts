@@ -39,3 +39,13 @@ export function parseCentsAmount(value: unknown, allowZero = false): number | nu
 export function amountToCents(value: unknown): number | null {
   return parseCentsAmount(value, false);
 }
+
+/**
+ * Integer cents -> decimal amount, the inverse boundary used when a shared
+ * expense is written as a personal movement.
+ */
+export function centsToAmount(cents: number): number {
+  if (!Number.isFinite(cents)) return 0;
+
+  return roundMoney(cents / CENTS_FACTOR);
+}

@@ -40,6 +40,7 @@ simplicidad de uso.
 - 👤 **Perfil y moneda preferida** en Ajustes: nombre visible editable y sincronizado con Firebase Auth, correo de la cuenta y moneda por defecto para las nuevas carteras.
 - 👥 **Social y solicitudes**: la pestaña **Social** reúne una fila de peticiones pendientes (recibidas + enviadas, con contador visible solo cuando hay alguna) que abre `/social/requests`, un selector **Tus amigos** / **Tus grupos** (los grupos muestran un estado *próximamente* sin acciones) y la lista de amigos con su saldo derivado (**Te debe** / **Le debes** / **En paz**). Tocar un amigo abre `/social/friends/[uid]`, que muestra nombre, correo, fecha de amistad, un saldo por cada moneda, permite eliminar la amistad con confirmación y lista los gastos compartidos de esa pareja. La fila ya no elimina: solo navega. El botón flotante abre el menú **Añadir amigo**, que lleva a `/social/add-friend`, donde viven la búsqueda por correo exacto y el envío de solicitudes. El saldo se calcula a partir de los gastos compartidos activos y se agrupa por moneda, nunca se convierte ni se suma entre monedas. Tocar un gasto compartido abre `/social/expenses/[expenseId]`, un detalle de solo lectura con descripción, total, moneda, fecha, pagador, modo de reparto, la parte de cada participante y marcas de tiempo; el lápiz abre el formulario precargado y la papelera elimina con confirmación y vuelve al detalle del amigo ya refrescado; un gasto borrado o desconocido muestra el estado seguro de gasto ausente.
 - 🤝 **Gastos compartidos 1:1** entre dos amigos, con reparto **igual o por importes fijos** y redondeo determinista que siempre suma el total exacto (el dominio mantiene además porcentaje y participaciones para la fase de grupos). Moneda por gasto, formulario en hoja con amigo, moneda, fecha, quién pagó y los campos de cada modo; editar y eliminar (borrado lógico con historial). La lista vive en el detalle del amigo, no en la pestaña **Social**, y el FAB de ese detalle crea un gasto con el amigo ya seleccionado y bloqueado.
+- 🏦 **Cartera enlazada al gasto compartido**: cuando paga el usuario, el formulario ofrece carteras activas de la misma moneda (o **Sin cartera**, que mantiene el comportamiento social) y, al elegir una, un selector de categoría que arranca en **Gastos compartidos** (se crea bajo demanda y nunca se pisa un nombre ya editado). El gasto escribe **un único movimiento de gasto** sincronizado en la misma transacción atómica: importe, fecha, descripción, categoría, cartera y pagador se propagan al editar, cambiar de pagador revierte o recrea el movimiento, y eliminar el gasto lo borra lógicamente y devuelve el saldo exactamente una vez. Ese movimiento muestra la etiqueta **Compartido**, abre `/social/expenses/[expenseId]` en vez del detalle personal y no se puede editar ni borrar desde **Movimientos**.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
 - 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías, dashboard y Social: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila, botón flotante y el menú de acciones del FAB (`FabActionMenu`), que hoy usa el FAB de Social y está previsto para el de movimientos.
@@ -154,8 +155,9 @@ npm run firestore-update-rules     # inicia sesión en Firebase y luego desplieg
 
 > El despliegue es manual: cada cambio en `firestore.rules` debe publicarse desde una
 > máquina con credenciales de Firebase. Las reglas de `publicProfiles`, `friendRequests`,
-> `friendships` (TICKET-007) y `sharedExpenses` (TICKET-009, subconjunto 1:1) todavía
-> están **pendientes de despliegue**.
+> `friendships` (TICKET-007), `sharedExpenses` (TICKET-009, subconjunto 1:1) y el enlace
+> del gasto compartido con su movimiento en `sharedExpenses`/`transactions`
+> (TICKET-044) todavía están **pendientes de despliegue**.
 
 ## 📜 Scripts disponibles
 
@@ -194,9 +196,9 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
-Estado actual (16/11/2026): **198 suites / 1054 tests**; la cobertura acotada a la
-lógica de negocio está en **99.03% de sentencias, 94.79% de ramas, 99.05% de
-funciones y 99.50% de líneas**, y `npm run check:copy` audita **213 archivos TSX**.
+Estado actual (16/11/2026): **205 suites / 1157 tests**; la cobertura acotada a la
+lógica de negocio está en **99.07% de sentencias, 94.74% de ramas, 99.01% de
+funciones y 99.49% de líneas**, y `npm run check:copy` audita **220 archivos TSX**.
 
 ## 🗺️ Roadmap
 
@@ -211,7 +213,7 @@ funciones y 99.50% de líneas**, y `npm run check:copy` audita **213 archivos TS
 - [x] Gastos compartidos 1:1
 - [x] Pestaña Social con peticiones y alta de amigo
 - [x] Detalle de amigo con gastos compartidos
-- [ ] Detalle de gasto compartido y cartera enlazada
+- [x] Detalle de gasto compartido y cartera enlazada
 - [ ] Liquidación de deudas 1:1 con confirmación y notificaciones
 - [ ] Bandeja de notificaciones
 - [ ] Grupos y gastos compartidos dentro de grupos
@@ -234,6 +236,7 @@ Consulta el roadmap completo en
 - [Pestaña Social (TICKET-041, 16/11/2026)](docs/project/development-notes/2026-11-16-social-tab.md): shell Social, rutas de alta de amigo y peticiones, contador de pendientes, `FabActionMenu` y el hueco temporal de gastos compartidos.
 - [Detalle de amigo (TICKET-042, 16/11/2026)](docs/project/development-notes/2026-11-16-friend-detail.md): ruta `/social/friends/[uid]`, saldos por moneda en la cabecera, lista filtrada de gastos 1:1, FAB con amigo bloqueado y semántica del borrado de amistad.
 - [Detalle de gasto compartido (TICKET-043, 16/11/2026)](docs/project/development-notes/2026-11-16-shared-expense-detail.md): ruta `/social/expenses/[expenseId]`, resolución viva del gasto, edición/borrado con retorno al detalle de amigo, estado seguro para gastos ausentes y bloque reservado del movimiento vinculado.
+- [Cartera enlazada al gasto compartido (TICKET-044, 16/11/2026)](docs/project/development-notes/2026-11-16-shared-expense-wallet-link.md): contrato de datos del enlace, reglas con `getAfter()`, transacción atómica detrás de `ILinkedMovementPort`, categoría **Gastos compartidos** bajo demanda, etiqueta **Compartido** y límites conocidos.
 - [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)

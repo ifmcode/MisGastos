@@ -17,6 +17,8 @@ export interface RecordCardProps {
   title: string;
   meta: string;
   amount: string;
+  /** Optional short pill next to the title (for example "Compartido"). */
+  badge?: string;
   /** Optional amount tone (for example success/danger on movements). */
   amountColor?: string;
   /** Optional second amount line (for example the currency code). */
@@ -33,6 +35,7 @@ export function RecordCard({
   title,
   meta,
   amount,
+  badge,
   amountColor,
   secondaryAmount,
   affordanceIconSize = 16,
@@ -60,9 +63,26 @@ export function RecordCard({
         </View>
 
         <View style={styles.details}>
-          <ThemedText type="defaultSemiBold" numberOfLines={1}>
-            {title}
-          </ThemedText>
+          <View style={styles.titleRow}>
+            <ThemedText type="defaultSemiBold" numberOfLines={1} style={styles.title}>
+              {title}
+            </ThemedText>
+            {badge ? (
+              <View
+                style={[
+                  styles.badge,
+                  { backgroundColor: theme.primarySoft },
+                ]}
+              >
+                <ThemedText
+                  style={[styles.badgeText, { color: theme.primary }]}
+                  numberOfLines={1}
+                >
+                  {badge}
+                </ThemedText>
+              </View>
+            ) : null}
+          </View>
           <ThemedText style={styles.meta} numberOfLines={1}>
             {meta}
           </ThemedText>

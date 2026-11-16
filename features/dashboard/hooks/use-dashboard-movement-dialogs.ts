@@ -35,6 +35,8 @@ export interface UseDashboardMovementDialogsOptions {
   mutations: DashboardMovementMutations;
   /** Refreshes the dashboard wallets so the totals follow the new balances. */
   onWalletsChanged: () => Promise<void> | void;
+  /** A linked movement opens its shared expense instead of the personal detail. */
+  onOpenSharedExpense: (expenseId: string) => void;
 }
 
 export interface DashboardMovementDialogs {
@@ -54,6 +56,7 @@ export function useDashboardMovementDialogs({
   transactions,
   mutations,
   onWalletsChanged,
+  onOpenSharedExpense,
 }: UseDashboardMovementDialogsOptions): DashboardMovementDialogs {
   // Edits and deletions change wallet balances, and the dashboard owns its own
   // `useWallets` instance, so refresh it to keep the totals in sync.
@@ -90,6 +93,7 @@ export function useDashboardMovementDialogs({
     openDetail: detail.open,
     closeDetail: detail.close,
     openEdit: form.openEdit,
+    openSharedExpense: onOpenSharedExpense,
   });
 
   return { detail, form, ...actions, deleteTransaction };

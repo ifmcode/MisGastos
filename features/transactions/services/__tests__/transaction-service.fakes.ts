@@ -37,6 +37,14 @@ export class FakeCategoryRepository implements ICategoryRepository {
     throw new Error("not used");
   }
 
+  async ensureCategory(
+    _ownerId: string,
+    _categoryId: string,
+    _dto: CreateCategoryDto,
+  ): Promise<Category> {
+    throw new Error("not used");
+  }
+
   async updateCategory(
     _ownerId: string,
     _categoryId: string,

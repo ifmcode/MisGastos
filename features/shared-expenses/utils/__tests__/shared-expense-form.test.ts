@@ -1,5 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
+import type { Wallet } from "@/features/wallets/types/wallet.types";
+
 import {
   createSharedExpenseFormValues,
   getSharedExpenseParticipantIds,
@@ -10,9 +12,28 @@ import {
 } from "../shared-expense-form";
 import {
   fromSharedExpense,
+  getSharedExpenseInitialValues,
   resolveExpenseFriendUid,
 } from "../shared-expense-form-load";
 import { buildSharedExpense } from "./shared-expense.fixtures";
+
+function buildWallet(overrides: Partial<Wallet> = {}): Wallet {
+  return {
+    id: "wallet-1",
+    name: "Cuenta principal",
+    currency: "EUR",
+    icon: "bank-outline",
+    color: "#0A7EA4",
+    initialBalance: 0,
+    balance: 100,
+    type: "bank",
+    includeInTotal: true,
+    ownerId: "user-a",
+    createdAt: "2026-11-01T10:00:00.000Z",
+    updatedAt: "2026-11-01T10:00:00.000Z",
+    ...overrides,
+  };
+}
 
 function buildValues(
   overrides: Partial<SharedExpenseFormValues> = {},
@@ -42,6 +63,8 @@ describe("createSharedExpenseFormValues", () => {
       dateText: "10/11/2026",
       payerId: "user-a",
       splitMode: "equal",
+      walletId: "",
+      categoryId: "",
     });
     expect(values.splitValues).toEqual({
       equal: {},
@@ -114,7 +137,18 @@ describe("toSharedExpenseInput", () => {
         { userId: "user-a", value: "60" },
         { userId: "user-b", value: "40" },
       ],
+      walletId: "",
+      categoryId: "",
     });
+  });
+
+  it("carries the wallet and category of the linked movement", () => {
+    const input = toSharedExpenseInput(
+      buildValues({ walletId: "wallet-1", categoryId: "category-1" }),
+    );
+
+    expect(input.walletId).toBe("wallet-1");
+    expect(input.categoryId).toBe("category-1");
   });
 
   it("sends empty values for an equal split", () => {
@@ -220,6 +254,106 @@ describe("fromSharedExpense", () => {
     expect(
       fromSharedExpense(expense, "user-a").payerId,
     ).toBe("user-a");
+  });
+
+  it("maps a social-only expense to empty wallet and category", () => {
+    const values = fromSharedExpense(buildSharedExpense(), "user-a");
+
+    expect(values.walletId).toBe("");
+    expect(values.categoryId).toBe("");
+  });
+
+  it("loads the stored wallet and category of a linked expense", () => {
+    const values = fromSharedExpense(
+      buildSharedExpense({
+        walletId: "wallet-1",
+        categoryId: "category-1",
+        linkedTransactionId: "transaction-1",
+      }),
+      "user-a",
+    );
+
+    expect(values.walletId).toBe("wallet-1");
+    expect(values.categoryId).toBe("category-1");
+  });
+});
+
+describe("getSharedExpenseInitialValues", () => {
+  const base = {
+    viewerUid: "user-a",
+    friends: [],
+    preferredCurrency: "EUR" as const,
+    today: "2026-11-16",
+    wallets: [] as Wallet[],
+    walletsLoading: false,
+    walletsError: null as string | null,
+  };
+
+  it("builds the create defaults", () => {
+    const values = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: null,
+      lockedFriendUid: "user-b",
+    });
+
+    expect(values).toMatchObject({
+      viewerUid: "user-a",
+      friendUid: "user-b",
+      payerId: "user-a",
+      currency: "EUR",
+      walletId: "",
+      categoryId: "",
+    });
+  });
+
+  it("keeps the stored wallet of an editable expense", () => {
+    const expense = buildSharedExpense({
+      walletId: "wallet-1",
+      categoryId: "category-1",
+    });
+
+    const values = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: expense,
+      wallets: [buildWallet()],
+    });
+
+    expect(values.walletId).toBe("wallet-1");
+    expect(values.categoryId).toBe("category-1");
+  });
+
+  it("clears a wallet that no longer exists once the list is loaded", () => {
+    const expense = buildSharedExpense({
+      walletId: "wallet-deleted",
+      categoryId: "category-1",
+    });
+
+    const values = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: expense,
+      wallets: [buildWallet()],
+    });
+
+    expect(values.walletId).toBe("");
+    expect(values.categoryId).toBe("");
+  });
+
+  it("keeps the wallet while the list is loading or failed", () => {
+    const expense = buildSharedExpense({ walletId: "wallet-1" });
+
+    const loading = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: expense,
+      walletsLoading: true,
+    });
+    const failed = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: expense,
+      walletsError: "No se pudieron cargar las carteras.",
+    });
+
+    expect(loading.walletId).toBe("wallet-1");
+    expect(failed.walletId).toBe("wallet-1");
   });
 });
 

@@ -21,7 +21,13 @@ export type SharedExpenseOperationCode =
   | "EXPENSE_NOT_FOUND"
   | "NOT_PARTICIPANT"
   | "NOT_FRIEND"
-  | "ALREADY_DELETED";
+  | "ALREADY_DELETED"
+  | "INSUFFICIENT_BALANCE"
+  | "WALLET_NOT_FOUND"
+  | "WALLET_NOT_OWNED"
+  | "CURRENCY_MISMATCH"
+  | "LINKED_MOVEMENT_NOT_REVERTIBLE"
+  | "LINKED_MOVEMENT_FOREIGN";
 
 export type SharedExpenseErrorCode =
   | SharedExpenseOperationCode

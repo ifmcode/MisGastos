@@ -11,8 +11,11 @@ import {
 import { useSharedExpenseList } from "@/features/shared-expenses/hooks/use-shared-expense-list";
 import type { SharedExpense } from "@/features/shared-expenses/types/shared-expense.types";
 import { findSharedExpenseForDetail } from "@/features/shared-expenses/utils/shared-expense-detail";
+import type { SharedExpenseDetailLinkedMovement } from "@/features/shared-expenses/utils/shared-expense-detail.types";
+import { useWallets } from "@/features/wallets/hooks/use-wallets";
 import { useAuth } from "@/hooks/use-auth";
 import { DEFAULT_CURRENCY } from "@/shared/constants/currencies";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 export type SharedExpenseDetailStatus = "loading" | "error" | "missing" | "ready";
 
@@ -35,6 +38,8 @@ export interface SharedExpenseDetailScreenController {
   /** Bound to the current expense; resolves true when it was deleted. */
   deleteExpense: () => Promise<boolean>;
   editor: SharedExpenseEditorController;
+  /** Wallet and movement of the payer's linked expense, resolved for display. */
+  linkedMovement: SharedExpenseDetailLinkedMovement | null;
 }
 
 /**
@@ -50,11 +55,29 @@ export function useSharedExpenseDetailScreen({
   const { profile } = useProfile();
   const overview = useFriendsOverview({ viewerUid });
   const list = useSharedExpenseList({ viewerUid });
+  const walletsState = useWallets();
+  const { tr } = useScopedTranslation("sharedExpenses");
 
   const expense = useMemo(
     () => findSharedExpenseForDetail(list.expenses, expenseId),
     [expenseId, list.expenses],
   );
+
+  // The linked movement belongs to the payer and is owner-only. The friend never
+  // receives one, so the block only exists on the payer's own view; a deleted
+  // wallet keeps a translated fallback name.
+  const linkedMovement = useMemo<SharedExpenseDetailLinkedMovement | null>(() => {
+    if (!expense?.walletId || expense.payerId !== viewerUid) return null;
+
+    const wallet = walletsState.wallets.find(
+      (item) => item.id === expense.walletId,
+    );
+
+    return {
+      walletName: wallet?.name ?? tr("detail.walletUnavailable"),
+      movementLabel: tr("detail.linkedMovementValue"),
+    };
+  }, [expense?.payerId, expense?.walletId, tr, viewerUid, walletsState.wallets]);
 
   // An edit must refresh the detail and the friend balances together.
   const refreshAll = useCallback(async () => {
@@ -102,5 +125,6 @@ export function useSharedExpenseDetailScreen({
     mutationError: deletion.actionError,
     deleteExpense,
     editor,
+    linkedMovement,
   };
 }

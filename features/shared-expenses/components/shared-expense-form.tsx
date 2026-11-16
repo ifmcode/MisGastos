@@ -2,7 +2,9 @@ import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
+import type { Category } from "@/features/categories/types/category.types";
 import type { Friend } from "@/features/friends/types/friend.types";
+import type { Wallet } from "@/features/wallets/types/wallet.types";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { FormActions } from "@/shared/components/molecules/form-actions";
 import { FormHeader } from "@/shared/components/molecules/form-header";
@@ -17,9 +19,13 @@ import type { SharedExpenseFormValues } from "../utils/shared-expense-form";
 import { SharedExpenseFormMainFields } from "./shared-expense-form-main-fields";
 import { SharedExpenseFormParticipants } from "./shared-expense-form-participants";
 import { SharedExpenseFriendField } from "./shared-expense-friend-field";
+import { SharedExpenseLinkedMovement } from "./shared-expense-linked-movement";
 
 export interface SharedExpenseFormProps {
   friends: readonly Friend[];
+  /** Owner wallets and categories of the payer's linked movement. */
+  wallets: readonly Wallet[];
+  categories: readonly Category[];
   initialValues: SharedExpenseFormValues;
   fieldErrors: SharedExpenseFieldErrors;
   error: string | null;
@@ -34,6 +40,8 @@ export interface SharedExpenseFormProps {
 /** Page-sheet body of the shared-expense form; owns its field state. */
 export function SharedExpenseForm({
   friends,
+  wallets,
+  categories,
   initialValues,
   fieldErrors,
   error,
@@ -45,7 +53,12 @@ export function SharedExpenseForm({
 }: SharedExpenseFormProps) {
   const theme = useFormTheme();
   const { t } = useScopedTranslation("sharedExpenses");
-  const form = useSharedExpenseForm({ initialValues, fieldErrors, onSubmit });
+  const form = useSharedExpenseForm({
+    initialValues,
+    fieldErrors,
+    wallets,
+    onSubmit,
+  });
   const { values, errors, submit } = form;
   const locked = isEditing || friendLocked === true;
   const lockedReason =
@@ -103,6 +116,19 @@ export function SharedExpenseForm({
               onPayerChange={form.changePayer}
               onSplitModeChange={form.changeSplitMode}
               onSplitValueChange={form.changeSplitValue}
+            />
+
+            <SharedExpenseLinkedMovement
+              wallets={wallets}
+              categories={categories}
+              payerId={values.payerId}
+              viewerUid={values.viewerUid}
+              currency={values.currency}
+              walletId={values.walletId}
+              categoryId={values.categoryId}
+              disabled={submitting}
+              onWalletChange={form.changeWallet}
+              onCategoryChange={form.changeCategory}
             />
 
             <FormActions

@@ -22,3 +22,24 @@ export interface ISharedExpensesRepository {
   /** Soft delete: sets `deletedAt` and `updatedAt`, keeps the record. */
   softDeleteExpense(expenseId: string, deletedAt: string): Promise<void>;
 }
+
+/**
+ * Atomic pair "shared expense + linked personal movement". Kept apart from the
+ * social-only repository because every call spans the expense, the movement and
+ * one or two wallets inside a single `runTransaction`.
+ */
+export interface ISharedExpenseLinkRepository {
+  createExpenseLink(dto: CreateSharedExpenseDto): Promise<SharedExpense>;
+
+  updateExpenseLink(
+    viewerUid: string,
+    expenseId: string,
+    update: UpdateSharedExpenseDto,
+  ): Promise<SharedExpense>;
+
+  softDeleteExpenseLink(
+    viewerUid: string,
+    expenseId: string,
+    deletedAt: string,
+  ): Promise<void>;
+}

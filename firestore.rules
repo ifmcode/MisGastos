@@ -103,6 +103,21 @@ service cloud.firestore {
       return value == null || value is string;
     }
 
+    // Optional link keys are bounded ids: absent, null or a non-empty string.
+    function isOptionalExpenseId(value) {
+      return value == null
+        || (value is string && value.size() > 0 && value.size() <= 1500);
+    }
+
+    // Legacy documents may omit the keys entirely, so presence is guarded
+    // before reading them (a missing map key is an evaluation error).
+    function hasExpenseLinks(data) {
+      return (!('walletId' in data) || isOptionalExpenseId(data.walletId))
+        && (!('categoryId' in data) || isOptionalExpenseId(data.categoryId))
+        && (!('linkedTransactionId' in data)
+            || isOptionalExpenseId(data.linkedTransactionId));
+    }
+
     function hasExpenseFields(data) {
       return data.keys().hasOnly(
         [
@@ -115,12 +130,47 @@ service cloud.firestore {
           'participants',
           'description',
           'date',
+          'walletId',
+          'categoryId',
+          'linkedTransactionId',
           'createdBy',
           'createdAt',
           'updatedAt',
           'deletedAt'
         ]
       );
+    }
+
+    // A linked movement must be an expense of the payer, between participants of
+    // the same currency. `getAfter` is required because the movement and its
+    // expense are written in the same transaction: `get` would read the
+    // pre-transaction state, where the new expense does not exist yet.
+    function hasValidSharedExpenseLink(data) {
+      return data.type == 'expense'
+        && data.sharedExpenseId is string
+        && data.sharedExpenseId.size() > 0
+        && isSharedExpenseLinkTarget(
+             getAfter(
+               /databases/$(database)/documents/sharedExpenses/$(data.sharedExpenseId)
+             ).data,
+             data
+           );
+    }
+
+    function isSharedExpenseLinkTarget(expense, data) {
+      return expense.participantIds is list
+        && request.auth.uid in expense.participantIds
+        && expense.payerId == request.auth.uid
+        && expense.currency == data.currency;
+    }
+
+    // The link may be absent, but it can never be added, removed or retargeted.
+    function keepsSharedExpenseLink(previous, next) {
+      return ('sharedExpenseId' in previous) == ('sharedExpenseId' in next)
+        && (
+          !('sharedExpenseId' in previous)
+          || previous.sharedExpenseId == next.sharedExpenseId
+        );
     }
 
     // Profiles keep the Firebase uid in the `uid` field and are looked up by
@@ -150,13 +200,46 @@ service cloud.firestore {
     match /transactions/{transactionId} {
       allow read: if isWalletOwner(resource.data);
 
+      // A linked movement is an expense of the payer whose referenced expense
+      // must exist once this write is applied (same transaction included).
       allow create: if isSignedIn()
-        && request.resource.data.ownerId == request.auth.uid;
+        && request.resource.data.ownerId == request.auth.uid
+        && (
+          !('sharedExpenseId' in request.resource.data)
+          || hasValidSharedExpenseLink(request.resource.data)
+        );
 
+      // An update must still be a valid linked expense. `get` covers the stored
+      // state (payer flip, edit) and `getAfter` covers an atomic currency edit
+      // where the expense and the movement change currency together.
       allow update: if isWalletOwner(resource.data)
-        && request.resource.data.ownerId == resource.data.ownerId;
+        && request.resource.data.ownerId == resource.data.ownerId
+        && keepsSharedExpenseLink(resource.data, request.resource.data)
+        && (
+          !('sharedExpenseId' in request.resource.data)
+          || (
+            request.resource.data.type == 'expense'
+            && (
+              isSharedExpenseLinkTarget(
+                get(
+                  /databases/$(database)/documents/sharedExpenses/$(request.resource.data.sharedExpenseId)
+                ).data,
+                request.resource.data
+              )
+              || isSharedExpenseLinkTarget(
+                getAfter(
+                  /databases/$(database)/documents/sharedExpenses/$(request.resource.data.sharedExpenseId)
+                ).data,
+                request.resource.data
+              )
+            )
+          )
+        );
 
-      allow delete: if isWalletOwner(resource.data);
+      // Linked movements are only ever soft-deleted by the shared-expense
+      // operations; a hard delete would leave the expense pointing nowhere.
+      allow delete: if isWalletOwner(resource.data)
+        && !('sharedExpenseId' in resource.data);
     }
 
     // User-defined categories. The type is fixed after creation so historical
@@ -372,6 +455,7 @@ service cloud.firestore {
         && hasExpenseMoney(request.resource.data)
         && hasExpenseShares(request.resource.data)
         && hasExpenseFields(request.resource.data)
+        && hasExpenseLinks(request.resource.data)
         && request.resource.data.currency is string
         && request.resource.data.createdAt is string
         && request.resource.data.updatedAt is string
@@ -390,6 +474,7 @@ service cloud.firestore {
         && hasExpenseMoney(request.resource.data)
         && hasExpenseShares(request.resource.data)
         && hasExpenseFields(request.resource.data)
+        && hasExpenseLinks(request.resource.data)
         && request.resource.data.currency is string
         && request.resource.data.updatedAt is string
         && isExpenseDeletedAt(request.resource.data.deletedAt);

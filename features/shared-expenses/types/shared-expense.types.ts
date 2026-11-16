@@ -57,6 +57,10 @@ export interface SharedExpenseInput {
   payerId: string;
   splitMode: string;
   participants: SharedExpenseParticipantInput[];
+  /** Optional wallet of the payer; `undefined`/empty keeps the expense social. */
+  walletId?: string;
+  /** Optional expense category for the linked movement. */
+  categoryId?: string;
 }
 
 /** Normalized payload handed to the service: integer cents and resolved codes. */
@@ -69,12 +73,19 @@ export interface ValidatedSharedExpense {
   participants: SharedExpenseParticipant[];
   description: string;
   date: string;
+  walletId: string | null;
+  categoryId: string | null;
+  /** Persistence-owned: the form never supplies it, so it is null on create. */
+  linkedTransactionId: string | null;
 }
 
 /**
  * `sharedExpenses/{expenseId}` document. The id is client-generated and unique
  * per expense; the sorted participant pair lives in the `pairId` field (joined
  * with `__`), never in the id. Money is integer cents.
+ *
+ * `walletId`, `categoryId` and `linkedTransactionId` are `null` for social-only
+ * expenses; otherwise they describe the single linked movement of the payer.
  */
 export interface SharedExpense {
   id: string;
@@ -87,6 +98,9 @@ export interface SharedExpense {
   participants: SharedExpenseParticipant[];
   description: string;
   date: string;
+  walletId: string | null;
+  categoryId: string | null;
+  linkedTransactionId: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -101,6 +115,8 @@ export type CreateSharedExpenseDto = Omit<SharedExpense, "id"> & {
 /**
  * Mutable fields of an expense. `participantIds`, `pairId`, `createdBy` and
  * `createdAt` are immutable after creation, so they never appear here.
+ * `linkedTransactionId` is optional because persistence owns it: the social-only
+ * path must not clobber the stored value.
  */
 export interface UpdateSharedExpenseDto {
   payerId: string;
@@ -110,6 +126,9 @@ export interface UpdateSharedExpenseDto {
   participants: SharedExpenseParticipant[];
   description: string;
   date: string;
+  walletId: string | null;
+  categoryId: string | null;
+  linkedTransactionId?: string | null;
   updatedAt: string;
 }
 

@@ -65,6 +65,30 @@ describe("FirebaseTransactionRepository.getTransactions", () => {
 
     await expect(repository.getTransactions("user-1")).rejects.toBe(failure);
   });
+
+  it("excludes soft-deleted linked movements from the list", async () => {
+    mockGetDocs.mockResolvedValue({
+      docs: [
+        { id: "transaction-1", data: () => transactionDocument() },
+        {
+          id: "transaction-deleted",
+          data: () =>
+            transactionDocument({
+              deletedAt: "2026-11-16T10:00:00.000Z",
+              sharedExpenseId: "expense-1",
+            }),
+        },
+      ],
+    });
+
+    const transactions = await new FirebaseTransactionRepository().getTransactions(
+      "user-1",
+    );
+
+    expect(transactions.map((transaction) => transaction.id)).toEqual([
+      "transaction-1",
+    ]);
+  });
 });
 
 describe("FirebaseTransactionRepository mutations", () => {

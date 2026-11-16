@@ -9,7 +9,7 @@ import {
 } from "./shared-expense-detail";
 import { getSharedExpenseParticipantName } from "./shared-expense-friends";
 
-/** Reserved wallet/movement block: TICKET-044 fills it, until then it is empty. */
+/** Wallet and movement rows of a linked expense; empty for social-only ones. */
 export function buildSharedExpenseLinkedMovementFields(
   context: SharedExpenseDetailContext,
 ): DetailField[] {

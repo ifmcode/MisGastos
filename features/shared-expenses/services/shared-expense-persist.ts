@@ -3,10 +3,40 @@ import { createFriendPairId } from "@/features/friends/utils/friend-pair";
 
 import type {
   CreateSharedExpenseDto,
+  SharedExpense,
   UpdateSharedExpenseDto,
   ValidatedSharedExpense,
 } from "../types/shared-expense.types";
 import { SharedExpenseOperationError } from "./shared-expense.errors";
+
+/** Wallet link the service persists: `null` keeps the expense social-only. */
+export interface ResolvedSharedExpenseLink {
+  walletId: string | null;
+  categoryId: string | null;
+}
+
+/**
+ * Only the payer can own the linked movement (rules require it), so a wallet
+ * selected while someone else pays is dropped instead of persisted.
+ */
+export function resolveSharedExpenseLink(
+  value: ValidatedSharedExpense,
+  viewerUid: string,
+): ResolvedSharedExpenseLink {
+  const walletId =
+    value.walletId !== null && value.payerId === viewerUid
+      ? value.walletId
+      : null;
+
+  return walletId === null
+    ? { walletId: null, categoryId: null }
+    : { walletId, categoryId: value.categoryId };
+}
+
+/** A stored expense is linked when it has a wallet or a movement reference. */
+export function isSharedExpenseLinked(expense: SharedExpense): boolean {
+  return expense.walletId !== null || expense.linkedTransactionId !== null;
+}
 
 /**
  * The 1:1 slice only shares with an accepted friend; groups arrive with
@@ -57,6 +87,8 @@ export function buildUpdateSharedExpenseDto(
     participants: value.participants,
     description: value.description,
     date: value.date,
+    walletId: value.walletId,
+    categoryId: value.categoryId,
     updatedAt: now,
   };
 }
