@@ -9,17 +9,47 @@
     "friendPaid": "Pagó {{name}}",
     "yourShare": "Tu parte: {{amount}}",
     "yourSharePercent": "Tu parte: {{amount}} ({{percent}})",
+    "openAccessibility": "Abrir el gasto {{description}}",
+    "openHint": "Abre los detalles de este gasto compartido.",
     "editAccessibility": "Editar el gasto {{description}}",
     "editHint": "Abre el formulario con los datos de este gasto compartido.",
     "deleteAccessibility": "Eliminar el gasto {{description}}",
     "deleteHint": "Pide confirmación antes de eliminar este gasto compartido.",
     "deletingHint": "Eliminando este gasto compartido…"
   },
+  "detail": {
+    "title": "Gasto compartido",
+    "summaryLabel": "Gasto compartido",
+    "errorTitle": "No se pudo cargar este gasto compartido",
+    "description": "Descripción",
+    "total": "Total",
+    "currency": "Moneda",
+    "date": "Fecha",
+    "payer": "Pagó",
+    "splitMode": "División",
+    "creator": "Creado por",
+    "createdAt": "Creado",
+    "updatedAt": "Última actualización",
+    "participants": "Participantes",
+    "wallet": "Cartera",
+    "linkedMovement": "Movimiento vinculado",
+    "split": {
+      "equal": "Igual",
+      "percentage": "Porcentaje",
+      "fixed": "Importe",
+      "shares": "Partes"
+    },
+    "participantSharePercent": "{{amount}} ({{percent}} %)",
+    "participantShareWeight_one": "{{amount}} ({{count}} parte)",
+    "participantShareWeight_other": "{{amount}} ({{count}} partes)",
+    "missingTitle": "Este gasto ya no está disponible",
+    "missingMessage": "Puede que se haya eliminado o que ya no participes en él.",
+    "missingAction": "Volver",
+    "missingActionAccessibility": "Volver a la pantalla anterior"
+  },
   "deleteDialog": {
     "title": "Eliminar gasto",
-    "message": "El gasto «{{description}}» dejará de contar en los saldos de tus amigos.",
-    "confirm": "Eliminar",
-    "cancel": "Cancelar"
+    "message": "El gasto «{{description}}» dejará de contar en los saldos de tus amigos."
   },
   "form": {
     "createTitle": "Nuevo gasto compartido",

@@ -32,8 +32,12 @@ export interface DetailDeleteConfirmation {
   message: string;
 }
 
+/** Close affordance of the detail header: a modal "close" or a route "back". */
+export type DetailCloseIcon = "close" | "back";
+
 export interface DetailActionLabels {
   close: string;
+  closeHint?: string;
   edit: string;
   editHint?: string;
   delete: string;

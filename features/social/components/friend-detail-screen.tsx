@@ -5,6 +5,7 @@ import { RefreshControl, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
+import type { SharedExpense } from "@/features/shared-expenses/types/shared-expense.types";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
 import { Fab } from "@/shared/components/molecules/fab";
@@ -46,6 +47,14 @@ export function FriendDetailScreen() {
 
     router.replace("/(tabs)/social" as Href);
   }, [router]);
+
+  // The row only navigates: review first, edit or delete from the detail.
+  const openExpense = useCallback(
+    (expense: SharedExpense) => {
+      router.push(`/social/expenses/${expense.id}` as Href);
+    },
+    [router],
+  );
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + 16 }]}>
@@ -92,7 +101,6 @@ export function FriendDetailScreen() {
           />
 
           <ErrorBanner message={screen.removalError} />
-          <ErrorBanner message={screen.expenseError} />
 
           <FriendDetailExpenses
             expenses={screen.expenses}
@@ -100,10 +108,8 @@ export function FriendDetailScreen() {
             viewerUid={screen.viewerUid}
             loading={screen.expensesLoading}
             error={screen.expensesError}
-            pendingId={screen.pendingId}
             onRetry={screen.reloadExpenses}
-            onEdit={editor.openEdit}
-            onDelete={screen.requestDelete}
+            onOpen={openExpense}
           />
         </ScrollView>
       )}
@@ -123,7 +129,6 @@ export function FriendDetailScreen() {
         editor={editor}
         friends={screen.friends}
         removeConfirm={removal.confirm}
-        deleteConfirm={screen.deleteConfirm}
       />
     </ThemedView>
   );

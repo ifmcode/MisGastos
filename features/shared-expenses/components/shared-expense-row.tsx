@@ -1,4 +1,5 @@
-import { View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import type { Friend } from "@/features/friends/types/friend.types";
@@ -10,35 +11,30 @@ import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 import { sharedExpensesStyles as styles } from "../styles/shared-expenses.styles";
 import type { SharedExpense } from "../types/shared-expense.types";
 import { getSharedExpenseParticipantName } from "../utils/shared-expense-friends";
-import { SharedExpenseRowActions } from "./shared-expense-row-actions";
 
 export interface SharedExpenseRowProps {
   expense: SharedExpense;
   friends: readonly Friend[];
   viewerUid: string;
-  /** Id of the expense with an operation in flight, if any. */
-  pendingId: string | null;
-  onEdit: (expense: SharedExpense) => void;
-  onDelete: (expense: SharedExpense) => void;
+  onOpen: (expense: SharedExpense) => void;
 }
 
 /**
- * One active expense with its total, payer, the viewer share and the edit and
- * delete actions. Currencies are never converted, so the row keeps its own.
+ * One active expense with its total, payer and the viewer share. The whole row
+ * opens the read-only detail; edit and delete live in the detail header, so a
+ * review never starts by opening an editable form. Currencies are never
+ * converted, so the row keeps its own.
  */
 export function SharedExpenseRow({
   expense,
   friends,
   viewerUid,
-  pendingId,
-  onEdit,
-  onDelete,
+  onOpen,
 }: SharedExpenseRowProps) {
   const theme = useFormTheme();
   const locale = useAppLocale();
   const { t } = useScopedTranslation("sharedExpenses");
 
-  const busy = pendingId !== null;
   const payerName = getSharedExpenseParticipantName(
     friends,
     expense.payerId,
@@ -67,10 +63,17 @@ export function SharedExpenseRow({
           });
 
   return (
-    <View
-      style={[
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t("row.openAccessibility", {
+        description: expense.description,
+      })}
+      accessibilityHint={t("row.openHint")}
+      onPress={() => onOpen(expense)}
+      style={({ pressed }) => [
         styles.rowCard,
         { borderColor: theme.border, backgroundColor: theme.surface },
+        pressed && styles.pressed,
       ]}
     >
       <View style={styles.rowBody}>
@@ -96,13 +99,13 @@ export function SharedExpenseRow({
         ) : null}
       </View>
 
-      <SharedExpenseRowActions
-        description={expense.description}
-        disabled={busy}
-        deleting={pendingId === expense.id}
-        onEdit={() => onEdit(expense)}
-        onDelete={() => onDelete(expense)}
+      <Ionicons
+        name="chevron-forward"
+        size={20}
+        color={theme.muted}
+        style={styles.rowChevron}
+        accessible={false}
       />
-    </View>
+    </Pressable>
   );
 }

@@ -39,23 +39,25 @@ export const sharedExpensesStyles = StyleSheet.create({
     lineHeight: 18,
     fontWeight: "600",
   },
-  rowActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: "center",
-    justifyContent: "center",
+  rowChevron: {
+    alignSelf: "center",
   },
   actionDisabled: {
     opacity: 0.5,
   },
   pressed: {
     opacity: 0.7,
+  },
+
+  // Detail (shared-expense route)
+  detailSection: {
+    gap: 10,
+  },
+  detailSectionTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
   },
 
   // Form shell

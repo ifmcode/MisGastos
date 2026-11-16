@@ -9,17 +9,47 @@
     "friendPaid": "{{name}} paid",
     "yourShare": "Your share: {{amount}}",
     "yourSharePercent": "Your share: {{amount}} ({{percent}})",
+    "openAccessibility": "Open the expense {{description}}",
+    "openHint": "Opens the details of this shared expense.",
     "editAccessibility": "Edit the expense {{description}}",
     "editHint": "Opens the form with the details of this shared expense.",
     "deleteAccessibility": "Delete the expense {{description}}",
     "deleteHint": "Asks for confirmation before deleting this shared expense.",
     "deletingHint": "Deleting this shared expense…"
   },
+  "detail": {
+    "title": "Shared expense",
+    "summaryLabel": "Shared expense",
+    "errorTitle": "Could not load this shared expense",
+    "description": "Description",
+    "total": "Total",
+    "currency": "Currency",
+    "date": "Date",
+    "payer": "Paid by",
+    "splitMode": "Split",
+    "creator": "Created by",
+    "createdAt": "Created",
+    "updatedAt": "Last update",
+    "participants": "Participants",
+    "wallet": "Wallet",
+    "linkedMovement": "Linked movement",
+    "split": {
+      "equal": "Equal",
+      "percentage": "Percentage",
+      "fixed": "Amount",
+      "shares": "Shares"
+    },
+    "participantSharePercent": "{{amount}} ({{percent}}%)",
+    "participantShareWeight_one": "{{amount}} ({{count}} share)",
+    "participantShareWeight_other": "{{amount}} ({{count}} shares)",
+    "missingTitle": "This expense is no longer available",
+    "missingMessage": "It may have been deleted or you may no longer take part in it.",
+    "missingAction": "Go back",
+    "missingActionAccessibility": "Go back to the previous screen"
+  },
   "deleteDialog": {
     "title": "Delete expense",
-    "message": "The expense “{{description}}” will stop counting towards your friends' balances.",
-    "confirm": "Delete",
-    "cancel": "Cancel"
+    "message": "The expense “{{description}}” will stop counting towards your friends' balances."
   },
   "form": {
     "createTitle": "New shared expense",

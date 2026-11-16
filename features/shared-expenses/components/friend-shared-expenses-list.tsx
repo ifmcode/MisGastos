@@ -11,13 +11,10 @@ export interface FriendSharedExpensesListProps {
   expenses: readonly SharedExpense[];
   friends: readonly Friend[];
   viewerUid: string;
-  /** Id of the expense with an operation in flight, if any. */
-  pendingId: string | null;
   /** Already translated empty copy: each surface owns its own tone. */
   emptyTitle: string;
   emptyMessage: string;
-  onEdit: (expense: SharedExpense) => void;
-  onDelete: (expense: SharedExpense) => void;
+  onOpen: (expense: SharedExpense) => void;
 }
 
 /**
@@ -28,11 +25,9 @@ export function FriendSharedExpensesList({
   expenses,
   friends,
   viewerUid,
-  pendingId,
   emptyTitle,
   emptyMessage,
-  onEdit,
-  onDelete,
+  onOpen,
 }: FriendSharedExpensesListProps) {
   if (expenses.length === 0) {
     return (
@@ -48,9 +43,7 @@ export function FriendSharedExpensesList({
           expense={expense}
           friends={friends}
           viewerUid={viewerUid}
-          pendingId={pendingId}
-          onEdit={onEdit}
-          onDelete={onDelete}
+          onOpen={onOpen}
         />
       ))}
     </View>

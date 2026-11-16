@@ -18,9 +18,19 @@ export function DetailSummaryCard({ summary }: DetailSummaryCardProps) {
       : summary.tone === "negative"
         ? theme.danger
         : theme.text;
+  // One announcement for the whole card. `meta` is left out on purpose: it
+  // usually repeats the currency that `amount` already contains, so joining it
+  // would make screen readers announce the currency twice.
+  const accessibilityLabel = [summary.label, summary.amount]
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0)
+    .join(". ");
 
   return (
     <View
+      accessible
+      accessibilityRole="summary"
+      accessibilityLabel={accessibilityLabel || undefined}
       style={[
         styles.summaryCard,
         { backgroundColor: theme.surface, borderColor: theme.border },

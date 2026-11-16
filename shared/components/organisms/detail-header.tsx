@@ -3,7 +3,10 @@ import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
-import type { DetailActionLabels } from "@/shared/types/detail.types";
+import type {
+  DetailActionLabels,
+  DetailCloseIcon,
+} from "@/shared/types/detail.types";
 
 import { detailStyles as styles } from "./detail.styles";
 
@@ -12,6 +15,8 @@ export interface DetailHeaderProps {
   subtitle: string;
   disabled: boolean;
   labels: DetailActionLabels;
+  /** Route details share the header with the modal but keep a back arrow. */
+  closeIcon?: DetailCloseIcon;
   onEdit: () => void;
   onDelete: () => void;
   onClose: () => void;
@@ -22,6 +27,7 @@ export function DetailHeader({
   subtitle,
   disabled,
   labels,
+  closeIcon = "close",
   onEdit,
   onDelete,
   onClose,
@@ -33,12 +39,17 @@ export function DetailHeader({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={labels.close}
+        accessibilityHint={labels.closeHint}
         hitSlop={10}
         onPress={onClose}
         disabled={disabled}
         style={styles.closeButton}
       >
-        <Ionicons name="close" size={24} color={theme.muted} />
+        <Ionicons
+          name={closeIcon === "back" ? "chevron-back" : "close"}
+          size={24}
+          color={theme.muted}
+        />
       </Pressable>
 
       <View style={styles.headerText}>

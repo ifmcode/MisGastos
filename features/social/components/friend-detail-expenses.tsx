@@ -18,11 +18,8 @@ export interface FriendDetailExpensesProps {
   viewerUid: string;
   loading: boolean;
   error: string | null;
-  /** Id of the expense with an operation in flight, if any. */
-  pendingId: string | null;
   onRetry: () => void;
-  onEdit: (expense: SharedExpense) => void;
-  onDelete: (expense: SharedExpense) => void;
+  onOpen: (expense: SharedExpense) => void;
 }
 
 /**
@@ -36,10 +33,8 @@ export function FriendDetailExpenses({
   viewerUid,
   loading,
   error,
-  pendingId,
   onRetry,
-  onEdit,
-  onDelete,
+  onOpen,
 }: FriendDetailExpensesProps) {
   const theme = useFormTheme();
   const { t } = useTranslation(["sharedExpenses", "social", "common"]);
@@ -71,11 +66,9 @@ export function FriendDetailExpenses({
             expenses={expenses}
             friends={friends}
             viewerUid={viewerUid}
-            pendingId={pendingId}
             emptyTitle={t("social:friendDetail.emptyTitle")}
             emptyMessage={t("social:friendDetail.emptyMessage")}
-            onEdit={onEdit}
-            onDelete={onDelete}
+            onOpen={onOpen}
           />
         </>
       )}

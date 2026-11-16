@@ -12,7 +12,6 @@ import type { SharedExpenseEditorController } from "@/features/shared-expenses/h
 import type { SharedExpense } from "@/features/shared-expenses/types/shared-expense.types";
 import { useAuth } from "@/hooks/use-auth";
 import { DEFAULT_CURRENCY } from "@/shared/constants/currencies";
-import type { UseConfirmDialogResult } from "@/shared/hooks/use-confirm-dialog";
 
 import { useFriendDetailExpenses } from "./use-friend-detail-expenses";
 import {
@@ -46,12 +45,8 @@ export interface FriendDetailScreenController {
   reloadExpenses: () => void;
   /** Viewer uid, already normalized to a string for the expense rows. */
   viewerUid: string;
-  /** Remaining friend/expense failures, each announced in its own banner. */
+  /** Remaining friend failure, announced in its own banner. */
   removalError: string | null;
-  expenseError: string | null;
-  pendingId: string | null;
-  requestDelete: (expense: SharedExpense) => void;
-  deleteConfirm: UseConfirmDialogResult;
   editor: SharedExpenseEditorController;
   removal: FriendRemovalController;
 }
@@ -130,10 +125,6 @@ export function useFriendDetailScreen({
     reloadExpenses: expenses.reload,
     viewerUid: viewerUid ?? "",
     removalError: removal.error,
-    expenseError: expenses.actionError,
-    pendingId: expenses.pendingId,
-    requestDelete: expenses.requestDelete,
-    deleteConfirm: expenses.deleteConfirm,
     editor: expenses.editor,
     removal,
   };

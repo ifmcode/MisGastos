@@ -7,6 +7,8 @@
 > here only to state that they stay as they are.
 > Updated by TICKET-041 (16/11/2026) with the FAB action menu; the TICKET-037
 > decisions above are unchanged.
+> Updated again by TICKET-043 (16/11/2026) with the route-safe `DetailView`,
+> `useDetailActions` and the shared-expense detail pieces; no palette was added.
 
 ## Decisions
 
@@ -169,6 +171,44 @@ Consumers: transaction, transfer, wallet and category form modals. The transacti
 transfer and category modals keep their own delete confirmation copy and dialog
 state as children.
 
+### `DetailView` / `useDetailActions`
+
+```ts
+interface DetailViewProps {
+  title: string;
+  subtitle: string;
+  summary?: DetailSummary;
+  fields?: readonly DetailField[];
+  missing: boolean;                // shows DetailMissingState instead of the body
+  disabled?: boolean;
+  labels: DetailActionLabels;
+  missingLabels: DetailMissingStateLabels;
+  errorContent?: ReactNode;        // feature banner above the summary
+  children?: ReactNode;            // extra blocks after the fields card
+  closeIcon?: DetailCloseIcon;     // "back" on routes, "close" inside a modal
+  onEdit: () => void;
+  onDelete: () => void;
+  onClose: () => void;
+}
+
+interface UseDetailActionsOptions {
+  deleteConfirmation: DetailDeleteConfirmation | null;   // null = no-op
+  onConfirmDelete: () => Promise<boolean>;               // true = leave the detail
+  onClose: () => void;
+}
+```
+
+`shared/components/organisms/detail-view.tsx` is the route-safe layout: header
+(title, subtitle, edit/delete, optional back/close icon), summary card, fields card,
+the optional feature banner and children slot, and the missing-record state that
+replaces the body. It owns no navigation, no `Modal` and no dialog state, so
+`DetailModal` (movements and transfers) and the shared-expense route share one
+layout; `DetailHeader` exposes `closeIcon`/`closeHint` for the back variant and
+`DetailSummaryCard` announces label + amount only. `shared/hooks/use-detail-actions.ts`
+wraps `useConfirmDialog` and closes the detail only after `onConfirmDelete` reports
+success, so a failed delete keeps the record and its banner on screen. Consumers:
+`DetailModal` and `features/social` (`SharedExpenseDetailScreen`).
+
 ### `RecordCard`
 
 ```ts
@@ -191,6 +231,18 @@ signed amount plus currency, success/danger tone) and `TransferItem` (swap icon,
 origin → destination, date/notes meta, unsigned amount). Feature utilities keep the
 accessibility labels: `getTransactionDetailLabel`, `getTransferEditLabel` and
 `getTransferDetailLabel`.
+
+### Shared-expense detail pieces
+
+TICKET-043 reused existing shared-expense UI instead of adding a second set:
+`features/shared-expenses/components/shared-expense-participants.tsx` renders the
+per-participant shares (viewer first, legacy percentage/shares through
+`formatBpsText` and the stored `weight`), `SharedExpenseEditorModal` is mounted by both
+the friend detail and the detail route, and `shared-expense-row.tsx` is now a single
+pressable that opens `/social/expenses/[expenseId]` (its former inline actions
+component was deleted). The detail layout and colours stay shared; the route only adds
+a one-key shell style module, and the participants section reuses the existing
+shared-expenses style module, so no new palette was introduced.
 
 ### `Fab`
 
@@ -278,7 +330,7 @@ translated accessibility label.
 
 - `npx tsc --noEmit`
 - `npx expo lint`
-- `npx jest` (194 suites / 1004 tests, updated after TICKET-041)
-- `npm run check:copy` (204 TSX files)
+- `npx jest` (198 suites / 1054 tests, updated after TICKET-043)
+- `npm run check:copy` (213 TSX files)
 - Dark mode and web follow the same `useFormTheme` tokens as before; shared
   components never import feature palettes.

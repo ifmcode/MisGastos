@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
-import { Modal, View } from "react-native";
+import { Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
-import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
+import { useDetailActions } from "@/shared/hooks/use-detail-actions";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { EMPTY_DETAIL_SUMMARY } from "@/shared/types/detail.types";
 import type {
@@ -14,9 +14,7 @@ import type {
   DetailSummary,
 } from "@/shared/types/detail.types";
 
-import { DetailBody } from "./detail-body";
-import { DetailHeader } from "./detail-header";
-import { DetailMissingState } from "./detail-missing-state";
+import { DetailView } from "./detail-view";
 import { detailStyles as styles } from "./detail.styles";
 
 export interface DetailModalProps {
@@ -40,9 +38,8 @@ export interface DetailModalProps {
 }
 
 /**
- * Shared read-only detail view: page-sheet shell, header actions, summary,
- * fields, optional error and the missing-record state. Features pass resolved
- * copy and data, so no visible string or domain type lives here.
+ * Page-sheet shell of the shared read-only detail: it adds the modal, the
+ * safe area and the confirmation on top of the route-safe `DetailView`.
  */
 export function DetailModal({
   visible,
@@ -61,37 +58,19 @@ export function DetailModal({
   onClose,
 }: DetailModalProps) {
   const theme = useFormTheme();
-  const deleteDialog = useConfirmDialog();
-
-  function closeDetail() {
-    deleteDialog.close();
-    onClose();
-  }
-
-  async function confirmDelete() {
-    const deleted = await onConfirmDelete();
-    if (deleted) closeDetail();
-  }
-
-  function requestDelete() {
-    if (!deleteConfirmation) return;
-
-    deleteDialog.open({
-      title: deleteConfirmation.title,
-      message: deleteConfirmation.message,
-      onConfirm: () => {
-        void confirmDelete();
-      },
-    });
-  }
+  const actions = useDetailActions({
+    deleteConfirmation,
+    onConfirmDelete,
+    onClose,
+  });
 
   function handleRequestClose() {
-    if (deleteDialog.visible) {
-      deleteDialog.close();
+    if (actions.confirm.visible) {
+      actions.confirm.close();
       return;
     }
 
-    closeDetail();
+    actions.closeDetail();
   }
 
   return (
@@ -100,50 +79,38 @@ export function DetailModal({
       animationType="slide"
       presentationStyle="pageSheet"
       onRequestClose={handleRequestClose}
-      onDismiss={deleteDialog.close}
+      onDismiss={actions.confirm.close}
     >
       {visible ? (
         <SafeAreaView
           style={[styles.safeArea, { backgroundColor: theme.background }]}
         >
-          <View style={styles.container}>
-            {missing ? (
-              <DetailMissingState
-                labels={missingLabels}
-                onClose={closeDetail}
-              />
-            ) : (
-              <>
-                <DetailHeader
-                  title={title}
-                  subtitle={subtitle}
-                  disabled={disabled}
-                  labels={labels}
-                  onEdit={onEdit}
-                  onDelete={requestDelete}
-                  onClose={closeDetail}
-                />
+          <DetailView
+            title={title}
+            subtitle={subtitle}
+            summary={summary}
+            fields={fields}
+            missing={missing}
+            disabled={disabled}
+            labels={labels}
+            missingLabels={missingLabels}
+            errorContent={errorContent}
+            onEdit={onEdit}
+            onDelete={actions.requestDelete}
+            onClose={actions.closeDetail}
+          />
 
-                <DetailBody
-                  summary={summary}
-                  fields={fields}
-                  errorContent={errorContent}
-                />
-              </>
-            )}
-
-            {missing ? null : (
-              <ConfirmDialog
-                visible={deleteDialog.visible}
-                title={deleteDialog.title}
-                message={deleteDialog.message}
-                confirmLabel={deleteDialog.confirmLabel}
-                cancelLabel={deleteDialog.cancelLabel}
-                onConfirm={deleteDialog.confirm}
-                onCancel={deleteDialog.close}
-              />
-            )}
-          </View>
+          {missing ? null : (
+            <ConfirmDialog
+              visible={actions.confirm.visible}
+              title={actions.confirm.title}
+              message={actions.confirm.message}
+              confirmLabel={actions.confirm.confirmLabel}
+              cancelLabel={actions.confirm.cancelLabel}
+              onConfirm={actions.confirm.confirm}
+              onCancel={actions.confirm.close}
+            />
+          )}
         </SafeAreaView>
       ) : null}
     </Modal>

@@ -49,6 +49,10 @@ export function AuthNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="social/expenses/[expenseId]"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="modal"
         options={{ presentation: "modal", title: t("stack.modal") }}
       />

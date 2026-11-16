@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from "react";
 
 import type { Friend } from "@/features/friends/types/friend.types";
-import { useSharedExpenseDeletion } from "@/features/shared-expenses/hooks/use-shared-expense-deletion";
 import {
   useSharedExpenseEditor,
   type SharedExpenseEditorController,
@@ -10,7 +9,6 @@ import { useSharedExpenseList } from "@/features/shared-expenses/hooks/use-share
 import type { SharedExpense } from "@/features/shared-expenses/types/shared-expense.types";
 import { getFriendExpenses } from "@/features/shared-expenses/utils/friend-expenses";
 import type { CurrencyCode } from "@/shared/constants/currencies";
-import type { UseConfirmDialogResult } from "@/shared/hooks/use-confirm-dialog";
 
 export interface UseFriendDetailExpensesOptions {
   viewerUid: string | undefined;
@@ -27,18 +25,13 @@ export interface FriendDetailExpensesController {
   error: string | null;
   reload: () => void;
   refresh: () => Promise<void>;
-  actionError: string | null;
-  /** Id of the expense with a delete in flight, if any. */
-  pendingId: string | null;
-  requestDelete: (expense: SharedExpense) => void;
-  deleteConfirm: UseConfirmDialogResult;
   editor: SharedExpenseEditorController;
 }
 
 /**
- * Pair expenses of the detail: the viewer's list filtered in memory, the
- * preselected create/edit form and the confirmed delete. Every mutation also
- * asks the parent to reload the friend balances.
+ * Pair expenses of the detail: the viewer's list filtered in memory plus the
+ * preselected create/edit form. Delete and edit-detail live in the expense
+ * route (TICKET-043), so this hook only keeps the list and the create form.
  */
 export function useFriendDetailExpenses({
   viewerUid,
@@ -62,11 +55,6 @@ export function useFriendDetailExpenses({
     onSaved: onChanged,
   });
 
-  const deletion = useSharedExpenseDeletion({
-    viewerUid,
-    onDeleted: onChanged,
-  });
-
   const expenses = useMemo(
     () => getFriendExpenses(list.expenses, viewerUid ?? "", friend?.uid ?? ""),
     [friend, list.expenses, viewerUid],
@@ -78,10 +66,6 @@ export function useFriendDetailExpenses({
     error: list.error,
     reload: list.reload,
     refresh: list.refresh,
-    actionError: deletion.actionError,
-    pendingId: deletion.pendingId,
-    requestDelete: deletion.requestDelete,
-    deleteConfirm: deletion.confirm,
     editor,
   };
 }
