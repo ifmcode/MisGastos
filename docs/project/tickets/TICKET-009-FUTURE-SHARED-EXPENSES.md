@@ -157,7 +157,7 @@ Add expenses inside a group, choose who paid and split the amount equally, by pe
 - Store money in integer cents to avoid floating-point errors. Reuse the existing money utilities where possible.
 - Suggested fields: `payerId`, `amountCents`, `currency`, `splitMode`, `participants[{ userId, shareCents }]`, `description`, `date`, `createdBy`, `createdAt`, `updatedAt`, `deletedAt`.
 - The balance calculation belongs in a pure service used by both the group screen and the friends screen.
-- Personal wallet balances are not modified by group expenses unless a future ticket explicitly defines a settlement-to-wallet flow.
+- Personal wallet balances are not modified by group expenses unless a future ticket explicitly defines a settlement-to-wallet flow. TICKET-044 defines that flow for the payer of a 1:1 expense and TICKET-046 for 1:1 settlements; group expenses still leave personal wallets untouched.
 
 ## Dependencies
 - TICKET-008 Groups

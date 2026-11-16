@@ -33,6 +33,10 @@ Create Splitwise-style groups to organise shared expenses between friends, with 
 - Group currency should be locked after the first shared expense to avoid mixed-currency ledgers.
 - Keep group money separate from personal wallets. Transfers between personal wallets and groups are out of scope for this ticket.
 - Create `features/groups/` with `components/`, `hooks/`, `repositories/`, `schemas/`, `services/`, `types/` and `utils/`.
+- **Placement:** groups live under **Social → Tus grupos**, the segment reserved by TICKET-041. The Social FAB enables **Crear grupo** and **Unirse a grupo** in this phase; TICKET-041 ships that menu with only **Añadir amigo**, so no dead action is exposed before groups exist.
+- **Expense entry:** group expenses are created from the movements FAB menu (TICKET-045), which already reserves the **Gasto de grupo** action as disabled until this ticket lands. Group members, membership and the group currency must reuse the existing shared-expense split and balance model instead of a second money implementation.
 
 ## Dependencies
 - TICKET-007 Friends and Requests
+- TICKET-041 Social tab shell (groups segment and FAB actions)
+- TICKET-045 Movements create menu (group expense entry)

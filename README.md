@@ -209,8 +209,12 @@ funciones y 99.48% de líneas**, y `npm run check:copy` audita **193 archivos TS
 - [x] Perfil y moneda preferida
 - [x] Amigos
 - [x] Gastos compartidos 1:1
-- [ ] Grupos y gastos compartidos
-- [ ] Liquidación de deudas
+- [ ] Pestaña Social con peticiones y detalle de amigo
+- [ ] Detalle de gasto compartido y cartera enlazada
+- [ ] Liquidación de deudas 1:1 con confirmación y notificaciones
+- [ ] Bandeja de notificaciones
+- [ ] Grupos y gastos compartidos dentro de grupos
+- [ ] Liquidación de deudas en grupos
 - [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización; implementación en la fase 7)
 - [x] Especialización del flujo de desarrollo con agentes y skills de OpenCode
 - [ ] Librería de componentes con Storybook

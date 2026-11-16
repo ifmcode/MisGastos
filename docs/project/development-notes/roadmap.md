@@ -10,11 +10,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 5 - Social vertical slice
-- **Current ticket:** Minimal subset of TICKET-010 - balance and settlement between two people
+- **Current ticket:** TICKET-041 - Social tab shell, add-friend screen and pending requests
 - **Status:** ⏳ Pending
 - **Last completed:** TICKET-009 minimal subset - 1:1 shared expense (15/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Next:** Minimal subset of TICKET-010 - balance and settlement between two people
+- **Queued:** TICKET-042..TICKET-047 (friend and expense detail, wallet link, movements menu, 1:1 settlement and notifications)
+- **Next:** TICKET-041 - Social tab shell, add-friend screen and pending requests
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -114,16 +115,28 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Phase 5: Social vertical slice (IN PROGRESS)
 - [x] TICKET-007: friends and requests ✅ 15/11/2026
 - [x] Minimal subset of TICKET-009: 1:1 shared expense ✅ 15/11/2026 (ticket stays open for the group requirements)
-- [ ] Minimal subset of TICKET-010: balance and settlement between two people
-- Validate with 3-5 real users
-- Do not build a friends list without shared expenses; it does not validate the product
 - Delivered model, request state machine, rules and limitations: [`2026-11-15-friends-and-requests.md`](2026-11-15-friends-and-requests.md)
 - Delivered 1:1 shared expenses, split rounding, per-currency balances, rules status and limitations: [`2026-11-15-shared-expenses-1to1.md`](2026-11-15-shared-expenses-1to1.md)
 
+### 5.1 Social navigation and shared-expense UX
+- [ ] TICKET-041: Social tab shell, add-friend screen and pending requests
+- [ ] TICKET-042: friend detail screen with shared expenses
+- [ ] TICKET-043: shared expense detail screen
+- [ ] TICKET-044: shared expense wallet and linked personal movement
+- [ ] TICKET-045: movements FAB create menu
+
+### 5.2 1:1 settlement and notifications
+- [ ] TICKET-046: 1:1 debt settlement with bilateral confirmation
+- [ ] TICKET-047: in-app notification inbox
+- The balance between two people already ships with TICKET-009; TICKET-046 replaces the former "minimal subset of TICKET-010" settlement line.
+
+- Validate with 3-5 real users
+- Do not build a friends list without shared expenses; it does not validate the product
+
 ## Phase 6: Groups (QUEUED)
-- [ ] TICKET-008: create groups
-- [ ] Full TICKET-009: equal, percentage, fixed-amount and share splits
-- [ ] TICKET-010: group balances and settlements
+- [ ] TICKET-008: create groups (consumes the Social → Tus grupos shell from TICKET-041)
+- [ ] Full TICKET-009: the group requirements still open after the 1:1 subset (group membership and payer validation, group currency, expense in the group detail)
+- [ ] TICKET-010: group balances and settlements (reuse the TICKET-046 settlement state machine, wallet movements and notification events)
 - [ ] TICKET-011: group history
 - Build shared expenses and settlements as append-only ledger entries folded by a shared pure function, so offline group movements work without a rewrite (constraint from the TICKET-023 spike)
 
