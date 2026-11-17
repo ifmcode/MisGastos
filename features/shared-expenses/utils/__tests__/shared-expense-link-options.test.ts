@@ -10,7 +10,6 @@ import {
   getSharedExpenseCategoryOptions,
   getSharedExpenseWalletOptions,
   SHARED_EXPENSE_CATEGORY_FALLBACK_KEY,
-  SHARED_EXPENSE_CATEGORY_LABEL_KEY,
 } from "../shared-expense-link-options";
 
 function buildWallet(overrides: Partial<Wallet> = {}): Wallet {
@@ -100,36 +99,33 @@ describe("getSharedExpenseWalletOptions", () => {
 });
 
 describe("getSharedExpenseCategoryOptions", () => {
-  it("includes the shared category once, before the stored expense ones", () => {
-    const sharedId = getSharedExpenseCategoryId("user-a");
-    const options = getSharedExpenseCategoryOptions(
-      [buildCategory(), buildCategory({ id: "category-2", name: "Ocio" })],
-      "user-a",
-    );
-
-    expect(options.map((option) => option.id)).toEqual([
-      sharedId,
-      "category-1",
-      "category-2",
-    ]);
-    expect(options[0].labelKey).toBe(SHARED_EXPENSE_CATEGORY_LABEL_KEY);
-  });
-
-  it("does not duplicate an existing shared category document", () => {
+  it("excludes a stored shared category and keeps the expense order", () => {
     const sharedId = getSharedExpenseCategoryId("user-a");
     const options = getSharedExpenseCategoryOptions(
       [
-        buildCategory({ id: sharedId, name: "Gastos compartidos", icon: "receipt-outline" }),
+        buildCategory({ id: sharedId, name: "Gastos compartidos" }),
+        buildCategory(),
+        buildCategory({ id: "category-2", name: "Ocio" }),
       ],
       "user-a",
     );
 
-    expect(options).toHaveLength(1);
-    expect(options[0]).toEqual({
-      id: sharedId,
-      label: "Gastos compartidos",
-      icon: "receipt-outline",
-    });
+    expect(options.map((option) => option.id)).toEqual([
+      "category-1",
+      "category-2",
+    ]);
+    expect(
+      options.some((option) => option.id === getSharedExpenseCategoryId("user-a")),
+    ).toBe(false);
+  });
+
+  it("adds no synthetic shared option while the document is missing", () => {
+    const sharedId = getSharedExpenseCategoryId("user-a");
+    const options = getSharedExpenseCategoryOptions([buildCategory()], "user-a");
+
+    expect(options.map((option) => option.id)).toEqual(["category-1"]);
+    expect(options.some((option) => option.id === sharedId)).toBe(false);
+    expect(options.every((option) => option.labelKey === undefined)).toBe(true);
   });
 
   it("drops income categories", () => {
@@ -153,7 +149,19 @@ describe("getSharedExpenseCategoryOptions", () => {
     expect(fallback.labelKey).toBe(SHARED_EXPENSE_CATEGORY_FALLBACK_KEY);
   });
 
-  it("adds no synthetic option without a viewer uid", () => {
+  it("never restores the shared category as a selected fallback", () => {
+    const sharedId = getSharedExpenseCategoryId("user-a");
+    const options = getSharedExpenseCategoryOptions(
+      [buildCategory()],
+      "user-a",
+      sharedId,
+    );
+
+    expect(options.map((option) => option.id)).toEqual(["category-1"]);
+    expect(options.some((option) => option.id === sharedId)).toBe(false);
+  });
+
+  it("returns only the real categories without a viewer uid", () => {
     const options = getSharedExpenseCategoryOptions([buildCategory()], "");
 
     expect(options.map((option) => option.id)).toEqual(["category-1"]);
@@ -185,10 +193,10 @@ describe("getSharedExpenseCategoryLabel", () => {
   it("translates synthetic options and keeps stored names", () => {
     expect(
       getSharedExpenseCategoryLabel(
-        { id: "x", label: "", labelKey: "form.categoryDefault", icon: "receipt-outline" },
+        { id: "x", label: "", labelKey: "form.categoryUnavailable", icon: "receipt-outline" },
         translate,
       ),
-    ).toBe("t:form.categoryDefault");
+    ).toBe("t:form.categoryUnavailable");
     expect(
       getSharedExpenseCategoryLabel(
         { id: "y", label: "Comida", icon: "fast-food-outline" },

@@ -10,7 +10,7 @@ import { DetailSummaryCard } from "./detail-summary-card";
 export interface DetailBodyProps {
   summary: DetailSummary;
   fields: readonly DetailField[];
-  /** Optional feature error banner rendered above the summary. */
+  /** Optional feature banners (errors, notices) rendered above the summary. */
   errorContent?: ReactNode;
   /** Optional feature blocks rendered after the fields card, sharing its gap. */
   children?: ReactNode;

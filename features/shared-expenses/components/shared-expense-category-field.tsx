@@ -19,6 +19,8 @@ export interface SharedExpenseCategoryFieldProps {
   options: readonly SharedExpenseCategoryOption[];
   selectedId: string;
   disabled: boolean;
+  /** Translated category error, already resolved from its validation code. */
+  errorText?: string | null;
   onChange: (categoryId: string) => void;
 }
 
@@ -27,6 +29,7 @@ export function SharedExpenseCategoryField({
   options,
   selectedId,
   disabled,
+  errorText,
   onChange,
 }: SharedExpenseCategoryFieldProps) {
   const theme = useFormTheme();
@@ -113,6 +116,14 @@ export function SharedExpenseCategoryField({
           />
         </Pressable>
       </View>
+
+      {errorText ? (
+        <ThemedText
+          style={[sharedExpensesStyles.fieldError, { color: theme.danger }]}
+        >
+          {errorText}
+        </ThemedText>
+      ) : null}
 
       <SharedExpenseCategoryPickerDialog
         visible={pickerVisible}

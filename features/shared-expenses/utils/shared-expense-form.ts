@@ -75,6 +75,7 @@ export function toSharedExpenseInput(
   values: SharedExpenseFormValues,
 ): SharedExpenseInput {
   const activeValues = values.splitValues[values.splitMode] ?? {};
+  const hasWallet = values.walletId.trim().length > 0;
 
   return {
     friendUid: values.friendUid,
@@ -89,7 +90,9 @@ export function toSharedExpenseInput(
       value: activeValues[userId] ?? "",
     })),
     walletId: values.walletId,
-    categoryId: values.categoryId,
+    // Without a wallet the persisted link has no category, whatever the local
+    // state still holds.
+    categoryId: hasWallet ? values.categoryId : "",
   };
 }
 

@@ -3,6 +3,7 @@ import type { Wallet } from "@/features/wallets/types/wallet.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 import { formatDateInput } from "@/shared/utils/date";
 
+import { getSharedExpenseCategoryId } from "../services/shared-expense-category";
 import type {
   ExpenseSplitMode,
   SharedExpense,
@@ -59,6 +60,11 @@ export function fromSharedExpense(
     ]),
   );
 
+  const walletId = (expense.walletId ?? "").trim();
+  const sharedCategoryId =
+    viewerUid.trim().length > 0 ? getSharedExpenseCategoryId(viewerUid) : "";
+  const storedCategoryId = expense.categoryId ?? "";
+
   return {
     viewerUid,
     friendUid: resolveExpenseFriendUid(expense, viewerUid),
@@ -70,8 +76,14 @@ export function fromSharedExpense(
     payerId: expense.payerId,
     splitMode: expense.splitMode,
     splitValues,
-    walletId: expense.walletId ?? "",
-    categoryId: expense.categoryId ?? "",
+    walletId,
+    // A category never survives without a wallet: it would stay in the form as
+    // a stale chip while the movement has no wallet. The deterministic shared
+    // category is cleared for the same reason: the picker no longer offers it.
+    categoryId:
+      walletId.length > 0 && storedCategoryId !== sharedCategoryId
+        ? storedCategoryId
+        : "",
   };
 }
 

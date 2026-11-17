@@ -36,13 +36,16 @@ describe("SharedExpensesService.createExpense", () => {
     const { repository, friendsRepository, service } = createService();
     friendsRepository.seedFriendship("user-a", "user-b");
 
-    const expense = await service.createExpense("user-a", buildInput());
+    const expense = await service.createExpense(
+      "user-a",
+      buildInput({ payerId: "user-b", walletId: "" }),
+    );
 
     const dto = repository.createCalls[0];
     expect(dto).toEqual({
       participantIds: ["user-a", "user-b"],
       pairId: "user-a__user-b",
-      payerId: "user-a",
+      payerId: "user-b",
       amountCents: 1000,
       currency: "EUR",
       splitMode: "equal",
@@ -107,8 +110,8 @@ describe("SharedExpensesService.createExpense", () => {
 });
 
 describe("SharedExpensesService.createExpense with a wallet", () => {
-  it("creates the linked movement with the default category", async () => {
-    const { repository, linkRepository, categoryRepository, friendsRepository, service } =
+  it("creates the linked movement with the chosen category", async () => {
+    const { repository, linkRepository, friendsRepository, service } =
       createService();
     friendsRepository.seedFriendship("user-a", "user-b");
 
@@ -121,46 +124,32 @@ describe("SharedExpensesService.createExpense with a wallet", () => {
     expect(repository.createCalls).toEqual([]);
     expect(linkRepository.createCalls[0]).toMatchObject({
       walletId: "wallet-1",
-      categoryId: "user-a__shared-expense",
+      categoryId: "category-1",
       linkedTransactionId: null,
     });
-    expect(categoryRepository.ensureCalls).toEqual([
-      expect.objectContaining({
-        ownerId: "user-a",
-        categoryId: "user-a__shared-expense",
-      }),
-    ]);
     expect(expense.id).toBe("expense-link-1");
   });
 
-  it("ensures the deterministic category id preselected by the form", async () => {
-    const { repository, linkRepository, categoryRepository, friendsRepository, service } =
+  it("rejects a viewer-paid linked expense without a category", async () => {
+    const { repository, linkRepository, friendsRepository, service } =
       createService();
     friendsRepository.seedFriendship("user-a", "user-b");
 
-    await service.createExpense(
-      "user-a",
-      buildInput({
-        walletId: "wallet-1",
-        categoryId: "user-a__shared-expense",
-      }),
-    );
+    await expect(
+      service.createExpense(
+        "user-a",
+        buildInput({ walletId: "wallet-1", categoryId: "" }),
+      ),
+    ).rejects.toMatchObject({
+      fieldErrors: { categoryId: "CATEGORY_REQUIRED" },
+    });
 
-    expect(linkRepository.createCalls[0].categoryId).toBe(
-      "user-a__shared-expense",
-    );
-    expect(categoryRepository.ensureCalls).toEqual([
-      expect.objectContaining({
-        ownerId: "user-a",
-        categoryId: "user-a__shared-expense",
-      }),
-    ]);
     expect(repository.createCalls).toEqual([]);
+    expect(linkRepository.createCalls).toEqual([]);
   });
 
-  it("keeps a supplied category and does not ensure the default one", async () => {
-    const { linkRepository, categoryRepository, friendsRepository, service } =
-      createService();
+  it("trims and keeps the supplied category", async () => {
+    const { linkRepository, friendsRepository, service } = createService();
     friendsRepository.seedFriendship("user-a", "user-b");
 
     await service.createExpense(
@@ -169,11 +158,10 @@ describe("SharedExpensesService.createExpense with a wallet", () => {
     );
 
     expect(linkRepository.createCalls[0].categoryId).toBe("category-2");
-    expect(categoryRepository.ensureCalls).toEqual([]);
   });
 
-  it("drops the wallet when the friend is the payer", async () => {
-    const { repository, linkRepository, categoryRepository, friendsRepository, service } =
+  it("drops the wallet and category when the friend is the payer", async () => {
+    const { repository, linkRepository, friendsRepository, service } =
       createService();
     friendsRepository.seedFriendship("user-a", "user-b");
 
@@ -189,14 +177,5 @@ describe("SharedExpensesService.createExpense with a wallet", () => {
       categoryId: null,
       linkedTransactionId: null,
     });
-    expect(categoryRepository.ensureCalls).toEqual([]);
-  });
-
-  it("exposes the deterministic category id", async () => {
-    const { service } = createService();
-
-    await expect(service.ensureSharedExpenseCategory("user-a")).resolves.toBe(
-      "user-a__shared-expense",
-    );
   });
 });

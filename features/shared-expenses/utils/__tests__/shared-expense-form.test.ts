@@ -3,6 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 import type { Friend } from "@/features/friends/types/friend.types";
 import type { Wallet } from "@/features/wallets/types/wallet.types";
 
+import { getSharedExpenseCategoryId } from "../../services/shared-expense-category";
 import {
   createSharedExpenseFormValues,
   getSharedExpenseParticipantIds,
@@ -163,6 +164,18 @@ describe("toSharedExpenseInput", () => {
     expect(input.categoryId).toBe("category-1");
   });
 
+  it("sends an empty category while the wallet is empty", () => {
+    const blank = toSharedExpenseInput(
+      buildValues({ walletId: "  ", categoryId: "shared-category" }),
+    );
+    const missing = toSharedExpenseInput(
+      buildValues({ walletId: "", categoryId: "shared-category" }),
+    );
+
+    expect(blank.categoryId).toBe("");
+    expect(missing.categoryId).toBe("");
+  });
+
   it("sends empty values for an equal split", () => {
     expect(
       toSharedExpenseInput(buildValues({ amount: "10" })).participants,
@@ -281,6 +294,48 @@ describe("fromSharedExpense", () => {
         walletId: "wallet-1",
         categoryId: "category-1",
         linkedTransactionId: "transaction-1",
+      }),
+      "user-a",
+    );
+
+    expect(values.walletId).toBe("wallet-1");
+    expect(values.categoryId).toBe("category-1");
+  });
+
+  it("clears a stored shared default category of the linked movement", () => {
+    const values = fromSharedExpense(
+      buildSharedExpense({
+        walletId: "wallet-1",
+        categoryId: getSharedExpenseCategoryId("user-a"),
+      }),
+      "user-a",
+    );
+
+    expect(values.walletId).toBe("wallet-1");
+    expect(values.categoryId).toBe("");
+  });
+
+  it("drops a stored category when the wallet is null or blank", () => {
+    const missing = fromSharedExpense(
+      buildSharedExpense({ walletId: null, categoryId: "shared-category" }),
+      "user-a",
+    );
+    const blank = fromSharedExpense(
+      buildSharedExpense({ walletId: "   ", categoryId: "shared-category" }),
+      "user-a",
+    );
+
+    expect(missing.walletId).toBe("");
+    expect(missing.categoryId).toBe("");
+    expect(blank.walletId).toBe("");
+    expect(blank.categoryId).toBe("");
+  });
+
+  it("trims a whitespace wallet and keeps its category", () => {
+    const values = fromSharedExpense(
+      buildSharedExpense({
+        walletId: " wallet-1 ",
+        categoryId: "category-1",
       }),
       "user-a",
     );

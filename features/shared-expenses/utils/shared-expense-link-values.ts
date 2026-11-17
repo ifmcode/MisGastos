@@ -20,8 +20,9 @@ export function selectSharedExpensePayer(
 }
 
 /**
- * Selecting a wallet defaults the movement category to "Gastos compartidos"
- * unless the user already picked one; clearing the wallet clears the category.
+ * Selecting a wallet keeps a real category the user already picked. The
+ * deterministic "Gastos compartidos" category is not offered any more, so a
+ * legacy default is cleared instead of kept; clearing the wallet drops both.
  */
 export function selectSharedExpenseWallet(
   values: SharedExpenseFormValues,
@@ -31,12 +32,15 @@ export function selectSharedExpenseWallet(
     return { ...values, walletId: "", categoryId: "" };
   }
 
-  const categoryId =
-    values.categoryId.length > 0
-      ? values.categoryId
-      : getSharedExpenseCategoryId(values.viewerUid);
+  const keepsCategory =
+    values.categoryId.length > 0 &&
+    values.categoryId !== getSharedExpenseCategoryId(values.viewerUid);
 
-  return { ...values, walletId, categoryId };
+  return {
+    ...values,
+    walletId,
+    categoryId: keepsCategory ? values.categoryId : "",
+  };
 }
 
 export function selectSharedExpenseCategory(
@@ -62,4 +66,25 @@ export function selectSharedExpenseCurrency(
   }
 
   return { ...values, currency };
+}
+
+/**
+ * A movement keeps its wallet currency, so a wallet whose currency differs makes
+ * the save fail in the service. Checking it here shows the error before the
+ * request; a missing or orphaned wallet returns `null` because only the service
+ * can tell whether it still exists.
+ */
+export function getSharedExpenseWalletCurrencyError(
+  values: SharedExpenseFormValues,
+  wallets: readonly Wallet[],
+): "CURRENCY_MISMATCH" | null {
+  const walletId = values.walletId.trim();
+
+  if (walletId.length === 0) return null;
+
+  const wallet = wallets.find((item) => item.id === walletId);
+
+  if (!wallet) return null;
+
+  return wallet.currency === values.currency ? null : "CURRENCY_MISMATCH";
 }

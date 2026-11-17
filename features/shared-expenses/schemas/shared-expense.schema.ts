@@ -33,7 +33,11 @@ export function validateSharedExpenseInput(
   const issues: SharedExpenseValidationIssue[] = [];
   const parsed = parseSharedExpenseFields(input, viewerUid, issues);
 
-  if (parsed === null) return { ok: false, error: issues };
+  // A missing payer wallet reports an issue without nulling a parsed field, so
+  // every collected issue rejects the payload, not only an unparseable field.
+  if (parsed === null || issues.length > 0) {
+    return { ok: false, error: issues };
+  }
 
   const values = parseSplitParticipants(parsed.splitMode, input.participants);
 

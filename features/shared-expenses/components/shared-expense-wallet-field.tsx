@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { WalletChipSelector } from "@/features/wallets/components/wallet-chip-selector";
@@ -16,20 +16,29 @@ export interface SharedExpenseWalletFieldProps {
   wallets: readonly Wallet[];
   selectedId: string;
   disabled: boolean;
+  /** Translated wallet error, already resolved from its validation code. */
+  errorText?: string | null;
+  /** Translated guidance shown when the currency has no active wallets. */
+  emptyText: string;
   onSelect: (walletId: string) => void;
 }
 
-/** Optional wallet of the linked movement, with an explicit "no wallet" chip. */
+/**
+ * Mandatory wallet of the linked movement: the expense must reach Movements, so
+ * the block only exists while the viewer pays and always needs a selection.
+ */
 export function SharedExpenseWalletField({
   wallets,
   selectedId,
   disabled,
+  errorText,
+  emptyText,
   onSelect,
 }: SharedExpenseWalletFieldProps) {
   const theme = useFormTheme();
   const { t } = useScopedTranslation("sharedExpenses");
   const [pickerVisible, setPickerVisible] = useState(false);
-  const noWalletSelected = selectedId.length === 0;
+  const hasOptions = wallets.length > 0;
 
   function select(walletId: string) {
     onSelect(walletId);
@@ -42,43 +51,12 @@ export function SharedExpenseWalletField({
         {t("form.walletLabel")}
       </ThemedText>
 
-      <View
-        style={styles.group}
-        accessibilityRole="radiogroup"
-        accessibilityLabel={t("form.walletGroupAccessibility")}
-      >
-        <View style={styles.chipRow}>
-          <Pressable
-            accessibilityRole="radio"
-            accessibilityState={{ selected: noWalletSelected }}
-            accessibilityLabel={t("form.walletNoneAccessibility")}
-            accessibilityHint={t("form.walletNoneHint")}
-            onPress={() => select("")}
-            disabled={disabled}
-            style={({ pressed }) => [
-              styles.chip,
-              {
-                backgroundColor: noWalletSelected
-                  ? theme.primarySoft
-                  : theme.surface,
-                borderColor: noWalletSelected ? theme.primary : theme.border,
-              },
-              pressed && styles.pickerOptionPressed,
-            ]}
-          >
-            <ThemedText
-              style={[
-                styles.chipText,
-                { color: noWalletSelected ? theme.primary : theme.text },
-              ]}
-              numberOfLines={1}
-            >
-              {t("form.walletNone")}
-            </ThemedText>
-          </Pressable>
-        </View>
-
-        {wallets.length > 0 ? (
+      {hasOptions ? (
+        <View
+          style={styles.group}
+          accessibilityRole="radiogroup"
+          accessibilityLabel={t("form.walletGroupAccessibility")}
+        >
           <WalletChipSelector
             wallets={wallets}
             selectedId={selectedId}
@@ -87,12 +65,30 @@ export function SharedExpenseWalletField({
             onSelect={onSelect}
             onOpenPicker={() => setPickerVisible(true)}
           />
-        ) : null}
-      </View>
+        </View>
+      ) : (
+        <View style={styles.group}>
+          <ThemedText
+            style={[sharedExpensesStyles.helper, { color: theme.muted }]}
+          >
+            {emptyText}
+          </ThemedText>
+        </View>
+      )}
 
-      <ThemedText style={[sharedExpensesStyles.helper, { color: theme.muted }]}>
-        {t("form.walletHint")}
-      </ThemedText>
+      {hasOptions ? (
+        <ThemedText style={[sharedExpensesStyles.helper, { color: theme.muted }]}>
+          {t("form.walletHint")}
+        </ThemedText>
+      ) : null}
+
+      {errorText ? (
+        <ThemedText
+          style={[sharedExpensesStyles.fieldError, { color: theme.danger }]}
+        >
+          {errorText}
+        </ThemedText>
+      ) : null}
 
       <WalletPickerDialog
         visible={pickerVisible}

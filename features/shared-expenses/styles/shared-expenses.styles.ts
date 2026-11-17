@@ -59,6 +59,24 @@ export const sharedExpensesStyles = StyleSheet.create({
     letterSpacing: 0.6,
     textTransform: "uppercase",
   },
+  // Legacy viewer-paid expense saved without a wallet: informational only.
+  walletWarning: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  walletWarningBody: {
+    flex: 1,
+    gap: 2,
+  },
+  walletWarningText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
 
   // Form shell
   flex: {
@@ -88,6 +106,18 @@ export const sharedExpensesStyles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     marginTop: 6,
+  },
+  formNotice: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 18,
+  },
+  formNoticeText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "600",
   },
   helper: {
     fontSize: 13,

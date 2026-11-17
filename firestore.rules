@@ -118,6 +118,31 @@ service cloud.firestore {
             || isOptionalExpenseId(data.linkedTransactionId));
     }
 
+    // The payer owns the linked movement, so a payer write must carry a wallet:
+    // without it the expense would claim a payment nobody records. Friend-paid
+    // records may stay social-only. Legacy viewer-paid records stay readable and
+    // can still be soft-deleted by a participant; any other update must choose a
+    // wallet. Mirrored by the service guard (WALLET_REQUIRED) and by the form,
+    // which blocks the submit. Deployment of this file is manual.
+    function hasPayerWallet(data) {
+      return data.payerId != request.auth.uid
+        || ('walletId' in data
+            && isOptionalExpenseId(data.walletId)
+            && data.walletId != null);
+    }
+
+    // The unlinked soft delete touches nothing but the deletion stamps, so a
+    // legacy viewer-paid record can be closed without choosing a wallet. The
+    // linked delete may also clear `linkedTransactionId` and passes through
+    // `hasPayerWallet` instead. Any other write (amount, payer, wallet, category,
+    // shares) keeps the full invariant: `diff` allows only the two keys the
+    // unlinked repository update writes.
+    function isExpenseSoftDelete(previous, next) {
+      return previous.deletedAt == null
+        && next.deletedAt is string
+        && next.diff(previous).affectedKeys().hasOnly(['deletedAt', 'updatedAt']);
+    }
+
     function hasExpenseFields(data) {
       return data.keys().hasOnly(
         [
@@ -456,6 +481,7 @@ service cloud.firestore {
         && hasExpenseShares(request.resource.data)
         && hasExpenseFields(request.resource.data)
         && hasExpenseLinks(request.resource.data)
+        && hasPayerWallet(request.resource.data)
         && request.resource.data.currency is string
         && request.resource.data.createdAt is string
         && request.resource.data.updatedAt is string
@@ -475,6 +501,8 @@ service cloud.firestore {
         && hasExpenseShares(request.resource.data)
         && hasExpenseFields(request.resource.data)
         && hasExpenseLinks(request.resource.data)
+        && (isExpenseSoftDelete(resource.data, request.resource.data)
+            || hasPayerWallet(request.resource.data))
         && request.resource.data.currency is string
         && request.resource.data.updatedAt is string
         && isExpenseDeletedAt(request.resource.data.deletedAt);

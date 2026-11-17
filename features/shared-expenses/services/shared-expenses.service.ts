@@ -10,7 +10,6 @@ import type {
   SharedExpenseInput,
 } from "../types/shared-expense.types";
 import { sortSharedExpenses } from "../utils/expense-ledger";
-import { ensureSharedExpenseCategory as ensureCategoryDocument } from "./shared-expense-category";
 import { SharedExpenseOperationError } from "./shared-expense.errors";
 import { assertSharedExpenseFriendship } from "./shared-expense-persist";
 import {
@@ -43,7 +42,7 @@ export class SharedExpensesService {
     linkRepository: ISharedExpenseLinkRepository,
     categoryRepository: ICategoryRepository,
   ) {
-    this.writeDeps = { repository, linkRepository, categoryRepository };
+    this.writeDeps = { repository, linkRepository };
   }
 
   /** Every expense of the viewer, soft-deleted included for the audit trail. */
@@ -63,14 +62,6 @@ export class SharedExpensesService {
     assertExpenseParticipant(expense, viewer);
 
     return expense;
-  }
-
-  /**
-   * Returns the deterministic "Gastos compartidos" category id, creating it the
-   * first time a payer links a movement. Existing categories are never rewritten.
-   */
-  ensureSharedExpenseCategory(ownerId: string): Promise<string> {
-    return ensureCategoryDocument(this.writeDeps.categoryRepository, ownerId);
   }
 
   async createExpense(

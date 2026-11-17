@@ -13,8 +13,7 @@ import { getSharedExpenseCategoryId } from "../services/shared-expense-category"
 /** Maximum number of category chips shown inline before the `+` action. */
 export const SHARED_EXPENSE_CATEGORY_CHIP_LIMIT = 3;
 
-/** Synthetic labels: the shared category may not exist as a document yet. */
-export const SHARED_EXPENSE_CATEGORY_LABEL_KEY = "form.categoryDefault";
+/** Label of a still-selected id whose category is no longer stored. */
 export const SHARED_EXPENSE_CATEGORY_FALLBACK_KEY = "form.categoryUnavailable";
 
 export interface SharedExpenseCategoryOption {
@@ -48,39 +47,35 @@ export function getSharedExpenseWalletOptions(
 }
 
 /**
- * Expense categories plus the deterministic "Gastos compartidos" option. The
- * synthetic option is added once, only while the document does not exist, and a
- * still-selected id that is gone keeps a fallback row so it stays visible.
+ * Expense categories of the linked movement. The deterministic "Gastos
+ * compartidos" category is never offered, whether it is stored or would be
+ * synthetic: the movement is already the shared expense, so it adds no choice.
+ * A still-selected id that is gone keeps a fallback row so it stays visible.
  */
 export function getSharedExpenseCategoryOptions(
   categories: readonly Category[],
   viewerUid: string,
   selectedCategoryId = "",
 ): SharedExpenseCategoryOption[] {
+  const sharedCategoryId =
+    viewerUid.trim().length > 0 ? getSharedExpenseCategoryId(viewerUid) : "";
   const options: SharedExpenseCategoryOption[] = categories
-    .filter((category) => category.type === "expense")
+    .filter(
+      (category) =>
+        category.type === "expense" && category.id !== sharedCategoryId,
+    )
     .map((category) => ({
       id: category.id,
       label: category.name,
       icon: getCategoryIconName(category.icon),
     }));
-  const sharedCategoryId =
-    viewerUid.trim().length > 0 ? getSharedExpenseCategoryId(viewerUid) : "";
 
-  if (options.some((option) => option.id === sharedCategoryId)) {
-    return withSelectedFallback(options, selectedCategoryId);
-  }
-
-  if (sharedCategoryId.length > 0) {
-    options.unshift({
-      id: sharedCategoryId,
-      label: "",
-      labelKey: SHARED_EXPENSE_CATEGORY_LABEL_KEY,
-      icon: getCategoryIconName("people-outline"),
-    });
-  }
-
-  return withSelectedFallback(options, selectedCategoryId);
+  return withSelectedFallback(
+    options,
+    // A legacy selection of the shared category must not come back as a
+    // fallback row: the picker never offers it.
+    selectedCategoryId === sharedCategoryId ? "" : selectedCategoryId,
+  );
 }
 
 function withSelectedFallback(

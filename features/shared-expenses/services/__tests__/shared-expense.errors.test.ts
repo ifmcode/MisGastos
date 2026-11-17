@@ -56,6 +56,8 @@ describe("getSharedExpenseErrorCode", () => {
       "WALLET_NOT_FOUND",
       "WALLET_NOT_OWNED",
       "CURRENCY_MISMATCH",
+      "WALLET_REQUIRED",
+      "CATEGORY_REQUIRED",
     ] as const;
 
     for (const code of codes) {

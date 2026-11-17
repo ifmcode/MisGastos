@@ -11,32 +11,15 @@ import { readParticipantIds, readPayerId } from "./shared-expense-participants";
 import {
   SHARED_EXPENSE_AMOUNT_MAX,
   SHARED_EXPENSE_DESCRIPTION_MAX_LENGTH,
+  type ParsedSharedExpense,
   type SharedExpenseValidationIssue,
 } from "./shared-expense-validation.types";
+import { readSharedExpenseLink } from "./shared-expense-wallet-validation";
 
 const AMOUNT_MAX_CENTS = SHARED_EXPENSE_AMOUNT_MAX * 100;
 
-/** Fields that survived validation, before the exact split is computed. */
-export interface ParsedSharedExpense {
-  description: string;
-  amountCents: number;
-  currency: CurrencyCode;
-  date: string;
-  payerId: string;
-  participantIds: string[];
-  splitMode: ExpenseSplitMode;
-  walletId: string | null;
-  categoryId: string | null;
-}
-
 function readText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
-}
-
-/** Optional ids are trimmed; an empty string means "not selected". */
-function readOptionalId(value: unknown): string | null {
-  const id = readText(value);
-  return id.length > 0 ? id : null;
 }
 
 function readDescription(
@@ -129,9 +112,12 @@ export function parseSharedExpenseFields(
   const splitMode = readSplitMode(input.splitMode, issues);
   const participantIds = readParticipantIds(input, viewerUid, issues);
   const payerId = readPayerId(input.payerId, participantIds, issues);
-  const walletId = readOptionalId(input.walletId);
-  // No wallet means no personal movement, so the category cannot survive alone.
-  const categoryId = walletId === null ? null : readOptionalId(input.categoryId);
+  const { walletId, categoryId } = readSharedExpenseLink(
+    input,
+    payerId,
+    viewerUid,
+    issues,
+  );
 
   if (
     description === null ||

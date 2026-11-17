@@ -2,7 +2,7 @@
 
 > Single source of truth for the V1 scope, phase order and the current ticket.
 > The former `implementation-plan.md` was merged into this file on 12/11/2026.
-> **Last reviewed:** 16/11/2026
+> **Last reviewed:** 17/11/2026
 
 ## Product Vision
 A personal finance manager (wallets, movements, transfers and dashboard) merged with Splitwise-style shared finances (friends, groups, shared expenses, balances and settlements). **V1.0 is everything defined in this roadmap**; the MVP was the first milestone, not the release.
@@ -12,7 +12,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Phase:** 5 - Social vertical slice
 - **Current ticket:** TICKET-046 - 1:1 debt settlement with bilateral confirmation
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-045 - Movements FAB create menu (16/11/2026)
+- **Last completed:** TICKET-051 - Mandatory shared expense category and no hidden default (17/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
 - **Queued:** TICKET-047 (notification inbox) and TICKET-008 in Phase 6
 - **Next:** TICKET-046 - 1:1 debt settlement with bilateral confirmation
@@ -124,11 +124,17 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] TICKET-043: shared expense detail screen ✅ 16/11/2026
 - [x] TICKET-044: shared expense wallet and linked personal movement ✅ 16/11/2026
 - [x] TICKET-045: movements FAB create menu ✅ 16/11/2026
+- [x] TICKET-048: mandatory wallet for viewer-paid shared expenses ✅ 17/11/2026
+- [x] TICKET-049: shared-expense link feedback and category reset ✅ 17/11/2026
+- [x] TICKET-050: shared-expense save feedback and category picker ✅ 17/11/2026
+- [x] TICKET-051: mandatory shared-expense category and no hidden default ✅ 17/11/2026
 - Delivered Social shell, pending requests, add-friend and requests routes, the shared `FabActionMenu` and the accepted shared-expense entry gap: [`2026-11-16-social-tab.md`](2026-11-16-social-tab.md)
 - Delivered friend detail, header balances, filtered 1:1 expense list, locked-friend FAB and the removal move: [`2026-11-16-friend-detail.md`](2026-11-16-friend-detail.md)
 - Delivered the shared-expense detail route, live resolution, edit/delete flow and the route-safe `DetailView`: [`2026-11-16-shared-expense-detail.md`](2026-11-16-shared-expense-detail.md)
 - Delivered the optional same-currency wallet, the atomic linked movement (`ILinkedMovementPort` + `runTransaction`), the on-demand **Gastos compartidos** category, the **Compartido** badge and the shared-detail routing: [`2026-11-16-shared-expense-wallet-link.md`](2026-11-16-shared-expense-wallet-link.md)
 - Delivered the single create entry in **Movimientos** (shared `FabActionMenu` with movement / friend expense / disabled group action), the pure action helper, the friend gating states and `preselectFirstFriend: false`: [`2026-11-16-movements-create-menu.md`](2026-11-16-movements-create-menu.md)
+- Delivered the mandatory wallet for viewer-paid expenses (create and update) across schema, service and rules, the payer transitions reloaded around it, the legacy no-wallet detail notice and the `use-scoped-translation` TS2589 fix: [`2026-11-17-mandatory-wallet-viewer-paid.md`](2026-11-17-mandatory-wallet-viewer-paid.md)
+- Delivered the shared-expense link and save feedback: the stale linked category is cleared without a wallet (TICKET-049), the system **Gastos compartidos** category is excluded from the picker and never preselected, the wallet currency is pre-checked and the server/first field error shows above **Guardar** (TICKET-050), and the linked category is now mandatory with no hidden default (TICKET-051, the service rejects with `CATEGORY_REQUIRED` and the error renders under the field): [`2026-11-17-shared-expense-save-feedback.md`](2026-11-17-shared-expense-save-feedback.md)
 
 ### 5.2 1:1 settlement and notifications
 - [ ] TICKET-046: 1:1 debt settlement with bilateral confirmation

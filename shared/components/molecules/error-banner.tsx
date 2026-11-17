@@ -19,6 +19,8 @@ export function ErrorBanner({ message }: ErrorBannerProps) {
 
   return (
     <View
+      accessibilityRole="alert"
+      accessibilityLiveRegion="polite"
       style={[styles.banner, { backgroundColor: theme.dangerSurface }]}
     >
       <Ionicons name="alert-circle" size={20} color={theme.danger} />

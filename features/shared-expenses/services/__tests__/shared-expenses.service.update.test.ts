@@ -44,13 +44,18 @@ describe("SharedExpensesService.updateExpense", () => {
     const expense = await service.updateExpense(
       "user-a",
       " expense-1 ",
-      buildInput({ amount: "20.00", description: " Lunch " }),
+      buildInput({
+        payerId: "user-b",
+        walletId: "",
+        amount: "20.00",
+        description: " Lunch ",
+      }),
     );
 
     const call = repository.updateCalls[0];
     expect(call.expenseId).toBe("expense-1");
     expect(call.update).toEqual({
-      payerId: "user-a",
+      payerId: "user-b",
       amountCents: 2000,
       currency: "EUR",
       splitMode: "equal",
@@ -151,7 +156,7 @@ describe("SharedExpensesService.updateExpense", () => {
 
 describe("SharedExpensesService.updateExpense link routing", () => {
   it("routes to the link repository when a wallet is added", async () => {
-    const { repository, linkRepository, categoryRepository, friendsRepository, service } =
+    const { repository, linkRepository, friendsRepository, service } =
       createService();
     friendsRepository.seedFriendship("user-a", "user-b");
     repository.seed(buildSharedExpense());
@@ -169,10 +174,30 @@ describe("SharedExpensesService.updateExpense link routing", () => {
       expenseId: "expense-1",
       update: {
         walletId: "wallet-1",
-        categoryId: "user-a__shared-expense",
+        categoryId: "category-1",
       },
     });
-    expect(categoryRepository.ensureCalls).toHaveLength(1);
+  });
+
+  it("rejects a viewer-paid linked update without a category", async () => {
+    const { repository, linkRepository, friendsRepository, service } =
+      createService();
+    friendsRepository.seedFriendship("user-a", "user-b");
+    repository.seed(buildSharedExpense());
+    linkRepository.seed(buildSharedExpense());
+
+    await expect(
+      service.updateExpense(
+        "user-a",
+        "expense-1",
+        buildInput({ walletId: "wallet-1", categoryId: "   " }),
+      ),
+    ).rejects.toMatchObject({
+      fieldErrors: { categoryId: "CATEGORY_REQUIRED" },
+    });
+
+    expect(repository.updateCalls).toEqual([]);
+    expect(linkRepository.updateCalls).toEqual([]);
   });
 
   it("keeps the social path while no wallet is involved", async () => {
@@ -181,7 +206,11 @@ describe("SharedExpensesService.updateExpense link routing", () => {
     friendsRepository.seedFriendship("user-a", "user-b");
     repository.seed(buildSharedExpense());
 
-    await service.updateExpense("user-a", "expense-1", buildInput());
+    await service.updateExpense(
+      "user-a",
+      "expense-1",
+      buildInput({ payerId: "user-b", walletId: "" }),
+    );
 
     expect(linkRepository.updateCalls).toEqual([]);
     expect(repository.updateCalls[0].update).toMatchObject({
@@ -216,7 +245,7 @@ describe("SharedExpensesService.updateExpense link routing", () => {
   });
 
   it("creates the viewer's own movement when taking over a social expense", async () => {
-    const { repository, linkRepository, categoryRepository, friendsRepository, service } =
+    const { repository, linkRepository, friendsRepository, service } =
       createService();
     friendsRepository.seedFriendship("user-a", "user-b");
     const friendPaid = buildSharedExpense({ payerId: "user-b" });
@@ -235,13 +264,12 @@ describe("SharedExpensesService.updateExpense link routing", () => {
       update: {
         payerId: "user-a",
         walletId: "wallet-1",
-        categoryId: "user-a__shared-expense",
+        categoryId: "category-1",
       },
     });
-    expect(categoryRepository.ensureCalls).toHaveLength(1);
   });
 
-  it("keeps the link path when a linked expense clears its wallet", async () => {
+  it("keeps the link path when the friend takes over and the wallet is cleared", async () => {
     const { repository, linkRepository, friendsRepository, service } =
       createService();
     friendsRepository.seedFriendship("user-a", "user-b");
@@ -253,10 +281,15 @@ describe("SharedExpensesService.updateExpense link routing", () => {
     repository.seed(linked);
     linkRepository.seed(linked);
 
-    await service.updateExpense("user-a", "expense-1", buildInput());
+    await service.updateExpense(
+      "user-a",
+      "expense-1",
+      buildInput({ payerId: "user-b", walletId: "" }),
+    );
 
     expect(repository.updateCalls).toEqual([]);
     expect(linkRepository.updateCalls[0].update).toMatchObject({
+      payerId: "user-b",
       walletId: null,
       categoryId: null,
     });

@@ -25,7 +25,7 @@ export interface DetailViewProps {
   disabled?: boolean;
   labels: DetailActionLabels;
   missingLabels: DetailMissingStateLabels;
-  /** Optional feature error banner rendered above the summary. */
+  /** Optional feature banners (errors, notices) rendered above the summary. */
   errorContent?: ReactNode;
   /** Optional feature blocks rendered after the fields card. */
   children?: ReactNode;
@@ -39,7 +39,7 @@ export interface DetailViewProps {
 
 /**
  * Route-safe read-only detail layout: header actions, summary, fields, optional
- * error, extra blocks and the missing-record state. It owns no navigation, no
+ * banners, extra blocks and the missing-record state. It owns no navigation, no
  * modal and no dialog state, so `DetailModal` and full-screen routes share it.
  */
 export function DetailView({

@@ -3,7 +3,9 @@ import { useMemo } from "react";
 import type { Category } from "@/features/categories/types/category.types";
 import type { Wallet } from "@/features/wallets/types/wallet.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
+import type { SharedExpenseFieldErrors } from "../schemas/shared-expense.schema";
 import {
   getSharedExpenseCategoryOptions,
   getSharedExpenseWalletOptions,
@@ -20,14 +22,16 @@ export interface SharedExpenseLinkedMovementProps {
   walletId: string;
   categoryId: string;
   disabled: boolean;
+  errors: SharedExpenseFieldErrors;
   onWalletChange: (walletId: string) => void;
   onCategoryChange: (categoryId: string) => void;
 }
 
 /**
- * Optional personal movement of the shared expense. Only the payer can own it,
+ * Mandatory personal movement of the shared expense: only the payer can own it,
  * so the block renders while the viewer is the payer and disappears when the
- * friend pays. The category appears once a wallet is selected.
+ * friend pays. The wallet is required because the spend must reach Movements;
+ * the category appears once a wallet is selected.
  */
 export function SharedExpenseLinkedMovement({
   wallets,
@@ -38,17 +42,33 @@ export function SharedExpenseLinkedMovement({
   walletId,
   categoryId,
   disabled,
+  errors,
   onWalletChange,
   onCategoryChange,
 }: SharedExpenseLinkedMovementProps) {
+  const { t, tr } = useScopedTranslation("sharedExpenses");
+  const trimmedWalletId = walletId.trim();
+  const hasWallet = trimmedWalletId.length > 0;
   const walletOptions = useMemo(
-    () => getSharedExpenseWalletOptions(wallets, currency, walletId),
-    [currency, walletId, wallets],
+    () => getSharedExpenseWalletOptions(wallets, currency, trimmedWalletId),
+    [currency, trimmedWalletId, wallets],
   );
+  // No wallet, no options: the synthetic "Gastos compartidos" category must not
+  // linger as a stale choice in the missing-wallet state.
   const categoryOptions = useMemo(
-    () => getSharedExpenseCategoryOptions(categories, viewerUid, categoryId),
-    [categories, categoryId, viewerUid],
+    () =>
+      hasWallet
+        ? getSharedExpenseCategoryOptions(categories, viewerUid, categoryId)
+        : [],
+    [categories, categoryId, hasWallet, viewerUid],
   );
+  const walletError = errors.walletId
+    ? tr(`errors.${errors.walletId}`)
+    : null;
+  const categoryError = errors.categoryId
+    ? tr(`errors.${errors.categoryId}`)
+    : null;
+  const walletEmpty = t("form.walletEmpty", { currency });
 
   if (payerId !== viewerUid) return null;
 
@@ -56,16 +76,19 @@ export function SharedExpenseLinkedMovement({
     <>
       <SharedExpenseWalletField
         wallets={walletOptions}
-        selectedId={walletId}
+        selectedId={trimmedWalletId}
         disabled={disabled}
+        errorText={walletError}
+        emptyText={walletEmpty}
         onSelect={onWalletChange}
       />
 
-      {walletId.length > 0 ? (
+      {hasWallet ? (
         <SharedExpenseCategoryField
           options={categoryOptions}
           selectedId={categoryId}
           disabled={disabled}
+          errorText={categoryError}
           onChange={onCategoryChange}
         />
       ) : null}

@@ -117,6 +117,13 @@ describe("validateSharedExpenseInput - field errors", () => {
       { field: "payerId", code: "PAYER_REQUIRED" },
     ]);
   });
+
+  it("appends the missing payer wallet after the other issues", () => {
+    expect(issuesOf({ description: " ", walletId: "" })).toEqual([
+      { field: "description", code: "DESCRIPTION_REQUIRED" },
+      { field: "walletId", code: "WALLET_REQUIRED" },
+    ]);
+  });
 });
 
 describe("toSharedExpenseFieldErrors", () => {

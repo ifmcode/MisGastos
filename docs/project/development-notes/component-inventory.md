@@ -108,7 +108,9 @@ interface ErrorBannerProps {
 ```
 
 Consumers: transaction/transfer/wallet/category forms and both read-only detail
-modals. Copy arrives as a prop; the component only owns the danger styling.
+modals. Copy arrives as a prop; the component only owns the danger styling. It
+exposes `accessibilityRole="alert"` and `accessibilityLiveRegion="polite"`, so
+assistive technology announces the message when it appears.
 
 ### `FormHeader`
 
@@ -246,6 +248,26 @@ component was deleted). The detail layout and colours stay shared; the route onl
 a one-key shell style module, and the participants section reuses the existing
 shared-expenses style module, so no new palette was introduced.
 
+TICKET-048 made the wallet mandatory when the viewer pays and removed the
+**Sin cartera** option: `SharedExpenseWalletField` now shows the `WALLET_REQUIRED`
+error and the guidance to create a wallet in **Carteras** when there are no active
+same-currency wallets, and `SharedExpenseWalletWarning` (rendered in the detail)
+flags legacy viewer-paid records without a wallet. `shared-expense-form.tsx` was
+split into the page-sheet shell plus `shared-expense-form-body.tsx` to keep both
+files under 150 lines.
+
+TICKET-050 removed the system **Gastos compartidos** category from the linked
+movement picker (it is neither offered nor preselected) and `shared-expense-form-body.tsx`
+now renders the server error or first field error in an alert notice directly
+above `FormActions`, so a blocked save explains itself next to **Guardar**.
+
+TICKET-051 made the category mandatory for a linked movement: the schema and the
+service reject a linked expense without one (`CATEGORY_REQUIRED`), the hidden
+`ensureSharedExpenseCategory` default was removed, and the error renders under the
+category field. Social-only friend-paid expenses keep `categoryId: null`. The
+form notice uses new amber `warning`/`warningSurface`/`warningText` theme tokens
+for field-summary notices, while server errors keep the danger palette.
+
 ### `Fab`
 
 ```ts
@@ -341,7 +363,7 @@ translated accessibility label.
 
 - `npx tsc --noEmit`
 - `npx expo lint`
-- `npx jest` (208 suites / 1175 tests, updated after TICKET-045)
-- `npm run check:copy` (220 TSX files)
+- `npx jest` (213 suites / 1203 tests, updated after TICKET-051)
+- `npm run check:copy` (222 TSX files)
 - Dark mode and web follow the same `useFormTheme` tokens as before; shared
   components never import feature palettes.

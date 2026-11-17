@@ -1,5 +1,3 @@
-import type { ICategoryRepository } from "@/features/categories/repositories/category.repository";
-
 import type {
   ISharedExpensesRepository,
   ISharedExpenseLinkRepository,
@@ -8,12 +6,9 @@ import type {
   SharedExpense,
   ValidatedSharedExpense,
 } from "../types/shared-expense.types";
-import {
-  ensureSharedExpenseCategory,
-  getSharedExpenseCategoryId,
-} from "./shared-expense-category";
 import { SharedExpenseOperationError } from "./shared-expense.errors";
 import {
+  assertSharedExpensePayerWallet,
   buildCreateSharedExpenseDto,
   buildUpdateSharedExpenseDto,
   isSharedExpenseLinked,
@@ -24,31 +19,19 @@ import {
 export interface SharedExpenseWriteDeps {
   repository: ISharedExpensesRepository;
   linkRepository: ISharedExpenseLinkRepository;
-  categoryRepository: ICategoryRepository;
 }
 
 /**
- * A selected wallet always gets a category, defaulting to the lazily created
- * "Gastos compartidos" one. Social-only expenses keep `categoryId` null.
+ * A linked movement is saved with the category the viewer picked. Social-only
+ * expenses keep `categoryId` null and never create a hidden default category.
  */
-async function resolveCategoryId(
-  deps: SharedExpenseWriteDeps,
-  link: ResolvedSharedExpenseLink,
-  viewerUid: string,
-): Promise<string | null> {
+function resolveCategoryId(link: ResolvedSharedExpenseLink): string | null {
   if (link.walletId === null) return null;
-
-  // The form preselects the deterministic category id before the document
-  // exists, so it must still go through the ensure step. A real user-chosen
-  // category is kept untouched.
-  if (
-    link.categoryId !== null &&
-    link.categoryId !== getSharedExpenseCategoryId(viewerUid)
-  ) {
-    return link.categoryId;
+  if (link.categoryId === null) {
+    throw new SharedExpenseOperationError("CATEGORY_REQUIRED");
   }
 
-  return ensureSharedExpenseCategory(deps.categoryRepository, viewerUid);
+  return link.categoryId;
 }
 
 /** Routes to the atomic pair only when the payer linked one of their wallets. */
@@ -58,8 +41,9 @@ export async function createSharedExpenseRecord(
   viewerUid: string,
   now: string,
 ): Promise<SharedExpense> {
+  assertSharedExpensePayerWallet(value, viewerUid);
   const link = resolveSharedExpenseLink(value, viewerUid);
-  const categoryId = await resolveCategoryId(deps, link, viewerUid);
+  const categoryId = resolveCategoryId(link);
   const dto = buildCreateSharedExpenseDto(
     { ...value, ...link, categoryId },
     viewerUid,
@@ -82,6 +66,7 @@ export async function updateSharedExpenseRecord(
   viewerUid: string,
   now: string,
 ): Promise<SharedExpense> {
+  assertSharedExpensePayerWallet(value, viewerUid);
   const link = resolveSharedExpenseLink(value, viewerUid);
   const viewerPaysNow = link.walletId !== null;
   const viewerIsPayerNow = value.payerId === viewerUid;
@@ -101,7 +86,7 @@ export async function updateSharedExpenseRecord(
     );
   }
 
-  const categoryId = await resolveCategoryId(deps, link, viewerUid);
+  const categoryId = resolveCategoryId(link);
   const dto = buildUpdateSharedExpenseDto({ ...value, ...link, categoryId }, now);
 
   return deps.linkRepository.updateExpenseLink(viewerUid, existing.id, dto);

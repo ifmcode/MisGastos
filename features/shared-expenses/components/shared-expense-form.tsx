@@ -5,8 +5,6 @@ import { ThemedView } from "@/components/themed-view";
 import type { Category } from "@/features/categories/types/category.types";
 import type { Friend } from "@/features/friends/types/friend.types";
 import type { Wallet } from "@/features/wallets/types/wallet.types";
-import { ErrorBanner } from "@/shared/components/molecules/error-banner";
-import { FormActions } from "@/shared/components/molecules/form-actions";
 import { FormHeader } from "@/shared/components/molecules/form-header";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
@@ -16,10 +14,7 @@ import type { SharedExpenseFieldErrors } from "../schemas/shared-expense.schema"
 import { sharedExpensesStyles as styles } from "../styles/shared-expenses.styles";
 import type { SharedExpenseInput } from "../types/shared-expense.types";
 import type { SharedExpenseFormValues } from "../utils/shared-expense-form";
-import { SharedExpenseFormMainFields } from "./shared-expense-form-main-fields";
-import { SharedExpenseFormParticipants } from "./shared-expense-form-participants";
-import { SharedExpenseFriendField } from "./shared-expense-friend-field";
-import { SharedExpenseLinkedMovement } from "./shared-expense-linked-movement";
+import { SharedExpenseFormBody } from "./shared-expense-form-body";
 
 export interface SharedExpenseFormProps {
   friends: readonly Friend[];
@@ -37,7 +32,7 @@ export interface SharedExpenseFormProps {
   onCancel: () => void;
 }
 
-/** Page-sheet body of the shared-expense form; owns its field state. */
+/** Page sheet of the shared-expense form; owns the field state. */
 export function SharedExpenseForm({
   friends,
   wallets,
@@ -59,7 +54,6 @@ export function SharedExpenseForm({
     wallets,
     onSubmit,
   });
-  const { values, errors, submit } = form;
   const locked = isEditing || friendLocked === true;
   const lockedReason =
     friendLocked === true && !isEditing ? "preselected" : "editing";
@@ -88,59 +82,17 @@ export function SharedExpenseForm({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <ErrorBanner message={error} />
-
-            <SharedExpenseFriendField
+            <SharedExpenseFormBody
+              form={form}
               friends={friends}
-              selectedUid={values.friendUid}
-              locked={locked}
-              lockedReason={lockedReason}
-              onSelect={form.changeFriend}
-            />
-
-            <SharedExpenseFormMainFields
-              values={values}
-              errors={errors}
-              disabled={submitting}
-              onDescriptionChange={form.changeDescription}
-              onAmountChange={form.changeAmount}
-              onCurrencyChange={form.changeCurrency}
-              onDateTextChange={form.changeDateText}
-            />
-
-            <SharedExpenseFormParticipants
-              friends={friends}
-              values={values}
-              errors={errors}
-              disabled={submitting}
-              onPayerChange={form.changePayer}
-              onSplitModeChange={form.changeSplitMode}
-              onSplitValueChange={form.changeSplitValue}
-            />
-
-            <SharedExpenseLinkedMovement
               wallets={wallets}
               categories={categories}
-              payerId={values.payerId}
-              viewerUid={values.viewerUid}
-              currency={values.currency}
-              walletId={values.walletId}
-              categoryId={values.categoryId}
-              disabled={submitting}
-              onWalletChange={form.changeWallet}
-              onCategoryChange={form.changeCategory}
-            />
-
-            <FormActions
+              error={error}
               submitting={submitting}
               isEditing={isEditing}
-              canSubmit={values.friendUid.trim().length > 0}
-              cancelLabel={t("form.cancel")}
-              cancelAccessibilityLabel={t("form.cancelAccessibility")}
-              submitLabel={t("form.save")}
-              submitAccessibilityLabel={t("form.saveAccessibility")}
+              locked={locked}
+              lockedReason={lockedReason}
               onCancel={onCancel}
-              onSubmit={submit}
             />
           </ScrollView>
         </ThemedView>

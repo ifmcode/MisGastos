@@ -88,20 +88,30 @@ describe("selectSharedExpensePayer", () => {
 });
 
 describe("selectSharedExpenseWallet", () => {
-  it("defaults the category to the shared expense one", () => {
+  it("does not default the category when a wallet is selected", () => {
     const next = selectSharedExpenseWallet(buildValues(), "wallet-1");
 
     expect(next.walletId).toBe("wallet-1");
-    expect(next.categoryId).toBe(getSharedExpenseCategoryId("user-a"));
+    expect(next.categoryId).toBe("");
   });
 
-  it("respects a category the user already picked", () => {
+  it("keeps a real category the user already picked", () => {
     const next = selectSharedExpenseWallet(
       buildValues({ categoryId: "category-1" }),
       "wallet-1",
     );
 
     expect(next.categoryId).toBe("category-1");
+  });
+
+  it("clears a legacy shared category of the previous default", () => {
+    const next = selectSharedExpenseWallet(
+      buildValues({ categoryId: getSharedExpenseCategoryId("user-a") }),
+      "wallet-1",
+    );
+
+    expect(next.walletId).toBe("wallet-1");
+    expect(next.categoryId).toBe("");
   });
 
   it("clears the category when the wallet is removed", () => {

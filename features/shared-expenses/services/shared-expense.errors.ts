@@ -27,7 +27,9 @@ export type SharedExpenseOperationCode =
   | "WALLET_NOT_OWNED"
   | "CURRENCY_MISMATCH"
   | "LINKED_MOVEMENT_NOT_REVERTIBLE"
-  | "LINKED_MOVEMENT_FOREIGN";
+  | "LINKED_MOVEMENT_FOREIGN"
+  | "WALLET_REQUIRED"
+  | "CATEGORY_REQUIRED";
 
 export type SharedExpenseErrorCode =
   | SharedExpenseOperationCode
@@ -36,8 +38,7 @@ export type SharedExpenseErrorCode =
   | "NETWORK"
   | "LOAD_FAILED"
   | "SAVE_FAILED"
-  | "DELETE_FAILED"
-  | "SIGN_IN_REQUIRED";
+  | "DELETE_FAILED";
 
 export class SharedExpenseOperationError extends Error {
   readonly code: SharedExpenseOperationCode;

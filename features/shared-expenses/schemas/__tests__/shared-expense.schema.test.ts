@@ -29,8 +29,8 @@ describe("validateSharedExpenseInput - happy paths", () => {
         ],
         description: "Dinner",
         date: "2026-11-10",
-        walletId: null,
-        categoryId: null,
+        walletId: "wallet-1",
+        categoryId: "category-1",
         linkedTransactionId: null,
       },
     });
@@ -126,7 +126,11 @@ describe("validateSharedExpenseInput - optional wallet link", () => {
 
   it("nulls the wallet and category when no wallet is selected", () => {
     const result = validateSharedExpenseInput(
-      buildInput({ walletId: "   ", categoryId: "category-1" }),
+      buildInput({
+        payerId: "user-b",
+        walletId: "   ",
+        categoryId: "category-1",
+      }),
       VIEWER,
     );
 
@@ -138,7 +142,7 @@ describe("validateSharedExpenseInput - optional wallet link", () => {
 
   it("drops a category sent without a wallet", () => {
     const result = validateSharedExpenseInput(
-      buildInput({ categoryId: "category-1" }),
+      buildInput({ payerId: "user-b", walletId: "", categoryId: "category-1" }),
       VIEWER,
     );
 

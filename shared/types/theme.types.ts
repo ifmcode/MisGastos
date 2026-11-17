@@ -17,6 +17,9 @@ export interface ThemeTokens {
   danger: string;
   dangerSurface: string;
   dangerText: string;
+  warning: string;
+  warningSurface: string;
+  warningText: string;
   success: string;
   overlay: string;
   tint: string;

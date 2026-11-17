@@ -9,6 +9,9 @@ import type { SharedExpenseInput } from "../types/shared-expense.types";
 import { toSharedExpenseInput } from "../utils/shared-expense-form";
 import type { SharedExpenseFormValues } from "../utils/shared-expense-form";
 import {
+  getSharedExpenseWalletCurrencyError,
+} from "../utils/shared-expense-link-values";
+import {
   useSharedExpenseFormState,
   type SharedExpenseFormState,
 } from "./use-shared-expense-form-state";
@@ -44,6 +47,18 @@ export function useSharedExpenseForm({
 
     if (!validation.ok) {
       state.setValidationErrors(toSharedExpenseFieldErrors(validation.error));
+      return;
+    }
+
+    // The wallet keeps its own currency; checking it here surfaces the same
+    // rejection the service would return instead of leaving the tap silent.
+    const walletError = getSharedExpenseWalletCurrencyError(
+      state.values,
+      wallets,
+    );
+
+    if (walletError) {
+      state.setValidationErrors({ walletId: walletError });
       return;
     }
 

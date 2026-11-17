@@ -6,7 +6,7 @@ import { validateSharedExpenseInput } from "../shared-expense.schema";
 
 export const VIEWER = "user-a";
 
-/** Valid 1:1 form payload; override only the field under test. */
+/** Valid 1:1 form payload paid by the viewer; override only the field under test. */
 export function buildInput(
   overrides: Partial<SharedExpenseInput> = {},
 ): SharedExpenseInput {
@@ -22,6 +22,8 @@ export function buildInput(
       { userId: "user-a", value: "" },
       { userId: "user-b", value: "" },
     ],
+    walletId: "wallet-1",
+    categoryId: "category-1",
     ...overrides,
   };
 }

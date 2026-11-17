@@ -60,12 +60,13 @@ export function useSharedExpenseFormState({
 
   const errors: SharedExpenseFieldErrors = { ...localErrors, ...fieldErrors };
 
-  function clearError(field: keyof SharedExpenseFieldErrors) {
+  function clearError(...fields: (keyof SharedExpenseFieldErrors)[]) {
     setLocalErrors((current) => {
-      if (!(field in current)) return current;
+      const found = fields.filter((field) => field in current);
+      if (found.length === 0) return current;
 
       const next = { ...current };
-      delete next[field];
+      found.forEach((field) => delete next[field]);
       return next;
     });
   }
@@ -84,16 +85,17 @@ export function useSharedExpenseFormState({
     setValues((current) =>
       selectSharedExpenseCurrency(current, currency, wallets),
     );
-    clearError("currency");
+    clearError("currency", "walletId");
   }
 
   function changePayer(payerId: string) {
     setValues((current) => selectSharedExpensePayer(current, payerId));
-    clearError("payerId");
+    clearError("payerId", "walletId");
   }
 
   function changeWallet(walletId: string) {
     setValues((current) => selectSharedExpenseWallet(current, walletId));
+    clearError("walletId");
   }
 
   function changeCategory(categoryId: string) {
@@ -111,8 +113,7 @@ export function useSharedExpenseFormState({
 
       return refreshSplitValueDefaults({ ...next, payerId });
     });
-    clearError("participants");
-    clearError("payerId");
+    clearError("participants", "payerId");
   }
 
   function changeDateText(text: string) {
@@ -123,8 +124,7 @@ export function useSharedExpenseFormState({
 
   function changeSplitMode(mode: ExpenseSplitMode) {
     setValues((current) => switchExpenseSplitMode(current, mode));
-    clearError("splitMode");
-    clearError("participants");
+    clearError("splitMode", "participants");
   }
 
   function changeSplitValue(userId: string, value: string) {

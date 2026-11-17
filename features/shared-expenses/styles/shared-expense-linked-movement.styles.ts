@@ -10,7 +10,7 @@ export const linkedMovementStyles = StyleSheet.create({
     gap: 8,
   },
 
-  // Wallet chips and the "no wallet" radio
+  // Wallet chips (mandatory while the viewer pays)
   group: {
     gap: 8,
   },

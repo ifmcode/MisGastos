@@ -16,6 +16,21 @@ export interface ResolvedSharedExpenseLink {
 }
 
 /**
+ * Defense in depth: the schema already reports the missing wallet for a
+ * viewer-paid payload, so only a caller that bypasses the form validation can
+ * reach this guard. It mirrors the same invariant the rules enforce. Wallet
+ * existence, ownership and currency stay inside the repository transaction.
+ */
+export function assertSharedExpensePayerWallet(
+  value: ValidatedSharedExpense,
+  viewerUid: string,
+): void {
+  if (value.payerId === viewerUid && value.walletId === null) {
+    throw new SharedExpenseOperationError("WALLET_REQUIRED");
+  }
+}
+
+/**
  * Only the payer can own the linked movement (rules require it), so a wallet
  * selected while someone else pays is dropped instead of persisted.
  */

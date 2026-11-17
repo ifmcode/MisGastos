@@ -59,7 +59,7 @@ export interface SharedExpenseInput {
   participants: SharedExpenseParticipantInput[];
   /** Optional wallet of the payer; `undefined`/empty keeps the expense social. */
   walletId?: string;
-  /** Optional expense category for the linked movement. */
+  /** Category of the linked movement; required whenever the payer links a wallet. */
   categoryId?: string;
 }
 
