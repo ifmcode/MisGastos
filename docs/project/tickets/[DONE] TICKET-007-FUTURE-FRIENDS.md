@@ -74,7 +74,7 @@ Let users find other users, send friend requests, accept or reject them and keep
 - `publicProfiles` is readable by any signed-in user. Only display name and email are exposed; that minimal projection is the accepted trade-off instead of a Cloud Function lookup.
 - Friend balances stay at 0 until TICKET-009/010 produce ledger entries; the list already renders the folded value.
 - Removing a friend is allowed, but blocking is out of V1, and email remains the only search key (no shareable user code).
-- Full design: `docs/project/development-notes/2026-11-15-friends-and-requests.md`.
+- Full design: `docs/project/development-notes/session-notes/2026-11-15-friends-and-requests.md`.
 
 ## Technical Notes
 - Do not expose the whole `users` collection to the client. Evaluate a minimal `publicProfiles` document keyed by uid (name and searchable email) or a Cloud Function that resolves an email to a uid. Decide this before implementation.

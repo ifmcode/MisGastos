@@ -77,7 +77,7 @@ Give a shared expense a read-only detail screen at `/social/expenses/[expenseId]
 - `npm run check:copy`: pass, 213 TSX files.
 - `npm run test:coverage`: 99.03 % statements, 94.79 % branches, 99.05 % functions, 99.50 % lines; `shared-expense-detail.ts`, `shared-expense-detail-fields.ts` and `shared-expense-detail-copy.ts` at 100 %.
 - **Pending:** manual device validation (light/dark, Spanish/English, screen reader, deleted id, edit flow) was not run because no device was available in this session.
-- Development note: [`2026-11-16-shared-expense-detail.md`](../development-notes/2026-11-16-shared-expense-detail.md).
+- Development note: [`2026-11-16-shared-expense-detail.md`](../development-notes/session-notes/2026-11-16-shared-expense-detail.md).
 
 ## Technical Notes
 - **Route naming:** `/social/expenses/[expenseId]` sits under the `social` segment that TICKET-041 adds to `PRIVATE_SEGMENTS`. The id comes from `useLocalSearchParams` and is never used to build a Firestore path; the expense is resolved from the viewer's participant-scoped collection, so the rules remain the only access boundary.

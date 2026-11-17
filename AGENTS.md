@@ -35,10 +35,17 @@ Instructions for AI agents (OpenCode, Claude, etc.) working on MisGastos.
   1. Tick every requirement and acceptance criterion and add an `Implemented` section.
   2. Set the ticket `Status` to `✅ Done (DD/MM/YYYY)`.
   3. Rename the ticket file with the `[DONE] ` prefix and update its H1, keeping the ticket id: `[DONE] TICKET-022-...md` and `# [DONE] TICKET-022 - ...`.
-  4. Update `docs/project/development-notes/roadmap.md`: phase checkbox and **Current Focus** (next ticket).
+  4. Update `docs/project/development-notes/roadmap.md`: phase item and **Current Focus** (next ticket). Add the ticket and its closing date only — no implementation notes.
   5. Update `README.md` with the change or progress (features, structure, scripts and roadmap).
-  6. Update the session history in `project-memory.md`.
+  6. Update the session history in `project-memory.md` and, when the work needs a decision record or detailed note, write it in `session-notes/`.
 - **Never** rename or mark a ticket as done when any requirement or acceptance criterion is still open.
+
+## Documentation layers
+- `docs/project/development-notes/roadmap.md`: **order and scope only** — V1 scope, phase and ticket order, Current Focus, ordering rules. It is a development guide, not a diary: no implementation narrative and no per-ticket "delivered" sections.
+- `docs/project/development-notes/project-memory.md`: decisions, business rules, current state and the session history table.
+- `docs/project/development-notes/session-notes/YYYY-MM-DD-<slug>.md`: dated session/decision notes (implementation detail, design spikes, ADRs). **Every** new dated note is created in `session-notes/`, never in `development-notes/` root.
+- `component-inventory.md` and other non-dated reference docs stay in `development-notes/` root.
+- When a note moves or is renamed, fix every reference in `docs/`, `README.md`, `AGENTS.md` and `.opencode/`.
 
 ## Hard rules
 - **File size**: soft limit of **150 lines** per `.ts`/`.tsx` file. Split before adding more behavior. Style files are exempt.

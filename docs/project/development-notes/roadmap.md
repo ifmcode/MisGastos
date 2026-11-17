@@ -1,8 +1,14 @@
 # Roadmap - MisGastos
 
-> Single source of truth for the V1 scope, phase order and the current ticket.
-> The former `implementation-plan.md` was merged into this file on 12/11/2026.
+> Development guide: V1 scope, phase order, ticket order and the current ticket.
 > **Last reviewed:** 17/11/2026
+
+## Scope of this file
+- This file answers **what to build next and in which order**, plus the rules for doing it.
+- It is **not** a development diary: implementation detail, delivered files and decisions belong to `project-memory.md` and to the dated notes in `session-notes/`.
+- Every ticket lists its closed/open state and, for closed work, the closing date. The *how* is never described here.
+- **Before starting a ticket:** update **Current Focus** and set the ticket `Status` to `🚧 In progress`.
+- **When the ticket is done:** update **Current Focus**, tick the phase item below, refresh `README.md` and add the session entry to `project-memory.md` (see **Rules**).
 
 ## Product Vision
 A personal finance manager (wallets, movements, transfers and dashboard) merged with Splitwise-style shared finances (friends, groups, shared expenses, balances and settlements). **V1.0 is everything defined in this roadmap**; the MVP was the first milestone, not the release.
@@ -45,7 +51,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 >
 > The former `PM-xxx` feature ids remain as aliases in each ticket's `Related` field; ticket ids are the canonical reference.
 >
-> Tickets created before the consolidation may reference the old plan phases: A → 3, A.1 → 3.1, A.2 → 3.2, A.3 → 3.3, A.4 → 3.4, A.5 → 3.5, A.6 → 3.6, B → 4, C → 5, D → 6, E → 7, F → 8.
+> Tickets created before the 12/11/2026 consolidation may reference the old plan phases: A → 3, A.1 → 3.1, A.2 → 3.2, A.3 → 3.3, A.4 → 3.4, A.5 → 3.5, A.6 → 3.6, B → 4, C → 5, D → 6, E → 7, F → 8.
 
 ## Phase 0: Organization (COMPLETED)
 - [x] Create folder structure
@@ -55,9 +61,9 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Phase 1: Foundation (COMPLETED)
 - [x] Create `features/` and `shared/` structure
 - [x] Migrate auth to `features/auth` (repo + service) without breaking the flow
-- [x] Resolve the base UI kit in `shared/components` — the unused `atoms` were removed in TICKET-038 so the themed feature components remain the only UI system
-- [x] Add common types (`Result<T>`, etc.) — delivered in `shared/types/common.types.ts` and verified in TICKET-038
-- [x] Configure test coverage >= 90% (TICKET-038): business-logic scope enforced in `jest.config.js` (99.08% statements, 94.13% branches, 98.96% functions, 99.57% lines)
+- [x] Resolve the base UI kit in `shared/components` (TICKET-038)
+- [x] Add common types (`Result<T>`, etc.) in `shared/types/common.types.ts`
+- [x] Configure test coverage >= 90% for business logic in `jest.config.js`
 
 ## Phase 2: MVP core (COMPLETED)
 - [x] TICKET-000 Setup, auth and project organization
@@ -68,55 +74,52 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Phase 3: Personal finance complete (COMPLETED)
 
 ### 3.1 Personal finance UX follow-up (COMPLETED)
-- [x] Movement detail view with edit/delete actions (TICKET-025) ✅ 11/11/2026
-- [x] Transfer history from accounts (TICKET-026) ✅ 11/11/2026
-- [x] Home recent movements and transfers (TICKET-027) ✅ 11/11/2026
-- [x] Compact category selector (TICKET-028) ✅ 12/11/2026
-- [x] Compact wallet selector + missing wallet fix (TICKET-029) ✅ 12/11/2026
+- [x] TICKET-025 Movement detail view with edit/delete actions ✅ 11/11/2026
+- [x] TICKET-026 Transfer history from accounts ✅ 11/11/2026
+- [x] TICKET-027 Home recent movements and transfers ✅ 11/11/2026
+- [x] TICKET-028 Compact category selector ✅ 12/11/2026
+- [x] TICKET-029 Compact wallet selector and missing wallet fix ✅ 12/11/2026
 
 ### 3.2 Category ordering (COMPLETED)
-- [x] Reorder categories and reuse the order in every picker (TICKET-030) ✅ 12/11/2026
+- [x] TICKET-030 Reorder categories and reuse the order in every picker ✅ 12/11/2026
 
 ### 3.3 Internationalization (COMPLETED)
-- [x] Extract all UI copy into per-feature translation files and add a Spanish/English selector in Settings (TICKET-031) ✅ 12/11/2026
-- [x] Use `expo-localization` + i18next namespaces, persisted preference, `Intl` formatting and error-code mapping
+- [x] TICKET-031 Per-feature translation namespaces and Spanish/English selector in Settings ✅ 12/11/2026
 
 ### 3.4 Wallet transfer entry (COMPLETED)
-- [x] Move **Transferir** from the dashboard header to the **Carteras** tab (TICKET-032) ✅ 12/11/2026
+- [x] TICKET-032 Move **Transferir** from the dashboard header to the **Carteras** tab ✅ 12/11/2026
 
 ### 3.5 Dashboard recent data and detail views (COMPLETED)
-- [x] Fix the recent-transfers cap/freshness and add **Ver todos** (TICKET-033) ✅ 13/11/2026
-- [x] Open the movement detail from a recent movement (TICKET-034) ✅ 13/11/2026
-- [x] Add the transfer detail view with edit/delete (TICKET-035) ✅ 13/11/2026
-- [x] Open the transfer detail from a recent transfer (TICKET-036) ✅ 13/11/2026
-- [x] Open the transfer detail from the transfer history (TICKET-039) ✅ 14/11/2026
+- [x] TICKET-033 Recent-transfers cap/freshness and **Ver todos** ✅ 13/11/2026
+- [x] TICKET-034 Movement detail from a recent movement ✅ 13/11/2026
+- [x] TICKET-035 Transfer detail view with edit/delete ✅ 13/11/2026
+- [x] TICKET-036 Transfer detail from a recent transfer ✅ 13/11/2026
+- [x] TICKET-039 Transfer detail from the transfer history ✅ 14/11/2026
 
 ### 3.6 Shared component extraction (COMPLETED)
-- [x] Inventory and extract duplicated loading/error/empty states, form blocks and list rows into `shared/components` (TICKET-037) ✅ 13/11/2026
+- [x] TICKET-037 Shared loading/error/empty states, form blocks and list rows in `shared/components` ✅ 13/11/2026
 
 ### 3.7 Earlier post-MVP polish (COMPLETED)
-- [x] Categories management (TICKET-004)
-- [x] Date picker UX (TICKET-005)
-- [x] Dark mode polish + Settings toggle (TICKET-014) ✅ 09/11/2026
-- [x] Wallet management (TICKET-018) ✅ 10/11/2026
-- [x] Inline auth errors (TICKET-020)
-- [x] Email verification on signup (TICKET-021)
-- [x] Discoverable edit/delete actions (TICKET-022)
+- [x] TICKET-004 Categories management
+- [x] TICKET-005 Date picker UX
+- [x] TICKET-014 Dark mode polish + Settings toggle ✅ 09/11/2026
+- [x] TICKET-018 Wallet management ✅ 10/11/2026
+- [x] TICKET-020 Inline auth errors
+- [x] TICKET-021 Email verification on signup
+- [x] TICKET-022 Discoverable edit/delete actions
 
 ### 3.8 Profile and preferred currency (COMPLETED)
-- [x] Profile editing and a preferred-currency selector (TICKET-006) ✅ 14/11/2026
+- [x] TICKET-006 Profile editing and a preferred-currency selector ✅ 14/11/2026
 
 ## Phase 4: Architecture and workflow spike (COMPLETED)
-- [x] TICKET-023 (design spike only): decided SQLite + outbox, idempotency and conflict policy before groups ✅ 14/11/2026
-- [x] TICKET-024: defined the 5 project agents (`architect`, `mobile-ui`, `firebase-data`, `reviewer`, `docs-writer`) and 6 skills, with routing, permissions and two validation runs ✅ 14/11/2026
-- [x] Record the decisions in development notes: `2026-11-14-offline-first-architecture.md` (schema, sync protocol, conflict policy, phases) and `guidelines/agents-and-skills.md` (routing, permissions, add/retire workflow)
+- [x] TICKET-023 (design spike only): SQLite + outbox, idempotency and conflict policy decided before groups ✅ 14/11/2026
+- [x] TICKET-024: the 5 project agents and 6 skills defined with routing, permissions and validation runs ✅ 14/11/2026
+- [x] Record the decisions in `session-notes/` and `guidelines/agents-and-skills.md`
 - This phase runs before Phase 5; the full offline implementation is Phase 7
 
 ## Phase 5: Social vertical slice (IN PROGRESS)
 - [x] TICKET-007: friends and requests ✅ 15/11/2026
 - [x] Minimal subset of TICKET-009: 1:1 shared expense ✅ 15/11/2026 (ticket stays open for the group requirements)
-- Delivered model, request state machine, rules and limitations: [`2026-11-15-friends-and-requests.md`](2026-11-15-friends-and-requests.md)
-- Delivered 1:1 shared expenses, split rounding, per-currency balances, rules status and limitations: [`2026-11-15-shared-expenses-1to1.md`](2026-11-15-shared-expenses-1to1.md)
 
 ### 5.1 Social navigation and shared-expense UX
 - [x] TICKET-041: Social tab shell, add-friend screen and pending requests ✅ 16/11/2026
@@ -128,19 +131,11 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] TICKET-049: shared-expense link feedback and category reset ✅ 17/11/2026
 - [x] TICKET-050: shared-expense save feedback and category picker ✅ 17/11/2026
 - [x] TICKET-051: mandatory shared-expense category and no hidden default ✅ 17/11/2026
-- Delivered Social shell, pending requests, add-friend and requests routes, the shared `FabActionMenu` and the accepted shared-expense entry gap: [`2026-11-16-social-tab.md`](2026-11-16-social-tab.md)
-- Delivered friend detail, header balances, filtered 1:1 expense list, locked-friend FAB and the removal move: [`2026-11-16-friend-detail.md`](2026-11-16-friend-detail.md)
-- Delivered the shared-expense detail route, live resolution, edit/delete flow and the route-safe `DetailView`: [`2026-11-16-shared-expense-detail.md`](2026-11-16-shared-expense-detail.md)
-- Delivered the optional same-currency wallet, the atomic linked movement (`ILinkedMovementPort` + `runTransaction`), the on-demand **Gastos compartidos** category, the **Compartido** badge and the shared-detail routing: [`2026-11-16-shared-expense-wallet-link.md`](2026-11-16-shared-expense-wallet-link.md)
-- Delivered the single create entry in **Movimientos** (shared `FabActionMenu` with movement / friend expense / disabled group action), the pure action helper, the friend gating states and `preselectFirstFriend: false`: [`2026-11-16-movements-create-menu.md`](2026-11-16-movements-create-menu.md)
-- Delivered the mandatory wallet for viewer-paid expenses (create and update) across schema, service and rules, the payer transitions reloaded around it, the legacy no-wallet detail notice and the `use-scoped-translation` TS2589 fix: [`2026-11-17-mandatory-wallet-viewer-paid.md`](2026-11-17-mandatory-wallet-viewer-paid.md)
-- Delivered the shared-expense link and save feedback: the stale linked category is cleared without a wallet (TICKET-049), the system **Gastos compartidos** category is excluded from the picker and never preselected, the wallet currency is pre-checked and the server/first field error shows above **Guardar** (TICKET-050), and the linked category is now mandatory with no hidden default (TICKET-051, the service rejects with `CATEGORY_REQUIRED` and the error renders under the field): [`2026-11-17-shared-expense-save-feedback.md`](2026-11-17-shared-expense-save-feedback.md)
 
 ### 5.2 1:1 settlement and notifications
 - [ ] TICKET-046: 1:1 debt settlement with bilateral confirmation
 - [ ] TICKET-047: in-app notification inbox
 - The balance between two people already ships with TICKET-009; TICKET-046 replaces the former "minimal subset of TICKET-010" settlement line.
-
 - Validate with 3-5 real users
 - Do not build a friends list without shared expenses; it does not validate the product
 
@@ -149,10 +144,10 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [ ] Full TICKET-009: the group requirements still open after the 1:1 subset (group membership and payer validation, group currency, expense in the group detail)
 - [ ] TICKET-010: group balances and settlements (reuse the TICKET-046 settlement state machine, wallet movements and notification events)
 - [ ] TICKET-011: group history
-- Build shared expenses and settlements as append-only ledger entries folded by a shared pure function, so offline group movements work without a rewrite (constraint from the TICKET-023 spike)
+- Constraint from the Phase 4 spike: shared expenses and settlements are append-only ledger entries folded by a shared pure function, so offline group movements work without a rewrite
 
 ## Phase 7: Offline-first implementation (QUEUED)
-- [ ] Full TICKET-023: local persistence, offline mutations, sync queue, conflict handling and offline group/friend movements (design accepted 14/11/2026, see `2026-11-14-offline-first-architecture.md`)
+- [ ] Full TICKET-023 (design accepted in Phase 4)
   - [ ] Foundations: local SQLite DB, client-generated ids, `revision`/`deletedAt`/`appliedMutations` and rules
   - [ ] Local read cache for personal data and offline banner
   - [ ] Offline write queue for expenses, incomes and transfers with local balance derivation
@@ -177,7 +172,8 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Rules
 - This roadmap is the single source of truth for V1 scope, phase order and the current ticket
 - **Before starting:** set the ticket `Status` to `🚧 In progress` and update **Current Focus**
-- **When fully done:** tick every requirement and acceptance criterion, add an `Implemented` section, set `✅ Done (DD/MM/YYYY)`, rename the ticket file and H1 with the `[DONE] ` prefix, update the phase checkbox and **Current Focus**, refresh `README.md` and then add a session entry to `project-memory.md`
+- **When fully done:** tick every requirement and acceptance criterion, add an `Implemented` section, set `✅ Done (DD/MM/YYYY)`, rename the ticket file and H1 with the `[DONE] ` prefix, tick the phase item and **Current Focus**, refresh `README.md` and then add a session entry to `project-memory.md`
 - **Never** mark a ticket done while any requirement or acceptance criterion is open
+- **Documentation split:** this file keeps order and scope; decisions and session history go to `project-memory.md`, and dated notes (implementation detail, design spikes, ADRs) go to `session-notes/YYYY-MM-DD-<slug>.md`
 - Follow `AGENTS.md` for code rules, `guidelines/` for architecture/security and `project-memory.md` for decisions and business rules
 - Tests for critical business logic; commit only when the user asks and group changes by logical block; code and docs in English

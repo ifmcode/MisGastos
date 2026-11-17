@@ -7,7 +7,18 @@ description: Ticket status flow, roadmap Current Focus, project memory sessions 
 
 `docs/project/development-notes/roadmap.md` is the single source of truth for V1
 scope, phase order and the current ticket. `project-memory.md` holds decisions,
-business rules and session history.
+business rules and session history. Dated notes live in
+`docs/project/development-notes/session-notes/`.
+
+## Roadmap is a guide, not a diary
+
+The roadmap only carries order and scope: V1 scope, phase/ticket order, ordering
+rules and **Current Focus**. Keep ticket lines as `- [x] TICKET-0NN: <title> ✅
+DD/MM/YYYY` (or `[ ]` while open) plus short ordering constraints.
+
+Never add to the roadmap: "Delivered ..." paragraphs, implementation detail,
+file/class names, per-session narratives or links to session notes. That content
+goes to `project-memory.md` (decisions) and `session-notes/` (dated notes).
 
 ## Opening a ticket
 
@@ -22,11 +33,14 @@ business rules and session history.
 2. `Status: ✅ Done (DD/MM/YYYY)`.
 3. Rename the file to `[DONE] TICKET-0NN-...md` and the H1 to
    `# [DONE] TICKET-0NN - ...`, keeping the id.
-4. Roadmap: tick the phase checkbox and update **Current Focus** (`Last completed`,
-   `Next`, status).
+4. Roadmap: tick the phase item with its closing date and update **Current Focus**
+   (`Last completed`, `Next`, status). No implementation notes here.
 5. `README.md`: features, structure, scripts and roadmap status.
 6. `project-memory.md`: one row in the session history plus refreshed
    "Current State" bullets when behavior changed.
+7. If the work needs a decision record or a detailed note, write it in
+   `session-notes/YYYY-MM-DD-<slug>.md` and link it from the ticket's
+   `Implemented` section.
 
 Never rename or mark done while a requirement, acceptance criterion or
 verification command is open.
@@ -51,9 +65,14 @@ verification command is open.
 
 ## Development notes
 
-One file per decision: `docs/project/development-notes/YYYY-MM-DD-<slug>.md`, with
-context, decision, alternatives, consequences, phase mapping and open questions.
-Link it from the roadmap and from the ticket's `Implemented` section.
+One file per decision or session:
+`docs/project/development-notes/session-notes/YYYY-MM-DD-<slug>.md`, with context,
+decision, alternatives, consequences, phase mapping and open questions. Link it
+from the ticket's `Implemented` section, never from the roadmap (the roadmap keeps
+order and scope only).
+
+Non-dated reference documents (for example `component-inventory.md`) stay in
+`development-notes/` root.
 
 ## README
 

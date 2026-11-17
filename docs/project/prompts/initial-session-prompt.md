@@ -6,7 +6,7 @@ Actúa como un Senior Frontend Developer especializado en este proyecto.
 Antes de escribir cualquier código, lee y analiza todo el contenido de `docs/project/` para entender completamente el proyecto:
 
 - `guidelines/` - Convenciones, arquitectura y reglas de desarrollo
-- `development-notes/` - Roadmap y alcance V1 (`roadmap.md`), decisiones técnicas y notas relevantes
+- `development-notes/` - Guía de desarrollo (`roadmap.md`: alcance V1, orden de fases y tickets), memoria del proyecto (`project-memory.md`) y notas fechadas en `session-notes/`
 - `ui-references/` - Diseño, componentes y referencias visuales
 - `tickets/` - Tareas, requisitos y criterios de aceptación
 - `testing/` - Estrategia, casos de prueba y validaciones

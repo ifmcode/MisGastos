@@ -99,7 +99,7 @@ When the viewer pays a shared expense, its linked personal movement is the recor
 - **Manual device validation was not performed** in this session: the payer transitions on a real device, the empty-wallet guidance, the legacy notice, es/en and light/dark, and the screen-reader labels remain pending.
 - **The `sharedExpenses` payer-wallet rule is pending deployment** (`npm run firebase-deploy:rules` stays manual). Until it runs, the invariant is enforced by the schema, the service and the form only.
 - A legacy viewer-paid expense without a wallet can still be soft-deleted (the exception in the update rule) but any other change requires a wallet, which is the intended migration path.
-- Decision record: [`2026-11-17-mandatory-wallet-viewer-paid.md`](../development-notes/2026-11-17-mandatory-wallet-viewer-paid.md).
+- Decision record: [`2026-11-17-mandatory-wallet-viewer-paid.md`](../development-notes/session-notes/2026-11-17-mandatory-wallet-viewer-paid.md).
 
 ## Technical Notes
 - The atomic payer transitions already exist in `updateSharedExpenseLinkOperation` and its tests; this ticket only adds the missing wallet requirement and UI, without rewriting the transaction.

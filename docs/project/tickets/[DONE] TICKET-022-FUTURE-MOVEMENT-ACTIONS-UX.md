@@ -49,7 +49,7 @@ The app already supports editing and deleting expenses, incomes and transfers, b
   pure utilities with unit tests; manual platform checks are documented in the
   session note.
 
-See `docs/project/development-notes/2026-11-08-movement-actions-ux.md`.
+See `docs/project/development-notes/session-notes/2026-11-08-movement-actions-ux.md`.
 
 ## Dependencies
 - TICKET-002 Transactions

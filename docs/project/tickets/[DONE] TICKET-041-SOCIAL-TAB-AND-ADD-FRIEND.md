@@ -101,7 +101,7 @@ Transparent `Modal` (`overFullScreen`, `fade`, `statusBarTranslucent`, `onReques
 - `npm run test:coverage`: 99.00% statements, 94.70% branches, 99.01% functions, 99.49% lines; `features/social/utils` at 100%.
 - Reviewer verdict: `approve with nits`, no blockers. The code nits (dead keys/styles, badge grouping, add-friend refresh feedback, background-refresh error, requests loading copy, action callback deps, memoized pending count, hoisted remove error banner) were fixed before this docs pass.
 - **Pending:** manual emulator validation (light/dark, Spanish/English, two accounts, iOS modal close-then-navigate) was not run because no device was available in this session.
-- Development note: [`2026-11-16-social-tab.md`](../development-notes/2026-11-16-social-tab.md).
+- Development note: [`2026-11-16-social-tab.md`](../development-notes/session-notes/2026-11-16-social-tab.md).
 
 ## Technical Notes
 - **Route structure:** `app/social/add-friend.tsx` and `app/social/requests.tsx` are siblings of the tabs group. The auth guard reads `segments[0]`, so `social` must join `PRIVATE_SEGMENTS`; if the explicit `<Stack.Screen>` list in `features/auth/components/auth-navigator.tsx` is kept, declare `headerShown: false` for the new `social/*` routes there.

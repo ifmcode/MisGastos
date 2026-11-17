@@ -47,9 +47,13 @@ personal-finance app that is growing Splitwise-style shared finances.
 
 ## Deliverable
 
-Write the decision in `docs/project/development-notes/YYYY-MM-DD-<slug>.md` with:
-context, decision, alternatives considered, consequences/risks, phase mapping and
-how each acceptance criterion of the ticket is covered. End with open questions.
+Write the decision in `docs/project/development-notes/session-notes/YYYY-MM-DD-<slug>.md`
+with: context, decision, alternatives considered, consequences/risks, phase mapping
+and how each acceptance criterion of the ticket is covered. End with open questions.
+
+The roadmap stays a guide: it only receives order and scope, never the decision
+narrative. Durable decisions also go to the **Key Decisions** section of
+`docs/project/development-notes/project-memory.md`.
 
 You may only edit `docs/project/development-notes/**`. Application source,
 tickets, roadmap, README and configuration are off-limits; hand those edits to
@@ -63,7 +67,7 @@ tickets, roadmap, README and configuration are off-limits; hand those edits to
   design that bypasses the repository interface.
 - Money decisions must state rounding and storage representation explicitly.
 - Offline and social features must stay compatible with the accepted design in
-  `docs/project/development-notes/2026-11-14-offline-first-architecture.md`.
+  `docs/project/development-notes/session-notes/2026-11-14-offline-first-architecture.md`.
 - Do not invent Firestore fields, indexes, endpoints or migrations that the code
   does not already have. If something is unknown, list it as an open question.
 - Ask blocking questions in Spanish; write the deliverable itself in English.

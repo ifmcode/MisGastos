@@ -106,7 +106,7 @@ inventario de agentes, el ruteo por tipo de tarea y las restricciones de permiso
 - npm
 - Un proyecto de Firebase con **Authentication** y **Cloud Firestore** habilitados
 - Android: Android Studio con su JBR (**JDK 21**) apuntado por `JAVA_HOME`; Gradle 9.4.1 exige JDK 17 o superior
-- Android en Windows: **ninja 1.13.2** en `...\Android\Sdk\cmake\<versión>\bin`, porque el ninja que trae el SDK no supera las rutas de 260 caracteres ([detalles](docs/project/development-notes/2026-11-15-android-dev-environment.md))
+- Android en Windows: **ninja 1.13.2** en `...\Android\Sdk\cmake\<versión>\bin`, porque el ninja que trae el SDK no supera las rutas de 260 caracteres ([detalles](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md))
 
 ### Instalación
 
@@ -145,7 +145,7 @@ npm run web        # Navegador
 > En Android hace falta una **development build** (`npm run android` la compila e instala) y Metro
 > sirviendo el JS en el puerto 8081; Expo Go no carga los módulos nativos. Flujo diario y
 > diagnóstico del entorno en
-> [`2026-11-15-android-dev-environment.md`](docs/project/development-notes/2026-11-15-android-dev-environment.md).
+> [`2026-11-15-android-dev-environment.md`](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md).
 
 ### Desplegar reglas de Firestore
 
@@ -232,19 +232,20 @@ Consulta el roadmap completo en
 ## 📚 Documentación
 
 - [Memoria del proyecto](docs/project/development-notes/project-memory.md)
-- [Roadmap y alcance V1](docs/project/development-notes/roadmap.md)
+- [Roadmap y alcance V1](docs/project/development-notes/roadmap.md): orden de fases y tickets, alcance V1 y normas de orden. Es una guía de desarrollo, no un diario de implementación.
+- [Notas de sesión](docs/project/development-notes/session-notes/): un fichero `YYYY-MM-DD-<slug>.md` por sesión, decisión o ADR con el detalle de implementación. Las notas con fecha se crean siempre aquí.
 - [Inventario de componentes compartidos](docs/project/development-notes/component-inventory.md)
-- [Arquitectura offline-first (diseño y ADR)](docs/project/development-notes/2026-11-14-offline-first-architecture.md)
-- [Amigos y solicitudes (TICKET-007)](docs/project/development-notes/2026-11-15-friends-and-requests.md): modelo de datos, ciclo de vida de las solicitudes, reglas y límites actuales.
-- [Gastos compartidos 1:1 (TICKET-009, subconjunto)](docs/project/development-notes/2026-11-15-shared-expenses-1to1.md): modelo de datos, modos de reparto y redondeo, saldos por moneda, reglas y límites actuales.
-- [Pestaña Social (TICKET-041, 16/11/2026)](docs/project/development-notes/2026-11-16-social-tab.md): shell Social, rutas de alta de amigo y peticiones, contador de pendientes, `FabActionMenu` y el hueco temporal de gastos compartidos.
-- [Detalle de amigo (TICKET-042, 16/11/2026)](docs/project/development-notes/2026-11-16-friend-detail.md): ruta `/social/friends/[uid]`, saldos por moneda en la cabecera, lista filtrada de gastos 1:1, FAB con amigo bloqueado y semántica del borrado de amistad.
-- [Detalle de gasto compartido (TICKET-043, 16/11/2026)](docs/project/development-notes/2026-11-16-shared-expense-detail.md): ruta `/social/expenses/[expenseId]`, resolución viva del gasto, edición/borrado con retorno al detalle de amigo, estado seguro para gastos ausentes y bloque reservado del movimiento vinculado.
-- [Cartera enlazada al gasto compartido (TICKET-044, 16/11/2026)](docs/project/development-notes/2026-11-16-shared-expense-wallet-link.md): contrato de datos del enlace, reglas con `getAfter()`, transacción atómica detrás de `ILinkedMovementPort`, categoría **Gastos compartidos** bajo demanda (la creación implícita se eliminó en TICKET-051), etiqueta **Compartido** y límites conocidos.
-- [Cartera obligatoria en gastos compartidos pagados por mí (TICKET-048, 17/11/2026)](docs/project/development-notes/2026-11-17-mandatory-wallet-viewer-paid.md): cartera obligatoria al pagar, transiciones de pagador, aviso en gastos antiguos y regla de Firestore pendiente de despliegue.
-- [Aviso de guardado y categoría obligatoria en gastos compartidos (TICKET-049, TICKET-050 y TICKET-051, 17/11/2026)](docs/project/development-notes/2026-11-17-shared-expense-save-feedback.md): la categoría del sistema **Gastos compartidos** desaparece del selector y de su valor por defecto, la categoría del movimiento vinculado es obligatoria y no se crea por defecto, la moneda de la cartera se valida antes de enviar y el error del servidor se muestra junto a **Guardar**.
-- [Menú de creación en Movimientos (TICKET-045, 16/11/2026)](docs/project/development-notes/2026-11-16-movements-create-menu.md): menú único del FAB, helper puro de acciones, estados de los amigos, `preselectFirstFriend`, refresco tras crear y accesibilidad de cada fila.
-- [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
+- [Arquitectura offline-first (diseño y ADR)](docs/project/development-notes/session-notes/2026-11-14-offline-first-architecture.md)
+- [Amigos y solicitudes (TICKET-007)](docs/project/development-notes/session-notes/2026-11-15-friends-and-requests.md): modelo de datos, ciclo de vida de las solicitudes, reglas y límites actuales.
+- [Gastos compartidos 1:1 (TICKET-009, subconjunto)](docs/project/development-notes/session-notes/2026-11-15-shared-expenses-1to1.md): modelo de datos, modos de reparto y redondeo, saldos por moneda, reglas y límites actuales.
+- [Pestaña Social (TICKET-041, 16/11/2026)](docs/project/development-notes/session-notes/2026-11-16-social-tab.md): shell Social, rutas de alta de amigo y peticiones, contador de pendientes, `FabActionMenu` y el hueco temporal de gastos compartidos.
+- [Detalle de amigo (TICKET-042, 16/11/2026)](docs/project/development-notes/session-notes/2026-11-16-friend-detail.md): ruta `/social/friends/[uid]`, saldos por moneda en la cabecera, lista filtrada de gastos 1:1, FAB con amigo bloqueado y semántica del borrado de amistad.
+- [Detalle de gasto compartido (TICKET-043, 16/11/2026)](docs/project/development-notes/session-notes/2026-11-16-shared-expense-detail.md): ruta `/social/expenses/[expenseId]`, resolución viva del gasto, edición/borrado con retorno al detalle de amigo, estado seguro para gastos ausentes y bloque reservado del movimiento vinculado.
+- [Cartera enlazada al gasto compartido (TICKET-044, 16/11/2026)](docs/project/development-notes/session-notes/2026-11-16-shared-expense-wallet-link.md): contrato de datos del enlace, reglas con `getAfter()`, transacción atómica detrás de `ILinkedMovementPort`, categoría **Gastos compartidos** bajo demanda (la creación implícita se eliminó en TICKET-051), etiqueta **Compartido** y límites conocidos.
+- [Cartera obligatoria en gastos compartidos pagados por mí (TICKET-048, 17/11/2026)](docs/project/development-notes/session-notes/2026-11-17-mandatory-wallet-viewer-paid.md): cartera obligatoria al pagar, transiciones de pagador, aviso en gastos antiguos y regla de Firestore pendiente de despliegue.
+- [Aviso de guardado y categoría obligatoria en gastos compartidos (TICKET-049, TICKET-050 y TICKET-051, 17/11/2026)](docs/project/development-notes/session-notes/2026-11-17-shared-expense-save-feedback.md): la categoría del sistema **Gastos compartidos** desaparece del selector y de su valor por defecto, la categoría del movimiento vinculado es obligatoria y no se crea por defecto, la moneda de la cartera se valida antes de enviar y el error del servidor se muestra junto a **Guardar**.
+- [Menú de creación en Movimientos (TICKET-045, 16/11/2026)](docs/project/development-notes/session-notes/2026-11-16-movements-create-menu.md): menú único del FAB, helper puro de acciones, estados de los amigos, `preselectFirstFriend`, refresco tras crear y accesibilidad de cada fila.
+- [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)
 - [Guía de agentes y skills (OpenCode)](docs/project/guidelines/agents-and-skills.md)

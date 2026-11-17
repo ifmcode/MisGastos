@@ -58,4 +58,4 @@ Verification (17/11/2026):
 - `npm run test:coverage`: 99.07% statements, 94.83% branches, 99.02% functions, 99.50% lines.
 - `npm run check:copy`: 222 TSX files.
 
-Related note: [`2026-11-17-shared-expense-save-feedback.md`](../development-notes/2026-11-17-shared-expense-save-feedback.md) (TICKET-049/050/051).
+Related note: [`2026-11-17-shared-expense-save-feedback.md`](../development-notes/session-notes/2026-11-17-shared-expense-save-feedback.md) (TICKET-049/050/051).

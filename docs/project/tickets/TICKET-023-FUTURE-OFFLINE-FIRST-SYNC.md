@@ -39,7 +39,7 @@ Make the app usable without an internet connection. The user must be able to cre
 **Status:** ✅ Accepted. **No app code changed** in this session; the epic stays in progress until the
 implementation phases below are delivered.
 
-**Full document:** [`docs/project/development-notes/2026-11-14-offline-first-architecture.md`](../development-notes/2026-11-14-offline-first-architecture.md)
+**Full document:** [`docs/project/development-notes/session-notes/2026-11-14-offline-first-architecture.md`](../development-notes/session-notes/2026-11-14-offline-first-architecture.md)
 
 ### Decisions
 

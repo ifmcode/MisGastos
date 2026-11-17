@@ -152,7 +152,7 @@ Add expenses inside a group, choose who paid and split the amount equally, by pe
 - Groups (TICKET-008) and the group-only requirements above: group membership
   and payer validation, group currency and group detail/balance.
 - Group balances, settlement and balance simplification (TICKET-010).
-- Full design and limitations: `docs/project/development-notes/2026-11-15-shared-expenses-1to1.md`.
+- Full design and limitations: `docs/project/development-notes/session-notes/2026-11-15-shared-expenses-1to1.md`.
 
 ## Technical Notes
 - Suggested collection: `groups/{groupId}/expenses/{expenseId}` or a root `groupExpenses` collection with `groupId`.

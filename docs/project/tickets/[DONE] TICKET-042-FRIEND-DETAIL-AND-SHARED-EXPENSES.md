@@ -82,7 +82,7 @@ Give every accepted friend a dedicated screen at `/social/friends/[uid]` that re
 - `npm run check:copy`: pass, 209 TSX files.
 - `npm run test:coverage`: 99.01 % statements, 94.74 % branches, 99.03 % functions, 99.49 % lines; `features/friends/utils/friend-detail.ts` and `features/shared-expenses/utils/friend-expenses.ts` at 100 %.
 - **Pending:** manual emulator validation (light/dark, Spanish/English, screen reader, two-account removal, FAB create) was not run because no device was available in this session, exactly as in TICKET-041.
-- Development note: [`2026-11-16-friend-detail.md`](../development-notes/2026-11-16-friend-detail.md).
+- Development note: [`2026-11-16-friend-detail.md`](../development-notes/session-notes/2026-11-16-friend-detail.md).
 
 ## Technical Notes
 - **Route naming:** `/social/friends/[uid]` keeps the friend resource under the `social` segment that TICKET-041 adds to `PRIVATE_SEGMENTS`. The uid is read with `useLocalSearchParams`; it is never used to build a Firestore path, only to filter the loaded overview.

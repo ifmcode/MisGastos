@@ -84,7 +84,7 @@ Turn the **Movimientos** create action into one entry point: the FAB opens the s
 - **Gasto de grupo** stays disabled until TICKET-008.
 - Accepted trade-offs: the Movements tab now also mounts the friends overview and the shared-expense editor's own wallets/categories collections, and the movement create refreshes wallets twice (the mutations hook plus the screen callback), accepted for correctness.
 - No Firestore rule, schema, service, repository or money logic changed, so no migration or rules deploy follows from this ticket.
-- Decision record: [`2026-11-16-movements-create-menu.md`](../../development-notes/2026-11-16-movements-create-menu.md).
+- Decision record: [`2026-11-16-movements-create-menu.md`](../development-notes/session-notes/2026-11-16-movements-create-menu.md).
 
 ## Technical Notes
 - **`FabActionMenu` API (from 041):** `visible`, a translated `title`, `onClose` and `actions[{ key, label, icon, hint?, disabled?, onPress }]`. It renders a transparent `Modal` with a backdrop that closes on press/back and one pressable row per action, so this ticket only builds the array and the handlers.

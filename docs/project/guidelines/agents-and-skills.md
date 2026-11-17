@@ -79,7 +79,7 @@ written against real code instead of an accepted design only.
 | Rules, index or ownership change | `firebase-data` | `firestore-rules` | Rules diff + deploy note for the user |
 | Money, transfer or balance logic | `firebase-data`, then `reviewer` | `money-and-balances`, `jest-testing` | Operation + invariant tests + review findings |
 | Tests and coverage for existing logic | Code owner agent | `jest-testing` | Tests + coverage numbers |
-| Design spike, ADR or phase breakdown | `architect` | `misgastos-feature`, `firestore-rules` when data is involved | Note in `development-notes/`, open questions |
+| Design spike, ADR or phase breakdown | `architect` | `misgastos-feature`, `firestore-rules` when data is involved | Note in `development-notes/session-notes/`, open questions |
 | Ticket open/close, roadmap, memory, README | `docs-writer` | `docs-ticket` | Updated ticket, roadmap, memory row, README |
 | Pre-merge / pre-close review | `reviewer` | `money-and-balances` when money is involved | Severity-ordered findings + verdict |
 | Offline-first implementation (Phase 7) | `architect` then `firebase-data` | `offline-sync` (to be created), `firestore-rules` | Accepted design, then implementation |
