@@ -1,4 +1,7 @@
 import { Category } from "@/features/categories/types/category.types";
+import type { Friend } from "@/features/friends/types/friend.types";
+import { SharedExpenseEditorModal } from "@/features/shared-expenses/components/shared-expense-editor-modal";
+import type { SharedExpenseEditorController } from "@/features/shared-expenses/hooks/use-shared-expense-editor";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 
 import type { TransactionDetailDialog } from "../hooks/use-transaction-detail-dialog";
@@ -27,6 +30,8 @@ export interface TransactionsModalsProps {
   onResetFilters: () => void;
   onCloseFilters: () => void;
   onCategoryCreated: (category: Category) => void;
+  sharedExpenseEditor: SharedExpenseEditorController;
+  friends: readonly Friend[];
 }
 
 /** Detail, form and filter dialogs of the movements screen. */
@@ -47,6 +52,8 @@ export function TransactionsModals({
   onResetFilters,
   onCloseFilters,
   onCategoryCreated,
+  sharedExpenseEditor,
+  friends,
 }: TransactionsModalsProps) {
   return (
     <>
@@ -75,6 +82,11 @@ export function TransactionsModals({
         onDelete={form.deleteEditing}
         onClose={form.close}
         onCategoryCreated={onCategoryCreated}
+      />
+
+      <SharedExpenseEditorModal
+        editor={sharedExpenseEditor}
+        friends={friends}
       />
 
       <TransactionsFiltersDialog

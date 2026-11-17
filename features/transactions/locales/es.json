@@ -1,8 +1,6 @@
 {
   "title": "Movimientos",
   "subtitle": "Gastos, ingresos e historial.",
-  "new": "Nuevo",
-  "add": "Añadir movimiento",
   "loading": "Cargando movimientos…",
   "errorTitle": "No se pudieron cargar los movimientos",
   "retryAccessibility": "Reintentar carga de movimientos",
@@ -12,6 +10,18 @@
   "emptyFilteredMessage": "No hay movimientos con los filtros aplicados. Prueba a cambiarlos.",
   "createFirst": "Crear primer movimiento",
   "create": "Crear movimiento",
+  "fab": {
+    "openAccessibility": "Abrir el menú para crear",
+    "openHint": "Elige entre un nuevo movimiento, un gasto con amigo o un gasto de grupo.",
+    "menuTitle": "Crear",
+    "newMovement": "Nuevo movimiento",
+    "newMovementHint": "Registra un gasto o ingreso en una de tus carteras.",
+    "friendExpense": "Gasto con amigo",
+    "friendExpenseHint": "Reparte un gasto con uno de tus amigos aceptados.",
+    "friendExpenseNoFriendsHint": "Añade un amigo en la pestaña Social para poder compartir gastos.",
+    "groupExpense": "Gasto de grupo",
+    "groupExpenseComingSoonHint": "Próximamente: los gastos de grupo llegarán con los grupos."
+  },
   "types": {
     "expense": "Gasto",
     "income": "Ingreso"

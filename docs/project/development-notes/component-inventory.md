@@ -9,6 +9,8 @@
 > decisions above are unchanged.
 > Updated again by TICKET-043 (16/11/2026) with the route-safe `DetailView`,
 > `useDetailActions` and the shared-expense detail pieces; no palette was added.
+> TICKET-045 (16/11/2026) adds the movements tab as the second `FabActionMenu`
+> consumer; the extracted components and their props are unchanged.
 
 ## Decisions
 
@@ -256,8 +258,10 @@ interface FabProps {
 ```
 
 Consumers: wallets, transactions, categories and the Social hub (`social-fab.tsx`).
-The optional hint was added in TICKET-041 so the Social FAB can announce that it
-opens the action menu.
+Wallets and categories still run their create action directly; transactions
+(since TICKET-045) and the Social hub (TICKET-041) use the FAB only to open the
+shared `FabActionMenu`. The optional hint was added in TICKET-041 so both FABs can
+announce that they open an action menu.
 
 ### `FabActionMenu`
 
@@ -280,8 +284,15 @@ interface FabActionMenuProps {
 ```
 
 Consumers: `features/social/components/social-fab.tsx` with one action
-(**Añadir amigo** → `/social/add-friend`); TICKET-045 reuses the same API for the
-movements FAB. The component owns the transparent `Modal`
+(**Añadir amigo** → `/social/add-friend`) and, since TICKET-045,
+`features/transactions/components/transactions-fab.tsx` built from
+`getMovementsFabActions`/`getMovementsFabMenuActions`
+(`features/transactions/utils/movements-fab-actions.ts`). The movements menu has
+**Nuevo movimiento** (the existing personal form), **Gasto con amigo** (the shared
+`SharedExpenseEditorModal` with no preselected friend; disabled with a hint pointing
+to **Social** when there are no accepted friends, and with the neutral hint while the
+overview loads or fails) and **Gasto de grupo** (always disabled with the
+**Próximamente** hint). The component owns the transparent `Modal`
 (`overFullScreen`/`fade`/`statusBarTranslucent`/`onRequestClose`), the backdrop
 that closes on press, the themed card with safe-area padding, one accessible row
 per action (`accessibilityRole="button"` + `accessibilityState.disabled`), the
@@ -330,7 +341,7 @@ translated accessibility label.
 
 - `npx tsc --noEmit`
 - `npx expo lint`
-- `npx jest` (198 suites / 1054 tests, updated after TICKET-043)
-- `npm run check:copy` (213 TSX files)
+- `npx jest` (208 suites / 1175 tests, updated after TICKET-045)
+- `npm run check:copy` (220 TSX files)
 - Dark mode and web follow the same `useFormTheme` tokens as before; shared
   components never import feature palettes.

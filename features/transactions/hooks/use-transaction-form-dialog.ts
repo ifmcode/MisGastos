@@ -14,6 +14,8 @@ export interface UseTransactionFormDialogOptions {
   ) => Promise<boolean>;
   deleteTransaction: (transactionId: string) => Promise<boolean>;
   clearMutationState: () => void;
+  /** Called after a successful create from any entry point. */
+  onCreated?: () => void;
 }
 
 export interface TransactionFormDialog {
@@ -33,6 +35,7 @@ export function useTransactionFormDialog({
   updateTransaction,
   deleteTransaction,
   clearMutationState,
+  onCreated,
 }: UseTransactionFormDialogOptions): TransactionFormDialog {
   const [visible, setVisible] = useState(false);
   const [editingTransaction, setEditingTransaction] =
@@ -61,6 +64,7 @@ export function useTransactionFormDialog({
   }
 
   async function submit(input: TransactionInput) {
+    const creating = !editingTransaction;
     const saved = editingTransaction
       ? await updateTransaction(editingTransaction.id, input)
       : await createTransaction(input);
@@ -69,6 +73,8 @@ export function useTransactionFormDialog({
 
     rememberLastUsedDate(input.date);
     finish();
+
+    if (creating) onCreated?.();
   }
 
   async function deleteEditing() {

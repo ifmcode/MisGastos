@@ -1,20 +1,42 @@
-import { useTranslation } from "react-i18next";
-
 import { Fab } from "@/shared/components/molecules/fab";
+import {
+  FabActionMenu,
+  type FabActionMenuAction,
+} from "@/shared/components/molecules/fab-action-menu";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 export interface TransactionsFabProps {
   bottom: number;
-  onPress: () => void;
+  menuVisible: boolean;
+  actions: readonly FabActionMenuAction[];
+  onOpen: () => void;
+  onClose: () => void;
 }
 
-export function TransactionsFab({ bottom, onPress }: TransactionsFabProps) {
-  const { t } = useTranslation("transactions");
+/** FAB plus the create menu: the only create entry point of the movements tab. */
+export function TransactionsFab({
+  bottom,
+  menuVisible,
+  actions,
+  onOpen,
+  onClose,
+}: TransactionsFabProps) {
+  const { t } = useScopedTranslation("transactions");
 
   return (
-    <Fab
-      accessibilityLabel={t("add")}
-      bottom={bottom}
-      onPress={onPress}
-    />
+    <>
+      <Fab
+        accessibilityLabel={t("fab.openAccessibility")}
+        accessibilityHint={t("fab.openHint")}
+        bottom={bottom}
+        onPress={onOpen}
+      />
+      <FabActionMenu
+        visible={menuVisible}
+        title={t("fab.menuTitle")}
+        onClose={onClose}
+        actions={actions}
+      />
+    </>
   );
 }

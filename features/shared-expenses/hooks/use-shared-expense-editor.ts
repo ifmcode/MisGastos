@@ -22,6 +22,8 @@ export interface UseSharedExpenseEditorOptions {
   friends: readonly Friend[];
   preferredCurrency: CurrencyCode;
   lockedFriendUid?: string;
+  /** Prefill the first friend on create; the movements menu passes `false`. */
+  preselectFirstFriend?: boolean;
   onSaved: () => void;
 }
 
@@ -52,6 +54,7 @@ export function useSharedExpenseEditor({
   friends,
   preferredCurrency,
   lockedFriendUid,
+  preselectFirstFriend,
   onSaved,
 }: UseSharedExpenseEditorOptions): SharedExpenseEditorController {
   const walletsState = useWallets();
@@ -86,6 +89,7 @@ export function useSharedExpenseEditor({
         viewerUid: viewerUid ?? "",
         friends,
         lockedFriendUid,
+        preselectFirstFriend,
         preferredCurrency,
         today: getTodayIsoDate(),
         wallets: walletsState.wallets,
@@ -97,6 +101,7 @@ export function useSharedExpenseEditor({
       friends,
       lockedFriendUid,
       preferredCurrency,
+      preselectFirstFriend,
       viewerUid,
       walletsState.error,
       walletsState.loading,

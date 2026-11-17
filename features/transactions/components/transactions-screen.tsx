@@ -20,7 +20,6 @@ export function TransactionsScreen() {
         showActions={screen.showChrome}
         hasFilters={screen.hasFilters}
         onOpenFilters={screen.openFilters}
-        onCreate={screen.dialog.openCreate}
       />
 
       <TransactionsBody
@@ -35,14 +34,17 @@ export function TransactionsScreen() {
         onRetry={screen.retryLoad}
         onRefresh={screen.refreshAll}
         onOpenDetail={screen.openDetail}
-        onCreate={screen.dialog.openCreate}
+        onCreate={screen.createMenu.openMenu}
         onClearFilters={screen.clearFilters}
       />
 
       {screen.showChrome ? (
         <TransactionsFab
           bottom={insets.bottom + 24}
-          onPress={screen.dialog.openCreate}
+          menuVisible={screen.createMenu.menuVisible}
+          actions={screen.createMenu.actions}
+          onOpen={screen.createMenu.openMenu}
+          onClose={screen.createMenu.closeMenu}
         />
       ) : null}
 
@@ -63,6 +65,8 @@ export function TransactionsScreen() {
         onResetFilters={screen.clearFilters}
         onCloseFilters={screen.closeFilters}
         onCategoryCreated={screen.addCategory}
+        sharedExpenseEditor={screen.createMenu.editor}
+        friends={screen.createMenu.friends}
       />
     </ThemedView>
   );

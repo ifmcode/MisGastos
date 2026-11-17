@@ -10,12 +10,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 5 - Social vertical slice
-- **Current ticket:** TICKET-045 - Movements FAB create menu
+- **Current ticket:** TICKET-046 - 1:1 debt settlement with bilateral confirmation
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-044 - Shared expense wallet and linked personal movement (16/11/2026)
+- **Last completed:** TICKET-045 - Movements FAB create menu (16/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-046..TICKET-047 (1:1 settlement and notifications) and TICKET-008 in Phase 6
-- **Next:** TICKET-045 - Movements FAB create menu
+- **Queued:** TICKET-047 (notification inbox) and TICKET-008 in Phase 6
+- **Next:** TICKET-046 - 1:1 debt settlement with bilateral confirmation
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -123,11 +123,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] TICKET-042: friend detail screen with shared expenses ✅ 16/11/2026
 - [x] TICKET-043: shared expense detail screen ✅ 16/11/2026
 - [x] TICKET-044: shared expense wallet and linked personal movement ✅ 16/11/2026
-- [ ] TICKET-045: movements FAB create menu
+- [x] TICKET-045: movements FAB create menu ✅ 16/11/2026
 - Delivered Social shell, pending requests, add-friend and requests routes, the shared `FabActionMenu` and the accepted shared-expense entry gap: [`2026-11-16-social-tab.md`](2026-11-16-social-tab.md)
 - Delivered friend detail, header balances, filtered 1:1 expense list, locked-friend FAB and the removal move: [`2026-11-16-friend-detail.md`](2026-11-16-friend-detail.md)
 - Delivered the shared-expense detail route, live resolution, edit/delete flow and the route-safe `DetailView`: [`2026-11-16-shared-expense-detail.md`](2026-11-16-shared-expense-detail.md)
 - Delivered the optional same-currency wallet, the atomic linked movement (`ILinkedMovementPort` + `runTransaction`), the on-demand **Gastos compartidos** category, the **Compartido** badge and the shared-detail routing: [`2026-11-16-shared-expense-wallet-link.md`](2026-11-16-shared-expense-wallet-link.md)
+- Delivered the single create entry in **Movimientos** (shared `FabActionMenu` with movement / friend expense / disabled group action), the pure action helper, the friend gating states and `preselectFirstFriend: false`: [`2026-11-16-movements-create-menu.md`](2026-11-16-movements-create-menu.md)
 
 ### 5.2 1:1 settlement and notifications
 - [ ] TICKET-046: 1:1 debt settlement with bilateral confirmation

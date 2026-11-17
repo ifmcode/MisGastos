@@ -8,6 +8,7 @@ import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
 import { useTransactionDetailDialog } from "./use-transaction-detail-dialog";
 import { useTransactionFormDialog } from "./use-transaction-form-dialog";
 import { useTransactions } from "./use-transactions";
+import { useTransactionsCreateMenu } from "./use-transactions-create-menu";
 import type { Transaction } from "../types/transaction.types";
 import type { TransactionFilters } from "../utils/transaction-filters";
 
@@ -41,14 +42,25 @@ export function useTransactionsScreen() {
     [wallets],
   );
   const activeWallets = useMemo(() => getActiveWallets(wallets), [wallets]);
+  // A linked movement created from the shared-expense form must appear without
+  // a manual pull-to-refresh, so both sources reload after any create.
+  const refreshAfterCreate = useCallback(() => {
+    void transactionsState.refresh();
+    void refreshWallets();
+  }, [transactionsState.refresh, refreshWallets]);
   const dialog = useTransactionFormDialog({
     mutating: transactionsState.mutating,
     createTransaction: transactionsState.createTransaction,
     updateTransaction: transactionsState.updateTransaction,
     deleteTransaction: transactionsState.deleteTransaction,
     clearMutationState: transactionsState.clearMutationState,
+    onCreated: refreshAfterCreate,
   });
   const detail = useTransactionDetailDialog(transactionsState.transactions);
+  const createMenu = useTransactionsCreateMenu({
+    openMovementForm: dialog.openCreate,
+    onChanged: refreshAfterCreate,
+  });
 
   const hasFilters = transactionsState.activeFilterCount > 0;
   const screenLoading =
@@ -107,6 +119,7 @@ export function useTransactionsScreen() {
     mutationFieldErrors: transactionsState.mutationFieldErrors,
     dialog,
     detail,
+    createMenu,
     filtersVisible,
     hasFilters,
     screenLoading,

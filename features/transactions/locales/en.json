@@ -1,8 +1,6 @@
 {
   "title": "Movements",
   "subtitle": "Expenses, income and history.",
-  "new": "New",
-  "add": "Add movement",
   "loading": "Loading movements…",
   "errorTitle": "Could not load movements",
   "retryAccessibility": "Retry loading movements",
@@ -12,6 +10,18 @@
   "emptyFilteredMessage": "There are no movements matching the applied filters. Try changing them.",
   "createFirst": "Create first movement",
   "create": "Create movement",
+  "fab": {
+    "openAccessibility": "Open the create menu",
+    "openHint": "Choose between a new movement, an expense with a friend or a group expense.",
+    "menuTitle": "Create",
+    "newMovement": "New movement",
+    "newMovementHint": "Record an expense or income in one of your wallets.",
+    "friendExpense": "Expense with a friend",
+    "friendExpenseHint": "Split an expense with one of your accepted friends.",
+    "friendExpenseNoFriendsHint": "Add a friend in the Social tab to share expenses.",
+    "groupExpense": "Group expense",
+    "groupExpenseComingSoonHint": "Coming soon: group expenses arrive with groups."
+  },
   "types": {
     "expense": "Expense",
     "income": "Income"

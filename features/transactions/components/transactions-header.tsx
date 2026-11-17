@@ -13,14 +13,13 @@ export interface TransactionsHeaderProps {
   showActions: boolean;
   hasFilters: boolean;
   onOpenFilters: () => void;
-  onCreate: () => void;
 }
 
+/** Title and the filters action; creation lives in the FAB menu only. */
 export function TransactionsHeader({
   showActions,
   hasFilters,
   onOpenFilters,
-  onCreate,
 }: TransactionsHeaderProps) {
   const { t } = useTranslation("transactions");
 
@@ -47,21 +46,6 @@ export function TransactionsHeader({
               color={transactionsPalette.primary}
             />
             {hasFilters ? <View style={styles.filterDot} /> : null}
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t("add")}
-            onPress={onCreate}
-            style={styles.headerButton}
-          >
-            <Ionicons
-              name="add"
-              size={20}
-              color={transactionsPalette.onPrimary}
-            />
-            <ThemedText style={styles.headerButtonText}>
-              {t("new")}
-            </ThemedText>
           </Pressable>
         </View>
       ) : null}

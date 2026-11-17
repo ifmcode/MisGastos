@@ -4,7 +4,6 @@ import { StyleSheet } from "react-native";
 export const transactionsPalette = {
   primary: "#0A7EA4",
   primarySoft: "rgba(10, 126, 164, 0.12)",
-  onPrimary: "#FFFFFF",
 } as const;
 
 export const transactionsStyles = StyleSheet.create({
@@ -65,20 +64,6 @@ export const transactionsStyles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: transactionsPalette.primary,
-  },
-  headerButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: transactionsPalette.primary,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-  },
-  headerButtonText: {
-    color: transactionsPalette.onPrimary,
-    fontSize: 14,
-    fontWeight: "700",
   },
 
   // Active filters summary

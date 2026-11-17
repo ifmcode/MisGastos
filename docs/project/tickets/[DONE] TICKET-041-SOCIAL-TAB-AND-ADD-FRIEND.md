@@ -111,7 +111,7 @@ Transparent `Modal` (`overFullScreen`, `fade`, `statusBarTranslucent`, `onReques
 - **Pending counts:** the overview already separates `incoming`/`outgoing`; the pure helper only counts `status === "pending"` and returns the total, so the badge and the row share one number and the UI cannot drift from the list.
 - **Reuse instead of copies:** `/social/add-friend` composes `useFriendSearch` and the three existing search components; `/social/requests` composes `FriendRequestSection` with `useFriendActions`. No new service, schema or repository is needed.
 - **Sequencing:** removing the **Gastos compartidos** section leaves the app without a shared-expense entry point until TICKET-042 mounts it in the friend detail. Ship 041 and 042 in the same demo/release, or accept that gap explicitly.
-- **TICKET-045:** consumes `FabActionMenu` from the movements FAB (`docs/project/tickets/TICKET-045-MOVEMENTS-CREATE-MENU.md`); keep the menu API (`visible`, `title`, `onClose`, `actions`) stable so both screens share one component.
+- **TICKET-045:** consumes `FabActionMenu` from the movements FAB (`docs/project/tickets/[DONE] TICKET-045-MOVEMENTS-CREATE-MENU.md`); keep the menu API (`visible`, `title`, `onClose`, `actions`) stable so both screens share one component.
 - **Out of scope:** TICKET-042 (friend detail and shared expenses), TICKET-043 (expense detail), TICKET-044 and TICKET-046 (wallet/movement link and settlement), groups, notifications, blocking users and any change to the friends service, rules or balance math.
 
 ## Validation Plan

@@ -80,6 +80,11 @@ export interface SharedExpenseInitialValuesOptions {
   viewerUid: string;
   friends: readonly Friend[];
   lockedFriendUid?: string;
+  /**
+   * Create flows of a single friend prefill it; the movements menu passes
+   * `false` so the friend field starts empty and stays required.
+   */
+  preselectFirstFriend?: boolean;
   preferredCurrency: CurrencyCode;
   today: string;
   wallets: readonly Wallet[];
@@ -97,6 +102,7 @@ export function getSharedExpenseInitialValues({
   viewerUid,
   friends,
   lockedFriendUid,
+  preselectFirstFriend = true,
   preferredCurrency,
   today,
   wallets,
@@ -116,9 +122,11 @@ export function getSharedExpenseInitialValues({
       : loaded;
   }
 
+  const firstFriendUid = preselectFirstFriend ? friends[0]?.uid ?? "" : "";
+
   return createSharedExpenseFormValues({
     viewerUid,
-    friendUid: lockedFriendUid ?? friends[0]?.uid ?? "",
+    friendUid: lockedFriendUid ?? firstFriendUid,
     currency: preferredCurrency,
     date: today,
     payerId: viewerUid,

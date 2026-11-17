@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
+import type { Friend } from "@/features/friends/types/friend.types";
 import type { Wallet } from "@/features/wallets/types/wallet.types";
 
 import {
@@ -31,6 +32,17 @@ function buildWallet(overrides: Partial<Wallet> = {}): Wallet {
     ownerId: "user-a",
     createdAt: "2026-11-01T10:00:00.000Z",
     updatedAt: "2026-11-01T10:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function buildFriend(overrides: Partial<Friend> = {}): Friend {
+  return {
+    uid: "user-b",
+    displayName: "Bea",
+    email: "bea@example.com",
+    balances: [],
+    since: "2026-11-01T00:00:00.000Z",
     ...overrides,
   };
 }
@@ -354,6 +366,39 @@ describe("getSharedExpenseInitialValues", () => {
 
     expect(loading.walletId).toBe("wallet-1");
     expect(failed.walletId).toBe("wallet-1");
+  });
+
+  it("leaves the friend empty when the first friend is not preselected", () => {
+    const values = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: null,
+      friends: [buildFriend()],
+      preselectFirstFriend: false,
+    });
+
+    expect(values.friendUid).toBe("");
+  });
+
+  it("preselects the first friend by default", () => {
+    const values = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: null,
+      friends: [buildFriend(), buildFriend({ uid: "user-c" })],
+    });
+
+    expect(values.friendUid).toBe("user-b");
+  });
+
+  it("keeps an explicit locked friend over the preselection flag", () => {
+    const values = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: null,
+      friends: [buildFriend()],
+      lockedFriendUid: "user-c",
+      preselectFirstFriend: false,
+    });
+
+    expect(values.friendUid).toBe("user-c");
   });
 });
 
