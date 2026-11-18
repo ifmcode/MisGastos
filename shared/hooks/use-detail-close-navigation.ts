@@ -2,9 +2,7 @@ import { useRouter, type Href } from "expo-router";
 import { useCallback } from "react";
 
 export interface DetailCloseNavigationOptions {
-  /** The detail was opened from a notification, so back must replace it. */
-  fromNotification: boolean;
-  /** Friend detail it returns to; without one the Social hub is the parent. */
+  /** Friend detail used only when there is no screen to return to. */
   friendUid: string | null;
 }
 
@@ -17,29 +15,23 @@ function parentHref(friendUid: string | null): Href {
 }
 
 /**
- * Close action of a shared detail (settlement, shared expense). A notification
- * target always resolves to the friend detail — the inbox is never the parent of
- * a detail — and a target that no longer exists still lands on a valid route.
- * Opened any other way, the stack simply pops.
+ * Close action of a shared detail (settlement, shared expense). Back returns to
+ * the screen the detail was opened from, so a notification lands on the inbox
+ * or on whatever screen the banner interrupted. A deep link without history
+ * falls back to the friend detail, or to the Social hub without a friend.
  */
 export function useDetailCloseNavigation({
-  fromNotification,
   friendUid,
 }: DetailCloseNavigationOptions): () => void {
   const router = useRouter();
   const parent = parentHref(friendUid);
 
   return useCallback(() => {
-    if (fromNotification) {
-      router.replace(parent);
-      return;
-    }
-
     if (router.canGoBack()) {
       router.back();
       return;
     }
 
     router.replace(parent);
-  }, [fromNotification, parent, router]);
+  }, [parent, router]);
 }

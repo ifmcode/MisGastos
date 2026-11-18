@@ -43,20 +43,17 @@ export function SharedExpenseDetailScreen() {
   const { tr } = useScopedTranslation(["sharedExpenses", "social", "common"]);
   const params = useLocalSearchParams<{
     expenseId?: string | string[];
-    from?: string | string[];
     friendUid?: string | string[];
   }>();
   const screen = useSharedExpenseDetailScreen({
     expenseId: readParam(params.expenseId),
   });
   const { expense, editor } = screen;
-  const fromNotification = readParam(params.from) === "notification";
   const walletWarningVisible = expense
     ? hasViewerPaidWithoutWallet(expense, screen.viewerUid)
     : false;
 
   const leave = useDetailCloseNavigation({
-    fromNotification,
     friendUid: readParam(params.friendUid) || null,
   });
 

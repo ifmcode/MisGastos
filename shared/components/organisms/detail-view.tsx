@@ -27,6 +27,8 @@ export interface DetailViewProps {
   missingLabels: DetailMissingStateLabels;
   /** Optional feature banners (errors, notices) rendered above the summary. */
   errorContent?: ReactNode;
+  /** Primary follow-up rendered above the summary, visible without scrolling. */
+  highlightContent?: ReactNode;
   /** Optional feature blocks rendered after the fields card. */
   children?: ReactNode;
   /** "back" on routes that push the detail; "close" inside a modal. */
@@ -52,6 +54,7 @@ export function DetailView({
   labels,
   missingLabels,
   errorContent,
+  highlightContent,
   children,
   closeIcon,
   onEdit,
@@ -79,6 +82,7 @@ export function DetailView({
             summary={summary}
             fields={fields}
             errorContent={errorContent}
+            highlightContent={highlightContent}
           >
             {children}
           </DetailBody>

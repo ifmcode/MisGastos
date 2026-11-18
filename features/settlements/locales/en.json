@@ -131,6 +131,8 @@
     "receiverMovement": "Income in Movements",
     "receiverMovementValue": "Income in your wallet",
     "walletUnavailable": "Wallet unavailable",
+    "receiveTitle": "Receive the money",
+    "receiveHint": "Optional: choose the wallet where you want to deposit this settlement.",
     "linkWallet": "Choose wallet",
     "linkWalletHint": "Choose the wallet where you receive the money.",
     "unlinkWallet": "Remove wallet",

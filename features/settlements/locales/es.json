@@ -131,6 +131,8 @@
     "receiverMovement": "Ingreso en Movimientos",
     "receiverMovementValue": "Ingreso en tu cartera",
     "walletUnavailable": "Cartera no disponible",
+    "receiveTitle": "Recibir el dinero",
+    "receiveHint": "Opcional: elige la cartera donde quieres ingresar esta liquidación.",
     "linkWallet": "Elegir cartera",
     "linkWalletHint": "Elige la cartera donde recibir el dinero.",
     "unlinkWallet": "Quitar cartera",

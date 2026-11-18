@@ -11,14 +11,12 @@ function readParam(value: string | string[] | undefined): string {
 export default function SettlementDetailRoute() {
   const params = useLocalSearchParams<{
     settlementId?: string | string[];
-    from?: string | string[];
     friendUid?: string | string[];
   }>();
 
   return (
     <SettlementDetailScreen
       settlementId={readParam(params.settlementId)}
-      from={readParam(params.from)}
       friendUid={readParam(params.friendUid)}
     />
   );

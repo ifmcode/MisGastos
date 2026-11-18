@@ -4,16 +4,14 @@ import type { NotificationTarget } from "../notifications.utils";
 import { buildNotificationTargetHref } from "../notifications.utils";
 
 describe("buildNotificationTargetHref", () => {
-  it("builds the settlement href with the notification origin and friend", () => {
+  it("builds the settlement href with the friend fallback", () => {
     expect(
       buildNotificationTargetHref({
         kind: "settlement",
         settlementId: "settlement-1",
         friendUid: "user-a",
       }),
-    ).toBe(
-      "/social/settlements/settlement-1?from=notification&friendUid=user-a",
-    );
+    ).toBe("/social/settlements/settlement-1?friendUid=user-a");
 
     expect(
       buildNotificationTargetHref({
@@ -21,7 +19,7 @@ describe("buildNotificationTargetHref", () => {
         settlementId: "settlement-1",
         friendUid: null,
       }),
-    ).toBe("/social/settlements/settlement-1?from=notification");
+    ).toBe("/social/settlements/settlement-1");
   });
 
   it("builds the expense href and encodes every id", () => {
@@ -31,9 +29,7 @@ describe("buildNotificationTargetHref", () => {
         expenseId: "expense/1",
         friendUid: "user a",
       }),
-    ).toBe(
-      "/social/expenses/expense%2F1?from=notification&friendUid=user%20a",
-    );
+    ).toBe("/social/expenses/expense%2F1?friendUid=user%20a");
   });
 
   it("builds the requests and friend hrefs", () => {

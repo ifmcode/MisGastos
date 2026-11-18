@@ -65,12 +65,13 @@ export function resolveNotificationTarget(
 }
 
 function withFriend(href: string, friendUid: string | null): string {
-  return friendUid ? `${href}&friendUid=${encodeURIComponent(friendUid)}` : href;
+  return friendUid ? `${href}?friendUid=${encodeURIComponent(friendUid)}` : href;
 }
 
 /**
- * Plain href of a target. Nested details carry `from=notification`, so their
- * back action lands on the friend detail instead of the inbox.
+ * Plain href of a target. Back always returns to the screen the detail was
+ * opened from; the actor's `friendUid` is only the fallback parent used when a
+ * target is opened without history (a deep link or a future push).
  */
 export function buildNotificationTargetHref(
   target: NotificationTarget,
@@ -78,12 +79,12 @@ export function buildNotificationTargetHref(
   switch (target.kind) {
     case "settlement":
       return withFriend(
-        `/social/settlements/${encodeURIComponent(target.settlementId)}?from=notification`,
+        `/social/settlements/${encodeURIComponent(target.settlementId)}`,
         target.friendUid,
       );
     case "expense":
       return withFriend(
-        `/social/expenses/${encodeURIComponent(target.expenseId)}?from=notification`,
+        `/social/expenses/${encodeURIComponent(target.expenseId)}`,
         target.friendUid,
       );
     case "requests":

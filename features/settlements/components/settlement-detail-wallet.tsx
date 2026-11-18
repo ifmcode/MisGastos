@@ -38,6 +38,12 @@ export function SettlementDetailWallet({
   if (!detail.hasReceiverWallet) {
     return (
       <View style={styles.detailBlock}>
+        <ThemedText style={styles.label}>
+          {t("detail.receiveTitle")}
+        </ThemedText>
+        <ThemedText style={[styles.helper, { color: theme.muted }]}>
+          {t("detail.receiveHint")}
+        </ThemedText>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("detail.linkWallet")}
@@ -62,8 +68,8 @@ export function SettlementDetailWallet({
 
   return (
     <View style={styles.detailBlock}>
-      <ThemedText style={[styles.helper, { color: theme.muted }]}>
-        {t("detail.receiverWallet")}
+      <ThemedText style={styles.label}>
+        {t("detail.receiveTitle")}
       </ThemedText>
       <View style={styles.detailWalletRow}>
         <ThemedText style={[styles.detailValue, { color: theme.text }]}>

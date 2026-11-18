@@ -1,4 +1,5 @@
 import type { CurrencyCode } from "@/shared/constants/currencies";
+import { centsToAmount } from "@/features/friends/utils/friend-balance";
 import type { Translate } from "@/shared/i18n/translate";
 import type {
   DetailField,
@@ -29,7 +30,10 @@ function formatAmount(
   settlement: Settlement,
   context: SettlementDetailContext,
 ): string {
-  return context.formatCurrency(settlement.amountCents / 100, settlement.currency);
+  return context.formatCurrency(
+    centsToAmount(settlement.amountCents),
+    settlement.currency,
+  );
 }
 
 /** Subtitle sentence of the detail: who paid whom and how much. */
@@ -63,7 +67,8 @@ export function getSettlementDetailSummary(
 export function getSettlementDetailFields(
   settlement: Settlement,
   context: SettlementDetailContext,
-): DetailField[] {  const fields: DetailField[] = [
+): DetailField[] {
+  const fields: DetailField[] = [
     {
       key: "amount",
       label: context.t("detail.amount"),
@@ -114,7 +119,12 @@ export function getSettlementDetailFields(
       label: context.t("detail.updatedAt"),
       value: context.formatDateTime(settlement.updatedAt),
     },
-    {
+  ];
+
+  // The income wallet belongs to the creditor: the debtor has nothing to
+  // receive, so those rows would only suggest an action that does not exist.
+  if (isCreditor(settlement, context.viewerUid)) {
+    fields.push({
       key: "receiverWallet",
       label: context.t("detail.receiverWallet"),
       value: context.walletName
@@ -122,15 +132,15 @@ export function getSettlementDetailFields(
           ? `${context.walletName} · ${context.t("detail.walletArchived")}`
           : context.walletName
         : context.t("detail.receiverWalletNone"),
-    },
-  ];
-
-  if (settlement.receiverTransactionId) {
-    fields.push({
-      key: "receiverMovement",
-      label: context.t("detail.receiverMovement"),
-      value: context.t("detail.receiverMovementValue"),
     });
+
+    if (settlement.receiverTransactionId) {
+      fields.push({
+        key: "receiverMovement",
+        label: context.t("detail.receiverMovement"),
+        value: context.t("detail.receiverMovementValue"),
+      });
+    }
   }
 
   return fields;

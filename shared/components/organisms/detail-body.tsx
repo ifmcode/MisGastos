@@ -12,15 +12,18 @@ export interface DetailBodyProps {
   fields: readonly DetailField[];
   /** Optional feature banners (errors, notices) rendered above the summary. */
   errorContent?: ReactNode;
+  /** Primary follow-up that must be visible before scrolling, above the summary. */
+  highlightContent?: ReactNode;
   /** Optional feature blocks rendered after the fields card, sharing its gap. */
   children?: ReactNode;
 }
 
-/** Scrollable body shared by every detail view: error, summary and fields. */
+/** Scrollable body shared by every detail view: error, highlight, summary and fields. */
 export function DetailBody({
   summary,
   fields,
   errorContent,
+  highlightContent,
   children,
 }: DetailBodyProps) {
   return (
@@ -30,6 +33,7 @@ export function DetailBody({
     >
       {errorContent}
       <View style={styles.content}>
+        {highlightContent}
         <DetailSummaryCard summary={summary} />
         <DetailFieldsCard fields={fields} />
         {children}

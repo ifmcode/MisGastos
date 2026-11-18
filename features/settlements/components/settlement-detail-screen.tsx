@@ -22,16 +22,13 @@ import { SettlementRouteHeader } from "./settlement-route-header";
 export interface SettlementDetailScreenProps {
   /** Route id, already normalized to a single trimmed string. */
   settlementId: string;
-  /** `from=notification`: back lands on the friend detail, not the inbox. */
-  from?: string;
-  /** Actor carried by the notification; used when the settlement is gone. */
+  /** Actor carried by the notification; only the fallback without history. */
   friendUid?: string;
 }
 
 /** Read-only settlement with edit/delete and the creditor's wallet follow-up. */
 export function SettlementDetailScreen({
   settlementId,
-  from,
   friendUid,
 }: SettlementDetailScreenProps) {
   const insets = useSafeAreaInsets();
@@ -46,10 +43,7 @@ export function SettlementDetailScreen({
       )
     : "";
   const parentFriendUid = detail?.friendUid ?? friendUid ?? null;
-  const leave = useDetailCloseNavigation({
-    fromNotification: from === "notification",
-    friendUid: parentFriendUid,
-  });
+  const leave = useDetailCloseNavigation({ friendUid: parentFriendUid });
 
   const view = useSettlementDetailView({
     settlement,
@@ -100,23 +94,24 @@ export function SettlementDetailScreen({
           labels={view.labels}
           missingLabels={view.missingLabels}
           errorContent={<ErrorBanner message={screen.mutationError} />}
+          highlightContent={
+            detail ? (
+              <SettlementDetailWallet
+                detail={detail}
+                walletName={screen.walletInfo.name}
+                walletArchived={screen.walletInfo.archived}
+                pending={screen.pending}
+                onLink={screen.editor.open}
+                onUnlink={screen.walletLink.requestUnlink}
+              />
+            ) : null
+          }
           onEdit={() => {
             if (screen.friend) screen.editor.open();
           }}
           onDelete={actions.requestDelete}
           onClose={actions.closeDetail}
-        >
-          {detail ? (
-            <SettlementDetailWallet
-              detail={detail}
-              walletName={screen.walletInfo.name}
-              walletArchived={screen.walletInfo.archived}
-              pending={screen.pending}
-              onLink={screen.editor.open}
-              onUnlink={screen.walletLink.requestUnlink}
-            />
-          ) : null}
-        </DetailView>
+        />
       )}
 
       <SettlementEditorModal
