@@ -20,7 +20,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Status:** ⏳ Pending
 - **Last completed:** TICKET-047 - in-app notification inbox (18/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-056 in Phase 5.3 after TICKET-055; TICKET-008 in Phase 6
+- **Queued:** TICKET-056 in Phase 5.3 after TICKET-055; TICKET-057 in Phase 5.4; TICKET-008 in Phase 6
 - **Next:** TICKET-055 - optional wallet registration in shared expenses
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
@@ -142,6 +142,9 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ### 5.3 Shared-expense form refinement
 - [ ] TICKET-055: optional wallet registration in shared expenses with a configurable default
 - [ ] TICKET-056: compact currency field with **Cambiar** and the live remaining amount for the fixed split
+
+### 5.4 Initial onboarding
+- [ ] TICKET-057: default main wallet on account creation
 
 ## Phase 6: Groups (QUEUED)
 - [ ] TICKET-008: create groups (consumes the Social → Tus grupos shell from TICKET-041)

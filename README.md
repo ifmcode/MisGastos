@@ -225,6 +225,7 @@ funciones y 99,13 % de líneas**, y `npm run check:copy` audita **250 archivos T
 - [x] Bandeja de notificaciones in-app con pestañas **Pendientes**/**Vistas** y aviso flotante
 - [ ] Registro opcional en cartera de los gastos compartidos: toggle Sí/No, por defecto No y configurable
 - [ ] Moneda compacta con **Cambiar** y aviso de importe restante en el reparto por importe
+- [ ] Cartera principal por defecto al crear la cuenta
 - [ ] Grupos y gastos compartidos dentro de grupos
 - [ ] Liquidación de deudas en grupos
 - [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización; implementación en la fase 7)
