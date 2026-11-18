@@ -40,6 +40,7 @@ export function TransactionItem({
   const theme = useFormTheme();
   const { t } = useTranslation("transactions");
   const { t: tShared } = useTranslation("sharedExpenses");
+  const { t: tSettlements } = useTranslation("settlements");
   const tr = asTranslate(t);
   const locale = useAppLocale();
   const isIncome = transaction.type === "income";
@@ -52,18 +53,25 @@ export function TransactionItem({
     transaction.currency,
   );
   const date = locale.formatDate(transaction.date);
+  const isSettlement = Boolean(transaction.settlementId);
+  const settlementLabel = isSettlement ? tSettlements("badge.label") : undefined;
   const detailLabel = getTransactionDetailLabel(
     transaction,
     categoryLabel,
     amount,
     date,
     walletName,
+    settlementLabel,
   );
   const isLinked = Boolean(transaction.sharedExpenseId);
-  const badge = isLinked ? tShared("badge.label") : undefined;
+  const badge = settlementLabel ?? (isLinked ? tShared("badge.label") : undefined);
   const hint =
     accessibilityHint ??
-    (isLinked ? tShared("badge.hint") : t(OPEN_TRANSACTION_DETAIL_HINT_KEY));
+    (isSettlement
+      ? tSettlements("badge.hint")
+      : isLinked
+        ? tShared("badge.hint")
+        : t(OPEN_TRANSACTION_DETAIL_HINT_KEY));
   const summary = tr(detailLabel.key, {
     ...detailLabel.values,
     type: tr(detailLabel.values.typeKey),
@@ -75,7 +83,7 @@ export function TransactionItem({
       accessibilityHint={hint}
       onPress={onPress}
       icon={category.icon}
-      title={transaction.concept}
+      title={settlementLabel ?? transaction.concept}
       meta={joinMetaParts([date, categoryLabel, walletName])}
       amount={`${amountPrefix}${amount}`}
       badge={badge}

@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
 import type { SharedExpense } from "@/features/shared-expenses/types/shared-expense.types";
+import { SettlementMessage } from "@/features/settlements/components/settlement-message";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
 import { Fab } from "@/shared/components/molecules/fab";
@@ -98,9 +99,22 @@ export function FriendDetailScreen() {
             removing={removal.removing}
             onBack={leave}
             onRemove={removal.requestRemove}
+            onSettle={() => router.push(`/social/settlements/new?friendUid=${header.uid}` as Href)}
           />
 
           <ErrorBanner message={screen.removalError} />
+
+          {screen.latestSettlement ? (
+            <SettlementMessage
+              settlement={screen.latestSettlement}
+              viewerUid={screen.viewerUid}
+              friendName={header.name}
+              pairSettled={header.balances.length === 0}
+              onOpen={(item) => router.push(`/social/settlements/${item.id}` as Href)}
+            />
+          ) : null}
+
+          <ErrorBanner message={screen.settlementsError} />
 
           <FriendDetailExpenses
             expenses={screen.expenses}
@@ -110,6 +124,9 @@ export function FriendDetailScreen() {
             error={screen.expensesError}
             onRetry={screen.reloadExpenses}
             onOpen={openExpense}
+            collapsed={!screen.showExpenses}
+            canCollapse={screen.canCollapseExpenses}
+            onToggle={screen.toggleExpenses}
           />
         </ScrollView>
       )}

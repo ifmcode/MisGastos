@@ -47,8 +47,7 @@ describe("getTransactionDetailLabel", () => {
     });
   });
 
-  it("announces an income and omits a missing wallet", () => {
-    expect(
+  it("announces an income and omits a missing wallet", () => {    expect(
       getTransactionDetailLabel(
         buildTransaction({ type: "income", concept: "Nómina" }),
         "Salario",
@@ -65,6 +64,19 @@ describe("getTransactionDetailLabel", () => {
         category: "Salario",
       },
     });
+  });
+
+  it("uses the translated concept of a linked settlement movement", () => {
+    const label = getTransactionDetailLabel(
+      buildTransaction({ type: "income", settlementId: "settlement-1" }),
+      "Salario",
+      "20,00 €",
+      "20/10/2026",
+      "Cuenta principal",
+      "Liquidación",
+    );
+
+    expect(label.values.concept).toBe("Liquidación");
   });
 });
 

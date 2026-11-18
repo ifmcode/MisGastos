@@ -37,7 +37,7 @@ export function TransactionDetailModal({
   onDelete,
   onClose,
 }: TransactionDetailModalProps) {
-  const { t } = useTranslation(["transactions", "common"]);
+  const { t } = useTranslation(["transactions", "common", "settlements"]);
   const tr = asTranslate(t);
   const locale = useAppLocale();
   const confirmation = transaction
@@ -67,6 +67,7 @@ export function TransactionDetailModal({
         categories,
         tr,
         locale.formatDate,
+        transaction.settlementId ? t("settlements:badge.label") : undefined,
       )
     : [];
 

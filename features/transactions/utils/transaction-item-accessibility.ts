@@ -19,6 +19,8 @@ export function getTransactionDetailLabel(
   amount: string,
   date: string,
   walletName?: string,
+  /** Replaces the raw concept, for linked movements with a translated label. */
+  concept = transaction.concept,
 ): TransactionDetailLabel {
   return {
     key: walletName
@@ -27,7 +29,7 @@ export function getTransactionDetailLabel(
     values: {
       typeKey:
         transaction.type === "income" ? "types.income" : "types.expense",
-      concept: transaction.concept,
+      concept,
       amount,
       date,
       category: categoryLabel,

@@ -83,6 +83,8 @@ export function buildTransactionDetailFields(
   categories: readonly Category[],
   t: Translate,
   formatDate: (isoDate: string) => string,
+  /** Translated concept of a linked movement, never the machine token. */
+  conceptLabel?: string,
 ): DetailField[] {
   const category = getTransactionCategory(categories, transaction.categoryId);
 
@@ -103,7 +105,7 @@ export function buildTransactionDetailFields(
     {
       key: "concept",
       label: t("detail.concept"),
-      value: transaction.concept,
+      value: conceptLabel ?? transaction.concept,
     },
     {
       key: "date",

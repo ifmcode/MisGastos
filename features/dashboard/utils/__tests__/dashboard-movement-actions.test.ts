@@ -42,6 +42,9 @@ function createPort() {
     openSharedExpense: jest.fn<(expenseId: string) => void>(() => {
       calls.push("shared");
     }),
+    openSettlement: jest.fn<(settlementId: string) => void>(() => {
+      calls.push("settlement");
+    }),
   };
 
   return { port, calls };
@@ -69,6 +72,21 @@ describe("createDashboardMovementActions", () => {
 
     expect(calls).toEqual(["shared"]);
     expect(port.openSharedExpense).toHaveBeenCalledWith("expense-1");
+    expect(port.openDetail).not.toHaveBeenCalled();
+    expect(port.clearMutationState).not.toHaveBeenCalled();
+  });
+
+  it("navigates to the settlement instead of the personal detail", () => {
+    const { port, calls } = createPort();
+    const transaction = buildTransaction();
+    transaction.type = "income";
+    transaction.settlementId = "settlement-1";
+    const actions = createDashboardMovementActions(port);
+
+    actions.openDetail(transaction);
+
+    expect(calls).toEqual(["settlement"]);
+    expect(port.openSettlement).toHaveBeenCalledWith("settlement-1");
     expect(port.openDetail).not.toHaveBeenCalled();
     expect(port.clearMutationState).not.toHaveBeenCalled();
   });

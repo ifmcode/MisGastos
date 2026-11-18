@@ -70,6 +70,7 @@ export function mapTransactionDocument(
       : null;
 
   const sharedExpenseId = readSharedExpenseId(data);
+  const settlementId = readSettlementId(data);
 
   return {
     id,
@@ -84,6 +85,7 @@ export function mapTransactionDocument(
     date,
     ownerId: storedOwnerId,
     ...(sharedExpenseId ? { sharedExpenseId } : {}),
+    ...(settlementId ? { settlementId } : {}),
     createdAt,
     updatedAt,
     deletedAt,
@@ -97,5 +99,15 @@ function readSharedExpenseId(data: Record<string, unknown>): string | null {
   return typeof data.sharedExpenseId === "string" &&
     data.sharedExpenseId.trim().length > 0
     ? data.sharedExpenseId.trim()
+    : null;
+}
+
+/** A settlement link only belongs to an income; anything else is dropped. */
+function readSettlementId(data: Record<string, unknown>): string | null {
+  if (data.type !== "income") return null;
+
+  return typeof data.settlementId === "string" &&
+    data.settlementId.trim().length > 0
+    ? data.settlementId.trim()
     : null;
 }

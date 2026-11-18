@@ -15,6 +15,7 @@ import { ErrorState } from "@/shared/components/molecules/error-state";
 import { LoadingState } from "@/shared/components/molecules/loading-state";
 
 import { useDashboardMovementDialogs } from "../hooks/use-dashboard-movement-dialogs";
+import { useDashboardNotifications } from "../hooks/use-dashboard-notifications";
 import { useDashboardOverview } from "../hooks/use-dashboard-overview";
 import { useDashboardRefresh } from "../hooks/use-dashboard-refresh";
 import { useDashboardTransferDialogs } from "../hooks/use-dashboard-transfer-dialogs";
@@ -34,14 +35,14 @@ export function DashboardScreen() {
   const walletsState = useWallets();
   const transfersState = useTransfers();
   const categoriesState = useCategories();
+  const notificationsState = useDashboardNotifications();
   const transactionsState = useTransactions({
     categories: categoriesState.categories,
   });
 
   const [selectedWalletId, setSelectedWalletId] = useState("");
 
-  // Other tabs create and edit this data, so the dashboard refreshes it when
-  // the screen regains focus instead of keeping the first mount.
+  // Other tabs edit this data; refresh it when the screen regains focus.
   const dashboardRefresh = useDashboardRefresh({
     wallets: walletsState,
     transfers: transfersState,
@@ -49,10 +50,7 @@ export function DashboardScreen() {
     categories: categoriesState,
   });
 
-  const activeWallets = useMemo(
-    () => getActiveWallets(walletsState.wallets),
-    [walletsState.wallets],
-  );
+  const activeWallets = useMemo(() => getActiveWallets(walletsState.wallets), [walletsState.wallets]);
   const overview = useDashboardOverview({
     wallets: activeWallets,
     allWallets: walletsState.wallets,
@@ -60,10 +58,7 @@ export function DashboardScreen() {
     transactions: transactionsState.transactions,
     selectedWalletId,
   });
-  const navigation = useMemo(
-    () => createDashboardNavigationActions(router),
-    [router],
-  );
+  const navigation = useMemo(() => createDashboardNavigationActions(router), [router]);
   const transferDialogs = useDashboardTransferDialogs({
     transfers: transfersState.transfers,
     mutations: transfersState,
@@ -74,6 +69,7 @@ export function DashboardScreen() {
     mutations: transactionsState,
     onWalletsChanged: walletsState.refresh,
     onOpenSharedExpense: navigation.openSharedExpense,
+    onOpenSettlement: navigation.openSettlement,
   });
   const greeting = t("greeting", { name: profile?.displayName ?? user?.displayName ?? user?.email ?? t("defaultUser") });
 
@@ -81,7 +77,11 @@ export function DashboardScreen() {
     <ThemedView
       style={[dashboardStyles.container, { paddingTop: insets.top + 16 }]}
     >
-      <DashboardHeader greeting={greeting} />
+      <DashboardHeader
+        greeting={greeting}
+        unreadCount={notificationsState.unreadCount}
+        onOpenNotifications={notificationsState.openNotifications}
+      />
 
       {walletsState.loading ? (
         <LoadingState message={t("loadingSummary")} />

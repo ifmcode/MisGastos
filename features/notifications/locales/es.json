@@ -1,0 +1,45 @@
+{
+  "title": "Notificaciones",
+  "subtitle": "Lo que ha pasado con tus deudas y tus amigos.",
+  "loading": "Cargando notificaciones…",
+  "errorTitle": "No se pudieron cargar las notificaciones",
+  "retryAccessibility": "Reintentar la carga de notificaciones",
+  "emptyTitle": "No tienes notificaciones",
+  "emptyMessage": "Cuando un amigo liquide una deuda contigo, lo verás aquí.",
+  "actorFallback": "Un amigo",
+  "unread": "Sin leer",
+  "bell": {
+    "label_zero": "Notificaciones",
+    "label_one": "Notificaciones: {{count}} sin leer",
+    "label_other": "Notificaciones: {{count}} sin leer",
+    "hint": "Abre la bandeja de notificaciones."
+  },
+  "row": {
+    "openAccessibility": "Abrir la notificación: {{title}}",
+    "openHint": "Abre el detalle relacionado y marca la notificación como leída.",
+    "settlementWalletHint": "Abre la liquidación para elegir tu cartera de ingreso."
+  },
+  "types": {
+    "settlement-created": {
+      "full": "{{name}} ha liquidado toda la deuda de {{amount}}.",
+      "partial": "{{name}} ha liquidado parte de la deuda: {{amount}}."
+    },
+    "settlement-updated": {
+      "full": "{{name}} ha actualizado la liquidación de {{amount}}; la deuda queda saldada.",
+      "partial": "{{name}} ha actualizado la liquidación a {{amount}}."
+    },
+    "settlement-deleted": {
+      "full": "{{name}} ha eliminado la liquidación de {{amount}}; la deuda vuelve a su estado anterior.",
+      "partial": "{{name}} ha eliminado la liquidación de {{amount}}."
+    }
+  },
+  "errors": {
+    "SIGN_IN_REQUIRED": "Debes iniciar sesión.",
+    "NOTIFICATION_NOT_FOUND": "Esta notificación ya no existe.",
+    "NOT_OWNER": "Esta notificación no te pertenece.",
+    "LOAD_FAILED": "No se pudieron cargar las notificaciones. Inténtalo de nuevo.",
+    "SAVE_FAILED": "No se pudo actualizar la notificación. Inténtalo de nuevo.",
+    "PERMISSION_DENIED": "No tienes permiso para realizar esta operación.",
+    "NETWORK": "No hay conexión. Revisa tu red e inténtalo de nuevo."
+  }
+}

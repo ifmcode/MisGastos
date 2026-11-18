@@ -4,25 +4,22 @@ jest.mock("../../repositories/firebase-friends.repository", () => ({
   FirebaseFriendsRepository: jest.fn(() => ({ kind: "friends-repository" })),
 }));
 
-jest.mock(
-  "@/features/shared-expenses/repositories/shared-expense-ledger.repository",
-  () => ({
-    SharedExpenseLedgerRepository: jest.fn(() => ({
-      kind: "shared-expense-ledger-repository",
-    })),
-  }),
-);
+const mockLedger = { kind: "friend-ledger" };
+
+jest.mock("../../repositories/friend-ledger.factory", () => ({
+  getFriendLedgerRepository: jest.fn(() => mockLedger),
+}));
 
 import { EmptyFriendLedgerRepository } from "../../repositories/friend-ledger.repository";
-import { SharedExpenseLedgerRepository } from "@/features/shared-expenses/repositories/shared-expense-ledger.repository";
+import { getFriendLedgerRepository } from "../../repositories/friend-ledger.factory";
 import { getFriendsService } from "../friends.factory";
 
 describe("getFriendsService", () => {
-  it("reuses one FriendsService instance wired to the expense ledger", () => {
+  it("reuses one FriendsService wired to the composed friend ledger", () => {
     const service = getFriendsService();
 
     expect(getFriendsService()).toBe(service);
-    expect(SharedExpenseLedgerRepository).toHaveBeenCalledTimes(1);
+    expect(getFriendLedgerRepository).toHaveBeenCalledTimes(1);
   });
 });
 

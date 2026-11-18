@@ -53,6 +53,15 @@ export function AuthNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="social/settlements/new"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="social/settlements/[settlementId]"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="notifications" options={{ headerShown: false }} />
+      <Stack.Screen
         name="modal"
         options={{ presentation: "modal", title: t("stack.modal") }}
       />

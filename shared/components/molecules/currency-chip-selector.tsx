@@ -11,6 +11,11 @@ export type CurrencyOption = (typeof CURRENCIES)[number];
 export interface CurrencyChipSelectorProps {
   value: CurrencyCode;
   disabled?: boolean;
+  /**
+   * Optional subset of currencies, for screens that can only offer a few (for
+   * example the debt currencies of a friend). Defaults to every currency.
+   */
+  currencies?: readonly CurrencyOption[];
   /** Accessibility copy is provided by the feature translation namespace. */
   getAccessibilityLabel: (currency: CurrencyOption) => string;
   onChange: (currency: CurrencyCode) => void;
@@ -20,6 +25,7 @@ export interface CurrencyChipSelectorProps {
 export function CurrencyChipSelector({
   value,
   disabled = false,
+  currencies = CURRENCIES,
   getAccessibilityLabel,
   onChange,
 }: CurrencyChipSelectorProps) {
@@ -27,7 +33,7 @@ export function CurrencyChipSelector({
 
   return (
     <View style={styles.chipsWrap}>
-      {CURRENCIES.map((currency) => {
+      {currencies.map((currency) => {
         const selected = value === currency.code;
 
         return (

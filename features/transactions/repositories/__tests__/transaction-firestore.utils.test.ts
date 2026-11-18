@@ -78,6 +78,38 @@ describe("toTransactionData", () => {
 
     expect(data).not.toHaveProperty("notes");
   });
+
+  it("persists a settlement link only on income movements", () => {
+    const linked = toTransactionData(
+      "user-1",
+      { ...validDto, type: "income", settlementId: "  settlement-1  " },
+      "now",
+    );
+    const expense = toTransactionData(
+      "user-1",
+      { ...validDto, settlementId: "settlement-1" },
+      "now",
+    );
+
+    expect(linked.settlementId).toBe("settlement-1");
+    expect(expense).not.toHaveProperty("settlementId");
+  });
+
+  it("never mixes the two link keys", () => {
+    const income = toTransactionData(
+      "user-1",
+      {
+        ...validDto,
+        type: "income",
+        sharedExpenseId: "expense-1",
+        settlementId: "settlement-1",
+      },
+      "now",
+    );
+
+    expect(income).not.toHaveProperty("sharedExpenseId");
+    expect(income.settlementId).toBe("settlement-1");
+  });
 });
 
 describe("buildTransaction", () => {
@@ -128,6 +160,24 @@ describe("buildTransaction", () => {
     );
 
     expect(transaction).not.toHaveProperty("notes");
+  });
+
+  it("keeps the settlement id only on income movements", () => {
+    const income = buildTransaction(
+      "transaction-1",
+      "user-1",
+      { ...validDto, type: "income", settlementId: "settlement-1" },
+      "now",
+    );
+    const expense = buildTransaction(
+      "transaction-1",
+      "user-1",
+      { ...validDto, settlementId: "settlement-1" },
+      "now",
+    );
+
+    expect(income.settlementId).toBe("settlement-1");
+    expect(expense).not.toHaveProperty("settlementId");
   });
 });
 

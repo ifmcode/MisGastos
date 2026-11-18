@@ -51,6 +51,9 @@ export function toTransactionData(
   const sharedExpenseId = readSharedExpenseId(dto);
   if (sharedExpenseId) data.sharedExpenseId = sharedExpenseId;
 
+  const settlementId = readSettlementId(dto);
+  if (settlementId) data.settlementId = settlementId;
+
   return data;
 }
 
@@ -68,6 +71,18 @@ function readSharedExpenseId(dto: CreateTransactionDto): string | null {
   return id.length > 0 ? id : null;
 }
 
+/**
+ * A settlement income is the mirror case: the link is only valid on an income,
+ * because a settlement records money the creditor received.
+ */
+export function readSettlementId(dto: CreateTransactionDto): string | null {
+  if (dto.type !== "income") return null;
+
+  const id = typeof dto.settlementId === "string" ? dto.settlementId.trim() : "";
+
+  return id.length > 0 ? id : null;
+}
+
 export function buildTransaction(
   id: string,
   ownerId: string,
@@ -75,6 +90,7 @@ export function buildTransaction(
   now: string,
 ): Transaction {
   const sharedExpenseId = readSharedExpenseId(dto);
+  const settlementId = readSettlementId(dto);
 
   return {
     id,
@@ -88,6 +104,7 @@ export function buildTransaction(
     date: dto.date,
     ownerId,
     ...(sharedExpenseId ? { sharedExpenseId } : {}),
+    ...(settlementId ? { settlementId } : {}),
     createdAt: now,
     updatedAt: now,
     deletedAt: dto.deletedAt ?? null,

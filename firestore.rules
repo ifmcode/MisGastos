@@ -198,6 +198,222 @@ service cloud.firestore {
         );
     }
 
+    // ---- TICKET-046 settlements ------------------------------------------
+    // A settlement cancels debt and is applied by existing: no pending state,
+    // and a soft-deleted record never counts. Rules cannot sum the pair ledger,
+    // so the debt bound stays in the service; here only the shape, the pair and
+    // the receiver-only link are validated.
+    function isSettlementParticipant(data) {
+      return isSignedIn() && request.auth.uid in data.participantIds;
+    }
+
+    function isSettlementIdValue(value) {
+      return value is string && value.size() > 0 && value.size() <= 1500;
+    }
+
+    function isReceiverLinkEmpty(data) {
+      return data.receiverWalletId == null
+        && data.receiverCategoryId == null
+        && data.receiverTransactionId == null;
+    }
+
+    function isReceiverLinkComplete(data) {
+      return isSettlementIdValue(data.receiverWalletId)
+        && isSettlementIdValue(data.receiverCategoryId)
+        && isSettlementIdValue(data.receiverTransactionId);
+    }
+
+    // Never a partial link: an income without its wallet or category could not be
+    // reverted by anyone.
+    function hasSettlementLinkShape(data) {
+      return isReceiverLinkEmpty(data) || isReceiverLinkComplete(data);
+    }
+
+    // Bounded by SETTLEMENT_AMOUNT_MAX (1,000,000.00) and
+    // SETTLEMENT_NOTE_MAX_LENGTH (500) in the settlement schema.
+    function hasSettlementMoney(data) {
+      return data.amountCents is int
+        && data.amountCents > 0
+        && data.amountCents <= 100000000
+        && data.currency is string
+        && data.currency.size() > 0
+        && data.date is string
+        && data.note is string
+        && data.note.size() <= 500;
+    }
+
+    function hasSettlementPair(data) {
+      return hasSortedPair(data.participantIds)
+        && data.pairId == data.participantIds[0] + '__' + data.participantIds[1]
+        && data.fromUserId in data.participantIds
+        && data.toUserId in data.participantIds
+        && data.fromUserId != data.toUserId
+        && request.auth.uid in data.participantIds;
+    }
+
+    function hasSettlementFields(data) {
+      return data.keys().hasOnly(
+        [
+          'participantIds',
+          'pairId',
+          'fromUserId',
+          'toUserId',
+          'amountCents',
+          'currency',
+          'date',
+          'note',
+          'receiverWalletId',
+          'receiverCategoryId',
+          'receiverTransactionId',
+          'createdBy',
+          'createdAt',
+          'updatedAt',
+          'deletedAt'
+        ]
+      );
+    }
+
+    // The creditor owns the linked income, so only they may clear the link and
+    // only while both the stored and the new record are active. A debtor delete
+    // with a linked movement is denied: the creditor must unlink first.
+    function isSettlementSoftDelete(previous, next) {
+      return previous.deletedAt == null
+        && next.deletedAt is string
+        && isReceiverLinkEmpty(next)
+        && (
+          previous.receiverTransactionId == null
+          || request.auth.uid == previous.toUserId
+        )
+        && next.diff(previous).affectedKeys().hasOnly(
+             request.auth.uid == previous.toUserId
+               ? [
+                   'deletedAt',
+                   'updatedAt',
+                   'receiverWalletId',
+                   'receiverCategoryId',
+                   'receiverTransactionId'
+                 ]
+               : ['deletedAt', 'updatedAt']
+           );
+    }
+
+    // A regular edit keeps the record active. The receiver link keys may only
+    // change for the creditor, and once an income exists the debtor can no
+    // longer resize it (the service rejects it with AMOUNT_LOCKED).
+    function isSettlementEdit(previous, next) {
+      return previous.deletedAt == null
+        && next.deletedAt == null
+        && (
+          request.auth.uid == previous.toUserId
+          || (
+            next.receiverWalletId == previous.receiverWalletId
+            && next.receiverCategoryId == previous.receiverCategoryId
+            && next.receiverTransactionId == previous.receiverTransactionId
+          )
+        )
+        && (
+          request.auth.uid == previous.toUserId
+          || previous.receiverTransactionId == null
+          || next.amountCents == previous.amountCents
+        );
+    }
+
+    // ---- TICKET-046 notifications ----------------------------------------
+    function isNotificationOwner(data) {
+      return isSignedIn() && data.userId == request.auth.uid;
+    }
+
+    function isNotificationType(value) {
+      return value in
+        ['settlement-created', 'settlement-updated', 'settlement-deleted'];
+    }
+
+    // Ids, numbers and booleans only: the copy lives in the locales.
+    function hasNotificationPayload(payload) {
+      return payload is map
+        && payload.keys().hasOnly(
+             [
+               'settlementId',
+               'pairId',
+               'friendUid',
+               'amountCents',
+               'currency',
+               'isFull',
+               'canLinkWallet'
+             ]
+           )
+        && isSettlementIdValue(payload.settlementId)
+        && payload.pairId is string
+        && payload.friendUid is string
+        && payload.amountCents is int
+        && payload.amountCents > 0
+        && payload.amountCents <= 100000000
+        && payload.currency is string
+        && payload.isFull is bool
+        && payload.canLinkWallet is bool;
+    }
+
+    // The recipient must be the other participant of the referenced settlement
+    // and the actor must belong to it. `getAfter` is required because the
+    // settlement and its notification are written in the same transaction.
+    function isNotificationTargetFor(settlement, notification) {
+      return settlement.participantIds is list
+        && request.auth.uid in settlement.participantIds
+        && notification.userId in settlement.participantIds
+        && notification.userId != request.auth.uid
+        && notification.payload.friendUid == request.auth.uid
+        && notification.payload.pairId == settlement.pairId;
+    }
+
+    // The actor writes the notification for the other participant and must read
+    // the deterministic document inside the same transaction to stay idempotent.
+    // `list` stays owner-only; this is a single-document `get` for a settlement
+    // the actor participates in, and `getAfter` covers the create in the same
+    // write. The actor already knows the settlement, so the trade-off is the
+    // recipient's `readAt`, not new financial data.
+    function isSettlementNotificationActor(data) {
+      return isSignedIn()
+        && data.userId != request.auth.uid
+        && data.payload is map
+        && data.payload.settlementId is string
+        && request.auth.uid in getAfter(
+             /databases/$(database)/documents/settlements/$(data.payload.settlementId)
+           ).data.participantIds;
+    }
+
+    // Shared expense links are expense-only; a settlement link is income-only.
+    // Both are optional, but a movement can never carry the two at once.
+    function hasNoDoubleLink(data) {
+      return !(('sharedExpenseId' in data) && ('settlementId' in data));
+    }
+
+    function hasValidSettlementLink(data) {
+      return data.type == 'income'
+        && isSettlementIdValue(data.settlementId)
+        && isSettlementIncomeTarget(
+             getAfter(
+               /databases/$(database)/documents/settlements/$(data.settlementId)
+             ).data,
+             data
+           );
+    }
+
+    function isSettlementIncomeTarget(settlement, movement) {
+      return settlement.participantIds is list
+        && request.auth.uid in settlement.participantIds
+        && settlement.toUserId == request.auth.uid
+        && settlement.currency == movement.currency
+        && settlement.deletedAt == null;
+    }
+
+    function keepsSettlementLink(previous, next) {
+      return ('settlementId' in previous) == ('settlementId' in next)
+        && (
+          !('settlementId' in previous)
+          || previous.settlementId == next.settlementId
+        );
+    }
+
     // Profiles keep the Firebase uid in the `uid` field and are looked up by
     // it. Only the owner can read or update the document, and the uid cannot
     // be reassigned after creation.
@@ -226,20 +442,28 @@ service cloud.firestore {
       allow read: if isWalletOwner(resource.data);
 
       // A linked movement is an expense of the payer whose referenced expense
-      // must exist once this write is applied (same transaction included).
+      // must exist once this write is applied (same transaction included), or an
+      // income of the creditor of the referenced settlement.
       allow create: if isSignedIn()
         && request.resource.data.ownerId == request.auth.uid
+        && hasNoDoubleLink(request.resource.data)
         && (
           !('sharedExpenseId' in request.resource.data)
           || hasValidSharedExpenseLink(request.resource.data)
+        )
+        && (
+          !('settlementId' in request.resource.data)
+          || hasValidSettlementLink(request.resource.data)
         );
 
-      // An update must still be a valid linked expense. `get` covers the stored
-      // state (payer flip, edit) and `getAfter` covers an atomic currency edit
-      // where the expense and the movement change currency together.
+      // An update must still be a valid linked record. `get` covers the stored
+      // state (edit, soft delete) and `getAfter` covers an atomic currency edit
+      // where the source record and the movement change currency together.
       allow update: if isWalletOwner(resource.data)
         && request.resource.data.ownerId == resource.data.ownerId
         && keepsSharedExpenseLink(resource.data, request.resource.data)
+        && keepsSettlementLink(resource.data, request.resource.data)
+        && hasNoDoubleLink(request.resource.data)
         && (
           !('sharedExpenseId' in request.resource.data)
           || (
@@ -259,12 +483,33 @@ service cloud.firestore {
               )
             )
           )
+        )
+        && (
+          !('settlementId' in request.resource.data)
+          || (
+            request.resource.data.type == 'income'
+            && (
+              isSettlementIncomeTarget(
+                get(
+                  /databases/$(database)/documents/settlements/$(request.resource.data.settlementId)
+                ).data,
+                request.resource.data
+              )
+              || isSettlementIncomeTarget(
+                getAfter(
+                  /databases/$(database)/documents/settlements/$(request.resource.data.settlementId)
+                ).data,
+                request.resource.data
+              )
+            )
+          )
         );
 
-      // Linked movements are only ever soft-deleted by the shared-expense
-      // operations; a hard delete would leave the expense pointing nowhere.
+      // Linked movements are only ever soft-deleted by their operations; a hard
+      // delete would leave the shared expense or the settlement pointing nowhere.
       allow delete: if isWalletOwner(resource.data)
-        && !('sharedExpenseId' in resource.data);
+        && !('sharedExpenseId' in resource.data)
+        && !('settlementId' in resource.data);
     }
 
     // User-defined categories. The type is fixed after creation so historical
@@ -506,6 +751,111 @@ service cloud.firestore {
         && request.resource.data.currency is string
         && request.resource.data.updatedAt is string
         && isExpenseDeletedAt(request.resource.data.deletedAt);
+
+      allow delete: if false;
+    }
+
+    // 1:1 debt settlements. Applied directly: `deletedAt: null` means active and
+    // every active settlement feeds the pair ledger; a soft-deleted one never
+    // does. Both participants read it and either one can create it (the service
+    // derives the direction), but only the creditor may link a wallet. The pair,
+    // the direction, the currency and the creation stamp are immutable and the
+    // record is never hard-deleted.
+    //
+    // No composite index: `getSettlementsOperation` filters only with
+    // `where('participantIds', 'array-contains', uid)` and sorts client-side.
+    match /settlements/{settlementId} {
+      allow get, list: if isSettlementParticipant(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && hasSettlementPair(request.resource.data)
+        && hasSettlementMoney(request.resource.data)
+        && hasSettlementFields(request.resource.data)
+        && hasSettlementLinkShape(request.resource.data)
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string
+        && request.resource.data.deletedAt == null
+        // Only the creditor ever links the income, so a debtor create is always
+        // social-only.
+        && (
+          request.resource.data.createdBy == request.resource.data.toUserId
+          || isReceiverLinkEmpty(request.resource.data)
+        )
+        && exists(
+             /databases/$(database)/documents/friendships/$(request.resource.data.pairId)
+           );
+
+      allow update: if isSettlementParticipant(resource.data)
+        && resource.data.deletedAt == null
+        && request.resource.data.participantIds == resource.data.participantIds
+        && request.resource.data.pairId == resource.data.pairId
+        && request.resource.data.fromUserId == resource.data.fromUserId
+        && request.resource.data.toUserId == resource.data.toUserId
+        && request.resource.data.currency == resource.data.currency
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && hasSettlementPair(request.resource.data)
+        && hasSettlementMoney(request.resource.data)
+        && hasSettlementFields(request.resource.data)
+        && hasSettlementLinkShape(request.resource.data)
+        && request.resource.data.updatedAt is string
+        && (
+          isSettlementSoftDelete(resource.data, request.resource.data)
+          || isSettlementEdit(resource.data, request.resource.data)
+        );
+
+      allow delete: if false;
+    }
+
+    // In-app notifications. The document id is the deterministic dedupe key, so a
+    // retried event cannot duplicate it. The recipient lists and reads the inbox;
+    // the actor writes it for the other participant and may `get` that single
+    // deterministic document inside the settlement transaction (see the get
+    // rule). `readAt` is the only mutable field and notifications are never
+    // deleted.
+    //
+    // No composite index: `getNotificationsOperation` filters only with
+    // `where('userId', '==', uid)` and sorts client-side.
+    match /notifications/{notificationId} {
+      // The actor needs a single `get` by its deterministic id to make the
+      // settlement transaction idempotent; the inbox `list` stays owner-only.
+      // A missing id must resolve to not-found instead of permission-denied so
+      // the first write can decide whether to create it. Same deliberate
+      // existence-oracle trade-off as the friend pair documents.
+      allow get: if isSignedIn()
+        && (
+          !exists(/databases/$(database)/documents/notifications/$(notificationId))
+          || isNotificationOwner(resource.data)
+          || isSettlementNotificationActor(resource.data)
+        );
+
+      allow list: if isNotificationOwner(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.userId is string
+        && request.resource.data.userId != request.auth.uid
+        && notificationId == request.resource.data.dedupeKey
+        && isNotificationType(request.resource.data.type)
+        && request.resource.data.keys().hasOnly(
+             ['userId', 'type', 'payload', 'createdAt', 'readAt', 'dedupeKey']
+           )
+        && hasNotificationPayload(request.resource.data.payload)
+        && request.resource.data.readAt == null
+        && request.resource.data.createdAt is string
+        && isNotificationTargetFor(
+             getAfter(
+               /databases/$(database)/documents/settlements/$(request.resource.data.payload.settlementId)
+             ).data,
+             request.resource.data
+           );
+
+      allow update: if isNotificationOwner(resource.data)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+             ['readAt']
+           )
+        && request.resource.data.readAt is string;
 
       allow delete: if false;
     }

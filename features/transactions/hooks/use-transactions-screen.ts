@@ -89,8 +89,13 @@ export function useTransactionsScreen() {
   }
 
   function openDetail(transaction: Transaction) {
-    // A linked movement belongs to its shared expense: the personal detail (and
-    // its edit/delete actions) must never open for it.
+    // Linked movements belong to their social record: the personal detail (and
+    // its edit/delete actions) must never open for them.
+    if (transaction.settlementId) {
+      router.push(`/social/settlements/${transaction.settlementId}` as Href);
+      return;
+    }
+
     if (transaction.sharedExpenseId) {
       router.push(`/social/expenses/${transaction.sharedExpenseId}` as Href);
       return;

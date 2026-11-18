@@ -10,10 +10,12 @@ import {
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import type { SharedExpenseEditorController } from "@/features/shared-expenses/hooks/use-shared-expense-editor";
 import type { SharedExpense } from "@/features/shared-expenses/types/shared-expense.types";
+import type { Settlement } from "@/features/settlements/types/settlement.types";
 import { useAuth } from "@/hooks/use-auth";
 import { DEFAULT_CURRENCY } from "@/shared/constants/currencies";
 
 import { useFriendDetailExpenses } from "./use-friend-detail-expenses";
+import { useFriendDetailSettlements } from "./use-friend-detail-settlements";
 import {
   useFriendRemoval,
   type FriendRemovalController,
@@ -43,6 +45,14 @@ export interface FriendDetailScreenController {
   expensesLoading: boolean;
   expensesError: string | null;
   reloadExpenses: () => void;
+  /** Pair settlements and the full-settlement collapse state. */
+  settlements: Settlement[];
+  latestSettlement: Settlement | null;
+  settlementsLoading: boolean;
+  settlementsError: string | null;
+  canCollapseExpenses: boolean;
+  showExpenses: boolean;
+  toggleExpenses: () => void;
   /** Viewer uid, already normalized to a string for the expense rows. */
   viewerUid: string;
   /** Remaining friend failure, announced in its own banner. */
@@ -87,29 +97,31 @@ export function useFriendDetailScreen({
     onChanged: overview.refresh,
   });
 
+  const settlements = useFriendDetailSettlements({ viewerUid, friend });
+
   const reload = useCallback(() => {
     void overview.reload();
     expenses.reload();
-  }, [expenses.reload, overview.reload]);
+    settlements.reload();
+  }, [expenses.reload, overview.reload, settlements.reload]);
 
-  // One pull-to-refresh flag for both sources: `useSharedExpenseList` exposes
+  // One pull-to-refresh flag for all sources: `useSharedExpenseList` exposes
   // `refresh` but not its own refreshing state.
-  const refresh = useCallback(() => {
-    setRefreshing(true);
-    void Promise.all([overview.refresh(), expenses.refresh()]).finally(() => {
+  const refresh = useCallback(() => {    setRefreshing(true);
+    void Promise.all([
+      overview.refresh(),
+      expenses.refresh(),
+      settlements.refresh(),
+    ]).finally(() => {
       setRefreshing(false);
     });
-  }, [expenses.refresh, overview.refresh]);
+  }, [expenses.refresh, overview.refresh, settlements.refresh]);
 
   // Only the overview decides whether the uid exists: an expense failure must
   // not turn a removed/unknown friend into a full load error.
   const status: FriendDetailStatus = header
     ? "ready"
-    : overview.loading
-      ? "loading"
-      : overview.error
-        ? "error"
-        : "missing";
+    : overview.loading ? "loading" : overview.error ? "error" : "missing";
 
   return {
     status,
@@ -123,6 +135,13 @@ export function useFriendDetailScreen({
     expensesLoading: expenses.loading,
     expensesError: expenses.error,
     reloadExpenses: expenses.reload,
+    settlements: settlements.settlements,
+    latestSettlement: settlements.latest,
+    settlementsLoading: settlements.loading,
+    settlementsError: settlements.error,
+    canCollapseExpenses: settlements.canCollapseExpenses,
+    showExpenses: settlements.showExpenses,
+    toggleExpenses: settlements.toggleExpenses,
     viewerUid: viewerUid ?? "",
     removalError: removal.error,
     editor: expenses.editor,

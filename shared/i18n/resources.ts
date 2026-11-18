@@ -6,10 +6,14 @@ import dashboardEn from "@/features/dashboard/locales/en.json";
 import dashboardEs from "@/features/dashboard/locales/es.json";
 import friendsEn from "@/features/friends/locales/en.json";
 import friendsEs from "@/features/friends/locales/es.json";
+import notificationsEn from "@/features/notifications/locales/en.json";
+import notificationsEs from "@/features/notifications/locales/es.json";
 import profileEn from "@/features/profile/locales/en.json";
 import profileEs from "@/features/profile/locales/es.json";
 import settingsEn from "@/features/settings/locales/en.json";
 import settingsEs from "@/features/settings/locales/es.json";
+import settlementsEn from "@/features/settlements/locales/en.json";
+import settlementsEs from "@/features/settlements/locales/es.json";
 import sharedExpensesEn from "@/features/shared-expenses/locales/en.json";
 import sharedExpensesEs from "@/features/shared-expenses/locales/es.json";
 import socialEn from "@/features/social/locales/en.json";
@@ -40,6 +44,8 @@ export const NAMESPACES = [
   "dashboard",
   "settings",
   "profile",
+  "settlements",
+  "notifications",
   "sharedExpenses",
   "social",
 ] as const;
@@ -61,6 +67,8 @@ export const resources = {
     dashboard: dashboardEs,
     settings: settingsEs,
     profile: profileEs,
+    settlements: settlementsEs,
+    notifications: notificationsEs,
     sharedExpenses: sharedExpensesEs,
     social: socialEs,
   },
@@ -77,6 +85,8 @@ export const resources = {
     dashboard: dashboardEn,
     settings: settingsEn,
     profile: profileEn,
+    settlements: settlementsEn,
+    notifications: notificationsEn,
     sharedExpenses: sharedExpensesEn,
     social: socialEn,
   },

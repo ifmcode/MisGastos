@@ -35,4 +35,15 @@ describe("createDashboardNavigationActions", () => {
     expect(push).toHaveBeenCalledWith("/social/expenses/expense-1");
     expect(navigate).not.toHaveBeenCalled();
   });
+
+  it("pushes the settlement detail of a linked income", () => {
+    const navigate = jest.fn();
+    const push = jest.fn();
+    const actions = createDashboardNavigationActions({ navigate, push });
+
+    actions.openSettlement("settlement-1");
+
+    expect(push).toHaveBeenCalledWith("/social/settlements/settlement-1");
+    expect(navigate).not.toHaveBeenCalled();
+  });
 });

@@ -7,12 +7,14 @@ export interface DashboardMovementDialogPort {
   openEdit: (transaction: Transaction) => void;
   /** Linked movements live in the social feature, not in the personal detail. */
   openSharedExpense: (expenseId: string) => void;
+  /** The linked settlement income opens its settlement detail too. */
+  openSettlement: (settlementId: string) => void;
 }
 
 export interface DashboardMovementActions {
   /**
    * Opens the detail without a stale mutation error from a previous attempt, or
-   * navigates to the shared expense when the movement carries a link.
+   * navigates to the linked record when the movement carries a link.
    */
   openDetail: (transaction: Transaction) => void;
   /** Closes the read-only detail before the edit form replaces it. */
@@ -30,6 +32,11 @@ export function createDashboardMovementActions(
 ): DashboardMovementActions {
   return {
     openDetail: (transaction) => {
+      if (transaction.settlementId) {
+        port.openSettlement(transaction.settlementId);
+        return;
+      }
+
       if (transaction.sharedExpenseId) {
         port.openSharedExpense(transaction.sharedExpenseId);
         return;

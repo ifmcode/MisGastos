@@ -8,6 +8,7 @@ import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { friendDetailStyles as styles } from "../styles/friend-detail.styles";
+import { FriendDetailSettleButton } from "./friend-detail-settle-button";
 
 export interface FriendDetailHeaderProps {
   header: FriendDetailHeaderData;
@@ -17,6 +18,8 @@ export interface FriendDetailHeaderProps {
   removing: boolean;
   onBack: () => void;
   onRemove: () => void;
+  /** Opens the settlement form for the pair debt. */
+  onSettle: () => void;
 }
 
 /**
@@ -29,6 +32,7 @@ export function FriendDetailHeader({
   removing,
   onBack,
   onRemove,
+  onSettle,
 }: FriendDetailHeaderProps) {
   const theme = useFormTheme();
   const locale = useAppLocale();
@@ -138,6 +142,9 @@ export function FriendDetailHeader({
           })
         )}
       </View>
+      {header.balances.length > 0 ? (
+        <FriendDetailSettleButton name={header.name} onPress={onSettle} />
+      ) : null}
     </View>
   );
 }

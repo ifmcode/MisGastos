@@ -1,0 +1,45 @@
+{
+  "title": "Notifications",
+  "subtitle": "What happened with your debts and your friends.",
+  "loading": "Loading notifications…",
+  "errorTitle": "Could not load the notifications",
+  "retryAccessibility": "Retry loading notifications",
+  "emptyTitle": "You have no notifications",
+  "emptyMessage": "When a friend settles a debt with you, you will see it here.",
+  "actorFallback": "A friend",
+  "unread": "Unread",
+  "bell": {
+    "label_zero": "Notifications",
+    "label_one": "Notifications: {{count}} unread",
+    "label_other": "Notifications: {{count}} unread",
+    "hint": "Open the notification inbox."
+  },
+  "row": {
+    "openAccessibility": "Open the notification: {{title}}",
+    "openHint": "Opens the related detail and marks the notification as read.",
+    "settlementWalletHint": "Opens the settlement to choose your income wallet."
+  },
+  "types": {
+    "settlement-created": {
+      "full": "{{name}} settled the whole debt of {{amount}}.",
+      "partial": "{{name}} settled part of the debt: {{amount}}."
+    },
+    "settlement-updated": {
+      "full": "{{name}} updated the settlement of {{amount}}; the debt is settled.",
+      "partial": "{{name}} updated the settlement to {{amount}}."
+    },
+    "settlement-deleted": {
+      "full": "{{name}} deleted the settlement of {{amount}}; the debt returns to its previous state.",
+      "partial": "{{name}} deleted the settlement of {{amount}}."
+    }
+  },
+  "errors": {
+    "SIGN_IN_REQUIRED": "You must sign in.",
+    "NOTIFICATION_NOT_FOUND": "This notification no longer exists.",
+    "NOT_OWNER": "This notification does not belong to you.",
+    "LOAD_FAILED": "Could not load the notifications. Try again.",
+    "SAVE_FAILED": "Could not update the notification. Try again.",
+    "PERMISSION_DENIED": "You do not have permission to perform this operation.",
+    "NETWORK": "No connection. Check your network and try again."
+  }
+}

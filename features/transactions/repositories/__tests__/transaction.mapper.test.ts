@@ -95,6 +95,38 @@ describe("mapTransactionDocument shared links and soft delete", () => {
   });
 });
 
+describe("mapTransactionDocument settlement links", () => {
+  it("reads a trimmed settlement id on income movements", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, type: "income", settlementId: "  settlement-1  " },
+      "user-1",
+    );
+
+    expect(transaction?.settlementId).toBe("settlement-1");
+  });
+
+  it("drops the settlement id on expense movements", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, settlementId: "settlement-1" },
+      "user-1",
+    );
+
+    expect(transaction && "settlementId" in transaction).toBe(false);
+  });
+
+  it("ignores an empty settlement id", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, type: "income", settlementId: "   " },
+      "user-1",
+    );
+
+    expect(transaction && "settlementId" in transaction).toBe(false);
+  });
+});
+
 describe("mapTransactionDocument invalid documents", () => {
   it("drops an unknown type, a non-positive amount or an unknown currency", () => {
     expect(

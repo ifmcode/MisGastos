@@ -92,7 +92,7 @@ Give every accepted friend a dedicated screen at `/social/friends/[uid]` that re
 - **Removing a friend:** `removeFriend` deletes the friendship document but does **not** touch `sharedExpenses`. Existing expenses stay participant-readable while no new expense can be created (`NOT_FRIEND`), and after this ticket they lose their only UI entry point once the friend disappears. Document the chosen behaviour in the `Implemented` section; never delete money records as a side effect of removing a friend.
 - **Balances:** the header reuses `Friend.balances[]`, which is already grouped per currency and never converted; do not sum lines of different currencies and do not recompute the ledger in the screen.
 - **Copy:** identity and balance strings stay in the `friends` namespace, expense strings in `sharedExpenses`; only the screen-level labels that are genuinely new (title, empty/missing state, FAB label) go to `social`.
-- **TICKET-046:** the settlement entry point planned for this screen is specified in `docs/project/tickets/TICKET-046-FRIEND-SETTLEMENT.md`; it adds the **Liquidar deudas** action to the header.
+- **TICKET-046:** the settlement entry point planned for this screen is specified in `docs/project/tickets/[DONE] TICKET-046-FRIEND-SETTLEMENT.md`; it adds the **Liquidar deudas** action to the header.
 - **Out of scope:** TICKET-043 (expense detail route and row tap), TICKET-044 (wallet/movement link shown in the expense detail), TICKET-046 (settlement button), group expenses and any change to the split math, schema, service or Firestore rules.
 
 ## Validation Plan

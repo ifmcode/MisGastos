@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import type { Friend } from "@/features/friends/types/friend.types";
@@ -20,12 +20,16 @@ export interface FriendDetailExpensesProps {
   error: string | null;
   onRetry: () => void;
   onOpen: (expense: SharedExpense) => void;
+  /** True when a full settlement hides the previous expenses. */
+  collapsed: boolean;
+  canCollapse: boolean;
+  onToggle: () => void;
 }
 
 /**
- * Section title plus the pair expenses. Loading and the retry error only take
- * the whole section while there is nothing to show; otherwise the list stays
- * visible and the failure is announced in a banner.
+ * Section title plus the pair expenses. A full settlement collapses the list
+ * behind "Show previous expenses" instead of deleting history, and the section
+ * is never hidden while the pair still owes money.
  */
 export function FriendDetailExpenses({
   expenses,
@@ -35,9 +39,12 @@ export function FriendDetailExpenses({
   error,
   onRetry,
   onOpen,
+  collapsed,
+  canCollapse,
+  onToggle,
 }: FriendDetailExpensesProps) {
   const theme = useFormTheme();
-  const { t } = useTranslation(["sharedExpenses", "social", "common"]);
+  const { t } = useTranslation(["sharedExpenses", "social", "common", "settlements"]);
   const empty = expenses.length === 0;
 
   return (
@@ -49,7 +56,38 @@ export function FriendDetailExpenses({
         {t("sharedExpenses:title")}
       </ThemedText>
 
-      {loading && empty ? (
+      {collapsed ? (
+        <>
+          <View
+            style={[
+              styles.settledNotice,
+              { borderColor: theme.border, backgroundColor: theme.surface },
+            ]}
+          >
+            <ThemedText style={[styles.settledTitle, { color: theme.success }]}>
+              {t("settlements:expenses.settledTitle")}
+            </ThemedText>
+            <ThemedText style={[styles.settledMessage, { color: theme.muted }]}>
+              {t("settlements:expenses.settledMessage")}
+            </ThemedText>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("settlements:expenses.showPrevious")}
+            accessibilityHint={t("settlements:expenses.showPreviousHint")}
+            onPress={onToggle}
+            style={({ pressed }) => [
+              styles.toggleButton,
+              { borderColor: theme.primary },
+              pressed && styles.pressed,
+            ]}
+          >
+            <ThemedText style={[styles.toggleButtonText, { color: theme.primary }]}>
+              {t("settlements:expenses.showPrevious")}
+            </ThemedText>
+          </Pressable>
+        </>
+      ) : loading && empty ? (
         <LoadingState variant="inline" message={t("sharedExpenses:loading")} />
       ) : error && empty ? (
         <ErrorState
@@ -70,6 +108,23 @@ export function FriendDetailExpenses({
             emptyMessage={t("social:friendDetail.emptyMessage")}
             onOpen={onOpen}
           />
+          {canCollapse ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("settlements:expenses.hidePrevious")}
+              accessibilityHint={t("settlements:expenses.hidePreviousHint")}
+              onPress={onToggle}
+              style={({ pressed }) => [
+                styles.toggleButton,
+                { borderColor: theme.border },
+                pressed && styles.pressed,
+              ]}
+            >
+              <ThemedText style={[styles.toggleButtonText, { color: theme.text }]}>
+                {t("settlements:expenses.hidePrevious")}
+              </ThemedText>
+            </Pressable>
+          ) : null}
         </>
       )}
     </View>

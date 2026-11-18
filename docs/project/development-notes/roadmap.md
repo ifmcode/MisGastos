@@ -18,7 +18,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Phase:** 5 - Social vertical slice
 - **Current ticket:** TICKET-047 - in-app notification inbox
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-051 - Mandatory shared expense category and no hidden default (17/11/2026)
+- **Last completed:** TICKET-046 - 1:1 debt settlement with direct application (18/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
 - **Queued:** TICKET-055 and TICKET-056 in Phase 5.3 after the notification inbox; TICKET-008 in Phase 6
 - **Next:** TICKET-047 - in-app notification inbox
@@ -133,7 +133,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] TICKET-051: mandatory shared-expense category and no hidden default ✅ 17/11/2026
 
 ### 5.2 1:1 settlement and notifications
-- [ ] TICKET-046: 1:1 debt settlement with bilateral confirmation
+- [x] TICKET-046: 1:1 debt settlement with direct application ✅ 18/11/2026
 - [ ] TICKET-047: in-app notification inbox with pending/viewed sections and the in-app banner
 - The balance between two people already ships with TICKET-009; TICKET-046 replaces the former "minimal subset of TICKET-010" settlement line.
 - Validate with 3-5 real users
@@ -146,7 +146,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Phase 6: Groups (QUEUED)
 - [ ] TICKET-008: create groups (consumes the Social → Tus grupos shell from TICKET-041)
 - [ ] Full TICKET-009: the group requirements still open after the 1:1 subset (group membership and payer validation, group currency, expense in the group detail)
-- [ ] TICKET-010: group balances and settlements (reuse the TICKET-046 settlement state machine, wallet movements and notification events)
+- [ ] TICKET-010: group balances and settlements (reuse the TICKET-046 direct-settlement model, the receiver wallet movement and notification events)
 - [ ] TICKET-011: group history
 - Constraint from the Phase 4 spike: shared expenses and settlements are append-only ledger entries folded by a shared pure function, so offline group movements work without a rewrite
 
