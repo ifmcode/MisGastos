@@ -6,6 +6,7 @@ import {
   formatDateTime,
   formatNumber,
   formatPercent,
+  formatRelativeTime,
 } from "../format";
 
 describe("formatCurrency", () => {
@@ -54,5 +55,52 @@ describe("formatDateTime", () => {
 
   it("returns the input for invalid values", () => {
     expect(formatDateTime("not-a-date", "es-ES")).toBe("not-a-date");
+  });
+});
+
+describe("formatRelativeTime", () => {
+  const now = new Date("2026-11-18T12:00:00.000Z");
+
+  function ago(ms: number): Date {
+    return new Date(now.getTime() - ms);
+  }
+
+  it("uses the seconds bucket and the automatic wording of the locale", () => {
+    expect(formatRelativeTime(ago(10 * 1000), "es-ES", now)).toBe(
+      "hace 10 segundos",
+    );
+    expect(formatRelativeTime(ago(10 * 1000), "en-US", now)).toBe(
+      "10 seconds ago",
+    );
+    expect(formatRelativeTime(now, "es-ES", now)).toBe("ahora");
+    expect(formatRelativeTime(now, "en-US", now)).toBe("now");
+  });
+
+  it("switches to minutes and hours", () => {
+    expect(formatRelativeTime(ago(5 * 60 * 1000), "es-ES", now)).toBe(
+      "hace 5 minutos",
+    );
+    expect(formatRelativeTime(ago(5 * 60 * 1000), "en-US", now)).toBe(
+      "5 minutes ago",
+    );
+    expect(formatRelativeTime(ago(2 * 60 * 60 * 1000), "es-ES", now)).toBe(
+      "hace 2 horas",
+    );
+    expect(formatRelativeTime(ago(2 * 60 * 60 * 1000), "en-US", now)).toBe(
+      "2 hours ago",
+    );
+  });
+
+  it("switches to days for older values", () => {
+    const threeDaysAgo = ago(3 * 24 * 60 * 60 * 1000);
+
+    expect(formatRelativeTime(threeDaysAgo, "es-ES", now)).toBe(
+      "hace 3 días",
+    );
+    expect(formatRelativeTime(threeDaysAgo, "en-US", now)).toBe("3 days ago");
+  });
+
+  it("falls back to the absolute date for invalid values", () => {
+    expect(formatRelativeTime("not-a-date", "es-ES", now)).toBe("not-a-date");
   });
 });

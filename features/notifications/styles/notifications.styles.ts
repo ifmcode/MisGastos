@@ -104,4 +104,104 @@ export const notificationsStyles = StyleSheet.create({
     lineHeight: 14,
     fontWeight: "700",
   },
+
+  // Segmented control: base + variant, mirroring the Social pattern.
+  segmentControl: {
+    flexDirection: "row",
+    gap: 4,
+    borderWidth: 1,
+    borderRadius: 14,
+    padding: 4,
+    marginHorizontal: 24,
+    marginBottom: 12,
+  },
+  segment: {
+    flex: 1,
+    minHeight: 40,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+  },
+  segmentText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  segmentCount: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "700",
+    minWidth: 18,
+    textAlign: "center",
+  },
+
+  // List header: action banner plus the mark-all-read action.
+  listHeader: {
+    gap: 8,
+    paddingTop: 2,
+  },
+  markAllRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 6,
+    minHeight: 44,
+    paddingHorizontal: 4,
+  },
+  markAllText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  // Floating banner: layout only, it must never capture empty space.
+  bannerOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    zIndex: 10,
+  },
+  bannerCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingRight: 2,
+  },
+  bannerBody: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 12,
+  },
+  bannerIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bannerText: {
+    flex: 1,
+    gap: 2,
+  },
+  bannerTitle: {
+    fontSize: 14,
+    lineHeight: 19,
+    fontWeight: "600",
+  },
+  bannerMeta: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  bannerClose: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });

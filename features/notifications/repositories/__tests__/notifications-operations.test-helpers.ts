@@ -10,6 +10,7 @@ export const mockDoc = jest.fn<(...args: unknown[]) => unknown>();
 export const mockCollection = jest.fn<(...args: unknown[]) => unknown>();
 export const mockQuery = jest.fn<(...args: unknown[]) => unknown>();
 export const mockWhere = jest.fn<(...args: unknown[]) => unknown>();
+export const mockOnSnapshot = jest.fn<(...args: unknown[]) => unknown>();
 
 jest.mock("firebase/firestore", () => ({
   getDoc: (...args: unknown[]) => mockGetDoc(...args),
@@ -20,6 +21,7 @@ jest.mock("firebase/firestore", () => ({
   collection: (...args: unknown[]) => mockCollection(...args),
   query: (...args: unknown[]) => mockQuery(...args),
   where: (...args: unknown[]) => mockWhere(...args),
+  onSnapshot: (...args: unknown[]) => mockOnSnapshot(...args),
 }));
 
 jest.mock("@/lib/firebase", () => ({ db: {} }));

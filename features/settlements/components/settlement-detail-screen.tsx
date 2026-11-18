@@ -1,8 +1,7 @@
-import { useRouter, type Href } from "expo-router";
-import { useCallback } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
+import { centsToAmount } from "@/features/friends/utils/friend-balance";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
@@ -10,6 +9,7 @@ import { LoadingState } from "@/shared/components/molecules/loading-state";
 import { DetailView } from "@/shared/components/organisms/detail-view";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useDetailActions } from "@/shared/hooks/use-detail-actions";
+import { useDetailCloseNavigation } from "@/shared/hooks/use-detail-close-navigation";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { useSettlementDetailScreen } from "../hooks/use-settlement-detail-screen";
@@ -22,34 +22,34 @@ import { SettlementRouteHeader } from "./settlement-route-header";
 export interface SettlementDetailScreenProps {
   /** Route id, already normalized to a single trimmed string. */
   settlementId: string;
+  /** `from=notification`: back lands on the friend detail, not the inbox. */
+  from?: string;
+  /** Actor carried by the notification; used when the settlement is gone. */
+  friendUid?: string;
 }
 
 /** Read-only settlement with edit/delete and the creditor's wallet follow-up. */
 export function SettlementDetailScreen({
   settlementId,
+  from,
+  friendUid,
 }: SettlementDetailScreenProps) {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const locale = useAppLocale();
   const { t, tr } = useScopedTranslation(["settlements", "common"]);
   const screen = useSettlementDetailScreen({ settlementId });
   const { settlement, detail, friendName } = screen;
   const amount = settlement
-    ? locale.formatCurrency(settlement.amountCents / 100, settlement.currency)
+    ? locale.formatCurrency(
+        centsToAmount(settlement.amountCents),
+        settlement.currency,
+      )
     : "";
-
-  const leave = useCallback(() => {
-    if (router.canGoBack()) {
-      router.back();
-      return;
-    }
-
-    router.replace(
-      (detail?.friendUid
-        ? `/social/friends/${detail.friendUid}`
-        : "/(tabs)/social") as Href,
-    );
-  }, [detail?.friendUid, router]);
+  const parentFriendUid = detail?.friendUid ?? friendUid ?? null;
+  const leave = useDetailCloseNavigation({
+    fromNotification: from === "notification",
+    friendUid: parentFriendUid,
+  });
 
   const view = useSettlementDetailView({
     settlement,

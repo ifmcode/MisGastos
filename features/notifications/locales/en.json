@@ -4,10 +4,33 @@
   "loading": "Loading notifications…",
   "errorTitle": "Could not load the notifications",
   "retryAccessibility": "Retry loading notifications",
-  "emptyTitle": "You have no notifications",
-  "emptyMessage": "When a friend settles a debt with you, you will see it here.",
   "actorFallback": "A friend",
   "unread": "Unread",
+  "segments": {
+    "accessibility": "Notification inbox sections",
+    "pending": "Pending",
+    "viewed": "Seen",
+    "pendingAccessibility_one": "Pending: {{count}} notification not presented yet",
+    "pendingAccessibility_other": "Pending: {{count}} notifications not presented yet",
+    "viewedAccessibility_one": "Seen: {{count}} notification presented",
+    "viewedAccessibility_other": "Seen: {{count}} notifications presented"
+  },
+  "empty": {
+    "pendingTitle": "You have no pending notifications",
+    "pendingMessage": "When a friend settles a debt with you, it will wait here until you see it.",
+    "viewedTitle": "You have not seen any notification yet",
+    "viewedMessage": "Notifications you open or dismiss will be kept in this section."
+  },
+  "markAllRead": {
+    "label": "Mark all as read",
+    "accessibilityLabel": "Mark every pending notification as read",
+    "hint": "Marks each pending notification as read and moves it to Seen."
+  },
+  "banner": {
+    "openAccessibility": "Open the notification: {{title}}",
+    "openHint": "Opens the related detail and marks the notification as read.",
+    "close": "Dismiss the notification"
+  },
   "bell": {
     "label_zero": "Notifications",
     "label_one": "Notifications: {{count}} unread",
@@ -31,7 +54,11 @@
     "settlement-deleted": {
       "full": "{{name}} deleted the settlement of {{amount}}; the debt returns to its previous state.",
       "partial": "{{name}} deleted the settlement of {{amount}}."
-    }
+    },
+    "friend-request": "{{name}} sent you a friend request.",
+    "friend-request-accepted": "{{name}} accepted your friend request.",
+    "group-expense": "{{name}} added a group expense.",
+    "group-settlement": "{{name}} recorded a group settlement."
   },
   "errors": {
     "SIGN_IN_REQUIRED": "You must sign in.",

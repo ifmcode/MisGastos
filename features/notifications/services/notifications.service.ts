@@ -1,27 +1,32 @@
-import type { INotificationsRepository } from "../repositories/notifications.repository";
+import {
+  buildSettlementNotificationInput,
+  type SettlementNotificationInput,
+} from "@/features/settlements/utils/settlement-notification";
+
+import type {
+  INotificationsRepository,
+  NotificationsListener,
+  NotificationsListenerError,
+  NotificationsUnsubscribe,
+} from "../repositories/notifications.repository";
 import type {
   AppNotification,
   NotificationWrite,
 } from "../types/notification.types";
 import {
   countUnreadNotifications,
-  sortNotifications,
+  isPendingNotification,
+  sortNotificationsNewestFirst,
 } from "../utils/notifications.utils";
-import { NotificationOperationError } from "./notification.errors";
+import { requireOwnedNotification, requireUserId } from "./notifications.guards";
 
-function requireUserId(value: unknown): string {
-  const uid = typeof value === "string" ? value.trim() : "";
-
-  if (uid.length === 0) {
-    throw new NotificationOperationError("SIGN_IN_REQUIRED");
-  }
-
-  return uid;
-}
+const NOOP_UNSUBSCRIBE: NotificationsUnsubscribe = () => {};
 
 /**
- * Minimal inbox of TICKET-046: unread-first list, unread count and mark-as-read.
- * Every guard is owner-only and returns a stable code; the UI translates it.
+ * Inbox use cases of TICKET-047: newest-first list, the two stamps (seen vs
+ * read), mark-all-read over Pendientes and the foreground subscription. Every
+ * guard is owner-only and returns a stable code; the UI translates it, the
+ * service never returns a sentence.
  */
 export class NotificationsService {
   constructor(private readonly repository: INotificationsRepository) {}
@@ -30,44 +35,105 @@ export class NotificationsService {
     const viewer = requireUserId(viewerUid);
     const notifications = await this.repository.getNotifications(viewer);
 
-    return sortNotifications(notifications);
+    return sortNotificationsNewestFirst(notifications);
   }
 
   countUnread(notifications: readonly AppNotification[]): number {
     return countUnreadNotifications(notifications);
   }
 
-  /** Idempotent: a notification that is already read is left untouched. */
+  /** Banner dismissed or timed out: only `seenAt`, the row stays unread. */
+  async markSeen(
+    viewerUid: string,
+    notificationId: string,
+    seenAt: string,
+  ): Promise<void> {
+    const { id, notification } = await requireOwnedNotification(
+      this.repository,
+      viewerUid,
+      notificationId,
+    );
+
+    if (notification.seenAt !== null) return;
+
+    await this.repository.markNotificationSeen(id, seenAt);
+  }
+
+  /**
+   * Opened: one write with both stamps. An existing stamp is preserved, so an
+   * already presented row keeps its `seenAt` and an already read row is a no-op.
+   */
   async markRead(
     viewerUid: string,
     notificationId: string,
-    readAt: string,
+    at: string,
   ): Promise<void> {
-    const viewer = requireUserId(viewerUid);
-    const id = notificationId.trim();
+    const { id, notification } = await requireOwnedNotification(
+      this.repository,
+      viewerUid,
+      notificationId,
+    );
 
-    if (id.length === 0) {
-      throw new NotificationOperationError("NOTIFICATION_NOT_FOUND");
-    }
+    if (notification.readAt !== null && notification.seenAt !== null) return;
 
-    const notification = await this.repository.getNotification(id);
-
-    if (!notification) {
-      throw new NotificationOperationError("NOTIFICATION_NOT_FOUND");
-    }
-
-    if (notification.userId !== viewer) {
-      throw new NotificationOperationError("NOT_OWNER");
-    }
-
-    if (notification.readAt !== null) return;
-
-    await this.repository.markNotificationRead(id, readAt);
+    await this.repository.markNotificationRead(
+      id,
+      notification.readAt ?? at,
+      notification.seenAt ?? at,
+    );
   }
 
+  /**
+   * Stamps every Pendiente (`seenAt == null`) once, preserving an existing
+   * `readAt`. Returns how many rows were touched.
+   */
+  async markAllRead(viewerUid: string, at: string): Promise<number> {
+    const viewer = requireUserId(viewerUid);
+    const notifications = await this.repository.getNotifications(viewer);
+    const pending = notifications.filter(isPendingNotification);
+
+    for (const notification of pending) {
+      await this.repository.markNotificationRead(
+        notification.id,
+        notification.readAt ?? at,
+        at,
+      );
+    }
+
+    return pending.length;
+  }
+
+  /**
+   * Foreground listener behind the banner. A blank viewer returns a no-op
+   * unsubscribe so a hook can subscribe before auth resolves.
+   */
+  subscribe(
+    viewerUid: string,
+    onChange: NotificationsListener,
+    onError?: NotificationsListenerError,
+  ): NotificationsUnsubscribe {
+    const viewer = typeof viewerUid === "string" ? viewerUid.trim() : "";
+    if (viewer.length === 0) return NOOP_UNSUBSCRIBE;
+
+    return this.repository.listenNotifications(viewer, onChange, onError);
+  }
+
+  /** Producer-agnostic helper; the settlement operations write in-transaction. */
   createNotification(
     input: NotificationWrite,
   ): Promise<AppNotification | null> {
     return this.repository.createNotification(input);
+  }
+
+  /**
+   * Non-transactional settlement producer: builds the same write DTO the
+   * settlement operations store inside their transaction, then delegates. The
+   * operations do not use it — they must keep the notification in their own
+   * transaction — so this wrapper serves future producers (groups, retries).
+   */
+  createSettlementNotification(
+    input: SettlementNotificationInput,
+  ): Promise<AppNotification | null> {
+    return this.createNotification(buildSettlementNotificationInput(input));
   }
 }

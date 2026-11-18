@@ -6,9 +6,16 @@ import {
   createNotificationOperation,
   getNotificationOperation,
   getNotificationsOperation,
+  listenNotificationsOperation,
   markNotificationReadOperation,
+  markNotificationSeenOperation,
 } from "./notifications.operations";
-import type { INotificationsRepository } from "./notifications.repository";
+import type {
+  INotificationsRepository,
+  NotificationsListener,
+  NotificationsListenerError,
+  NotificationsUnsubscribe,
+} from "./notifications.repository";
 
 export class FirebaseNotificationsRepository
   implements INotificationsRepository
@@ -27,10 +34,26 @@ export class FirebaseNotificationsRepository
     return createNotificationOperation(input);
   }
 
+  markNotificationSeen(
+    notificationId: string,
+    seenAt: string,
+  ): Promise<void> {
+    return markNotificationSeenOperation(notificationId, seenAt);
+  }
+
   markNotificationRead(
     notificationId: string,
     readAt: string,
+    seenAt: string,
   ): Promise<void> {
-    return markNotificationReadOperation(notificationId, readAt);
+    return markNotificationReadOperation(notificationId, readAt, seenAt);
+  }
+
+  listenNotifications(
+    userId: string,
+    onChange: NotificationsListener,
+    onError?: NotificationsListenerError,
+  ): NotificationsUnsubscribe {
+    return listenNotificationsOperation(userId, onChange, onError);
   }
 }

@@ -1,5 +1,4 @@
-import { useLocalSearchParams, useRouter, type Href } from "expo-router";
-import { useCallback } from "react";
+import { useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
@@ -14,6 +13,7 @@ import { LoadingState } from "@/shared/components/molecules/loading-state";
 import { DetailView } from "@/shared/components/organisms/detail-view";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useDetailActions } from "@/shared/hooks/use-detail-actions";
+import { useDetailCloseNavigation } from "@/shared/hooks/use-detail-close-navigation";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { useSharedExpenseDetailScreen } from "../hooks/use-shared-expense-detail-screen";
@@ -26,7 +26,7 @@ import {
   getSharedExpenseDetailMissingLabels,
 } from "../utils/shared-expense-detail-copy";
 
-function readExpenseId(value: string | string[] | undefined): string {
+function readParam(value: string | string[] | undefined): string {
   const first = Array.isArray(value) ? value[0] : value;
 
   return (first ?? "").trim();
@@ -39,26 +39,26 @@ function readExpenseId(value: string | string[] | undefined): string {
  */
 export function SharedExpenseDetailScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const locale = useAppLocale();
   const { tr } = useScopedTranslation(["sharedExpenses", "social", "common"]);
-  const params = useLocalSearchParams<{ expenseId?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    expenseId?: string | string[];
+    from?: string | string[];
+    friendUid?: string | string[];
+  }>();
   const screen = useSharedExpenseDetailScreen({
-    expenseId: readExpenseId(params.expenseId),
+    expenseId: readParam(params.expenseId),
   });
   const { expense, editor } = screen;
+  const fromNotification = readParam(params.from) === "notification";
   const walletWarningVisible = expense
     ? hasViewerPaidWithoutWallet(expense, screen.viewerUid)
     : false;
 
-  const leave = useCallback(() => {
-    if (router.canGoBack()) {
-      router.back();
-      return;
-    }
-
-    router.replace("/(tabs)/social" as Href);
-  }, [router]);
+  const leave = useDetailCloseNavigation({
+    fromNotification,
+    friendUid: readParam(params.friendUid) || null,
+  });
 
   const detail = useSharedExpenseDetailView({
     expense,

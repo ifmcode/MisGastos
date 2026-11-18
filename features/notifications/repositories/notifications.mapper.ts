@@ -41,6 +41,9 @@ export function mapNotificationDocument(
   const createdAt = toIsoTimestamp(data.createdAt);
   if (createdAt === null) return null;
 
+  // Missing/blank `seenAt` is a legacy document: it stays Pendiente, so no
+  // migration is needed when the field is introduced.
+  const seenAt = readText(data.seenAt);
   const readAt = readText(data.readAt);
   const dedupeKey = readText(data.dedupeKey);
 
@@ -50,6 +53,7 @@ export function mapNotificationDocument(
     type: data.type,
     payload,
     createdAt,
+    seenAt: seenAt.length > 0 ? seenAt : null,
     readAt: readAt.length > 0 ? readAt : null,
     dedupeKey: dedupeKey.length > 0 ? dedupeKey : notificationId,
   };

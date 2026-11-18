@@ -1,26 +1,25 @@
 import { useRouter, type Href } from "expo-router";
 import { useCallback } from "react";
-import { FlatList, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
-import { EmptyState } from "@/shared/components/molecules/empty-state";
-import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
 import { LoadingState } from "@/shared/components/molecules/loading-state";
-import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { useNotificationsScreen } from "../hooks/use-notifications-screen";
 import { notificationsStyles as styles } from "../styles/notifications.styles";
-import { NotificationRow } from "./notification-row";
 import { NotificationsHeader } from "./notifications-header";
+import { NotificationsList } from "./notifications-list";
+import { NotificationsSegmentControl } from "./notifications-segment-control";
 
-/** Minimal in-app inbox: list, unread marker, mark-as-read and target routing. */
+/**
+ * Two-segment inbox: Pendientes / Vistas with their counts, the active list and
+ * the loading, error and refresh states. Every rule lives in the hook.
+ */
 export function NotificationsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const theme = useFormTheme();
   const { t, tr } = useScopedTranslation(["notifications", "common"]);
   const screen = useNotificationsScreen();
 
@@ -41,6 +40,12 @@ export function NotificationsScreen() {
         onBack={leave}
       />
 
+      <NotificationsSegmentControl
+        segment={screen.segment}
+        counts={screen.segmentCounts}
+        onChange={screen.changeSegment}
+      />
+
       {screen.status === "loading" ? (
         <LoadingState message={t("loading")} />
       ) : screen.status === "error" ? (
@@ -52,30 +57,15 @@ export function NotificationsScreen() {
           onRetry={screen.reload}
         />
       ) : (
-        <FlatList
-          data={screen.rows}
-          keyExtractor={(row) => row.id}
-          renderItem={({ item }) => (
-            <NotificationRow row={item} onPress={() => screen.openRow(item.id)} />
-          )}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={<ErrorBanner message={screen.actionError} />}
-          ListEmptyComponent={
-            <EmptyState
-              icon="notifications-outline"
-              title={t("emptyTitle")}
-              message={t("emptyMessage")}
-            />
-          }
-          refreshControl={
-            <RefreshControl
-              refreshing={screen.refreshing}
-              onRefresh={screen.refresh}
-              tintColor={theme.primary}
-              colors={[theme.primary]}
-            />
-          }
+        <NotificationsList
+          rows={screen.rows}
+          segment={screen.segment}
+          refreshing={screen.refreshing}
+          actionError={screen.actionError}
+          canMarkAllRead={screen.canMarkAllRead}
+          onRefresh={screen.refresh}
+          onMarkAllRead={screen.markAllRead}
+          onOpenRow={screen.openRow}
         />
       )}
     </ThemedView>

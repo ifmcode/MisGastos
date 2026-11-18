@@ -7,7 +7,10 @@ import {
   toNotificationData,
 } from "../notifications.data";
 import { mapNotificationDocument } from "../notifications.mapper";
-import { buildNotificationDocument } from "./notifications.fixtures";
+import {
+  buildLegacyNotificationDocument,
+  buildNotificationDocument,
+} from "./notifications.fixtures";
 
 const write: NotificationWrite = {
   userId: "user-b",
@@ -43,6 +46,7 @@ describe("toNotificationData", () => {
       type: "settlement-created",
       payload: { settlementId: "settlement-1", amountCents: 1000 },
       createdAt: "2026-11-16T10:00:00.000Z",
+      seenAt: null,
       readAt: null,
       dedupeKey: "settlement-1:created:user-b",
     });
@@ -60,9 +64,43 @@ describe("mapNotificationDocument", () => {
       id: "settlement-1:created:user-b",
       userId: "user-b",
       type: "settlement-created",
+      seenAt: null,
       readAt: null,
       dedupeKey: "settlement-1:created:user-b",
     });
+  });
+
+  it("maps a legacy document without seenAt as Pendiente", () => {
+    const notification = mapNotificationDocument(
+      "settlement-1:created:user-b",
+      buildLegacyNotificationDocument(),
+    );
+
+    expect(notification).toMatchObject({ seenAt: null, readAt: null });
+  });
+
+  it("maps a seenAt string and normalizes the whitespace", () => {
+    const notification = mapNotificationDocument(
+      "settlement-1:created:user-b",
+      buildNotificationDocument({
+        seenAt: " 2026-11-16T10:30:00.000Z ",
+        readAt: "2026-11-16T11:00:00.000Z",
+      }),
+    );
+
+    expect(notification).toMatchObject({
+      seenAt: "2026-11-16T10:30:00.000Z",
+      readAt: "2026-11-16T11:00:00.000Z",
+    });
+  });
+
+  it("accepts the reserved TICKET-047 types without a shape change", () => {
+    const notification = mapNotificationDocument(
+      "friend-request:user-a:user-b",
+      buildNotificationDocument({ type: "friend-request" }),
+    );
+
+    expect(notification).toMatchObject({ type: "friend-request" });
   });
 
   it("falls back to the id when the stored key is missing", () => {
@@ -97,7 +135,7 @@ describe("mapNotificationDocument", () => {
       mapNotificationDocument("id", { ...document, userId: "" }),
     ).toBeNull();
     expect(
-      mapNotificationDocument("id", { ...document, type: "friend-request" }),
+      mapNotificationDocument("id", { ...document, type: "unknown-type" }),
     ).toBeNull();
     expect(
       mapNotificationDocument("id", { ...document, payload: "text" }),

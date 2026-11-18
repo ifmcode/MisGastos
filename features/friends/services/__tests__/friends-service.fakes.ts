@@ -19,6 +19,7 @@ export class FakeFriendsRepository implements IFriendsRepository {
   readonly requests = new Map<string, FriendRequest>();
   readonly friendships = new Map<string, Friendship>();
   readonly publicProfileCalls: PublicProfileInput[] = [];
+  readonly publicProfileReads: string[] = [];
   readonly profileBatchCalls: string[][] = [];
   readonly acceptedCalls: Array<{ viewerUid: string; requestId: string }> = [];
   readonly deletedFriendships: string[] = [];
@@ -94,6 +95,7 @@ export class FakeFriendsRepository implements IFriendsRepository {
 
   async getPublicProfile(uid: string): Promise<PublicProfile | null> {
     this.guard();
+    this.publicProfileReads.push(uid);
     return this.profiles.get(uid) ?? null;
   }
 

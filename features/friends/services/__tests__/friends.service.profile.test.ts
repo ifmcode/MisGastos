@@ -79,3 +79,31 @@ describe("FriendsService.ensurePublicProfile", () => {
     ).rejects.toBe(failure);
   });
 });
+
+describe("FriendsService.getPublicProfile", () => {
+  it("returns the public profile of a trimmed uid", async () => {
+    const { repository, service } = createService();
+    repository.seedProfile("user-1", "Ada", "ada@example.com");
+
+    await expect(service.getPublicProfile(" user-1 ")).resolves.toMatchObject({
+      uid: "user-1",
+      displayName: "Ada",
+    });
+  });
+
+  it("returns null for a missing uid without a read", async () => {
+    const { repository, service } = createService();
+
+    await expect(service.getPublicProfile("user-2")).resolves.toBeNull();
+    await expect(service.getPublicProfile("   ")).resolves.toBeNull();
+    expect(repository.publicProfileReads).toEqual(["user-2"]);
+  });
+
+  it("propagates repository failures", async () => {
+    const { repository, service } = createService();
+    const failure = new Error("read failed");
+    repository.failure = failure;
+
+    await expect(service.getPublicProfile("user-1")).rejects.toBe(failure);
+  });
+});

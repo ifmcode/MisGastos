@@ -356,13 +356,18 @@ service cloud.firestore {
     // The recipient must be the other participant of the referenced settlement
     // and the actor must belong to it. `getAfter` is required because the
     // settlement and its notification are written in the same transaction.
+    // The amount and currency must match the persisted settlement, so the
+    // payload can never claim a debt the record does not contain (create,
+    // update and delete truncate both fields from the same settlement).
     function isNotificationTargetFor(settlement, notification) {
       return settlement.participantIds is list
         && request.auth.uid in settlement.participantIds
         && notification.userId in settlement.participantIds
         && notification.userId != request.auth.uid
         && notification.payload.friendUid == request.auth.uid
-        && notification.payload.pairId == settlement.pairId;
+        && notification.payload.pairId == settlement.pairId
+        && notification.payload.amountCents == settlement.amountCents
+        && notification.payload.currency == settlement.currency;
     }
 
     // The actor writes the notification for the other participant and must read
@@ -812,11 +817,22 @@ service cloud.firestore {
     // retried event cannot duplicate it. The recipient lists and reads the inbox;
     // the actor writes it for the other participant and may `get` that single
     // deterministic document inside the settlement transaction (see the get
-    // rule). `readAt` is the only mutable field and notifications are never
-    // deleted.
+    // rule). Notifications are never deleted.
     //
-    // No composite index: `getNotificationsOperation` filters only with
-    // `where('userId', '==', uid)` and sorts client-side.
+    // State model: `seenAt` = first presented (drives the Pendientes/Vistas
+    // segments), `readAt` = opened (drives the unread marker). Creation stores
+    // both as null; opening writes both, a dismissed banner writes only
+    // `seenAt`. Both stamps are append-only: they go from null to a string on
+    // the owner's client and are never erased or rewritten, so a row cannot be
+    // un-read nor moved from Vistas back to Pendientes.
+    //
+    // The reserved TICKET-047 types (`friend-request`, `friend-request-accepted`,
+    // `group-expense`, `group-settlement`) are read-compatible on the client but
+    // NOT writable yet: no producer exists, so `isNotificationType` keeps the
+    // create restricted to the three settlement events.
+    //
+    // No composite index: `getNotificationsOperation`/`listenNotificationsOperation`
+    // filter only with `where('userId', '==', uid)` and sort client-side.
     match /notifications/{notificationId} {
       // The actor needs a single `get` by its deterministic id to make the
       // settlement transaction idempotent; the inbox `list` stays owner-only.
@@ -838,10 +854,14 @@ service cloud.firestore {
         && notificationId == request.resource.data.dedupeKey
         && isNotificationType(request.resource.data.type)
         && request.resource.data.keys().hasOnly(
-             ['userId', 'type', 'payload', 'createdAt', 'readAt', 'dedupeKey']
+             ['userId', 'type', 'payload', 'createdAt', 'readAt', 'seenAt', 'dedupeKey']
            )
         && hasNotificationPayload(request.resource.data.payload)
         && request.resource.data.readAt == null
+        // Tolerant read: a TICKET-046 client that does not know `seenAt` can
+        // still create its notification during a rolling deploy, and the mapper
+        // treats the missing key exactly as null.
+        && request.resource.data.get('seenAt', null) == null
         && request.resource.data.createdAt is string
         && isNotificationTargetFor(
              getAfter(
@@ -850,12 +870,27 @@ service cloud.firestore {
              request.resource.data
            );
 
+      // Owner-only and limited to the two stamps: `userId` and the payload are
+      // immutable. A stamp that already has a value must keep it, and a null
+      // stamp can only stay null or become a string, so the state is monotonic
+      // (seen-only update on an unread row, or a full open, both accepted).
+      // `get(key, null)` reads a pre-TICKET-047 document (key not stored) as
+      // null, so a legacy row can still be stamped without any migration.
       allow update: if isNotificationOwner(resource.data)
         && request.resource.data.userId == resource.data.userId
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
-             ['readAt']
+             ['readAt', 'seenAt']
            )
-        && request.resource.data.readAt is string;
+        && (resource.data.get('readAt', null) != null
+            ? request.resource.data.get('readAt', null)
+                == resource.data.get('readAt', null)
+            : (request.resource.data.get('readAt', null) == null
+               || request.resource.data.get('readAt', null) is string))
+        && (resource.data.get('seenAt', null) != null
+            ? request.resource.data.get('seenAt', null)
+                == resource.data.get('seenAt', null)
+            : (request.resource.data.get('seenAt', null) == null
+               || request.resource.data.get('seenAt', null) is string));
 
       allow delete: if false;
     }

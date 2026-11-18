@@ -9,6 +9,7 @@ import {
   formatDateTime,
   formatNumber,
   formatPercent,
+  formatRelativeTime,
 } from "@/shared/utils/format";
 
 export interface AppLocale {
@@ -28,6 +29,7 @@ export interface AppLocale {
     value: number,
     options?: Intl.NumberFormatOptions,
   ) => string;
+  formatRelative: (value: Date | string, now?: Date) => string;
 }
 
 /** Locale-aware formatters backed by `Intl` and the active language tag. */
@@ -48,6 +50,8 @@ export function useAppLocale(): AppLocale {
         formatNumber(value, languageTag, options),
       formatPercent: (value, options) =>
         formatPercent(value, languageTag, options),
+      formatRelative: (value, now) =>
+        formatRelativeTime(value, languageTag, now),
     }),
     [language, languageTag],
   );

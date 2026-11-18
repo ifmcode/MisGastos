@@ -1,0 +1,52 @@
+import { describe, expect, it } from "@jest/globals";
+
+import type { NotificationTarget } from "../notifications.utils";
+import { buildNotificationTargetHref } from "../notifications.utils";
+
+describe("buildNotificationTargetHref", () => {
+  it("builds the settlement href with the notification origin and friend", () => {
+    expect(
+      buildNotificationTargetHref({
+        kind: "settlement",
+        settlementId: "settlement-1",
+        friendUid: "user-a",
+      }),
+    ).toBe(
+      "/social/settlements/settlement-1?from=notification&friendUid=user-a",
+    );
+
+    expect(
+      buildNotificationTargetHref({
+        kind: "settlement",
+        settlementId: "settlement-1",
+        friendUid: null,
+      }),
+    ).toBe("/social/settlements/settlement-1?from=notification");
+  });
+
+  it("builds the expense href and encodes every id", () => {
+    expect(
+      buildNotificationTargetHref({
+        kind: "expense",
+        expenseId: "expense/1",
+        friendUid: "user a",
+      }),
+    ).toBe(
+      "/social/expenses/expense%2F1?from=notification&friendUid=user%20a",
+    );
+  });
+
+  it("builds the requests and friend hrefs", () => {
+    expect(buildNotificationTargetHref({ kind: "requests" })).toBe(
+      "/social/requests",
+    );
+
+    const friendTarget: NotificationTarget = {
+      kind: "friend",
+      friendUid: "user/a",
+    };
+    expect(buildNotificationTargetHref(friendTarget)).toBe(
+      "/social/friends/user%2Fa",
+    );
+  });
+});

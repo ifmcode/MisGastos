@@ -8,9 +8,7 @@ import {
   mockDoc,
   mockGetDoc,
   mockGetDocs,
-  mockQuery,
   mockSetDoc,
-  mockUpdateDoc,
   mockWhere,
   querySnapshot,
   setupNotificationMocks,
@@ -20,7 +18,6 @@ import {
   createNotificationOperation,
   getNotificationOperation,
   getNotificationsOperation,
-  markNotificationReadOperation,
 } from "../notifications.operations";
 import type { NotificationWrite } from "../../types/notification.types";
 import { buildNotificationDocument } from "./notifications.fixtures";
@@ -109,27 +106,15 @@ describe("createNotificationOperation", () => {
         userId: "user-b",
         type: "settlement-created",
         dedupeKey: input.dedupeKey,
+        seenAt: null,
         readAt: null,
       }),
     );
     expect(created).toMatchObject({
       id: input.dedupeKey,
       userId: "user-b",
+      seenAt: null,
       readAt: null,
     });
-  });
-});
-
-describe("markNotificationReadOperation", () => {
-  it("updates only readAt", async () => {
-    await markNotificationReadOperation(
-      "settlement-1:created:user-b",
-      "2026-11-16T11:00:00.000Z",
-    );
-
-    expect(mockUpdateDoc).toHaveBeenCalledWith(
-      expect.objectContaining({ id: "settlement-1:created:user-b" }),
-      { readAt: "2026-11-16T11:00:00.000Z" },
-    );
   });
 });

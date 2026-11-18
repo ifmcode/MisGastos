@@ -18,6 +18,7 @@ export function buildNotification(
       canLinkWallet: true,
     },
     createdAt: "2026-11-16T10:00:00.000Z",
+    seenAt: null,
     readAt: null,
     dedupeKey: "settlement-1:created:user-b",
     ...overrides,
@@ -35,8 +36,19 @@ export function buildNotificationDocument(
     type: notification.type,
     payload: notification.payload,
     createdAt: notification.createdAt,
+    seenAt: notification.seenAt,
     readAt: notification.readAt,
     dedupeKey: notification.dedupeKey,
     ...overrides,
   };
+}
+
+/** Drops `seenAt` to simulate a TICKET-046 document (no migration). */
+export function buildLegacyNotificationDocument(
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
+  const document = buildNotificationDocument(overrides);
+  delete document.seenAt;
+
+  return document;
 }

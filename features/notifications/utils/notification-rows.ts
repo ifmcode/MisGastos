@@ -1,7 +1,7 @@
-import type { Friend } from "@/features/friends/types/friend.types";
+import { centsToAmount } from "@/features/friends/utils/friend-balance";
 import { findFriendByUid } from "@/features/friends/utils/friend-detail";
 import { getFriendDisplayName } from "@/features/friends/utils/friend-display";
-import { centsToAmount } from "@/features/friends/utils/friend-balance";
+import type { Friend } from "@/features/friends/types/friend.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 import { resolveCurrencyCode } from "@/shared/constants/currencies";
 import type { Translate } from "@/shared/i18n/translate";
@@ -10,14 +10,17 @@ import { joinMetaParts } from "@/shared/utils/join-meta";
 import type {
   AppNotification,
   NotificationPayload,
-  NotificationType,
 } from "../types/notification.types";
+import {
+  type NotificationIcon,
+  resolveNotificationCopy,
+} from "./notification-copy";
+import {
+  isSettlementNotificationType,
+  isUnreadNotification,
+} from "./notifications.utils";
 
-export type NotificationRowIcon =
-  | "notifications-outline"
-  | "checkmark-circle-outline"
-  | "create-outline"
-  | "trash-outline";
+export type NotificationRowIcon = NotificationIcon;
 
 export interface NotificationRowModel {
   id: string;
@@ -31,19 +34,11 @@ export interface NotificationRowModel {
 
 export interface NotificationRowContext {
   friends: readonly Friend[];
+  /** Actor already resolved (banner); when present it wins over `friends`. */
+  actorName?: string | null;
   formatCurrency: (value: number, currency: CurrencyCode) => string;
-  formatDateTime: (value: string) => string;
+  formatRelativeDate: (value: string) => string;
   t: Translate;
-}
-
-const ICONS: Record<NotificationType, NotificationRowIcon> = {
-  "settlement-created": "checkmark-circle-outline",
-  "settlement-updated": "create-outline",
-  "settlement-deleted": "trash-outline",
-};
-
-function isUnread(notification: AppNotification): boolean {
-  return notification.readAt === null || notification.readAt.length === 0;
 }
 
 function readAmountCents(payload: NotificationPayload): number {
@@ -56,6 +51,8 @@ function readActorName(
   payload: NotificationPayload,
   context: NotificationRowContext,
 ): string {
+  if (context.actorName) return context.actorName;
+
   const friendUid = payload.friendUid;
   const friend =
     typeof friendUid === "string"
@@ -66,45 +63,55 @@ function readActorName(
 }
 
 /**
- * Presentation model of each inbox row: the copy is resolved from `type` and the
- * numeric payload, so the stored document never carries a sentence and the
- * inbox follows a locale change.
+ * Presentation model of one inbox row or banner: the copy is resolved from
+ * `type` and the numeric payload, the meta line is the localized relative date
+ * and the unread marker always comes from `readAt`, in both segments.
  */
+export function buildNotificationRow(
+  notification: AppNotification,
+  context: NotificationRowContext,
+): NotificationRowModel {
+  const payload = notification.payload;
+  const amount = isSettlementNotificationType(notification.type)
+    ? context.formatCurrency(
+        centsToAmount(readAmountCents(payload)),
+        resolveCurrencyCode(payload.currency),
+      )
+    : "";
+  const copy = resolveNotificationCopy(notification, {
+    actorName: readActorName(payload, context),
+    amount,
+    t: context.t,
+  });
+  const unread = isUnreadNotification(notification);
+  const openLabel = context.t("row.openAccessibility", { title: copy.title });
+
+  return {
+    id: notification.id,
+    title: copy.title,
+    meta: context.formatRelativeDate(notification.createdAt),
+    icon: copy.icon,
+    unread,
+    accessibilityLabel: unread
+      ? joinMetaParts([context.t("unread"), openLabel])
+      : openLabel,
+    accessibilityHint: joinMetaParts(
+      [
+        context.t("row.openHint"),
+        payload.canLinkWallet === true
+          ? context.t("row.settlementWalletHint")
+          : null,
+      ],
+      " ",
+    ),
+  };
+}
+
 export function buildNotificationRows(
   notifications: readonly AppNotification[],
   context: NotificationRowContext,
 ): NotificationRowModel[] {
-  return notifications.map((notification) => {
-    const payload = notification.payload;
-    const amount = context.formatCurrency(
-      centsToAmount(readAmountCents(payload)),
-      resolveCurrencyCode(payload.currency),
-    );
-    const title = context.t(
-      `types.${notification.type}.${payload.isFull === true ? "full" : "partial"}`,
-      { name: readActorName(payload, context), amount },
-    );
-    const unread = isUnread(notification);
-    const openLabel = context.t("row.openAccessibility", { title });
-
-    return {
-      id: notification.id,
-      title,
-      meta: context.formatDateTime(notification.createdAt),
-      icon: ICONS[notification.type],
-      unread,
-      accessibilityLabel: unread
-        ? joinMetaParts([context.t("unread"), openLabel])
-        : openLabel,
-      accessibilityHint: joinMetaParts(
-        [
-          context.t("row.openHint"),
-          payload.canLinkWallet === true
-            ? context.t("row.settlementWalletHint")
-            : null,
-        ],
-        " ",
-      ),
-    };
-  });
+  return notifications.map((notification) =>
+    buildNotificationRow(notification, context),
+  );
 }

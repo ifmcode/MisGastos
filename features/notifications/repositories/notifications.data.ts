@@ -24,7 +24,11 @@ export function createNotificationDocumentId(dedupeKey: string): string {
   return sanitizeDedupeKey(dedupeKey);
 }
 
-/** Full document of a new notification. `undefined` never reaches Firestore. */
+/**
+ * Full document of a new notification. `undefined` never reaches Firestore.
+ * Creation starts Pendiente and unread (`seenAt`/`readAt` null); the owner
+ * stamps them later, so the rules only accept null on create.
+ */
 export function toNotificationData(
   input: NotificationWrite,
 ): Record<string, unknown> {
@@ -33,6 +37,7 @@ export function toNotificationData(
     type: input.type,
     payload: input.payload,
     createdAt: input.createdAt,
+    seenAt: null,
     readAt: null,
     dedupeKey: createNotificationDocumentId(input.dedupeKey),
   };

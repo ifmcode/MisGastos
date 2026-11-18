@@ -1,13 +1,11 @@
-import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { getNotificationErrorCode } from "../services/notification.errors";
 import type { AppNotification } from "../types/notification.types";
+import { useNotificationsStore } from "./use-notifications-store";
 import { useNotificationsService } from "./use-notifications-service";
-
-type LoadMode = "initial" | "refresh";
 
 export interface UseNotificationsOptions {
   viewerUid: string | undefined;
@@ -18,114 +16,132 @@ export interface NotificationsController {
   unreadCount: number;
   loading: boolean;
   error: string | null;
-  /** Failure of a mark-as-read, announced without breaking the list. */
+  /** Failure of a stamp, announced without breaking the list. */
   actionError: string | null;
   reload: () => void;
   refresh: () => Promise<void>;
+  /** Banner dismissed or timed out: only `seenAt`, the row stays unread. */
+  markSeen: (notificationId: string) => Promise<void>;
+  /** Opened: both stamps in one service write. */
   markRead: (notificationId: string) => Promise<void>;
+  /** Stamps every Pendiente; returns how many rows the service touched. */
+  markAllRead: () => Promise<number>;
 }
 
-/** Inbox of the viewer with initial, refresh and focus reloads. */
+function stampSeen(
+  notifications: readonly AppNotification[],
+  notificationId: string,
+  seenAt: string,
+): AppNotification[] {
+  return notifications.map((notification) =>
+    notification.id === notificationId && notification.seenAt === null
+      ? { ...notification, seenAt }
+      : notification,
+  );
+}
+
+function stampAllSeen(
+  notifications: readonly AppNotification[],
+  at: string,
+): AppNotification[] {
+  return notifications.map((notification) =>
+    notification.seenAt === null
+      ? { ...notification, seenAt: at, readAt: notification.readAt ?? at }
+      : notification,
+  );
+}
+
+/** Inbox of the viewer: the snapshot plus the three stamps, optimistically. */
 export function useNotifications({
   viewerUid,
 }: UseNotificationsOptions): NotificationsController {
   const service = useNotificationsService();
   const { tr } = useScopedTranslation("notifications");
-  const [stored, setStored] = useState<AppNotification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const store = useNotificationsStore({ viewerUid });
+  const { refresh, setNotifications } = store;
   const [actionError, setActionError] = useState<string | null>(null);
-  const requestRef = useRef(0);
 
-  const load = useCallback(
-    async (mode: LoadMode) => {
-      if (!viewerUid) {
-        setStored([]);
-        setError(null);
-        setLoading(false);
-        return;
-      }
+  const fail = useCallback(
+    (error: unknown) => {
+      setActionError(
+        tr(`errors.${getNotificationErrorCode(error, "SAVE_FAILED")}`),
+      );
+      void refresh();
+    },
+    [refresh, tr],
+  );
 
-      requestRef.current += 1;
-      const request = requestRef.current;
+  const markSeen = useCallback(
+    async (notificationId: string) => {
+      if (!viewerUid) return;
 
-      if (mode === "initial") setLoading(true);
-      setError(null);
+      const seenAt = new Date().toISOString();
+      setActionError(null);
+      setNotifications((current) =>
+        stampSeen(current, notificationId, seenAt),
+      );
 
       try {
-        const loaded = await service.getNotifications(viewerUid);
-        if (requestRef.current === request) setStored(loaded);
-      } catch (loadError: unknown) {
-        if (requestRef.current === request) {
-          setError(
-            tr(`errors.${getNotificationErrorCode(loadError, "LOAD_FAILED")}`),
-          );
-        }
-      } finally {
-        if (requestRef.current === request && mode === "initial") {
-          setLoading(false);
-        }
+        await service.markSeen(viewerUid, notificationId, seenAt);
+      } catch (error: unknown) {
+        fail(error);
       }
     },
-    [service, tr, viewerUid],
+    [fail, service, setNotifications, viewerUid],
   );
-
-  useEffect(() => {
-    void load("initial");
-  }, [load]);
-
-  const hasFocusedOnce = useRef(false);
-  const refresh = useCallback(() => load("refresh"), [load]);
-
-  // Returning from the settlement detail must refresh the unread badge.
-  useFocusEffect(
-    useCallback(() => {
-      if (!hasFocusedOnce.current) {
-        hasFocusedOnce.current = true;
-        return;
-      }
-
-      void refresh();
-    }, [refresh]),
-  );
-
-  const reload = useCallback(() => {
-    void load("initial");
-  }, [load]);
 
   const markRead = useCallback(
     async (notificationId: string) => {
       if (!viewerUid) return;
 
-      const readAt = new Date().toISOString();
+      const at = new Date().toISOString();
       setActionError(null);
+      setNotifications((current) =>
+        current.map((notification) =>
+          notification.id === notificationId
+            ? {
+                ...notification,
+                readAt: notification.readAt ?? at,
+                seenAt: notification.seenAt ?? at,
+              }
+            : notification,
+        ),
+      );
 
       try {
-        await service.markRead(viewerUid, notificationId, readAt);
-        setStored((current) =>
-          current.map((notification) =>
-            notification.id === notificationId
-              ? { ...notification, readAt }
-              : notification,
-          ),
-        );
-      } catch (readError: unknown) {
-        setActionError(
-          tr(`errors.${getNotificationErrorCode(readError, "SAVE_FAILED")}`),
-        );
+        await service.markRead(viewerUid, notificationId, at);
+      } catch (error: unknown) {
+        fail(error);
       }
     },
-    [service, tr, viewerUid],
+    [fail, service, setNotifications, viewerUid],
   );
 
+  const markAllRead = useCallback(async () => {
+    if (!viewerUid) return 0;
+
+    const at = new Date().toISOString();
+    setActionError(null);
+    setNotifications((current) => stampAllSeen(current, at));
+
+    try {
+      return await service.markAllRead(viewerUid, at);
+    } catch (error: unknown) {
+      fail(error);
+      return 0;
+    }
+  }, [fail, service, setNotifications, viewerUid]);
+
   return {
-    notifications: stored,
-    unreadCount: service.countUnread(stored),
-    loading,
-    error,
+    notifications: store.notifications,
+    unreadCount: service.countUnread(store.notifications),
+    loading: store.loading,
+    error: store.error,
     actionError,
-    reload,
-    refresh,
+    reload: store.reload,
+    refresh: store.refresh,
+    markSeen,
     markRead,
+    markAllRead,
   };
 }

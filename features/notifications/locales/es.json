@@ -4,10 +4,33 @@
   "loading": "Cargando notificaciones…",
   "errorTitle": "No se pudieron cargar las notificaciones",
   "retryAccessibility": "Reintentar la carga de notificaciones",
-  "emptyTitle": "No tienes notificaciones",
-  "emptyMessage": "Cuando un amigo liquide una deuda contigo, lo verás aquí.",
   "actorFallback": "Un amigo",
   "unread": "Sin leer",
+  "segments": {
+    "accessibility": "Secciones de la bandeja de notificaciones",
+    "pending": "Pendientes",
+    "viewed": "Vistas",
+    "pendingAccessibility_one": "Pendientes: {{count}} notificación sin presentar",
+    "pendingAccessibility_other": "Pendientes: {{count}} notificaciones sin presentar",
+    "viewedAccessibility_one": "Vistas: {{count}} notificación presentada",
+    "viewedAccessibility_other": "Vistas: {{count}} notificaciones presentadas"
+  },
+  "empty": {
+    "pendingTitle": "No tienes notificaciones pendientes",
+    "pendingMessage": "Cuando un amigo liquide una deuda contigo, aparecerá aquí hasta que la veas.",
+    "viewedTitle": "Todavía no has visto ninguna notificación",
+    "viewedMessage": "Las notificaciones que abras o descartes se guardarán en esta sección."
+  },
+  "markAllRead": {
+    "label": "Marcar todo como leído",
+    "accessibilityLabel": "Marcar todas las notificaciones pendientes como leídas",
+    "hint": "Marca cada notificación pendiente como leída y la mueve a Vistas."
+  },
+  "banner": {
+    "openAccessibility": "Abrir la notificación: {{title}}",
+    "openHint": "Abre el detalle relacionado y marca la notificación como leída.",
+    "close": "Descartar la notificación"
+  },
   "bell": {
     "label_zero": "Notificaciones",
     "label_one": "Notificaciones: {{count}} sin leer",
@@ -31,7 +54,11 @@
     "settlement-deleted": {
       "full": "{{name}} ha eliminado la liquidación de {{amount}}; la deuda vuelve a su estado anterior.",
       "partial": "{{name}} ha eliminado la liquidación de {{amount}}."
-    }
+    },
+    "friend-request": "{{name}} te ha enviado una solicitud de amistad.",
+    "friend-request-accepted": "{{name}} ha aceptado tu solicitud de amistad.",
+    "group-expense": "{{name}} ha añadido un gasto de grupo.",
+    "group-settlement": "{{name}} ha registrado una liquidación de grupo."
   },
   "errors": {
     "SIGN_IN_REQUIRED": "Debes iniciar sesión.",

@@ -112,6 +112,17 @@ export class FriendsService {
     return loadFriendsOverview(this.repository, this.ledgerRepository, viewer);
   }
 
+  /**
+   * Public name of one actor (the notification banner resolves it). A blank uid
+   * returns null without a read, so a payload without an actor never queries.
+   */
+  async getPublicProfile(uid: string): Promise<PublicProfile | null> {
+    const target = typeof uid === "string" ? uid.trim() : "";
+    if (target.length === 0) return null;
+
+    return this.repository.getPublicProfile(target);
+  }
+
   private async requirePendingRequest(
     requestId: string,
     viewerUid: string,
