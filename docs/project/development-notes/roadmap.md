@@ -16,12 +16,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 5 - Social vertical slice
-- **Current ticket:** TICKET-047 - in-app notification inbox
+- **Current ticket:** TICKET-055 - optional wallet registration in shared expenses
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-046 - 1:1 debt settlement with direct application (18/11/2026)
+- **Last completed:** TICKET-047 - in-app notification inbox (18/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-055 and TICKET-056 in Phase 5.3 after the notification inbox; TICKET-008 in Phase 6
-- **Next:** TICKET-047 - in-app notification inbox
+- **Queued:** TICKET-056 in Phase 5.3 after TICKET-055; TICKET-008 in Phase 6
+- **Next:** TICKET-055 - optional wallet registration in shared expenses
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -134,7 +134,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ### 5.2 1:1 settlement and notifications
 - [x] TICKET-046: 1:1 debt settlement with direct application ✅ 18/11/2026
-- [ ] TICKET-047: in-app notification inbox with pending/viewed sections and the in-app banner
+- [x] TICKET-047: in-app notification inbox with pending/viewed sections and the in-app banner ✅ 18/11/2026
 - The balance between two people already ships with TICKET-009; TICKET-046 replaces the former "minimal subset of TICKET-010" settlement line.
 - Validate with 3-5 real users
 - Do not build a friends list without shared expenses; it does not validate the product

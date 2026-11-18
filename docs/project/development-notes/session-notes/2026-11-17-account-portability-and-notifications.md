@@ -151,7 +151,7 @@ that needs a backend or OS-level delivery out of V1.0.
 
 ## Related
 
-- `docs/project/tickets/TICKET-047-NOTIFICATION-INBOX.md`
+- `docs/project/tickets/[DONE] TICKET-047-NOTIFICATION-INBOX.md`
 - `docs/project/tickets/TICKET-013-FUTURE-DATA-EXPORT.md`
 - `docs/project/tickets/TICKET-052-FUTURE-PUSH-NOTIFICATIONS.md`
 - `docs/project/tickets/TICKET-053-FUTURE-DATA-IMPORT.md`

@@ -43,6 +43,7 @@ simplicidad de uso.
 - 🏦 **Cartera obligatoria en los gastos compartidos que pagas tú**: al crear o editar un gasto en el que pagas tú, la cartera es obligatoria (ya no existe **Sin cartera**) y se crea o sincroniza en la misma transacción atómica **un único movimiento de gasto** en **Movimientos**; si no tienes carteras activas en esa moneda, el formulario bloquea el guardado y te indica que crees una en **Carteras**. Cuando paga el amigo, el gasto sigue siendo solo social y no aparece en tu lista. Cambiar el pagador al amigo revierte el saldo exactamente una vez y borra lógicamente el movimiento, que desaparece de **Movimientos**; cambiar de amigo a ti exige elegir cartera y crea el movimiento. Los gastos antiguos pagados por ti sin cartera siguen siendo legibles, muestran un aviso en su detalle y piden una cartera en el siguiente guardado. La categoría vinculada se descarta si no hay cartera (no queda seleccionada ni aparece en la lista) y, si el guardado está bloqueado, el formulario muestra un recordatorio junto a las acciones para que no parezca guardado. La categoría del movimiento vinculado es obligatoria y se elige explícitamente: no se crea ni se aplica **Gastos compartidos** por defecto; el selector tampoco la ofrece ni la preselecciona, y el error de categoría se muestra bajo el campo; si el guardado se bloquea (por ejemplo, una cartera de otra moneda o saldo insuficiente), el aviso junto a **Guardar** no duplica el mensaje del campo: muestra el error del servidor o un recordatorio de revisar los campos marcados. El movimiento conserva la etiqueta **Compartido**, abre `/social/expenses/[expenseId]` y no se edita ni borra desde **Movimientos**.
 - ➕ **Menú de creación en Movimientos**: el botón flotante abre un único menú con **Nuevo movimiento**, **Gasto con amigo** y **Gasto de grupo** (deshabilitado con el aviso **Próximamente**). La cabecera de la pestaña solo conserva los filtros, así que el FAB es la única forma de crear. **Gasto con amigo** reutiliza el mismo formulario de gasto compartido sin amigo preseleccionado (el campo es visible y obligatorio) y se deshabilita con un aviso que apunta a **Social** cuando no hay amistades aceptadas; mientras los amigos cargan o si falla la carga, el aviso es neutro y nunca afirma que no haya amigos. Tras crear desde cualquier acción se refrescan la lista de movimientos y los saldos de las carteras.
 - 🤝 **Liquidación de deudas 1:1 directa**: cualquiera de los dos amigos puede liquidar total o parcialmente la deuda sin confirmación del otro; el importe se limita a la deuda de la moneda elegida y la dirección se deriva del saldo (**Yo pago** / **Me paga**). La fecha de la transferencia es opcional: por defecto hoy, admite días pasados y rechaza fechas futuras. Solo el acreedor puede enlazar opcionalmente una cartera de ingreso, en el momento o después desde la notificación; el otro amigo recibe una notificación in-app, la campana del dashboard muestra las no leídas y `/notifications` abre el detalle. El detalle del amigo muestra la última liquidación como mensaje clicable por encima de los gastos y, cuando la deuda queda saldada, los oculta tras **Ver gastos anteriores**. El detalle de la liquidación permite editar y eliminar arriba a la derecha, y el ingreso enlazado aparece en **Movimientos** con la etiqueta **Liquidación**.
+- 🔔 **Bandeja de notificaciones in-app**: `/notifications` abre en **Pendientes** con dos segmentos, **Pendientes** y **Vistas**, cada uno con su contador y su estado vacío; las filas muestran el icono del evento, el nombre del amigo, el importe y la moneda de las liquidaciones, la fecha relativa y el marcador de no leída en ambos segmentos. **Marcar todo como leído** solo aparece en **Pendientes** y solo cuando hay algo sin leer, y respeta los sellos de lectura ya existentes. Un aviso flotante de 4 segundos aparece en primer plano, uno cada vez y en orden de llegada, sin contador; se puede tocar o cerrar, nunca se muestra con la bandeja abierta y cerrarlo mueve la fila a **Vistas** sin marcarla leída. Al abrir una notificación se escriben los dos sellos y, al volver, el detalle del amigo sustituye al destino en la pila en lugar de la bandeja.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
 - 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías, dashboard y Social: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila, botón flotante y el menú de acciones del FAB (`FabActionMenu`), que hoy usan los FAB de Social y de Movimientos.
@@ -159,8 +160,9 @@ npm run firestore-update-rules     # inicia sesión en Firebase y luego desplieg
 > máquina con credenciales de Firebase. Las reglas de `publicProfiles`, `friendRequests`,
 > `friendships` (TICKET-007), `sharedExpenses` (TICKET-009, subconjunto 1:1) y el enlace
 > del gasto compartido con su movimiento en `sharedExpenses`/`transactions`
-> (TICKET-044), y la regla de cartera del pagador en `sharedExpenses`
-> (TICKET-048) todavía están **pendientes de despliegue**.
+> (TICKET-044), la regla de cartera del pagador en `sharedExpenses`
+> (TICKET-048) y las de `settlements` y `notifications` (TICKET-046 y TICKET-047,
+> con los dos sellos) todavía están **pendientes de despliegue**.
 
 ## 📜 Scripts disponibles
 
@@ -199,9 +201,9 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
-Estado actual (17/11/2026): **213 suites / 1203 tests**; la cobertura acotada a la
-lógica de negocio está en **99.07% de sentencias, 94.83% de ramas, 99.02% de
-funciones y 99.50% de líneas**, y `npm run check:copy` audita **222 archivos TSX**.
+Estado actual (18/11/2026): **252 suites / 1471 tests**; la cobertura acotada a la
+lógica de negocio está en **98,70 % de sentencias, 94,12 % de ramas, 98,13 % de
+funciones y 99,13 % de líneas**, y `npm run check:copy` audita **250 archivos TSX**.
 
 ## 🗺️ Roadmap
 
@@ -220,7 +222,7 @@ funciones y 99.50% de líneas**, y `npm run check:copy` audita **222 archivos TS
 - [x] Cartera obligatoria en los gastos compartidos pagados por mí
 - [x] Menú de creación en Movimientos con gasto con amigo y gasto de grupo (próximamente)
 - [x] Liquidación de deudas 1:1 con aplicación directa y notificaciones
-- [ ] Bandeja de notificaciones in-app con pestañas **Pendientes**/**Vistas** y aviso flotante
+- [x] Bandeja de notificaciones in-app con pestañas **Pendientes**/**Vistas** y aviso flotante
 - [ ] Registro opcional en cartera de los gastos compartidos: toggle Sí/No, por defecto No y configurable
 - [ ] Moneda compacta con **Cambiar** y aviso de importe restante en el reparto por importe
 - [ ] Grupos y gastos compartidos dentro de grupos
@@ -255,6 +257,7 @@ Consulta el roadmap completo en
 - [Portabilidad de datos y notificaciones (17/11/2026)](docs/project/development-notes/session-notes/2026-11-17-account-portability-and-notifications.md): modelo de estado de las notificaciones (**Pendientes**/**Vistas**, `seenAt`/`readAt` y aviso flotante), push fuera de V1 (TICKET-052), exportación en JSON versionado con selección de cartera (TICKET-013), importación con nombres editables y fuente aislada (TICKET-053) y copia manual en Google Drive (TICKET-054).
 - [Refinamiento del formulario de gasto compartido (18/11/2026)](docs/project/development-notes/session-notes/2026-11-18-shared-expense-form-refinement.md): registro opcional en cartera con toggle y preferencia en el perfil (TICKET-055), moneda compacta con **Cambiar** y aviso de importe restante en el reparto por importe (TICKET-056).
 - [Liquidación de deudas 1:1 (TICKET-046, 18/11/2026)](docs/project/development-notes/session-notes/2026-11-18-friend-settlement.md): aplicación directa sin confirmación, ledger inverso para cancelar la deuda, cartera opcional del acreedor, edición/borrado condicionados, mensaje y colapso de gastos, bandeja mínima y reglas pendientes de despliegue.
+- [Bandeja de notificaciones in-app (TICKET-047, 18/11/2026)](docs/project/development-notes/session-notes/2026-11-18-notification-inbox.md): dos sellos (`seenAt`/`readAt`), segmentos **Pendientes**/**Vistas**, aviso flotante de 4 segundos con cola silenciosa y supresión en la bandeja, navegación con `from=notification` hacia el detalle del amigo y reglas pendientes de despliegue.
 - [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)

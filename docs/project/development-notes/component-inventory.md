@@ -11,6 +11,12 @@
 > `useDetailActions` and the shared-expense detail pieces; no palette was added.
 > TICKET-045 (16/11/2026) adds the movements tab as the second `FabActionMenu`
 > consumer; the extracted components and their props are unchanged.
+> TICKET-047 (18/11/2026) adds no shared molecule: the inbox segment control
+> mirrors the Social tab pattern as a feature component, and the only new shared
+> seams are `shared/hooks/use-detail-close-navigation.ts` (the close rule both
+> notification targets share) and `formatRelativeTime` in
+> `shared/utils/format.ts`, exposed as `formatRelative` by `useAppLocale`. The
+> decisions table below is unchanged.
 
 ## Decisions
 
