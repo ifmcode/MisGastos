@@ -32,7 +32,6 @@ export const walletsStyles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
-    paddingRight: 12,
   },
   title: {
     fontSize: 30,
@@ -43,20 +42,6 @@ export const walletsStyles = StyleSheet.create({
     lineHeight: 20,
     opacity: 0.65,
     marginTop: 2,
-  },
-  headerButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: walletsPalette.primary,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-  },
-  headerButtonText: {
-    color: walletsPalette.onPrimary,
-    fontSize: 14,
-    fontWeight: "700",
   },
 
   // Quick actions (transfer + history) above the wallet list

@@ -1,7 +1,6 @@
 {
   "title": "Wallets",
   "subtitle": "Review and organize your accounts.",
-  "new": "New",
   "add": "Add wallet",
   "loading": "Loading wallets…",
   "errorTitle": "Could not load wallets",

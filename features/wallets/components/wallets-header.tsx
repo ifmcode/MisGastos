@@ -1,20 +1,15 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 
-import { walletsPalette, walletsStyles } from "../styles/wallets.styles";
+import { walletsStyles } from "../styles/wallets.styles";
 
-export interface WalletsHeaderProps {
-  showAddButton: boolean;
-  onAddPress: () => void;
-}
-
-export function WalletsHeader({
-  showAddButton,
-  onAddPress,
-}: WalletsHeaderProps) {
+/**
+ * Title and subtitle of the wallets tab. Creation lives only in the floating
+ * action button, so there is no duplicate header action.
+ */
+export function WalletsHeader() {
   const { t } = useTranslation("wallets");
 
   return (
@@ -27,20 +22,6 @@ export function WalletsHeader({
           {t("subtitle")}
         </ThemedText>
       </View>
-
-      {showAddButton ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("add")}
-          onPress={onAddPress}
-          style={walletsStyles.headerButton}
-        >
-          <Ionicons name="add" size={20} color={walletsPalette.onPrimary} />
-          <ThemedText style={walletsStyles.headerButtonText}>
-            {t("new")}
-          </ThemedText>
-        </Pressable>
-      ) : null}
     </View>
   );
 }

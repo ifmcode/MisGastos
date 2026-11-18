@@ -37,10 +37,7 @@ export function WalletsScreen() {
     <ThemedView
       style={[walletsStyles.container, { paddingTop: insets.top + 16 }]}
     >
-      <WalletsHeader
-        showAddButton={screen.canAddWallet}
-        onAddPress={screen.openCreate}
-      />
+      <WalletsHeader />
 
       {!wallets.loading && !wallets.error ? (
         <WalletsTransferActions

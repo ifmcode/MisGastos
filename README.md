@@ -31,7 +31,7 @@ simplicidad de uso.
 ## ✨ Características actuales
 
 - 🔐 **Autenticación** con email/contraseña, registro, recuperación de contraseña y Google.
-- 👛 **Carteras múltiples** con nombre, moneda, tipo, color, icono y saldo inicial.
+- 👛 **Carteras múltiples** con nombre, moneda, tipo, color, icono y saldo inicial. La creación vive solo en el botón flotante **+**, centrado en la pantalla, así que la cabecera no repite una acción duplicada.
 - ⚖️ **Inclusión en el total** configurable por cartera.
 - 💸 **Ingresos y gastos** con actualización atómica del saldo de la cartera.
 - 🧾 **Historial de movimientos** con filtros y ordenamiento.
@@ -46,7 +46,7 @@ simplicidad de uso.
 - 🔔 **Bandeja de notificaciones in-app**: `/notifications` abre en **Pendientes** con dos segmentos, **Pendientes** y **Vistas**, cada uno con su contador y su estado vacío; las filas muestran el icono del evento, el nombre del amigo, el importe y la moneda de las liquidaciones, la fecha relativa y el marcador de no leída en ambos segmentos. **Marcar todo como leído** solo aparece en **Pendientes** y solo cuando hay algo sin leer, y respeta los sellos de lectura ya existentes. Un aviso flotante de 4 segundos aparece en primer plano, uno cada vez y en orden de llegada, sin contador; se puede tocar o cerrar, nunca se muestra con la bandeja abierta y cerrarlo mueve la fila a **Vistas** sin marcarla leída. Al abrir una notificación se escriben los dos sellos y, al volver, el detalle del amigo sustituye al destino en la pila en lugar de la bandeja.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
-- 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías, dashboard y Social: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila, botón flotante y el menú de acciones del FAB (`FabActionMenu`), que hoy usan los FAB de Social y de Movimientos.
+- 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías, dashboard y Social: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila, botón flotante centrado y el menú de acciones del FAB (`FabActionMenu`), que hoy usan los FAB de Social y de Movimientos.
 
 ## 🛠️ Stack tecnológico
 
