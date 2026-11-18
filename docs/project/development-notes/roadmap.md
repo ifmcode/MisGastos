@@ -134,7 +134,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ### 5.2 1:1 settlement and notifications
 - [ ] TICKET-046: 1:1 debt settlement with bilateral confirmation
-- [ ] TICKET-047: in-app notification inbox
+- [ ] TICKET-047: in-app notification inbox with pending/viewed sections and the in-app banner
 - The balance between two people already ships with TICKET-009; TICKET-046 replaces the former "minimal subset of TICKET-010" settlement line.
 - Validate with 3-5 real users
 - Do not build a friends list without shared expenses; it does not validate the product
@@ -158,9 +158,15 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - Do not retrofit offline after groups without the Phase 4 decisions; the current Firestore transaction-based balance model may need to change
 
 ## Phase 8: Retention and final polish (QUEUED)
-- [ ] TICKET-012 budgets, TICKET-016 statistics, TICKET-015 advanced search, TICKET-013 export, TICKET-017 history grouping and TICKET-019 dashboard quick add
+- [ ] TICKET-012 budgets, TICKET-016 statistics, TICKET-015 advanced search, TICKET-013 export of wallets, movements, transfers, categories and account settings (excluding shared/group data), TICKET-017 history grouping and TICKET-019 dashboard quick add
 - [ ] TICKET-040 Storybook component catalog (developer tooling; can move earlier if the social UI needs it)
 - Then invest in final visual polish with real social screens
+
+## Post-V1 backlog (NOT in V1 scope)
+- [ ] TICKET-052 push notifications for background and closed app
+- [ ] TICKET-053 account data import
+- [ ] TICKET-054 Google Drive backup and restore
+- These are intentionally outside V1.0 scope, listed so their order and dependencies stay visible, and they start only after V1 ships.
 
 ## Ordering Rules
 - **Recommended:** 0-3 → 4 → 5 → 6 → 7 → 8

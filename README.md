@@ -219,12 +219,16 @@ funciones y 99.50% de líneas**, y `npm run check:copy` audita **222 archivos TS
 - [x] Cartera obligatoria en los gastos compartidos pagados por mí
 - [x] Menú de creación en Movimientos con gasto con amigo y gasto de grupo (próximamente)
 - [ ] Liquidación de deudas 1:1 con confirmación y notificaciones
-- [ ] Bandeja de notificaciones
+- [ ] Bandeja de notificaciones in-app con pestañas **Pendientes**/**Vistas** y aviso flotante
 - [ ] Grupos y gastos compartidos dentro de grupos
 - [ ] Liquidación de deudas en grupos
 - [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización; implementación en la fase 7)
 - [x] Especialización del flujo de desarrollo con agentes y skills de OpenCode
 - [ ] Librería de componentes con Storybook
+- [ ] Exportar los datos de la cuenta en JSON versionado, por cartera o completa y sin datos compartidos ni de grupo
+- [ ] Notificaciones push con la app cerrada (**post-V1**)
+- [ ] Importar los datos de la cuenta (**post-V1**)
+- [ ] Copia de seguridad manual y restauración en Google Drive (**post-V1**)
 
 Consulta el roadmap completo en
 [`docs/project/development-notes/roadmap.md`](docs/project/development-notes/roadmap.md).
@@ -245,6 +249,7 @@ Consulta el roadmap completo en
 - [Cartera obligatoria en gastos compartidos pagados por mí (TICKET-048, 17/11/2026)](docs/project/development-notes/session-notes/2026-11-17-mandatory-wallet-viewer-paid.md): cartera obligatoria al pagar, transiciones de pagador, aviso en gastos antiguos y regla de Firestore pendiente de despliegue.
 - [Aviso de guardado y categoría obligatoria en gastos compartidos (TICKET-049, TICKET-050 y TICKET-051, 17/11/2026)](docs/project/development-notes/session-notes/2026-11-17-shared-expense-save-feedback.md): la categoría del sistema **Gastos compartidos** desaparece del selector y de su valor por defecto, la categoría del movimiento vinculado es obligatoria y no se crea por defecto, la moneda de la cartera se valida antes de enviar y el error del servidor se muestra junto a **Guardar**.
 - [Menú de creación en Movimientos (TICKET-045, 16/11/2026)](docs/project/development-notes/session-notes/2026-11-16-movements-create-menu.md): menú único del FAB, helper puro de acciones, estados de los amigos, `preselectFirstFriend`, refresco tras crear y accesibilidad de cada fila.
+- [Portabilidad de datos y notificaciones (17/11/2026)](docs/project/development-notes/session-notes/2026-11-17-account-portability-and-notifications.md): modelo de estado de las notificaciones (**Pendientes**/**Vistas**, `seenAt`/`readAt` y aviso flotante), push fuera de V1 (TICKET-052), exportación en JSON versionado con selección de cartera (TICKET-013), importación con nombres editables y fuente aislada (TICKET-053) y copia manual en Google Drive (TICKET-054).
 - [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)
