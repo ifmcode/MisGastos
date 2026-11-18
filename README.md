@@ -218,6 +218,8 @@ funciones y 99.50% de líneas**, y `npm run check:copy` audita **222 archivos TS
 - [x] Detalle de gasto compartido y cartera enlazada
 - [x] Cartera obligatoria en los gastos compartidos pagados por mí
 - [x] Menú de creación en Movimientos con gasto con amigo y gasto de grupo (próximamente)
+- [ ] Registro opcional en cartera de los gastos compartidos: toggle Sí/No, por defecto No y configurable
+- [ ] Moneda compacta con **Cambiar** y aviso de importe restante en el reparto por importe
 - [ ] Liquidación de deudas 1:1 con confirmación y notificaciones
 - [ ] Bandeja de notificaciones in-app con pestañas **Pendientes**/**Vistas** y aviso flotante
 - [ ] Grupos y gastos compartidos dentro de grupos
@@ -250,6 +252,7 @@ Consulta el roadmap completo en
 - [Aviso de guardado y categoría obligatoria en gastos compartidos (TICKET-049, TICKET-050 y TICKET-051, 17/11/2026)](docs/project/development-notes/session-notes/2026-11-17-shared-expense-save-feedback.md): la categoría del sistema **Gastos compartidos** desaparece del selector y de su valor por defecto, la categoría del movimiento vinculado es obligatoria y no se crea por defecto, la moneda de la cartera se valida antes de enviar y el error del servidor se muestra junto a **Guardar**.
 - [Menú de creación en Movimientos (TICKET-045, 16/11/2026)](docs/project/development-notes/session-notes/2026-11-16-movements-create-menu.md): menú único del FAB, helper puro de acciones, estados de los amigos, `preselectFirstFriend`, refresco tras crear y accesibilidad de cada fila.
 - [Portabilidad de datos y notificaciones (17/11/2026)](docs/project/development-notes/session-notes/2026-11-17-account-portability-and-notifications.md): modelo de estado de las notificaciones (**Pendientes**/**Vistas**, `seenAt`/`readAt` y aviso flotante), push fuera de V1 (TICKET-052), exportación en JSON versionado con selección de cartera (TICKET-013), importación con nombres editables y fuente aislada (TICKET-053) y copia manual en Google Drive (TICKET-054).
+- [Refinamiento del formulario de gasto compartido (18/11/2026)](docs/project/development-notes/session-notes/2026-11-18-shared-expense-form-refinement.md): registro opcional en cartera con toggle y preferencia en el perfil (TICKET-055), moneda compacta con **Cambiar** y aviso de importe restante en el reparto por importe (TICKET-056).
 - [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)

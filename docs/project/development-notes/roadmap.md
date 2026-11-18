@@ -1,7 +1,7 @@
 # Roadmap - MisGastos
 
 > Development guide: V1 scope, phase order, ticket order and the current ticket.
-> **Last reviewed:** 17/11/2026
+> **Last reviewed:** 18/11/2026
 
 ## Scope of this file
 - This file answers **what to build next and in which order**, plus the rules for doing it.
@@ -16,12 +16,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 5 - Social vertical slice
-- **Current ticket:** TICKET-046 - 1:1 debt settlement with bilateral confirmation
+- **Current ticket:** TICKET-047 - in-app notification inbox
 - **Status:** ⏳ Pending
 - **Last completed:** TICKET-051 - Mandatory shared expense category and no hidden default (17/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-047 (notification inbox) and TICKET-008 in Phase 6
-- **Next:** TICKET-046 - 1:1 debt settlement with bilateral confirmation
+- **Queued:** TICKET-055 and TICKET-056 in Phase 5.3 after the notification inbox; TICKET-008 in Phase 6
+- **Next:** TICKET-047 - in-app notification inbox
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -138,6 +138,10 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - The balance between two people already ships with TICKET-009; TICKET-046 replaces the former "minimal subset of TICKET-010" settlement line.
 - Validate with 3-5 real users
 - Do not build a friends list without shared expenses; it does not validate the product
+
+### 5.3 Shared-expense form refinement
+- [ ] TICKET-055: optional wallet registration in shared expenses with a configurable default
+- [ ] TICKET-056: compact currency field with **Cambiar** and the live remaining amount for the fixed split
 
 ## Phase 6: Groups (QUEUED)
 - [ ] TICKET-008: create groups (consumes the Social → Tus grupos shell from TICKET-041)
