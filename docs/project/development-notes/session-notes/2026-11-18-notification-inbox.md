@@ -77,11 +77,14 @@ y el aviso:
 | `friend-request` | `/social/requests` |
 | `friend-request-accepted` | `/social/friends/[friendUid]` |
 
-Los destinos anidados llevan `from=notification` y `friendUid`.
-`shared/hooks/use-detail-close-navigation.ts` sustituye el detalle por el detalle
-del amigo (o por el hub Social si no hay amigo), de modo que la pila queda tabs →
-`/notifications` → `/social/friends/[uid]`: la bandeja nunca es el padre de un
-detalle y un destino que ya no existe sigue aterrizando en una ruta válida.
+Los destinos anidados ya **no** llevan `from=notification`: solo `friendUid`.
+`shared/hooks/use-detail-close-navigation.ts` vuelve con `router.back()` a la
+pantalla desde la que se abrió el detalle —la bandeja si se abrió desde una fila,
+la pantalla que interrumpió el aviso si se abrió desde él— y solo cuando no hay
+historial (deep link o un futuro push) sustituye el destino por el detalle del
+amigo, o por el hub Social si no hay amigo. `friendUid` es únicamente ese padre de
+reserva. Cambio posterior: TICKET-058
+(`docs/project/tickets/[DONE] TICKET-058-NOTIFICATION-BACK-AND-CREDITOR-WALLET.md`).
 
 ## 5. Reglas
 
@@ -118,14 +121,20 @@ Las reglas **no están desplegadas**. El usuario debe ejecutar
   se anuncia en un `ErrorBanner` sin romper la lista.
 - **Campana**: el badge sale de `countUnreadNotifications`, se oculta en 0 y se
   refresca al volver a la pestaña y al regresar de la bandeja.
+- **Detalle de la liquidación**: el seguimiento opcional del acreedor es el primer
+  bloque del detalle, por encima del resumen, con el título «Recibir el dinero», la
+  pista de que es opcional y **Elegir cartera** (más los estados enlazada,
+  archivada y **Quitar cartera**), así que se ve nada más abrir la notificación. Las
+  filas `Cartera de ingreso` e `Ingreso en Movimientos` son solo del acreedor: el
+  deudor ve únicamente la dirección y el subtítulo «Pagaste …».
 
 ## 7. Verificación
 
 - `npx tsc --noEmit`: OK.
 - `npx expo lint`: OK.
-- `npx jest`: 252 suites / 1471 tests.
-- `npm run test:coverage`: 98,70 % sentencias, 94,12 % ramas, 98,13 % funciones,
-  99,13 % líneas (umbral 90 %).
+- `npx jest`: 253 suites / 1475 tests.
+- `npm run test:coverage`: 98,93 % sentencias, 94,50 % ramas, 98,59 % funciones,
+  99,38 % líneas (umbral 90 %).
 - `npm run check:copy`: 250 archivos TSX.
 
 ## 8. Pendiente
@@ -135,6 +144,8 @@ Las reglas **no están desplegadas**. El usuario debe ejecutar
   liquidación genera una notificación por evento, y un reintento no genera
   ninguna.
 - Aviso, descarte y cola en dispositivo.
+- Flujo del acreedor en dispositivo: abrir la notificación, elegir cartera, ver el
+  ingreso y desenlazarlo.
 - Emulador de reglas (exige JDK ≥ 21) para la denegación al tercer usuario.
 - Revisión visual manual en claro/oscuro y en español/inglés.
 
@@ -150,3 +161,24 @@ Las reglas **no están desplegadas**. El usuario debe ejecutar
   enfocada o con la app en segundo plano **no se muestra después** como aviso, su
   id solo queda memorizado. Un aviso visible al entrar en la bandeja se retira sin
   sellar, así que la fila sigue en **Pendientes**.
+
+## 10. Addendum (18/11/2026)
+
+TICKET-058 corrige dos cosas reportadas al usar la bandeja:
+
+- **Volver vuelve al origen.** `buildNotificationTargetHref` deja de añadir
+  `from=notification` y `useDetailCloseNavigation` hace `router.back()` cuando hay
+  historial; el detalle del amigo (o el hub Social) es solo el respaldo de un
+  destino abierto sin historial, como un deep link. Supersede la decisión 3 del
+  registro del 17/11/2026 y el contrato de navegación de TICKET-047.
+- **El seguimiento del acreedor, primero.** El bloque «Recibir el dinero» pasa al
+  hueco nuevo `highlightContent` de `DetailView`/`DetailBody`, por encima del
+  resumen, y las filas `Cartera de ingreso` e `Ingreso en Movimientos` quedan
+  limitadas al acreedor (`isCreditor`), para que el deudor no crea que tiene que
+  elegir una cartera.
+
+Sin cambios de datos, reglas ni índices. Nueva prueba
+`features/settlements/utils/__tests__/settlement-detail-view.test.ts` (subtítulo de
+acreedor y deudor, conversión de céntimos y campos solo del acreedor). Verificación:
+`npx tsc --noEmit` OK, `npx expo lint` OK, `npx jest` 253 suites / 1475 tests,
+cobertura 98,93 / 94,50 / 98,59 / 99,38 % y `npm run check:copy` 250 archivos TSX.

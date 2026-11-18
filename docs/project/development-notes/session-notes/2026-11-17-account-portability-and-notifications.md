@@ -57,6 +57,8 @@ that needs a backend or OS-level delivery out of V1.0.
   of a detail.
 - The existing fallback (missing target → friend detail) is unchanged.
 
+> Superseded on 18/11/2026 by TICKET-058: back returns to the originating screen; the friend detail is only the fallback without history.
+
 ### 4. Push notifications deferred (TICKET-052, post-V1)
 
 - `expo-notifications` + Expo Push Service (or FCM/APNs) behind a Cloud Function
