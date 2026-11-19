@@ -17,5 +17,14 @@
     "spanish": "Español",
     "english": "English",
     "accessibility": "Choose the app language"
+  },
+  "sharedExpenseWallet": {
+    "label": "Register shared expenses in a wallet by default",
+    "helper": "Only affects new expenses: saved ones keep their own state.",
+    "on": "On",
+    "off": "Off",
+    "accessibility": "Register new shared expenses in a wallet",
+    "hint": "When you create a shared expense you paid for, the wallet and the category start turned on.",
+    "saveError": "The preference could not be saved. Try again."
   }
 }

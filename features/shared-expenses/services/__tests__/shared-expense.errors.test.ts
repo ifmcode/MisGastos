@@ -58,6 +58,7 @@ describe("getSharedExpenseErrorCode", () => {
       "CURRENCY_MISMATCH",
       "WALLET_REQUIRED",
       "CATEGORY_REQUIRED",
+      "LINK_WITHOUT_REGISTRATION",
     ] as const;
 
     for (const code of codes) {

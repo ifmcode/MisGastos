@@ -17,6 +17,9 @@
 > notification targets share) and `formatRelativeTime` in
 > `shared/utils/format.ts`, exposed as `formatRelative` by `useAppLocale`. The
 > decisions table below is unchanged.
+> TICKET-055 (18/11/2026) also adds no shared molecule: the wallet-registration
+> switch and the Settings default are feature components, and the only removal is
+> the TICKET-048 `SharedExpenseWalletWarning`, whose state became valid.
 
 ## Decisions
 
@@ -254,13 +257,20 @@ component was deleted). The detail layout and colours stay shared; the route onl
 a one-key shell style module, and the participants section reuses the existing
 shared-expenses style module, so no new palette was introduced.
 
-TICKET-048 made the wallet mandatory when the viewer pays and removed the
-**Sin cartera** option: `SharedExpenseWalletField` now shows the `WALLET_REQUIRED`
-error and the guidance to create a wallet in **Carteras** when there are no active
-same-currency wallets, and `SharedExpenseWalletWarning` (rendered in the detail)
-flags legacy viewer-paid records without a wallet. `shared-expense-form.tsx` was
-split into the page-sheet shell plus `shared-expense-form-body.tsx` to keep both
-files under 150 lines.
+TICKET-055 superseded TICKET-048's mandatory wallet: when the viewer pays, a
+Yes/No switch (`SharedExpenseWalletRegistration`,
+`features/shared-expenses/components/shared-expense-wallet-registration.tsx`)
+decides whether the expense registers in a wallet. **No** hides the wallet and
+category block and creates no movement; **Yes** keeps the `SharedExpenseWalletField`
+(localized `WALLET_REQUIRED` error and the guidance to create a wallet in
+**Carteras**) plus the category block. The legacy `SharedExpenseWalletWarning` and
+`hasViewerPaidWithoutWallet` were deleted because a social-only viewer-paid
+expense is now an intended state. The account default is a Settings row
+(`SettingsSharedExpenseToggle`,
+`features/settings/components/settings-shared-expense-toggle.tsx`) backed by the
+`users.registerSharedExpensesInWallet` field. `shared-expense-form.tsx` was split
+into the page-sheet shell plus `shared-expense-form-body.tsx` to keep both files
+under 150 lines.
 
 TICKET-050 removed the system **Gastos compartidos** category from the linked
 movement picker (it is neither offered nor preselected) and `shared-expense-form-body.tsx`

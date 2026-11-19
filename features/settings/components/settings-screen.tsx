@@ -11,6 +11,7 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { settingsStyles as styles } from "../styles/settings.styles";
 import { SettingsLanguageSelector } from "./settings-language-selector";
 import { SettingsProfileLink } from "./settings-profile-link";
+import { SettingsSharedExpenseToggle } from "./settings-shared-expense-toggle";
 import { SettingsThemeToggle } from "./settings-theme-toggle";
 
 export function SettingsScreen() {
@@ -52,6 +53,7 @@ export function SettingsScreen() {
 
         <SettingsThemeToggle />
         <SettingsLanguageSelector />
+        <SettingsSharedExpenseToggle />
       </ThemedView>
 
       <Pressable

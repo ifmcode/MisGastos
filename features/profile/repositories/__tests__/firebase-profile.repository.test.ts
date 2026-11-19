@@ -18,6 +18,7 @@ const existingDocument = {
     name: "Ada",
     email: "ada@example.com",
     preferredCurrency: "EUR",
+    registerSharedExpensesInWallet: false,
   }),
 };
 
@@ -26,6 +27,7 @@ const input = {
   email: "ada@example.com",
   displayName: "Ada Lovelace",
   preferredCurrency: "USD" as const,
+  registerSharedExpensesInWallet: true,
 };
 
 describe("FirebaseProfileRepository", () => {
@@ -40,6 +42,7 @@ describe("FirebaseProfileRepository", () => {
       email: "ada@example.com",
       displayName: "Ada",
       preferredCurrency: "EUR",
+      registerSharedExpensesInWallet: false,
     });
   });
 
@@ -62,6 +65,7 @@ describe("FirebaseProfileRepository", () => {
       expect.objectContaining({
         name: "Ada Lovelace",
         preferredCurrency: "USD",
+        registerSharedExpensesInWallet: true,
         email: "ada@example.com",
         updatedAt: expect.any(String),
       }),
@@ -71,7 +75,24 @@ describe("FirebaseProfileRepository", () => {
       id: "doc-1",
       displayName: "Ada Lovelace",
       preferredCurrency: "USD",
+      registerSharedExpensesInWallet: true,
     });
+  });
+
+  it("persists an explicit false when the preference is off", async () => {
+    mockGetDocs.mockResolvedValue({ docs: [existingDocument] });
+    mockUpdateDoc.mockResolvedValue(undefined);
+
+    const profile = await new FirebaseProfileRepository().saveProfile({
+      ...input,
+      registerSharedExpensesInWallet: false,
+    });
+
+    expect(mockUpdateDoc.mock.calls[0]?.[1]).toHaveProperty(
+      "registerSharedExpensesInWallet",
+      false,
+    );
+    expect(profile.registerSharedExpensesInWallet).toBe(false);
   });
 
   it("does not overwrite the stored email when the auth email is missing", async () => {
@@ -99,6 +120,7 @@ describe("FirebaseProfileRepository", () => {
         name: "Ada Lovelace",
         email: "ada@example.com",
         preferredCurrency: "USD",
+        registerSharedExpensesInWallet: true,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       }),
@@ -108,6 +130,7 @@ describe("FirebaseProfileRepository", () => {
       uid: "user-1",
       displayName: "Ada Lovelace",
       preferredCurrency: "USD",
+      registerSharedExpensesInWallet: true,
     });
   });
 

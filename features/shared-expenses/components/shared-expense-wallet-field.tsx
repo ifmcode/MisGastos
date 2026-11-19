@@ -24,8 +24,9 @@ export interface SharedExpenseWalletFieldProps {
 }
 
 /**
- * Mandatory wallet of the linked movement: the expense must reach Movements, so
- * the block only exists while the viewer pays and always needs a selection.
+ * Wallet of the linked movement while the viewer registers the expense in one.
+ * The block only renders when the registration toggle is **Yes** and the viewer
+ * is the payer; a social-only expense never shows it.
  */
 export function SharedExpenseWalletField({
   wallets,

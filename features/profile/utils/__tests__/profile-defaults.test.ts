@@ -22,6 +22,7 @@ const profile: Profile = {
   email: "ada@example.com",
   displayName: "Ada",
   preferredCurrency: "USD",
+  registerSharedExpensesInWallet: true,
 };
 
 describe("profile defaults", () => {
@@ -32,6 +33,7 @@ describe("profile defaults", () => {
       email: "ada@example.com",
       displayName: "Ada Lovelace",
       preferredCurrency: "EUR",
+      registerSharedExpensesInWallet: false,
     });
   });
 

@@ -24,6 +24,9 @@ export function buildInput(
     ],
     walletId: "wallet-1",
     categoryId: "category-1",
+    // The linked fixtures stay meaningful: registering is the default here, and
+    // the "No" toggle is exercised explicitly by the registration suite.
+    registerInWallet: true,
     ...overrides,
   };
 }

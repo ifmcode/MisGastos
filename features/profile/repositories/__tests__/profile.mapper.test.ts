@@ -12,6 +12,7 @@ describe("mapProfileDocument", () => {
           name: " Ada Lovelace ",
           email: " ada@example.com ",
           preferredCurrency: "USD",
+          registerSharedExpensesInWallet: true,
         },
         { uid: "fallback" },
       ),
@@ -21,6 +22,7 @@ describe("mapProfileDocument", () => {
       email: "ada@example.com",
       displayName: "Ada Lovelace",
       preferredCurrency: "USD",
+      registerSharedExpensesInWallet: true,
     });
   });
 
@@ -37,6 +39,7 @@ describe("mapProfileDocument", () => {
       email: "user@example.com",
       displayName: null,
       preferredCurrency: "EUR",
+      registerSharedExpensesInWallet: false,
     });
   });
 
@@ -48,6 +51,29 @@ describe("mapProfileDocument", () => {
       email: null,
       displayName: null,
       preferredCurrency: "EUR",
+      registerSharedExpensesInWallet: false,
     });
+  });
+
+  it("keeps an explicit false for the wallet preference", () => {
+    expect(
+      mapProfileDocument(
+        "doc-1",
+        { registerSharedExpensesInWallet: false },
+        { uid: "user-1" },
+      ).registerSharedExpensesInWallet,
+    ).toBe(false);
+  });
+
+  it("treats a malformed wallet preference as false", () => {
+    for (const value of ["true", 1, null, {}, []]) {
+      expect(
+        mapProfileDocument(
+          "doc-1",
+          { registerSharedExpensesInWallet: value },
+          { uid: "user-1" },
+        ).registerSharedExpensesInWallet,
+      ).toBe(false);
+    }
   });
 });

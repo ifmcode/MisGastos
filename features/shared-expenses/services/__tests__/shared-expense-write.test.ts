@@ -68,6 +68,64 @@ describe("shared expense write category guard", () => {
     expect(deps.linkRepository.updateCalls).toEqual([]);
   });
 
+  it("rejects a category without a wallet before writing", async () => {
+    const deps = createDeps();
+    const value: ValidatedSharedExpense = {
+      ...buildValue(),
+      walletId: null,
+      categoryId: "category-1",
+    };
+
+    await expect(
+      createSharedExpenseRecord(deps, value, "user-a", NOW),
+    ).rejects.toMatchObject({ code: "LINK_WITHOUT_REGISTRATION" });
+
+    expect(deps.repository.createCalls).toEqual([]);
+    expect(deps.linkRepository.createCalls).toEqual([]);
+  });
+
+  it("creates a viewer-paid expense without a link and no movement", async () => {
+    const deps = createDeps();
+    const value: ValidatedSharedExpense = {
+      ...buildValue(),
+      walletId: null,
+      categoryId: null,
+    };
+
+    await createSharedExpenseRecord(deps, value, "user-a", NOW);
+
+    expect(deps.linkRepository.createCalls).toEqual([]);
+    expect(deps.repository.createCalls[0]).toMatchObject({
+      payerId: "user-a",
+      walletId: null,
+      categoryId: null,
+      linkedTransactionId: null,
+    });
+  });
+
+  it("reverts the link of an expense whose toggle turns off", async () => {
+    const deps = createDeps();
+    const existing = buildSharedExpense({
+      walletId: "wallet-1",
+      categoryId: "category-1",
+      linkedTransactionId: "movement-1",
+    });
+    deps.linkRepository.seed(existing);
+    const value: ValidatedSharedExpense = {
+      ...buildValue(),
+      walletId: null,
+      categoryId: null,
+    };
+
+    await updateSharedExpenseRecord(deps, existing, value, "user-a", NOW);
+
+    expect(deps.repository.updateCalls).toEqual([]);
+    expect(deps.linkRepository.updateCalls[0]?.update).toMatchObject({
+      walletId: null,
+      categoryId: null,
+    });
+  });
+
   it("keeps the social-only friend-paid path without a category", async () => {
     const deps = createDeps();
     const value: ValidatedSharedExpense = {

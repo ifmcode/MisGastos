@@ -111,6 +111,23 @@ describe("buildExpenseLedgerEntries", () => {
     expect(entries[0].amountCents).toBe(500);
   });
 
+  it("derives the same debt whether or not the payer linked a wallet", () => {
+    const linked = expense({
+      walletId: "wallet-1",
+      categoryId: "category-1",
+      linkedTransactionId: "movement-1",
+    });
+    const social = expense({
+      walletId: null,
+      categoryId: null,
+      linkedTransactionId: null,
+    });
+
+    expect(buildExpenseLedgerEntries([linked])).toEqual(
+      buildExpenseLedgerEntries([social]),
+    );
+  });
+
   it("emits one entry per debtor in a multi-participant expense", () => {
     const entries = buildExpenseLedgerEntries([
       expense({

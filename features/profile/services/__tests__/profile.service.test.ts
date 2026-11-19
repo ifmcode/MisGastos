@@ -14,6 +14,7 @@ const profile: Profile = {
   email: "ada@example.com",
   displayName: "Ada",
   preferredCurrency: "EUR",
+  registerSharedExpensesInWallet: false,
 };
 
 function createRepository(): IProfileRepository {
@@ -24,6 +25,7 @@ function createRepository(): IProfileRepository {
       uid: input.uid,
       displayName: input.displayName,
       preferredCurrency: input.preferredCurrency,
+      registerSharedExpensesInWallet: input.registerSharedExpensesInWallet,
     })),
   };
 }
@@ -54,6 +56,7 @@ describe("ProfileService", () => {
       email: " ada@example.com ",
       displayName: " Ada Lovelace ",
       preferredCurrency: "USD",
+      registerSharedExpensesInWallet: true,
     });
 
     expect(repository.saveProfile).toHaveBeenCalledWith({
@@ -61,11 +64,28 @@ describe("ProfileService", () => {
       email: "ada@example.com",
       displayName: "Ada Lovelace",
       preferredCurrency: "USD",
+      registerSharedExpensesInWallet: true,
     });
     expect(saved).toMatchObject({
       displayName: "Ada Lovelace",
       preferredCurrency: "USD",
+      registerSharedExpensesInWallet: true,
     });
+  });
+
+  it("normalizes a missing wallet preference to false", async () => {
+    const repository = createRepository();
+    const service = new ProfileService(repository);
+
+    await service.saveProfile({
+      uid: "user-1",
+      displayName: "Ada",
+      preferredCurrency: "EUR",
+    } as unknown as Parameters<typeof service.saveProfile>[0]);
+
+    expect(repository.saveProfile).toHaveBeenCalledWith(
+      expect.objectContaining({ registerSharedExpensesInWallet: false }),
+    );
   });
 
   it("throws field errors and never persists invalid profiles", async () => {
@@ -76,6 +96,7 @@ describe("ProfileService", () => {
       uid: "  ",
       displayName: "   ",
       preferredCurrency: "BTC",
+      registerSharedExpensesInWallet: false,
     });
 
     await expect(failure).rejects.toBeInstanceOf(ProfileValidationError);
@@ -102,6 +123,7 @@ describe("ProfileService", () => {
         uid: "user-1",
         displayName: "Ada",
         preferredCurrency: "EUR",
+        registerSharedExpensesInWallet: false,
       }),
     ).rejects.toBe(failure);
   });

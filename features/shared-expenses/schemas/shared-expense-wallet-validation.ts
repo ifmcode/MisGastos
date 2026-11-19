@@ -15,9 +15,24 @@ function readOptionalId(value: unknown): string | null {
 }
 
 /**
- * Reads the optional wallet/category link of the form. The payer owns the linked
- * movement, so a viewer-paid expense must always carry a wallet and the category
- * it is saved with; a friend-paid one stays social-only and may omit both.
+ * The transient form toggle decides the requirement; a caller that does not send
+ * it keeps the previous contract and registers exactly when a wallet is present.
+ */
+function readRegistration(
+  input: SharedExpenseInput,
+  walletId: string | null,
+): boolean {
+  return typeof input.registerInWallet === "boolean"
+    ? input.registerInWallet
+    : walletId !== null;
+}
+
+/**
+ * Reads the optional wallet/category link of the form. A viewer-paid expense
+ * registers in a wallet only when the toggle says so: registration requires both
+ * a wallet and its category, while no registration rejects any leftover id
+ * (`LINK_WITHOUT_REGISTRATION`) and always clears the category. A friend-paid
+ * one stays social-only; the service drops the wallet it may still send.
  * Ownership and currency of the wallet are checked by the service and the
  * repository, never here.
  */
@@ -28,26 +43,33 @@ export function readSharedExpenseLink(
   issues: SharedExpenseValidationIssue[],
 ): SharedExpenseLinkInput {
   const walletId = readOptionalId(input.walletId);
+  const categoryId = readOptionalId(input.categoryId);
   const viewer = viewerUid.trim();
+  const viewerPays = payerId !== null && payerId === viewer;
+  const registration = readRegistration(input, walletId);
 
-  if (payerId !== null && payerId === viewer && walletId === null) {
-    issues.push({ field: "walletId", code: "WALLET_REQUIRED" });
+  if (viewerPays && !registration) {
+    // The toggle says "No": a leftover id would create a movement the user
+    // explicitly turned off, so the payload is rejected instead of guessed.
+    if (walletId !== null || categoryId !== null) {
+      issues.push({ field: "walletId", code: "LINK_WITHOUT_REGISTRATION" });
+    }
+
+    return { walletId: null, categoryId: null };
   }
 
   // No wallet means no personal movement, so the category cannot survive alone.
-  const categoryId =
-    walletId === null ? null : readOptionalId(input.categoryId);
+  const linkedCategoryId = walletId === null ? null : categoryId;
 
   // The category is a user decision: a linked movement is never saved with a
   // hidden default. A missing wallet already reports its own issue.
-  if (
-    payerId !== null &&
-    payerId === viewer &&
-    walletId !== null &&
-    categoryId === null
-  ) {
-    issues.push({ field: "categoryId", code: "CATEGORY_REQUIRED" });
+  if (viewerPays && registration) {
+    if (walletId === null) {
+      issues.push({ field: "walletId", code: "WALLET_REQUIRED" });
+    } else if (categoryId === null) {
+      issues.push({ field: "categoryId", code: "CATEGORY_REQUIRED" });
+    }
   }
 
-  return { walletId, categoryId };
+  return { walletId, categoryId: linkedCategoryId };
 }

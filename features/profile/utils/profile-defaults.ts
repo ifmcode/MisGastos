@@ -14,6 +14,7 @@ export function createProfileFromAuth(user: AuthUser): Profile {
     email: user.email,
     displayName: user.displayName,
     preferredCurrency: DEFAULT_CURRENCY,
+    registerSharedExpensesInWallet: false,
   };
 }
 

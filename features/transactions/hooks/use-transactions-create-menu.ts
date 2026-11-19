@@ -56,6 +56,8 @@ export function useTransactionsCreateMenu({
     friends,
     preferredCurrency,
     preselectFirstFriend: false,
+    registerInWalletByDefault:
+      profile?.registerSharedExpensesInWallet ?? false,
     onSaved: onChanged,
   });
 

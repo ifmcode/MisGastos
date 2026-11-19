@@ -61,6 +61,12 @@ export interface SharedExpenseInput {
   walletId?: string;
   /** Category of the linked movement; required whenever the payer links a wallet. */
   categoryId?: string;
+  /**
+   * Transient registration toggle read by validation only; never persisted.
+   * The stored link ids (`walletId`/`categoryId`/`linkedTransactionId`) decide
+   * the state when an expense is loaded.
+   */
+  registerInWallet?: boolean;
 }
 
 /** Normalized payload handed to the service: integer cents and resolved codes. */

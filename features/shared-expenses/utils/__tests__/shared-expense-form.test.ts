@@ -8,15 +8,16 @@ import {
   createSharedExpenseFormValues,
   getSharedExpenseParticipantIds,
   isPayerSelectable,
+  isSharedExpenseWalletRegistrationVisible,
   resolvePayerId,
   toSharedExpenseInput,
   type SharedExpenseFormValues,
 } from "../shared-expense-form";
 import {
   fromSharedExpense,
-  getSharedExpenseInitialValues,
   resolveExpenseFriendUid,
-} from "../shared-expense-form-load";
+} from "../shared-expense-form-from-expense";
+import { getSharedExpenseInitialValues } from "../shared-expense-form-load";
 import { buildSharedExpense } from "./shared-expense.fixtures";
 
 function buildWallet(overrides: Partial<Wallet> = {}): Wallet {
@@ -78,6 +79,7 @@ describe("createSharedExpenseFormValues", () => {
       splitMode: "equal",
       walletId: "",
       categoryId: "",
+      registerInWallet: false,
     });
     expect(values.splitValues).toEqual({
       equal: {},
@@ -99,6 +101,19 @@ describe("createSharedExpenseFormValues", () => {
     expect(values.currency).toBe("USD");
     expect(values.payerId).toBe("");
     expect(values.dateText).toBe("10/11/2026");
+  });
+
+  it("starts with the wallet registration off unless told otherwise", () => {
+    expect(buildValues().registerInWallet).toBe(false);
+    expect(
+      createSharedExpenseFormValues({
+        viewerUid: "user-a",
+        friendUid: "user-b",
+        currency: "EUR",
+        date: "2026-11-10",
+        registerInWallet: true,
+      }).registerInWallet,
+    ).toBe(true);
   });
 });
 
@@ -152,24 +167,52 @@ describe("toSharedExpenseInput", () => {
       ],
       walletId: "",
       categoryId: "",
+      registerInWallet: false,
     });
   });
 
   it("carries the wallet and category of the linked movement", () => {
     const input = toSharedExpenseInput(
-      buildValues({ walletId: "wallet-1", categoryId: "category-1" }),
+      buildValues({
+        walletId: "wallet-1",
+        categoryId: "category-1",
+        registerInWallet: true,
+      }),
     );
 
     expect(input.walletId).toBe("wallet-1");
     expect(input.categoryId).toBe("category-1");
+    expect(input.registerInWallet).toBe(true);
+  });
+
+  it("clears both ids when the registration toggle is off", () => {
+    const input = toSharedExpenseInput(
+      buildValues({
+        walletId: "wallet-1",
+        categoryId: "category-1",
+        registerInWallet: false,
+      }),
+    );
+
+    expect(input.walletId).toBe("");
+    expect(input.categoryId).toBe("");
+    expect(input.registerInWallet).toBe(false);
   });
 
   it("sends an empty category while the wallet is empty", () => {
     const blank = toSharedExpenseInput(
-      buildValues({ walletId: "  ", categoryId: "shared-category" }),
+      buildValues({
+        walletId: "  ",
+        categoryId: "shared-category",
+        registerInWallet: true,
+      }),
     );
     const missing = toSharedExpenseInput(
-      buildValues({ walletId: "", categoryId: "shared-category" }),
+      buildValues({
+        walletId: "",
+        categoryId: "shared-category",
+        registerInWallet: true,
+      }),
     );
 
     expect(blank.categoryId).toBe("");
@@ -302,6 +345,22 @@ describe("fromSharedExpense", () => {
     expect(values.categoryId).toBe("category-1");
   });
 
+  it("derives the registration toggle from the stored link", () => {
+    const wallet = fromSharedExpense(
+      buildSharedExpense({ walletId: "wallet-1" }),
+      "user-a",
+    );
+    const movement = fromSharedExpense(
+      buildSharedExpense({ linkedTransactionId: "transaction-1" }),
+      "user-a",
+    );
+    const social = fromSharedExpense(buildSharedExpense(), "user-a");
+
+    expect(wallet.registerInWallet).toBe(true);
+    expect(movement.registerInWallet).toBe(true);
+    expect(social.registerInWallet).toBe(false);
+  });
+
   it("clears a stored shared default category of the linked movement", () => {
     const values = fromSharedExpense(
       buildSharedExpense({
@@ -354,6 +413,7 @@ describe("getSharedExpenseInitialValues", () => {
     wallets: [] as Wallet[],
     walletsLoading: false,
     walletsError: null as string | null,
+    defaultRegisterInWallet: false,
   };
 
   it("builds the create defaults", () => {
@@ -454,6 +514,67 @@ describe("getSharedExpenseInitialValues", () => {
     });
 
     expect(values.friendUid).toBe("user-c");
+  });
+
+  it("defaults a new expense to the stored preference", () => {
+    const on = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: null,
+      defaultRegisterInWallet: true,
+    });
+    const off = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: null,
+    });
+
+    expect(on.registerInWallet).toBe(true);
+    expect(off.registerInWallet).toBe(false);
+  });
+
+  it("keeps the state of an edited expense over the preference", () => {
+    const linked = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: buildSharedExpense({
+        walletId: "wallet-1",
+        categoryId: "category-1",
+      }),
+      wallets: [buildWallet()],
+      defaultRegisterInWallet: false,
+    });
+    const social = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: buildSharedExpense(),
+      defaultRegisterInWallet: true,
+    });
+
+    expect(linked.registerInWallet).toBe(true);
+    expect(social.registerInWallet).toBe(false);
+  });
+
+  it("keeps the toggle on when the stored wallet is gone", () => {
+    const values = getSharedExpenseInitialValues({
+      ...base,
+      editingExpense: buildSharedExpense({ walletId: "wallet-deleted" }),
+      wallets: [buildWallet()],
+    });
+
+    expect(values.walletId).toBe("");
+    expect(values.registerInWallet).toBe(true);
+  });
+});
+
+describe("isSharedExpenseWalletRegistrationVisible", () => {
+  it("shows the toggle only while the viewer pays", () => {
+    expect(isSharedExpenseWalletRegistrationVisible("user-a", "user-a")).toBe(
+      true,
+    );
+    expect(isSharedExpenseWalletRegistrationVisible("user-b", "user-a")).toBe(
+      false,
+    );
+  });
+
+  it("hides the toggle without a signed-in viewer", () => {
+    expect(isSharedExpenseWalletRegistrationVisible("", "")).toBe(false);
   });
 });
 

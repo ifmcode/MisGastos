@@ -51,6 +51,25 @@ export function selectSharedExpenseCategory(
 }
 
 /**
+ * The registration switch guards the linked movement: turning it off drops the
+ * wallet and its category, while turning it on keeps whatever the user already
+ * selected so a quick Yes → No → Yes round trip does not lose the choice.
+ */
+export function selectSharedExpenseWalletRegistration(
+  values: SharedExpenseFormValues,
+  enabled: boolean,
+): SharedExpenseFormValues {
+  if (enabled) return { ...values, registerInWallet: true };
+
+  return {
+    ...values,
+    registerInWallet: false,
+    walletId: "",
+    categoryId: "",
+  };
+}
+
+/**
  * A wallet keeps its own currency, so switching the expense currency away from
  * the selected wallet clears the link and its category.
  */

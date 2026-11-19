@@ -22,7 +22,9 @@ import {
   selectSharedExpenseCurrency,
   selectSharedExpensePayer,
   selectSharedExpenseWallet,
+  selectSharedExpenseWalletRegistration,
 } from "../utils/shared-expense-link-values";
+import { useSharedExpenseFieldErrors } from "./use-shared-expense-field-errors";
 
 export interface UseSharedExpenseFormStateOptions {
   initialValues: SharedExpenseFormValues;
@@ -33,7 +35,6 @@ export interface UseSharedExpenseFormStateOptions {
 
 export interface SharedExpenseFormState {
   values: SharedExpenseFormValues;
-  /** Local validation merged with the errors returned by the service. */
   errors: SharedExpenseFieldErrors;
   changeDescription: (value: string) => void;
   changeAmount: (value: string) => void;
@@ -41,6 +42,8 @@ export interface SharedExpenseFormState {
   changePayer: (payerId: string) => void;
   changeWallet: (walletId: string) => void;
   changeCategory: (categoryId: string) => void;
+  /** Turns the linked movement on or off; off clears the wallet and category. */
+  changeRegisterInWallet: (enabled: boolean) => void;
   changeFriend: (friendUid: string) => void;
   changeDateText: (text: string) => void;
   changeSplitMode: (mode: ExpenseSplitMode) => void;
@@ -56,20 +59,8 @@ export function useSharedExpenseFormState({
   wallets,
 }: UseSharedExpenseFormStateOptions): SharedExpenseFormState {
   const [values, setValues] = useState<SharedExpenseFormValues>(initialValues);
-  const [localErrors, setLocalErrors] = useState<SharedExpenseFieldErrors>({});
-
-  const errors: SharedExpenseFieldErrors = { ...localErrors, ...fieldErrors };
-
-  function clearError(...fields: (keyof SharedExpenseFieldErrors)[]) {
-    setLocalErrors((current) => {
-      const found = fields.filter((field) => field in current);
-      if (found.length === 0) return current;
-
-      const next = { ...current };
-      found.forEach((field) => delete next[field]);
-      return next;
-    });
-  }
+  const { errors, clearError, setValidationErrors } =
+    useSharedExpenseFieldErrors(fieldErrors);
 
   function changeDescription(value: string) {
     setValues((current) => ({ ...current, description: value }));
@@ -100,6 +91,13 @@ export function useSharedExpenseFormState({
 
   function changeCategory(categoryId: string) {
     setValues((current) => selectSharedExpenseCategory(current, categoryId));
+  }
+
+  function changeRegisterInWallet(enabled: boolean) {
+    setValues((current) =>
+      selectSharedExpenseWalletRegistration(current, enabled),
+    );
+    clearError("walletId", "categoryId");
   }
 
   function changeFriend(friendUid: string) {
@@ -141,10 +139,11 @@ export function useSharedExpenseFormState({
     changePayer,
     changeWallet,
     changeCategory,
+    changeRegisterInWallet,
     changeFriend,
     changeDateText,
     changeSplitMode,
     changeSplitValue,
-    setValidationErrors: setLocalErrors,
+    setValidationErrors,
   };
 }

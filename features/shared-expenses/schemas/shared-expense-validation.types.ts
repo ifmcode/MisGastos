@@ -35,6 +35,7 @@ export type SharedExpenseValidationCode =
   | "SPLIT_MODE_INVALID"
   | "WALLET_REQUIRED"
   | "CATEGORY_REQUIRED"
+  | "LINK_WITHOUT_REGISTRATION"
   | "CURRENCY_MISMATCH"
   | SplitValueErrorCode
   | SplitErrorCode;

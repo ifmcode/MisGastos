@@ -4,8 +4,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedView } from "@/components/themed-view";
 import { SharedExpenseEditorModal } from "@/features/shared-expenses/components/shared-expense-editor-modal";
 import { SharedExpenseParticipants } from "@/features/shared-expenses/components/shared-expense-participants";
-import { SharedExpenseWalletWarning } from "@/features/shared-expenses/components/shared-expense-wallet-warning";
-import { hasViewerPaidWithoutWallet } from "@/features/shared-expenses/utils/shared-expense-wallet-warning";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
@@ -49,9 +47,6 @@ export function SharedExpenseDetailScreen() {
     expenseId: readParam(params.expenseId),
   });
   const { expense, editor } = screen;
-  const walletWarningVisible = expense
-    ? hasViewerPaidWithoutWallet(expense, screen.viewerUid)
-    : false;
 
   const leave = useDetailCloseNavigation({
     friendUid: readParam(params.friendUid) || null,
@@ -108,12 +103,7 @@ export function SharedExpenseDetailScreen() {
             pending: screen.pending,
           })}
           missingLabels={getSharedExpenseDetailMissingLabels(tr)}
-          errorContent={
-            <>
-              <ErrorBanner message={screen.mutationError} />
-              {walletWarningVisible ? <SharedExpenseWalletWarning /> : null}
-            </>
-          }
+          errorContent={<ErrorBanner message={screen.mutationError} />}
           onEdit={() => {
             if (expense) editor.openEdit(expense);
           }}

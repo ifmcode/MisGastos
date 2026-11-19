@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { useCategories } from "@/features/categories/hooks/use-categories";
 import type { Category } from "@/features/categories/types/category.types";
@@ -6,7 +6,6 @@ import type { Friend } from "@/features/friends/types/friend.types";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
 import type { Wallet } from "@/features/wallets/types/wallet.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
-import { getTodayIsoDate } from "@/shared/utils/date";
 
 import type { SharedExpenseFieldErrors } from "../schemas/shared-expense.schema";
 import type {
@@ -14,8 +13,8 @@ import type {
   SharedExpenseInput,
 } from "../types/shared-expense.types";
 import type { SharedExpenseFormValues } from "../utils/shared-expense-form";
-import { getSharedExpenseInitialValues } from "../utils/shared-expense-form-load";
 import { useSharedExpenseEditorSubmit } from "./use-shared-expense-editor-submit";
+import { useSharedExpenseInitialValues } from "./use-shared-expense-initial-values";
 
 export interface UseSharedExpenseEditorOptions {
   viewerUid: string | undefined;
@@ -24,6 +23,11 @@ export interface UseSharedExpenseEditorOptions {
   lockedFriendUid?: string;
   /** Prefill the first friend on create; the movements menu passes `false`. */
   preselectFirstFriend?: boolean;
+  /**
+   * Stored profile preference of the account; only new expenses read it, an
+   * edited expense derives its toggle from its own linked wallet or movement.
+   */
+  registerInWalletByDefault?: boolean;
   onSaved: () => void;
 }
 
@@ -55,6 +59,7 @@ export function useSharedExpenseEditor({
   preferredCurrency,
   lockedFriendUid,
   preselectFirstFriend,
+  registerInWalletByDefault = false,
   onSaved,
 }: UseSharedExpenseEditorOptions): SharedExpenseEditorController {
   const walletsState = useWallets();
@@ -82,32 +87,18 @@ export function useSharedExpenseEditor({
     onSaved: handleSaved,
   });
 
-  const initialValues = useMemo<SharedExpenseFormValues>(
-    () =>
-      getSharedExpenseInitialValues({
-        editingExpense,
-        viewerUid: viewerUid ?? "",
-        friends,
-        lockedFriendUid,
-        preselectFirstFriend,
-        preferredCurrency,
-        today: getTodayIsoDate(),
-        wallets: walletsState.wallets,
-        walletsLoading: walletsState.loading,
-        walletsError: walletsState.error,
-      }),
-    [
-      editingExpense,
-      friends,
-      lockedFriendUid,
-      preferredCurrency,
-      preselectFirstFriend,
-      viewerUid,
-      walletsState.error,
-      walletsState.loading,
-      walletsState.wallets,
-    ],
-  );
+  const initialValues = useSharedExpenseInitialValues({
+    editingExpense,
+    viewerUid,
+    friends,
+    lockedFriendUid,
+    preselectFirstFriend,
+    preferredCurrency,
+    registerInWalletByDefault,
+    wallets: walletsState.wallets,
+    walletsLoading: walletsState.loading,
+    walletsError: walletsState.error,
+  });
 
   const openCreate = useCallback(() => {
     setEditingExpense(null);

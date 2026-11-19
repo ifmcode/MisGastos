@@ -61,6 +61,7 @@ describe("validateProfileSaveInput", () => {
         email: "  ",
         displayName: "Ada",
         preferredCurrency: "EUR",
+        registerSharedExpensesInWallet: false,
       }),
     ).toEqual({
       ok: false,
@@ -73,6 +74,7 @@ describe("validateProfileSaveInput", () => {
         email: "  ada@example.com ",
         displayName: " Ada ",
         preferredCurrency: "GBP",
+        registerSharedExpensesInWallet: true,
       }),
     ).toEqual({
       ok: true,
@@ -81,6 +83,7 @@ describe("validateProfileSaveInput", () => {
         email: "ada@example.com",
         displayName: "Ada",
         preferredCurrency: "GBP",
+        registerSharedExpensesInWallet: true,
       },
     });
   });
@@ -90,9 +93,35 @@ describe("validateProfileSaveInput", () => {
       uid: "user-1",
       displayName: "Ada",
       preferredCurrency: "EUR",
+      registerSharedExpensesInWallet: false,
     });
 
     expect(result).toMatchObject({ ok: true, value: { email: null } });
+  });
+
+  it("normalizes a missing or malformed wallet preference to false", () => {
+    expect(
+      validateProfileSaveInput({
+        uid: "user-1",
+        displayName: "Ada",
+        preferredCurrency: "EUR",
+        registerSharedExpensesInWallet: "true" as unknown as boolean,
+      }),
+    ).toMatchObject({
+      ok: true,
+      value: { registerSharedExpensesInWallet: false },
+    });
+
+    expect(
+      validateProfileSaveInput({
+        uid: "user-1",
+        displayName: "Ada",
+        preferredCurrency: "EUR",
+      } as unknown as Parameters<typeof validateProfileSaveInput>[0]),
+    ).toMatchObject({
+      ok: true,
+      value: { registerSharedExpensesInWallet: false },
+    });
   });
 });
 

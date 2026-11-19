@@ -4,7 +4,7 @@ import { validateSharedExpenseInput } from "../shared-expense.schema";
 import { buildInput, issuesOf, VIEWER } from "./shared-expense-input.test-helpers";
 
 describe("validateSharedExpenseInput - payer wallet", () => {
-  it("requires a wallet when the viewer pays", () => {
+  it("requires a wallet when the viewer pays and registers", () => {
     expect(issuesOf({ walletId: "", categoryId: "category-1" })).toEqual([
       { field: "walletId", code: "WALLET_REQUIRED" },
     ]);
@@ -48,7 +48,7 @@ describe("validateSharedExpenseInput - payer wallet", () => {
     ]);
   });
 
-  it("never asks for a category without a wallet", () => {
+  it("never asks for a category when registration has no wallet", () => {
     expect(issuesOf({ walletId: "", categoryId: "" })).toEqual([
       { field: "walletId", code: "WALLET_REQUIRED" },
     ]);

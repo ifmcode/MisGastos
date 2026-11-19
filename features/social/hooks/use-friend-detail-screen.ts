@@ -33,10 +33,7 @@ export interface FriendDetailScreenController {
   header: FriendDetailHeader | null;
   /** Friends of the overview, used by the expense rows to resolve names. */
   friends: Friend[];
-  /**
-   * Overview error: full-screen when there is no friend to show, background
-   * banner when the header is already rendered.
-   */
+  /** Overview error: full-screen without a friend, banner otherwise. */
   error: string | null;
   refreshing: boolean;
   reload: () => void;
@@ -88,6 +85,8 @@ export function useFriendDetailScreen({
     friends: overview.overview.friends,
     friend,
     preferredCurrency: profile?.preferredCurrency ?? DEFAULT_CURRENCY,
+    registerSharedExpensesInWallet:
+      profile?.registerSharedExpensesInWallet ?? false,
     onFriendsChanged: overview.refresh,
   });
 

@@ -41,6 +41,29 @@ export const linkedMovementStyles = StyleSheet.create({
     borderStyle: "dashed",
   },
 
+  // Wallet registration toggle (TICKET-055)
+  registrationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  registrationLabel: {
+    flex: 1,
+    gap: 4,
+  },
+  registrationHelper: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  registrationValue: {
+    fontSize: 13,
+    fontWeight: "700",
+  },
+
   // Category picker popup
   pickerOverlay: {
     ...absoluteFill,

@@ -8,7 +8,7 @@ import type {
 } from "../types/shared-expense.types";
 import { SharedExpenseOperationError } from "./shared-expense.errors";
 import {
-  assertSharedExpensePayerWallet,
+  assertSharedExpenseLinkCoherence,
   buildCreateSharedExpenseDto,
   buildUpdateSharedExpenseDto,
   isSharedExpenseLinked,
@@ -41,7 +41,7 @@ export async function createSharedExpenseRecord(
   viewerUid: string,
   now: string,
 ): Promise<SharedExpense> {
-  assertSharedExpensePayerWallet(value, viewerUid);
+  assertSharedExpenseLinkCoherence(value, viewerUid);
   const link = resolveSharedExpenseLink(value, viewerUid);
   const categoryId = resolveCategoryId(link);
   const dto = buildCreateSharedExpenseDto(
@@ -66,7 +66,7 @@ export async function updateSharedExpenseRecord(
   viewerUid: string,
   now: string,
 ): Promise<SharedExpense> {
-  assertSharedExpensePayerWallet(value, viewerUid);
+  assertSharedExpenseLinkCoherence(value, viewerUid);
   const link = resolveSharedExpenseLink(value, viewerUid);
   const viewerPaysNow = link.walletId !== null;
   const viewerIsPayerNow = value.payerId === viewerUid;

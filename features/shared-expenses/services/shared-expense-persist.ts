@@ -16,17 +16,32 @@ export interface ResolvedSharedExpenseLink {
 }
 
 /**
- * Defense in depth: the schema already reports the missing wallet for a
- * viewer-paid payload, so only a caller that bypasses the form validation can
- * reach this guard. It mirrors the same invariant the rules enforce. Wallet
+ * Defense in depth for the wallet toggle: the schema already reports the missing
+ * wallet (`WALLET_REQUIRED`), the missing category (`CATEGORY_REQUIRED`) and a
+ * link that contradicts "No" (`LINK_WITHOUT_REGISTRATION`), so only a caller
+ * that bypasses the form validation reaches this guard. TICKET-055 replaced
+ * TICKET-048's mandatory payer wallet: a viewer-paid expense may now be
+ * social-only, but a wallet and a category always travel together. Wallet
  * existence, ownership and currency stay inside the repository transaction.
  */
-export function assertSharedExpensePayerWallet(
+export function assertSharedExpenseLinkCoherence(
   value: ValidatedSharedExpense,
   viewerUid: string,
 ): void {
-  if (value.payerId === viewerUid && value.walletId === null) {
-    throw new SharedExpenseOperationError("WALLET_REQUIRED");
+  if (value.walletId === null) {
+    if (value.categoryId !== null || value.linkedTransactionId !== null) {
+      throw new SharedExpenseOperationError("LINK_WITHOUT_REGISTRATION");
+    }
+
+    return;
+  }
+
+  // The other participant owns their movement, so the service drops the wallet
+  // and the category of a friend-paid value instead of persisting them.
+  if (value.payerId !== viewerUid) return;
+
+  if (value.categoryId === null) {
+    throw new SharedExpenseOperationError("CATEGORY_REQUIRED");
   }
 }
 

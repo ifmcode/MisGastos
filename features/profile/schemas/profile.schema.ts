@@ -32,6 +32,11 @@ function readCurrency(value: unknown): CurrencyCode | null {
   return isCurrencyCode(value) ? value : null;
 }
 
+/** A missing or malformed preference resolves to `false`, never an error. */
+function readBoolean(value: unknown): boolean {
+  return typeof value === "boolean" ? value : false;
+}
+
 function getCurrencyIssues(
   currency: CurrencyCode | null,
 ): ProfileValidationIssue[] {
@@ -102,6 +107,9 @@ export function validateProfileSaveInput(
       email: email.length > 0 ? email : null,
       displayName: readText(input.displayName).trim(),
       preferredCurrency: preferredCurrency as CurrencyCode,
+      registerSharedExpensesInWallet: readBoolean(
+        input.registerSharedExpensesInWallet,
+      ),
     },
   };
 }

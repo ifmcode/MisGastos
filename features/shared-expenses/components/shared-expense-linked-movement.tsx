@@ -28,10 +28,11 @@ export interface SharedExpenseLinkedMovementProps {
 }
 
 /**
- * Mandatory personal movement of the shared expense: only the payer can own it,
- * so the block renders while the viewer is the payer and disappears when the
- * friend pays. The wallet is required because the spend must reach Movements;
- * the category appears once a wallet is selected.
+ * Personal movement of the shared expense while the registration toggle is
+ * **Yes**: only the payer can own it, so the block renders while the viewer is
+ * the payer and disappears when the friend pays or the toggle is off. The
+ * wallet is required because the spend must reach Movements; the category
+ * appears once a wallet is selected.
  */
 export function SharedExpenseLinkedMovement({
   wallets,

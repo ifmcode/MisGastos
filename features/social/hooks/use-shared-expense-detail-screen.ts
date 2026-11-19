@@ -93,6 +93,8 @@ export function useSharedExpenseDetailScreen({
     viewerUid,
     friends: overview.overview.friends,
     preferredCurrency: profile?.preferredCurrency ?? DEFAULT_CURRENCY,
+    registerInWalletByDefault:
+      profile?.registerSharedExpensesInWallet ?? false,
     onSaved: refreshAll,
   });
 

@@ -1,8 +1,8 @@
 # Shared-expense form refinement (decision record)
 
 **Date:** 18/11/2026
-**Scope:** docs only — TICKET-055 and TICKET-056 created
-**Status:** decided, not implemented
+**Scope:** TICKET-055 implemented; TICKET-056 created (pending)
+**Status:** TICKET-055 implemented (18/11/2026); TICKET-056 decided, not implemented
 
 ## Context
 
@@ -64,6 +64,25 @@ other forms, so it is recorded next to it.
 - Presentation only: `FIXED_SUM_MISMATCH` and the existing validation still
   decide whether the form saves.
 
+## Implemented (TICKET-055)
+
+- The toggle travels as `registerInWallet` on `SharedExpenseInput` only; it is
+  read by validation and never stored. `ValidatedSharedExpense`, the DTOs and the
+  document keep the link ids as the single source of truth.
+- The form derives the switch with `isSharedExpenseLinked` on load, uses the
+  `users.registerSharedExpensesInWallet` preference only for a new expense, and
+  clears `walletId`/`categoryId` when the toggle is **No**.
+- The schema requires wallet + category for **Yes**, rejects a leftover id for
+  **No** with `LINK_WITHOUT_REGISTRATION`, and forces `categoryId: null` without
+  a wallet. The service guard `assertSharedExpenseLinkCoherence` mirrors the same
+  invariant before any write; the atomic linked-movement operations are
+  untouched.
+- `firestore.rules` replaces `hasPayerWallet` with `hasExpenseLinkCoherence`
+  (wallet ⇔ category and no `linkedTransactionId` without a wallet); deployment
+  stays manual.
+- The TICKET-048 legacy detail warning was removed: a viewer-paid expense with no
+  wallet is now a valid **No** state, not a defect.
+
 ## Alternatives considered
 
 - **Keep the wallet mandatory (TICKET-048 as is).** Rejected: it forces a
@@ -101,7 +120,7 @@ other forms, so it is recorded next to it.
 
 ## Related
 
-- `docs/project/tickets/TICKET-055-SHARED-EXPENSE-OPTIONAL-WALLET.md`
+- `docs/project/tickets/[DONE] TICKET-055-SHARED-EXPENSE-OPTIONAL-WALLET.md`
 - `docs/project/tickets/TICKET-056-SHARED-EXPENSE-CURRENCY-AND-REMAINING.md`
 - `docs/project/tickets/[DONE] TICKET-048-MANDATORY-WALLET-VIEWER-PAID.md`
 - `docs/project/tickets/[DONE] TICKET-051-MANDATORY-SHARED-EXPENSE-CATEGORY.md`

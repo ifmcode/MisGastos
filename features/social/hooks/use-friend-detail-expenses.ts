@@ -15,6 +15,8 @@ export interface UseFriendDetailExpensesOptions {
   friends: readonly Friend[];
   friend: Friend | null;
   preferredCurrency: CurrencyCode;
+  /** Account preference of the wallet registration for new expenses. */
+  registerSharedExpensesInWallet: boolean;
   /** Balances live in the friends overview, so mutations must reload it too. */
   onFriendsChanged: () => void | Promise<void>;
 }
@@ -38,6 +40,7 @@ export function useFriendDetailExpenses({
   friends,
   friend,
   preferredCurrency,
+  registerSharedExpensesInWallet,
   onFriendsChanged,
 }: UseFriendDetailExpensesOptions): FriendDetailExpensesController {
   const list = useSharedExpenseList({ viewerUid });
@@ -51,6 +54,7 @@ export function useFriendDetailExpenses({
     viewerUid,
     friends,
     preferredCurrency,
+    registerInWalletByDefault: registerSharedExpensesInWallet,
     lockedFriendUid: friend?.uid,
     onSaved: onChanged,
   });

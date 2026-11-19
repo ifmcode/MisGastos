@@ -29,7 +29,8 @@ export type SharedExpenseOperationCode =
   | "LINKED_MOVEMENT_NOT_REVERTIBLE"
   | "LINKED_MOVEMENT_FOREIGN"
   | "WALLET_REQUIRED"
-  | "CATEGORY_REQUIRED";
+  | "CATEGORY_REQUIRED"
+  | "LINK_WITHOUT_REGISTRATION";
 
 export type SharedExpenseErrorCode =
   | SharedExpenseOperationCode

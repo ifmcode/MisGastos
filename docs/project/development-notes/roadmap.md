@@ -16,12 +16,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 5 - Social vertical slice
-- **Current ticket:** TICKET-055 - optional wallet registration in shared expenses
+- **Current ticket:** TICKET-056 - compact currency field and live remaining amount in shared expenses
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-058 - notification back navigation and creditor wallet follow-up (18/11/2026)
+- **Last completed:** TICKET-055 - optional wallet registration in shared expenses (18/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-056 in Phase 5.3 after TICKET-055; TICKET-057 in Phase 5.4; TICKET-008 in Phase 6
-- **Next:** TICKET-055 - optional wallet registration in shared expenses
+- **Queued:** TICKET-057 in Phase 5.4; TICKET-008 in Phase 6
+- **Next:** TICKET-056
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -141,7 +141,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - Do not build a friends list without shared expenses; it does not validate the product
 
 ### 5.3 Shared-expense form refinement
-- [ ] TICKET-055: optional wallet registration in shared expenses with a configurable default
+- [x] TICKET-055: optional wallet registration in shared expenses with a configurable default ✅ 18/11/2026
 - [ ] TICKET-056: compact currency field with **Cambiar** and the live remaining amount for the fixed split
 
 ### 5.4 Initial onboarding

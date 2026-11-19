@@ -12,6 +12,7 @@ import {
   selectSharedExpenseCurrency,
   selectSharedExpensePayer,
   selectSharedExpenseWallet,
+  selectSharedExpenseWalletRegistration,
 } from "../shared-expense-link-values";
 
 function buildValues(
@@ -130,6 +131,34 @@ describe("selectSharedExpenseCategory", () => {
     expect(
       selectSharedExpenseCategory(buildValues(), "category-1").categoryId,
     ).toBe("category-1");
+  });
+});
+
+describe("selectSharedExpenseWalletRegistration", () => {
+  it("clears the wallet and category when registration is turned off", () => {
+    const next = selectSharedExpenseWalletRegistration(
+      buildValues({
+        registerInWallet: true,
+        walletId: "wallet-1",
+        categoryId: "category-1",
+      }),
+      false,
+    );
+
+    expect(next.registerInWallet).toBe(false);
+    expect(next.walletId).toBe("");
+    expect(next.categoryId).toBe("");
+  });
+
+  it("keeps the current ids when registration is turned on", () => {
+    const next = selectSharedExpenseWalletRegistration(
+      buildValues({ walletId: "wallet-1", categoryId: "category-1" }),
+      true,
+    );
+
+    expect(next.registerInWallet).toBe(true);
+    expect(next.walletId).toBe("wallet-1");
+    expect(next.categoryId).toBe("category-1");
   });
 });
 

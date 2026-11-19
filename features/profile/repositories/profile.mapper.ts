@@ -16,6 +16,11 @@ function readTextOrNull(value: unknown): string | null {
   return text.length > 0 ? text : null;
 }
 
+/** A missing or malformed preference resolves to `false`. */
+function readBoolean(value: unknown): boolean {
+  return typeof value === "boolean" ? value : false;
+}
+
 /**
  * Converts a `users` document into a Profile. Missing or malformed fields fall
  * back to safe values so a legacy document never breaks Settings.
@@ -33,5 +38,8 @@ export function mapProfileDocument(
     email: readTextOrNull(data.email) ?? fallback.email ?? null,
     displayName: readTextOrNull(data.name),
     preferredCurrency: resolveCurrencyCode(data.preferredCurrency),
+    registerSharedExpensesInWallet: readBoolean(
+      data.registerSharedExpensesInWallet,
+    ),
   };
 }

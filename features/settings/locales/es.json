@@ -17,5 +17,14 @@
     "spanish": "Español",
     "english": "English",
     "accessibility": "Elegir idioma de la app"
+  },
+  "sharedExpenseWallet": {
+    "label": "Registrar los gastos compartidos en una cartera por defecto",
+    "helper": "Solo afecta a los gastos nuevos: los ya guardados mantienen su estado.",
+    "on": "Activado",
+    "off": "Desactivado",
+    "accessibility": "Registrar los gastos compartidos nuevos en una cartera",
+    "hint": "Al crear un gasto compartido en el que pagas tú, la cartera y la categoría aparecen activadas.",
+    "saveError": "No se pudo guardar la preferencia. Inténtalo de nuevo."
   }
 }

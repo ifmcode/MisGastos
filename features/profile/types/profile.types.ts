@@ -6,6 +6,8 @@ export interface Profile {
   email: string | null;
   displayName: string | null;
   preferredCurrency: CurrencyCode;
+  /** Default of the shared-expense wallet toggle; a missing value means false. */
+  registerSharedExpensesInWallet: boolean;
 }
 
 /** Raw values handled by the profile form. */
@@ -24,6 +26,7 @@ export interface ProfileSaveInput {
   email?: string | null;
   displayName: string;
   preferredCurrency: string;
+  registerSharedExpensesInWallet: boolean;
 }
 
 export interface ValidatedProfileSaveInput {
@@ -31,4 +34,5 @@ export interface ValidatedProfileSaveInput {
   email: string | null;
   displayName: string;
   preferredCurrency: CurrencyCode;
+  registerSharedExpensesInWallet: boolean;
 }

@@ -45,6 +45,7 @@ export class FirebaseProfileRepository implements IProfileRepository {
       const update = {
         name: input.displayName,
         preferredCurrency: input.preferredCurrency,
+        registerSharedExpensesInWallet: input.registerSharedExpensesInWallet,
         updatedAt: now,
         ...(input.email ? { email: input.email } : {}),
       };
@@ -63,6 +64,7 @@ export class FirebaseProfileRepository implements IProfileRepository {
       name: input.displayName,
       email: input.email,
       preferredCurrency: input.preferredCurrency,
+      registerSharedExpensesInWallet: input.registerSharedExpensesInWallet,
       createdAt: now,
       updatedAt: now,
     };

@@ -45,6 +45,8 @@ export function useProfileScreen(): ProfileScreenController {
         const saved = await profileService.saveProfile({
           uid: user.uid,
           email: user.email,
+          registerSharedExpensesInWallet:
+            profile?.registerSharedExpensesInWallet ?? false,
           ...input,
         });
 
@@ -73,6 +75,7 @@ export function useProfileScreen(): ProfileScreenController {
     },
     [
       user,
+      profile,
       profileService,
       authService,
       refreshUser,

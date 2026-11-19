@@ -26,6 +26,12 @@ export interface SharedExpenseFormValues {
   walletId: string;
   /** Expense category of the linked movement; empty leaves it to persistence. */
   categoryId: string;
+  /**
+   * Transient UI switch of the wallet registration; never persisted. The stored
+   * wallet, category and linked movement are the single source of truth, so the
+   * toggle is derived from them when an expense is loaded.
+   */
+  registerInWallet: boolean;
 }
 
 export interface SharedExpenseFormDefaults {
@@ -34,6 +40,8 @@ export interface SharedExpenseFormDefaults {
   currency: CurrencyCode;
   date: string;
   payerId?: string;
+  /** Stored preference of new expenses; omitted means no wallet registration. */
+  registerInWallet?: boolean;
 }
 
 /** One empty value map per mode so switching never reads stale entries. */
@@ -57,6 +65,7 @@ export function createSharedExpenseFormValues(
     splitValues: emptySplitValues(),
     walletId: "",
     categoryId: "",
+    registerInWallet: defaults.registerInWallet ?? false,
   };
 }
 
@@ -75,7 +84,8 @@ export function toSharedExpenseInput(
   values: SharedExpenseFormValues,
 ): SharedExpenseInput {
   const activeValues = values.splitValues[values.splitMode] ?? {};
-  const hasWallet = values.walletId.trim().length > 0;
+  const registersInWallet = values.registerInWallet;
+  const hasWallet = registersInWallet && values.walletId.trim().length > 0;
 
   return {
     friendUid: values.friendUid,
@@ -89,11 +99,27 @@ export function toSharedExpenseInput(
       userId,
       value: activeValues[userId] ?? "",
     })),
-    walletId: values.walletId,
+    // "No" clears both ids, so a stale selection can never reach the schema.
+    walletId: registersInWallet ? values.walletId : "",
     // Without a wallet the persisted link has no category, whatever the local
     // state still holds.
     categoryId: hasWallet ? values.categoryId : "",
+    registerInWallet: registersInWallet,
   };
+}
+
+/**
+ * Only the payer can own the linked movement, so the registration toggle is
+ * visible while the viewer is the payer and disappears when the friend pays.
+ */
+export function isSharedExpenseWalletRegistrationVisible(
+  payerId: string,
+  viewerUid: string,
+): boolean {
+  const viewer = viewerUid.trim();
+  const payer = payerId.trim();
+
+  return viewer.length > 0 && payer === viewer;
 }
 
 export function isPayerSelectable(
