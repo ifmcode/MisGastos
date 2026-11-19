@@ -165,6 +165,11 @@ npm run firestore-update-rules     # inicia sesión en Firebase y luego desplieg
 > `notifications` (TICKET-046 y TICKET-047, con los dos sellos) todavía están
 > **pendientes de despliegue**.
 
+> Las funciones de `firestore.rules` usan el lenguaje de reglas de Firebase (derivado de
+> CEL), no TypeScript: el cuerpo es un único `return` con una sola expresión, sin
+> `if`/`else` ni un segundo `return`, y se ramifica con `? :`. Antes de desplegar,
+> `npx firebase deploy --only firestore:rules --dry-run` valida la compilación sin publicar nada.
+
 ## 📜 Scripts disponibles
 
 | Comando | Descripción |

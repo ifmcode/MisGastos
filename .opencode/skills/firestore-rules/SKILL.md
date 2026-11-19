@@ -43,6 +43,25 @@ match /things/{thingId} {
 - Rules cannot sum balances: any invariant that needs reading several documents
   belongs to a `runTransaction` operation, not to rules.
 
+## Rules language, not TypeScript
+
+`firestore.rules` is Firebase's CEL-derived language, not JavaScript. A `function`
+body is **one `return` with a single expression**.
+
+- No `if` / `else` statements, no second `return`, no local variables, no loops.
+  Writing them fails the deploy with `Unexpected 'if'` / `Unexpected 'return'`.
+- Branch with the ternary `condition ? whenTrue : whenFalse`, or with `&&` / `||`
+  (they short-circuit, so `!('key' in data) || isOptionalId(data.key)` never reads
+  a missing key). Split complex logic into small helper functions.
+- `allow ...: if <expression>;` is the only valid form in a `match`: that `if` is
+  part of the grammar, never a statement.
+- A compile error inside one function desynchronises the parser and adds
+  misleading errors further down (for example `Unexpected 'match'` on the next
+  block). Fix and re-validate the **first** reported line.
+- Limits per request: 10 nested function calls, 20 function calls, 1,000
+  evaluated expressions and 10 document reads (20 for a query). Never add a
+  `get`/`getAfter` inside a helper that is called from several branches.
+
 ## Transaction pattern
 
 Reference: `features/transfers/repositories/transfer-create.operation.ts` and
@@ -64,9 +83,16 @@ Reference: `features/transfers/repositories/transfer-create.operation.ts` and
 - Keep `firestore.indexes.json` deployed through
   `npm run firebase-deploy:indexes`; agents never deploy rules or indexes.
 
-## Verification
+## Verification and deployment
 
-There is no `@firebase/rules-unit-testing` suite yet, so verify by reading the
-rules against every new client call, then ask the user to deploy with
-`npm run firestore-deploy:rules` and exercise the flow. If the ticket adds a
-rules emulator suite, document it in `docs/project/testing/test-guide.md`.
+1. Check that the file compiles **before** asking for a deploy (the check runs
+   server-side, publishes nothing):
+   `npx firebase deploy --only firestore:rules --dry-run`
+2. There is no `@firebase/rules-unit-testing` suite yet, so read the rules
+   against every new client call. The emulator is the alternative check
+   (`npx firebase emulators:start --only firestore`) and needs JDK 21.
+3. Agents never deploy: ask the user to run
+   `npm run firebase-deploy:rules` (or `npm run firestore-update-rules` to log in
+   first) and exercise the flow.
+4. If the ticket adds a rules emulator suite, document it in
+   `docs/project/testing/test-guide.md`.

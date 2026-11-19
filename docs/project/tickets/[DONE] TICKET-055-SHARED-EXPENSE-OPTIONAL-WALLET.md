@@ -93,7 +93,7 @@ Implemented and verified on 18/11/2026. Decision record:
 - `firestore.rules` changed; no index change; the rules deployment remains manual.
 
 ### Known limitations and manual steps
-- `firestore.rules` must be deployed manually (`npm run firestore-deploy:rules`); until then the stricter coherence is enforced only by the schema, the service and the form.
+- `firestore.rules` must be deployed manually (`npm run firebase-deploy:rules`); until then the stricter coherence is enforced only by the schema, the service and the form.
 - Manual device validation is pending: **Yes/No** on a device, **Yes→No→Yes** and repeated saves, a friend-paid expense without toggle/block, legacy records, the Settings default only for new expenses, light/dark, es/en and screen reader.
 - The Settings switch saves through the full profile validation, so an account whose profile has no display name must set one in Profile first (same `NAME_REQUIRED` rule); documented as a limitation, not a blocker.
 - Each **Yes→No→Yes** cycle soft-deletes the previous movement and creates a new one; soft-deleted movements are never shown in Movimientos and are kept as an audit trail, so money is not duplicated.

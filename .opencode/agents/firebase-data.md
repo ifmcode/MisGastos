@@ -57,7 +57,12 @@ services, `firestore.rules` and `firestore.indexes.json`.
   Never return user-facing sentences from a service.
 - Soft delete financial records (`deletedAt`) and keep `createdAt` immutable.
 - Rules changes are reviewed but never deployed from an agent; the user runs
-  `npm run firestore-deploy:rules`.
+  `npm run firebase-deploy:rules` (`npm run firestore-update-rules` logs in
+  first). Validate first with `npx firebase deploy --only firestore:rules
+  --dry-run`, which compiles server-side and publishes nothing.
+- Rules functions are single-expression: no `if`/`else`, no second `return`.
+  Branch with `? :` or `&&`/`||` and split helpers; see the `firestore-rules`
+  skill.
 - Timestamps are ISO strings or server timestamps, consistent with the collection.
 
 ## Tests

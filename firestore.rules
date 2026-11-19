@@ -127,12 +127,10 @@ service cloud.firestore {
     // (`LINK_WITHOUT_REGISTRATION` / `CATEGORY_REQUIRED`) and by the form toggle.
     // Deployment of this file is manual.
     function hasExpenseLinkCoherence(data) {
-      if (data.get('walletId', null) == null) {
-        return data.get('categoryId', null) == null
-          && data.get('linkedTransactionId', null) == null;
-      }
-
-      return data.get('categoryId', null) != null;
+      return data.get('walletId', null) == null
+        ? data.get('categoryId', null) == null
+          && data.get('linkedTransactionId', null) == null
+        : data.get('categoryId', null) != null;
     }
 
     // The unlinked soft delete touches nothing but the deletion stamps, so an
