@@ -18,6 +18,7 @@ export interface FormTheme {
   warningSurface: string;
   warningText: string;
   success: string;
+  successSurface: string;
 }
 
 /**
@@ -45,5 +46,6 @@ export function useFormTheme(): FormTheme {
     warningSurface: tokens.warningSurface,
     warningText: tokens.warningText,
     success: tokens.success,
+    successSurface: tokens.successSurface,
   };
 }

@@ -7,9 +7,8 @@
   "row": {
     "youPaid": "You paid",
     "friendPaid": "{{name}} paid",
-    "yourShare": "Your share: {{amount}}",
-    "yourSharePercent": "Your share: {{amount}} ({{percent}})",
-    "openAccessibility": "Open the expense {{description}}",
+    "youLent": "You lent {{amount}}",
+    "youBorrowed": "You borrowed {{amount}}",
     "openHint": "Opens the details of this shared expense.",
     "editAccessibility": "Edit the expense {{description}}",
     "editHint": "Opens the form with the details of this shared expense.",

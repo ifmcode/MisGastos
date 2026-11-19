@@ -1,7 +1,7 @@
 # Roadmap - MisGastos
 
 > Development guide: V1 scope, phase order, ticket order and the current ticket.
-> **Last reviewed:** 18/11/2026
+> **Last reviewed:** 19/11/2026
 
 ## Scope of this file
 - This file answers **what to build next and in which order**, plus the rules for doing it.
@@ -18,7 +18,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Phase:** 5 - Social vertical slice
 - **Current ticket:** TICKET-056 - compact currency field and live remaining amount in shared expenses
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-055 - optional wallet registration in shared expenses (18/11/2026)
+- **Last completed:** TICKET-060 - keep settled history hidden after a new expense (19/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
 - **Queued:** TICKET-057 in Phase 5.4; TICKET-008 in Phase 6
 - **Next:** TICKET-056
@@ -131,6 +131,8 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] TICKET-049: shared-expense link feedback and category reset ✅ 17/11/2026
 - [x] TICKET-050: shared-expense save feedback and category picker ✅ 17/11/2026
 - [x] TICKET-051: mandatory shared-expense category and no hidden default ✅ 17/11/2026
+- [x] TICKET-059: unified friend timeline interleaving shared expenses and settlements ✅ 19/11/2026
+- [x] TICKET-060: keep settled history hidden after a new expense with a separator ✅ 19/11/2026
 
 ### 5.2 1:1 settlement and notifications
 - [x] TICKET-046: 1:1 debt settlement with direct application ✅ 18/11/2026

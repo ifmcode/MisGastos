@@ -21,6 +21,7 @@ export interface ThemeTokens {
   warningSurface: string;
   warningText: string;
   success: string;
+  successSurface: string;
   overlay: string;
   tint: string;
   icon: string;

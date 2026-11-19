@@ -8,7 +8,6 @@ import {
   getSettlementDebtorCreditor,
   getSettlementDirection,
   isAmountWithinDebt,
-  isPairFullySettled,
   isSettlementFull,
 } from "../settlement-debt";
 
@@ -114,15 +113,6 @@ describe("canEditSettlementAmount", () => {
     });
 
     expect(canEditSettlementAmount(settlement, "user-a")).toBe(false);
-  });
-});
-
-describe("isPairFullySettled", () => {
-  it("treats an empty balance list as settled", () => {
-    expect(isPairFullySettled([])).toBe(true);
-    expect(
-      isPairFullySettled([{ currency: "EUR", netBalanceCents: 1 }]),
-    ).toBe(false);
   });
 });
 

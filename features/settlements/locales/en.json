@@ -97,12 +97,8 @@
     "settleHint": "Opens the form to settle all or part of the debt."
   },
   "message": {
-    "title": "Settlement",
     "youPaid": "You paid {{amount}} to {{name}}",
     "youReceived": "{{name}} paid you {{amount}}",
-    "full": "Debt settled",
-    "partial": "Partial settlement",
-    "openAccessibility": "Open the settlement of {{amount}} with {{name}}",
     "openHint": "Opens the details of this settlement."
   },
   "expenses": {
@@ -111,7 +107,8 @@
     "hidePrevious": "Hide previous expenses",
     "hidePreviousHint": "Hides the shared expenses again.",
     "settledTitle": "Debt settled",
-    "settledMessage": "The settlement covered the whole debt. Previous expenses are still available."
+    "settledMessage": "The settlement covered the whole debt. Previous expenses are still available.",
+    "settledSeparator": "Settled movements"
   },
   "detail": {
     "title": "Settlement",

@@ -8,39 +8,10 @@ export const sharedExpensesPalette = {
 } as const;
 
 export const sharedExpensesStyles = StyleSheet.create({
-  // Expense list
-  list: {
-    gap: 10,
-  },
-
-  // Expense row
-  rowCard: {
-    flexDirection: "row",
-    gap: 12,
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 14,
-  },
+  // Flex body shared by the row-like blocks
   rowBody: {
     flex: 1,
     gap: 2,
-  },
-  rowMeta: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  rowAmount: {
-    fontSize: 16,
-    fontWeight: "700",
-    fontVariant: ["tabular-nums"],
-  },
-  rowLine: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: "600",
-  },
-  rowChevron: {
-    alignSelf: "center",
   },
   actionDisabled: {
     opacity: 0.5,

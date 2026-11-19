@@ -1,62 +1,23 @@
 import { useCallback, useMemo, useState } from "react";
 
 import { useFriendsOverview } from "@/features/friends/hooks/use-friends-overview";
-import type { Friend } from "@/features/friends/types/friend.types";
 import {
   findFriendByUid,
   getFriendDetailHeader,
-  type FriendDetailHeader,
 } from "@/features/friends/utils/friend-detail";
 import { useProfile } from "@/features/profile/hooks/use-profile";
-import type { SharedExpenseEditorController } from "@/features/shared-expenses/hooks/use-shared-expense-editor";
-import type { SharedExpense } from "@/features/shared-expenses/types/shared-expense.types";
-import type { Settlement } from "@/features/settlements/types/settlement.types";
 import { useAuth } from "@/hooks/use-auth";
 import { DEFAULT_CURRENCY } from "@/shared/constants/currencies";
 
+import type {
+  FriendDetailScreenController,
+  FriendDetailStatus,
+  UseFriendDetailScreenOptions,
+} from "../types/friend-detail-screen.types";
+import { buildFriendTimelineGroups } from "../utils/friend-timeline-settled";
 import { useFriendDetailExpenses } from "./use-friend-detail-expenses";
 import { useFriendDetailSettlements } from "./use-friend-detail-settlements";
-import {
-  useFriendRemoval,
-  type FriendRemovalController,
-} from "./use-friend-removal";
-
-export type FriendDetailStatus = "loading" | "error" | "missing" | "ready";
-
-export interface UseFriendDetailScreenOptions {
-  /** Route uid, already normalized to a single string. */
-  uid: string;
-}
-
-export interface FriendDetailScreenController {
-  status: FriendDetailStatus;
-  header: FriendDetailHeader | null;
-  /** Friends of the overview, used by the expense rows to resolve names. */
-  friends: Friend[];
-  /** Overview error: full-screen without a friend, banner otherwise. */
-  error: string | null;
-  refreshing: boolean;
-  reload: () => void;
-  refresh: () => void;
-  expenses: SharedExpense[];
-  expensesLoading: boolean;
-  expensesError: string | null;
-  reloadExpenses: () => void;
-  /** Pair settlements and the full-settlement collapse state. */
-  settlements: Settlement[];
-  latestSettlement: Settlement | null;
-  settlementsLoading: boolean;
-  settlementsError: string | null;
-  canCollapseExpenses: boolean;
-  showExpenses: boolean;
-  toggleExpenses: () => void;
-  /** Viewer uid, already normalized to a string for the expense rows. */
-  viewerUid: string;
-  /** Remaining friend failure, announced in its own banner. */
-  removalError: string | null;
-  editor: SharedExpenseEditorController;
-  removal: FriendRemovalController;
-}
+import { useFriendRemoval } from "./use-friend-removal";
 
 /**
  * Composition root of the friend detail. Both lists are already loaded by the
@@ -98,6 +59,42 @@ export function useFriendDetailScreen({
 
   const settlements = useFriendDetailSettlements({ viewerUid, friend });
 
+  // No new query: both pair lists are already loaded, so the split is pure.
+  const groups = useMemo(
+    () =>
+      buildFriendTimelineGroups({
+        expenses: expenses.expenses,
+        settlements: settlements.settlements,
+        viewerUid: viewerUid ?? "",
+        friendUid: friend?.uid ?? "",
+      }),
+    [expenses.expenses, friend?.uid, settlements.settlements, viewerUid],
+  );
+
+  const boundaryId = groups.boundary?.id ?? null;
+  const [expandedBoundaryId, setExpandedBoundaryId] = useState<string | null>(
+    null,
+  );
+
+  // Derived, not reset in an effect: a new full settlement changes the boundary
+  // id and the flag falls back to collapsed on the same render, with no frame of
+  // the previous cycle open. A new expense keeps the boundary, so an explicit
+  // expansion survives it.
+  const showSettled = boundaryId !== null && expandedBoundaryId === boundaryId;
+
+  const toggleSettled = useCallback(() => {
+    if (groups.settled.length === 0) return;
+
+    setExpandedBoundaryId((current) =>
+      current === boundaryId ? null : boundaryId,
+    );
+  }, [boundaryId, groups.settled.length]);
+
+  const reloadTimeline = useCallback(() => {
+    expenses.reload();
+    settlements.reload();
+  }, [expenses.reload, settlements.reload]);
+
   const reload = useCallback(() => {
     void overview.reload();
     expenses.reload();
@@ -106,7 +103,8 @@ export function useFriendDetailScreen({
 
   // One pull-to-refresh flag for all sources: `useSharedExpenseList` exposes
   // `refresh` but not its own refreshing state.
-  const refresh = useCallback(() => {    setRefreshing(true);
+  const refresh = useCallback(() => {
+    setRefreshing(true);
     void Promise.all([
       overview.refresh(),
       expenses.refresh(),
@@ -130,17 +128,13 @@ export function useFriendDetailScreen({
     refreshing,
     reload,
     refresh,
-    expenses: expenses.expenses,
-    expensesLoading: expenses.loading,
-    expensesError: expenses.error,
-    reloadExpenses: expenses.reload,
-    settlements: settlements.settlements,
-    latestSettlement: settlements.latest,
-    settlementsLoading: settlements.loading,
-    settlementsError: settlements.error,
-    canCollapseExpenses: settlements.canCollapseExpenses,
-    showExpenses: settlements.showExpenses,
-    toggleExpenses: settlements.toggleExpenses,
+    timelineCurrent: groups.current,
+    timelineSettled: groups.settled,
+    timelineLoading: expenses.loading || settlements.loading,
+    timelineError: expenses.error ?? settlements.error,
+    reloadTimeline,
+    showSettled,
+    toggleSettled,
     viewerUid: viewerUid ?? "",
     removalError: removal.error,
     editor: expenses.editor,

@@ -5,8 +5,8 @@ import { RefreshControl, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
+import type { Settlement } from "@/features/settlements/types/settlement.types";
 import type { SharedExpense } from "@/features/shared-expenses/types/shared-expense.types";
-import { SettlementMessage } from "@/features/settlements/components/settlement-message";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
 import { Fab } from "@/shared/components/molecules/fab";
@@ -15,10 +15,10 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useFriendDetailScreen } from "../hooks/use-friend-detail-screen";
 import { friendDetailStyles as styles } from "../styles/friend-detail.styles";
-import { FriendDetailExpenses } from "./friend-detail-expenses";
 import { FriendDetailHeader } from "./friend-detail-header";
 import { FriendDetailMissingState } from "./friend-detail-missing-state";
 import { FriendDetailModals } from "./friend-detail-modals";
+import { FriendDetailTimeline } from "./friend-detail-timeline";
 import { SocialRouteHeader } from "./social-route-header";
 
 function readUid(value: string | string[] | undefined): string {
@@ -53,6 +53,13 @@ export function FriendDetailScreen() {
   const openExpense = useCallback(
     (expense: SharedExpense) => {
       router.push(`/social/expenses/${expense.id}` as Href);
+    },
+    [router],
+  );
+
+  const openSettlement = useCallback(
+    (settlement: Settlement) => {
+      router.push(`/social/settlements/${settlement.id}` as Href);
     },
     [router],
   );
@@ -104,29 +111,18 @@ export function FriendDetailScreen() {
 
           <ErrorBanner message={screen.removalError} />
 
-          {screen.latestSettlement ? (
-            <SettlementMessage
-              settlement={screen.latestSettlement}
-              viewerUid={screen.viewerUid}
-              friendName={header.name}
-              pairSettled={header.balances.length === 0}
-              onOpen={(item) => router.push(`/social/settlements/${item.id}` as Href)}
-            />
-          ) : null}
-
-          <ErrorBanner message={screen.settlementsError} />
-
-          <FriendDetailExpenses
-            expenses={screen.expenses}
+          <FriendDetailTimeline
+            currentEntries={screen.timelineCurrent}
+            settledEntries={screen.timelineSettled}
             friends={screen.friends}
             viewerUid={screen.viewerUid}
-            loading={screen.expensesLoading}
-            error={screen.expensesError}
-            onRetry={screen.reloadExpenses}
-            onOpen={openExpense}
-            collapsed={!screen.showExpenses}
-            canCollapse={screen.canCollapseExpenses}
-            onToggle={screen.toggleExpenses}
+            loading={screen.timelineLoading}
+            error={screen.timelineError}
+            onRetry={screen.reloadTimeline}
+            onOpenExpense={openExpense}
+            onOpenSettlement={openSettlement}
+            showSettled={screen.showSettled}
+            onToggleSettled={screen.toggleSettled}
           />
         </ScrollView>
       )}

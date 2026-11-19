@@ -71,45 +71,7 @@ export const friendDetailStyles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // Expense section
-  section: {
-    gap: 10,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-    textTransform: "uppercase",
-  },
-  settledNotice: {
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 14,
-    gap: 4,
-  },
-  settledTitle: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: "700",
-  },
-  settledMessage: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  toggleButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    minHeight: 48,
-  },
-  toggleButtonText: {
-    fontSize: 14,
-    fontWeight: "700",
-  },
-
+  // Shared interaction states
   actionDisabled: {
     opacity: 0.5,
   },

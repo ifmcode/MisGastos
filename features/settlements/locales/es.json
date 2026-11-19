@@ -97,12 +97,8 @@
     "settleHint": "Abre el formulario para liquidar total o parcialmente la deuda."
   },
   "message": {
-    "title": "Liquidación",
     "youPaid": "Pagaste {{amount}} a {{name}}",
     "youReceived": "{{name}} te pagó {{amount}}",
-    "full": "Deuda saldada",
-    "partial": "Liquidación parcial",
-    "openAccessibility": "Abrir la liquidación de {{amount}} con {{name}}",
     "openHint": "Abre el detalle de esta liquidación."
   },
   "expenses": {
@@ -111,7 +107,8 @@
     "hidePrevious": "Ocultar gastos anteriores",
     "hidePreviousHint": "Vuelve a ocultar los gastos compartidos.",
     "settledTitle": "Deuda saldada",
-    "settledMessage": "La liquidación cubrió toda la deuda. Los gastos anteriores siguen disponibles."
+    "settledMessage": "La liquidación cubrió toda la deuda. Los gastos anteriores siguen disponibles.",
+    "settledSeparator": "Movimientos saldados"
   },
   "detail": {
     "title": "Liquidación",

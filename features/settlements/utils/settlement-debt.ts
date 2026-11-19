@@ -102,11 +102,6 @@ export function canEditSettlementAmount(
   return settlement.receiverTransactionId === null;
 }
 
-/** `Friend.balances` drops settled currencies, so an empty list means settled. */
-export function isPairFullySettled(balances: readonly FriendBalance[]): boolean {
-  return balances.length === 0;
-}
-
 /**
  * True when settling `amountCents` of `currency` leaves the whole pair at zero
  * in every currency. Other currencies must not exist at all, because the fold
