@@ -77,6 +77,51 @@ describe("getDefaultTransferWallets", () => {
     expect(result.fromWallet?.id).toBe("wallet-eur");
     expect(result.toWallet).toBeNull();
   });
+
+  it("preselects an active pair in the preferred currency", () => {
+    const wallets = [
+      buildWallet({ id: "wallet-eur" }),
+      buildWallet({ id: "wallet-eur-2" }),
+      buildWallet({ id: "wallet-usd", currency: "USD" }),
+      buildWallet({ id: "wallet-usd-2", currency: "USD" }),
+    ];
+
+    const result = getDefaultTransferWallets(wallets, "USD");
+
+    expect(result.fromWallet?.id).toBe("wallet-usd");
+    expect(result.toWallet?.id).toBe("wallet-usd-2");
+    expect(result.fromWallet?.currency).toBe(result.toWallet?.currency);
+  });
+
+  it("keeps the first pair when the preferred currency has no pair", () => {
+    const wallets = [
+      buildWallet({ id: "wallet-eur" }),
+      buildWallet({ id: "wallet-eur-2" }),
+      buildWallet({ id: "wallet-usd", currency: "USD" }),
+    ];
+
+    const result = getDefaultTransferWallets(wallets, "USD");
+
+    expect(result.fromWallet?.id).toBe("wallet-eur");
+    expect(result.toWallet?.id).toBe("wallet-eur-2");
+  });
+
+  it("ignores archived wallets when preselecting the preferred pair", () => {
+    const wallets = [
+      buildWallet({ id: "wallet-eur" }),
+      buildWallet({ id: "wallet-eur-2" }),
+      buildWallet({
+        id: "wallet-usd-archived",
+        currency: "USD",
+        archivedAt: "2026-11-01T10:00:00.000Z",
+      }),
+    ];
+
+    const result = getDefaultTransferWallets(wallets, "USD");
+
+    expect(result.fromWallet?.id).toBe("wallet-eur");
+    expect(result.toWallet?.id).toBe("wallet-eur-2");
+  });
 });
 
 describe("buildTransferFormValues", () => {
@@ -140,6 +185,29 @@ describe("buildTransferFormValues", () => {
 
     expect(values.fromWalletId).toBe("");
     expect(values.toWalletId).toBe("");
+    expect(values.currency).toBe("EUR");
+  });
+
+  it("builds the preferred-currency pair for a new transfer", () => {
+    const wallets = [
+      buildWallet({ id: "wallet-eur" }),
+      buildWallet({ id: "wallet-eur-2" }),
+      buildWallet({ id: "wallet-usd", currency: "USD" }),
+      buildWallet({ id: "wallet-usd-2", currency: "USD" }),
+    ];
+
+    const values = buildTransferFormValues(wallets, null, "USD");
+
+    expect(values.fromWalletId).toBe("wallet-usd");
+    expect(values.toWalletId).toBe("wallet-usd-2");
+    expect(values.currency).toBe("USD");
+  });
+
+  it("keeps the stored wallets and currency when editing", () => {
+    const values = buildTransferFormValues([], buildTransfer({}), "USD");
+
+    expect(values.fromWalletId).toBe("wallet-eur");
+    expect(values.toWalletId).toBe("wallet-eur-2");
     expect(values.currency).toBe("EUR");
   });
 });

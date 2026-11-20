@@ -8,6 +8,7 @@ import { ThemedView } from "@/components/themed-view";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { Fab } from "@/shared/components/molecules/fab";
+import { DEFAULT_CURRENCY } from "@/shared/constants/currencies";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useWalletScreen } from "../hooks/use-wallet-screen";
@@ -43,6 +44,7 @@ export function WalletsScreen() {
         <WalletsTransferActions
           activeWallets={wallets.activeWallets}
           walletLookup={wallets.wallets}
+          preferredCurrency={profile?.preferredCurrency ?? DEFAULT_CURRENCY}
           onWalletsChanged={() => void wallets.refresh()}
           onHistoryPress={() => router.push("/transfers" as Href)}
         />

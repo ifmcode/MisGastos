@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { PageSheetFormModal } from "@/shared/components/molecules/page-sheet-form-modal";
+import type { CurrencyCode } from "@/shared/constants/currencies";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
 import { asTranslate } from "@/shared/i18n/translate";
@@ -21,6 +22,8 @@ export interface TransferFormModalProps {
   wallets: Wallet[];
   walletLookup?: readonly Wallet[];
   editingTransfer: Transfer | null;
+  /** Profile preference: the initial pair of a new transfer. */
+  preferredCurrency: CurrencyCode;
   submitting: boolean;
   error: string | null;
   fieldErrors: TransferValidationErrors;
@@ -34,6 +37,7 @@ export function TransferFormModal({
   wallets,
   walletLookup = wallets,
   editingTransfer,
+  preferredCurrency,
   submitting,
   error,
   fieldErrors,
@@ -93,7 +97,11 @@ export function TransferFormModal({
         error={error}
         fieldErrors={fieldErrors}
         wallets={wallets}
-        initialValues={buildTransferFormValues(wallets, editingTransfer)}
+        initialValues={buildTransferFormValues(
+          wallets,
+          editingTransfer,
+          preferredCurrency,
+        )}
         isEditing={Boolean(editingTransfer)}
         editingTransfer={editingTransfer}
         onSubmit={onSubmit}

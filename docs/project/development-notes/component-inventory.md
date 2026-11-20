@@ -20,6 +20,10 @@
 > TICKET-055 (18/11/2026) also adds no shared molecule: the wallet-registration
 > switch and the Settings default are feature components, and the only removal is
 > the TICKET-048 `SharedExpenseWalletWarning`, whose state became valid.
+> TICKET-056 (20/11/2026) adds the `CurrencyField` + `CurrencyPickerDialog` pair
+> (compact currency row whose dialog content is the existing chip selector), the
+> pure `formatCurrencyLabel` in `shared/utils/` and the feature-only
+> `SharedExpenseSplitRemaining` line; `CurrencyChipSelector` keeps its consumers.
 
 ## Decisions
 
@@ -41,6 +45,7 @@
 | Label / input / error / helper / counter / amount styles | duplicated in every feature form style module | **Extract styles** | `shared/components/molecules/form-field.styles.ts` |
 | Row meta separator (` · `) | `transaction-item.tsx`, `transfer-item.tsx` | **Extract helper** | `shared/utils/join-meta.ts` (`joinMetaParts`) |
 | Currency chips | wallet form currency selector and the TICKET-006 profile currency selector | **Extract (TICKET-006)** | `shared/components/molecules/currency-chip-selector.tsx` |
+| Compact currency field | shared-expense form inline chips and the wallet form currency selector | **Extract (TICKET-056)** | `shared/components/molecules/currency-field.tsx` + `currency-picker-dialog.tsx` |
 | Info banner | `transfer-form-info-banner.tsx` only | **Keep** | Single consumer; its bordered/neutral layout differs from the error banner |
 | Text fields | movement concept, wallet name/description, category name | **Keep wrappers** | Validation codes and copy stay in each feature; only the styles moved to `form-field.styles.ts` |
 | Screen headers | wallets, transactions, categories, transfer history, dashboard | **Keep** | Each header owns different actions (add filter, back, greeting) and copy |
@@ -284,6 +289,20 @@ category field. Social-only friend-paid expenses keep `categoryId: null`. The
 form notice uses new amber `warning`/`warningSurface`/`warningText` theme tokens
 for field-summary notices, while server errors keep the danger palette.
 
+TICKET-056 keeps the fixed split informative: `SharedExpenseSplitRemaining`
+(`features/shared-expenses/components/shared-expense-split-remaining.tsx`) renders
+`Total … · Falta: …` / `· Completo` / `· Sobra: …` (danger tone) after the
+participant rows and before the existing error text, with
+`accessibilityLiveRegion="polite"` and no focus change. The math lives in the pure
+`getFixedSplitRemaining`/`formatRemainingCents`
+(`features/shared-expenses/utils/expense-remaining.ts`) over integer cents, and
+`FIXED_SUM_MISMATCH`/`INVALID_FIXED_AMOUNT` still decide whether the form saves.
+`features/transactions/utils/transaction-form-defaults.ts` and
+`features/transfers/utils/transfer-form-defaults.ts` now accept the profile
+preferred currency as an optional last argument: a new record preselects an active
+wallet (or an active same-currency pair) in that currency and falls back to the
+previous first-wallet behaviour, while edits keep the stored values.
+
 ### `Fab`
 
 ```ts
@@ -344,15 +363,56 @@ actions are simply absent or flagged by the caller.
 interface CurrencyChipSelectorProps {
   value: CurrencyCode;
   disabled?: boolean;
+  currencies?: readonly CurrencyOption[];
   getAccessibilityLabel: (currency: CurrencyOption) => string;
   onChange: (currency: CurrencyCode) => void;
 }
 ```
 
-Consumers: the wallet form through `WalletFormCurrencySelector` and the profile
-form through `ProfileCurrencyField`. The shared constants (`CURRENCIES`) and the
+Consumers: the currency picker dialog, the profile form through `ProfileCurrencyField`
+and the settlement currency chips; the wallet and shared-expense forms reach the
+chips through `CurrencyField`. The shared constants (`CURRENCIES`) and the
 selected/unselected theme tokens stay in one place; each feature supplies its own
 translated accessibility label.
+
+### `CurrencyField` / `CurrencyPickerDialog`
+
+```ts
+interface CurrencyFieldProps {
+  label: string;                     // already translated
+  value: CurrencyCode;
+  disabled?: boolean;                // also blocks the picker action
+  changeLabel: string;
+  changeAccessibilityLabel: string;
+  changeAccessibilityHint: string;
+  pickerTitle: string;
+  pickerCloseAccessibilityLabel: string;
+  pickerGroupAccessibilityLabel: string;
+  getCurrencyAccessibilityLabel: (currency: CurrencyOption) => string;
+  onChange: (currency: CurrencyCode) => void;
+}
+
+interface CurrencyPickerDialogProps {
+  visible: boolean;
+  title: string;
+  closeAccessibilityLabel: string;
+  groupAccessibilityLabel: string;
+  value: CurrencyCode;
+  getCurrencyAccessibilityLabel: (currency: CurrencyOption) => string;
+  onChange: (currency: CurrencyCode) => void;
+  onClose: () => void;
+}
+```
+
+`CurrencyField` renders the label, `formatCurrencyLabel(value)` (`EUR €`) and a
+≥44x44 text action in `theme.primary`; it owns the dialog visibility and closes on
+select. `CurrencyPickerDialog` keeps the transparent `overFullScreen`/fade
+`Modal`, the backdrop, `accessibilityViewIsModal`, `onAccessibilityEscape`, the
+header title and close button, and renders `CurrencyChipSelector` as its content,
+so there is still one currency list. Consumers: the shared-expense form
+(`SharedExpenseFormMainFields`, `sharedExpenses` copy) and the wallet form
+(`WalletFormCurrencySelector`, `wallets` copy). The profile selector keeps the
+plain chips.
 
 ## Removed after extraction
 
@@ -379,7 +439,7 @@ translated accessibility label.
 
 - `npx tsc --noEmit`
 - `npx expo lint`
-- `npx jest` (213 suites / 1203 tests, updated after TICKET-051)
-- `npm run check:copy` (222 TSX files)
+- `npx jest` (260 suites / 1556 tests, updated after TICKET-056)
+- `npm run check:copy` (260 TSX files)
 - Dark mode and web follow the same `useFormTheme` tokens as before; shared
   components never import feature palettes.

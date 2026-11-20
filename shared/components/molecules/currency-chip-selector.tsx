@@ -3,6 +3,7 @@ import { Pressable, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { CURRENCIES, CurrencyCode } from "@/shared/constants/currencies";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { formatCurrencyLabel } from "@/shared/utils/currency-label";
 
 import { currencyChipSelectorStyles as styles } from "./currency-chip-selector.styles";
 
@@ -21,7 +22,7 @@ export interface CurrencyChipSelectorProps {
   onChange: (currency: CurrencyCode) => void;
 }
 
-/** Shared currency chips used by the wallet and profile forms. */
+/** Shared currency chips used by the pickers and the profile form. */
 export function CurrencyChipSelector({
   value,
   disabled = false,
@@ -58,7 +59,7 @@ export function CurrencyChipSelector({
                 { color: selected ? theme.onPrimary : theme.text },
               ]}
             >
-              {currency.code} {currency.symbol}
+              {formatCurrencyLabel(currency.code)}
             </ThemedText>
           </Pressable>
         );

@@ -52,6 +52,7 @@ export function TransactionsScreen() {
         wallets={screen.wallets}
         activeWallets={screen.activeWallets}
         categories={screen.categories}
+        preferredCurrency={screen.preferredCurrency}
         mutating={screen.mutating}
         mutationError={screen.mutationError}
         mutationFieldErrors={screen.mutationFieldErrors}

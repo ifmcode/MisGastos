@@ -10,6 +10,7 @@ import { sharedExpensesStyles as styles } from "../styles/shared-expenses.styles
 import type { ExpenseSplitMode } from "../types/shared-expense.types";
 import type { SplitValueTexts } from "../utils/shared-expense-form";
 import { SharedExpenseSplitModeChips } from "./shared-expense-split-mode-chips";
+import { SharedExpenseSplitRemaining } from "./shared-expense-split-remaining";
 
 const MODE_HELPER_KEYS: Record<ExpenseSplitMode, string> = {
   equal: "form.splitHelperEqual",
@@ -21,6 +22,7 @@ const MODE_HELPER_KEYS: Record<ExpenseSplitMode, string> = {
 export interface SharedExpenseSplitSectionProps {
   mode: ExpenseSplitMode;
   currency: CurrencyCode;
+  amountText: string;
   viewerUid: string;
   friendUid: string;
   friendName: string;
@@ -36,6 +38,7 @@ export interface SharedExpenseSplitSectionProps {
 export function SharedExpenseSplitSection({
   mode,
   currency,
+  amountText,
   viewerUid,
   friendUid,
   friendName,
@@ -118,6 +121,14 @@ export function SharedExpenseSplitSection({
           ))}
         </View>
       )}
+
+      {mode === "fixed" ? (
+        <SharedExpenseSplitRemaining
+          amountText={amountText}
+          values={values}
+          currency={currency}
+        />
+      ) : null}
 
       {errorText ? (
         <ThemedText style={[styles.fieldError, { color: theme.danger }]}>

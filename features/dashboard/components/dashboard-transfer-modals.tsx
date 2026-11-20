@@ -1,9 +1,7 @@
-import { useMemo } from "react";
-
 import { TransferDetailModal } from "@/features/transfers/components/transfer-detail-modal";
 import { TransferFormModal } from "@/features/transfers/components/transfer-form-modal";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
+import type { CurrencyCode } from "@/shared/constants/currencies";
 
 import {
   DashboardTransferDialogs,
@@ -14,6 +12,9 @@ export interface DashboardTransferModalsProps {
   dialogs: DashboardTransferDialogs;
   state: DashboardTransferMutations;
   wallets: readonly Wallet[];
+  /** Active wallets only: the form never selects an archived wallet. */
+  activeWallets: Wallet[];
+  preferredCurrency: CurrencyCode;
 }
 
 /**
@@ -24,8 +25,9 @@ export function DashboardTransferModals({
   dialogs,
   state,
   wallets,
+  activeWallets,
+  preferredCurrency,
 }: DashboardTransferModalsProps) {
-  const activeWallets = useMemo(() => getActiveWallets(wallets), [wallets]);
   const { detail, form } = dialogs;
 
   return (
@@ -46,6 +48,7 @@ export function DashboardTransferModals({
         wallets={activeWallets}
         walletLookup={wallets}
         editingTransfer={form.editingTransfer}
+        preferredCurrency={preferredCurrency}
         submitting={state.mutating}
         error={state.createError}
         fieldErrors={state.createFieldErrors}

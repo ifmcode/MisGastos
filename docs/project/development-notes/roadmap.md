@@ -1,7 +1,7 @@
 # Roadmap - MisGastos
 
 > Development guide: V1 scope, phase order, ticket order and the current ticket.
-> **Last reviewed:** 19/11/2026
+> **Last reviewed:** 20/11/2026
 
 ## Scope of this file
 - This file answers **what to build next and in which order**, plus the rules for doing it.
@@ -16,12 +16,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 5 - Social vertical slice
-- **Current ticket:** TICKET-056 - compact currency field and live remaining amount in shared expenses
+- **Current ticket:** TICKET-057 - default main wallet on account creation
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-060 - keep settled history hidden after a new expense (19/11/2026)
+- **Last completed:** TICKET-056 - compact currency field and live remaining amount (20/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-057 in Phase 5.4; TICKET-008 in Phase 6
-- **Next:** TICKET-056
+- **Queued:** TICKET-008 in Phase 6; Phase 5 closes with TICKET-057
+- **Next:** TICKET-057
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -144,7 +144,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ### 5.3 Shared-expense form refinement
 - [x] TICKET-055: optional wallet registration in shared expenses with a configurable default ✅ 18/11/2026
-- [ ] TICKET-056: compact currency field with **Cambiar** and the live remaining amount for the fixed split
+- [x] TICKET-056: compact currency field with **Cambiar** and the live remaining amount for the fixed split ✅ 20/11/2026
 
 ### 5.4 Initial onboarding
 - [ ] TICKET-057: default main wallet on account creation

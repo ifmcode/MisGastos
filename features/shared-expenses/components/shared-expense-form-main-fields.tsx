@@ -3,10 +3,8 @@ import { TextInput, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { getCurrencySymbol } from "@/features/wallets/utils/money";
 import { AmountField } from "@/shared/components/molecules/amount-field";
-import {
-  CurrencyChipSelector,
-  type CurrencyOption,
-} from "@/shared/components/molecules/currency-chip-selector";
+import type { CurrencyOption } from "@/shared/components/molecules/currency-chip-selector";
+import { CurrencyField } from "@/shared/components/molecules/currency-field";
 import { DateFormField } from "@/shared/components/molecules/date-form-field";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
@@ -93,11 +91,17 @@ export function SharedExpenseFormMainFields({
         onChange={onAmountChange}
       />
 
-      <ThemedText style={styles.label}>{t("form.currencyLabel")}</ThemedText>
-      <CurrencyChipSelector
+      <CurrencyField
+        label={t("form.currencyLabel")}
         value={values.currency}
         disabled={disabled}
-        getAccessibilityLabel={currencyAccessibilityLabel}
+        changeLabel={t("form.currencyChange")}
+        changeAccessibilityLabel={t("form.currencyChangeAccessibility")}
+        changeAccessibilityHint={t("form.currencyChangeHint")}
+        pickerTitle={t("form.currencyPickerTitle")}
+        pickerCloseAccessibilityLabel={t("form.currencyPickerClose")}
+        pickerGroupAccessibilityLabel={t("form.currencyGroupAccessibility")}
+        getCurrencyAccessibilityLabel={currencyAccessibilityLabel}
         onChange={onCurrencyChange}
       />
       {errorText(errors.currency) ? (

@@ -58,6 +58,7 @@ export function SharedExpenseFormParticipants({
       <SharedExpenseSplitSection
         mode={values.splitMode}
         currency={values.currency}
+        amountText={values.amount}
         viewerUid={values.viewerUid}
         friendUid={values.friendUid}
         friendName={friendName}

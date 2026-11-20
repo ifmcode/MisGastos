@@ -42,7 +42,6 @@ export function WalletFormAppearance({
 
   return (
     <View>
-      <ThemedText style={styles.label}>{t("form.currency")}</ThemedText>
       <WalletFormCurrencySelector
         value={values.currency}
         disabled={disabled || currencyLocked}

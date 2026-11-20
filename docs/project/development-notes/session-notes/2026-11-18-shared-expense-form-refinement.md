@@ -1,8 +1,8 @@
 # Shared-expense form refinement (decision record)
 
 **Date:** 18/11/2026
-**Scope:** TICKET-055 implemented; TICKET-056 created (pending)
-**Status:** TICKET-055 implemented (18/11/2026); TICKET-056 decided, not implemented
+**Scope:** TICKET-055 and TICKET-056 implemented
+**Status:** TICKET-055 implemented (18/11/2026); TICKET-056 implemented (20/11/2026)
 
 ## Context
 
@@ -83,6 +83,45 @@ other forms, so it is recorded next to it.
 - The TICKET-048 legacy detail warning was removed: a viewer-paid expense with no
   wallet is now a valid **No** state, not a defect.
 
+## Implemented (TICKET-056)
+
+- `shared/components/molecules/currency-field.tsx` + `currency-picker-dialog.tsx`
+  (with `currency-field.styles.ts`) deliver the compact row and its dialog: the
+  label, `formatCurrencyLabel(value)` and a ≥44x44 **Cambiar** text action in the
+  primary colour, with its own role/label/hint and pressed feedback; the dialog is
+  a fade `overFullScreen` `Modal` with backdrop, `accessibilityViewIsModal`,
+  accessibility escape, close button and a `radiogroup` around the chip list, and
+  it closes on select or dismiss.
+- `shared/utils/currency-label.ts` (`formatCurrencyLabel`) resolves `CURRENCIES`
+  by code and returns `code + symbol`, the raw code for an unknown value and the
+  default currency as fallback; `CurrencyChipSelector` now renders through the
+  same helper, so the field, the dialog, the profile selector and the settlements
+  cannot drift.
+- The shared-expense form (`shared-expense-form-main-fields.tsx`) renders the
+  molecule with the `sharedExpenses` copy and keeps the currency error under the
+  field; the defaults are unchanged (new = profile preferred with the EUR
+  fallback, edit = stored) and `changeCurrency` still runs through
+  `selectSharedExpenseCurrency`, which clears an incompatible wallet and its
+  category and re-filters the options. `wallet-form-currency-selector.tsx`
+  renders the same molecule with the `wallets` copy and disables the action when
+  the wallet currency is locked.
+- `SharedExpenseSplitRemaining` plus
+  `features/shared-expenses/utils/expense-remaining.ts` (`getFixedSplitRemaining`
+  in integer cents with empty = 0, `formatRemainingCents` through `centsToAmount`
+  and `formatCurrency`) add the `Total … · Falta: …` / `· Completo` /
+  `· Sobra: …` line under the participant rows, announced with a polite live
+  region (plus `AccessibilityInfo` on iOS) and without a focus change.
+  `FIXED_SUM_MISMATCH`/`INVALID_FIXED_AMOUNT` still decide the save.
+- `transaction-form-defaults.ts` and `transfer-form-defaults.ts` accept the
+  profile preferred currency: a new record preselects an active wallet (or an
+  active same-currency pair) in that currency and falls back to the first wallet,
+  while edits keep their stored values.
+- No rules, schema, service, repository, `sharedExpenses` document or money helper
+  changed: no migration and no deploy. Current Focus moved to TICKET-057
+  (Phase 5.4) on 20/11/2026.
+- Verification (20/11/2026): `npx tsc --noEmit`, `npx expo lint`, `npx jest`
+  (260 suites / 1556 tests) and `npm run check:copy` (260 TSX files) pass.
+
 ## Alternatives considered
 
 - **Keep the wallet mandatory (TICKET-048 as is).** Rejected: it forces a
@@ -121,6 +160,6 @@ other forms, so it is recorded next to it.
 ## Related
 
 - `docs/project/tickets/[DONE] TICKET-055-SHARED-EXPENSE-OPTIONAL-WALLET.md`
-- `docs/project/tickets/TICKET-056-SHARED-EXPENSE-CURRENCY-AND-REMAINING.md`
+- `docs/project/tickets/[DONE] TICKET-056-SHARED-EXPENSE-CURRENCY-AND-REMAINING.md`
 - `docs/project/tickets/[DONE] TICKET-048-MANDATORY-WALLET-VIEWER-PAID.md`
 - `docs/project/tickets/[DONE] TICKET-051-MANDATORY-SHARED-EXPENSE-CATEGORY.md`

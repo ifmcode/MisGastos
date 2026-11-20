@@ -4,9 +4,11 @@ import { FlatList, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
+import { useProfile } from "@/features/profile/hooks/use-profile";
 import { EmptyState } from "@/shared/components/molecules/empty-state";
 import { ErrorState } from "@/shared/components/molecules/error-state";
 import { LoadingState } from "@/shared/components/molecules/loading-state";
+import { DEFAULT_CURRENCY } from "@/shared/constants/currencies";
 import { asTranslate } from "@/shared/i18n/translate";
 
 import { useTransferHistoryScreen } from "../hooks/use-transfer-history-screen";
@@ -26,6 +28,8 @@ export function TransferHistoryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { t } = useTranslation(["transfers", "common"]);
+  const { profile } = useProfile();
+  const preferredCurrency = profile?.preferredCurrency ?? DEFAULT_CURRENCY;
   const tr = asTranslate(t);
   const emptyCopy = getTransferHistoryEmptyCopy();
   const {
@@ -113,6 +117,7 @@ export function TransferHistoryScreen() {
         wallets={activeWallets}
         walletLookup={wallets}
         editingTransfer={form.editingTransfer}
+        preferredCurrency={preferredCurrency}
         submitting={mutating}
         error={createError}
         fieldErrors={createFieldErrors}

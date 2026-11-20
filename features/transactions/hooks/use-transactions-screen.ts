@@ -2,8 +2,10 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 
 import { useCategories } from "@/features/categories/hooks/use-categories";
+import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
 import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
+import { DEFAULT_CURRENCY } from "@/shared/constants/currencies";
 
 import { useTransactionDetailDialog } from "./use-transaction-detail-dialog";
 import { useTransactionFormDialog } from "./use-transaction-form-dialog";
@@ -16,6 +18,8 @@ import type { TransactionFilters } from "../utils/transaction-filters";
 export function useTransactionsScreen() {
   const router = useRouter();
   const { wallets, refresh: refreshWallets } = useWallets();
+  const { profile } = useProfile();
+  const preferredCurrency = profile?.preferredCurrency ?? DEFAULT_CURRENCY;
   const categoriesState = useCategories();
   const transactionsState = useTransactions({
     categories: categoriesState.categories,
@@ -113,6 +117,7 @@ export function useTransactionsScreen() {
   return {
     wallets,
     activeWallets,
+    preferredCurrency,
     categories: categoriesState.categories,
     walletMap,
     filteredTransactions: transactionsState.filteredTransactions,

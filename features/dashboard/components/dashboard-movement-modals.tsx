@@ -2,6 +2,7 @@ import { Category } from "@/features/categories/types/category.types";
 import { TransactionDetailModal } from "@/features/transactions/components/transaction-detail-modal";
 import { TransactionsFormModal } from "@/features/transactions/components/transactions-form-modal";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import type { CurrencyCode } from "@/shared/constants/currencies";
 
 import {
   DashboardMovementDialogs,
@@ -16,6 +17,7 @@ export interface DashboardMovementModalsProps {
   /** Active wallets only: the form never selects an archived wallet. */
   activeWallets: Wallet[];
   categories: readonly Category[];
+  preferredCurrency: CurrencyCode;
   onCategoryCreated: (category: Category) => void;
 }
 
@@ -29,6 +31,7 @@ export function DashboardMovementModals({
   wallets,
   activeWallets,
   categories,
+  preferredCurrency,
   onCategoryCreated,
 }: DashboardMovementModalsProps) {
   const { detail, form } = dialogs;
@@ -56,6 +59,7 @@ export function DashboardMovementModals({
         walletLookup={wallets}
         categories={categories}
         editingTransaction={form.editingTransaction}
+        preferredCurrency={preferredCurrency}
         onSubmit={(input) => void form.submit(input)}
         onDelete={form.deleteEditing}
         onClose={form.close}

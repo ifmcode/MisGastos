@@ -13,6 +13,7 @@ import { useWallets } from "@/features/wallets/hooks/use-wallets";
 import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
 import { ErrorState } from "@/shared/components/molecules/error-state";
 import { LoadingState } from "@/shared/components/molecules/loading-state";
+import { DEFAULT_CURRENCY } from "@/shared/constants/currencies";
 
 import { useDashboardMovementDialogs } from "../hooks/use-dashboard-movement-dialogs";
 import { useDashboardNotifications } from "../hooks/use-dashboard-notifications";
@@ -22,9 +23,8 @@ import { useDashboardTransferDialogs } from "../hooks/use-dashboard-transfer-dia
 import { dashboardStyles } from "../styles/dashboard.styles";
 import { createDashboardNavigationActions } from "../utils/dashboard-navigation";
 import { DashboardHeader } from "./dashboard-header";
-import { DashboardMovementModals } from "./dashboard-movement-modals";
+import { DashboardDialogs } from "./dashboard-dialogs";
 import { DashboardOverviewScroll } from "./dashboard-overview-scroll";
-import { DashboardTransferModals } from "./dashboard-transfer-modals";
 
 export function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -32,6 +32,7 @@ export function DashboardScreen() {
   const { t } = useTranslation(["dashboard", "common"]);
   const { user } = useAuth();
   const { profile } = useProfile();
+  const preferredCurrency = profile?.preferredCurrency ?? DEFAULT_CURRENCY;
   const walletsState = useWallets();
   const transfersState = useTransfers();
   const categoriesState = useCategories();
@@ -131,18 +132,15 @@ export function DashboardScreen() {
         />
       )}
 
-      <DashboardTransferModals
-        dialogs={transferDialogs}
-        state={transfersState}
-        wallets={walletsState.wallets}
-      />
-
-      <DashboardMovementModals
-        dialogs={movementDialogs}
-        mutations={transactionsState}
+      <DashboardDialogs
+        transferDialogs={transferDialogs}
+        transferState={transfersState}
+        movementDialogs={movementDialogs}
+        movementMutations={transactionsState}
         wallets={walletsState.wallets}
         activeWallets={activeWallets}
         categories={categoriesState.categories}
+        preferredCurrency={preferredCurrency}
         onCategoryCreated={categoriesState.addCategory}
       />
     </ThemedView>

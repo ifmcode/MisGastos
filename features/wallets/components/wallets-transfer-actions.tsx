@@ -1,5 +1,6 @@
 import { TransferFormModal } from "@/features/transfers/components/transfer-form-modal";
 import { canTransferBetweenWallets } from "@/features/transfers/utils/transfer-wallets";
+import type { CurrencyCode } from "@/shared/constants/currencies";
 
 import { useWalletsTransferAction } from "../hooks/use-wallets-transfer-action";
 import { Wallet } from "../types/wallet.types";
@@ -8,6 +9,7 @@ import { WalletsQuickActions } from "./wallets-quick-actions";
 export interface WalletsTransferActionsProps {
   activeWallets: Wallet[];
   walletLookup: readonly Wallet[];
+  preferredCurrency: CurrencyCode;
   onWalletsChanged: () => void;
   onHistoryPress: () => void;
 }
@@ -19,6 +21,7 @@ export interface WalletsTransferActionsProps {
 export function WalletsTransferActions({
   activeWallets,
   walletLookup,
+  preferredCurrency,
   onWalletsChanged,
   onHistoryPress,
 }: WalletsTransferActionsProps) {
@@ -37,6 +40,7 @@ export function WalletsTransferActions({
         wallets={activeWallets}
         walletLookup={walletLookup}
         editingTransfer={form.editingTransfer}
+        preferredCurrency={preferredCurrency}
         submitting={transfers.mutating}
         error={transfers.createError}
         fieldErrors={transfers.createFieldErrors}

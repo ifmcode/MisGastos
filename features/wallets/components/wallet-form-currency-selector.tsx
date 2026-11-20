@@ -1,10 +1,8 @@
 import { useTranslation } from "react-i18next";
 
-import {
-  CurrencyChipSelector,
-  type CurrencyOption,
-} from "@/shared/components/molecules/currency-chip-selector";
-import { CurrencyCode } from "@/shared/constants/currencies";
+import type { CurrencyOption } from "@/shared/components/molecules/currency-chip-selector";
+import { CurrencyField } from "@/shared/components/molecules/currency-field";
+import type { CurrencyCode } from "@/shared/constants/currencies";
 
 export interface WalletFormCurrencySelectorProps {
   value: CurrencyCode;
@@ -12,6 +10,7 @@ export interface WalletFormCurrencySelectorProps {
   onChange: (currency: CurrencyCode) => void;
 }
 
+/** Standalone wallet currency: the shared compact row plus the picker dialog. */
 export function WalletFormCurrencySelector({
   value,
   disabled,
@@ -24,10 +23,17 @@ export function WalletFormCurrencySelector({
   }
 
   return (
-    <CurrencyChipSelector
+    <CurrencyField
+      label={t("form.currency")}
       value={value}
       disabled={disabled}
-      getAccessibilityLabel={getAccessibilityLabel}
+      changeLabel={t("form.currencyChange")}
+      changeAccessibilityLabel={t("form.currencyChangeAccessibility")}
+      changeAccessibilityHint={t("form.currencyChangeHint")}
+      pickerTitle={t("form.currencyPickerTitle")}
+      pickerCloseAccessibilityLabel={t("form.currencyPickerClose")}
+      pickerGroupAccessibilityLabel={t("form.currencyGroupAccessibility")}
+      getCurrencyAccessibilityLabel={getAccessibilityLabel}
       onChange={onChange}
     />
   );

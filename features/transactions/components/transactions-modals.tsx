@@ -3,6 +3,7 @@ import type { Friend } from "@/features/friends/types/friend.types";
 import { SharedExpenseEditorModal } from "@/features/shared-expenses/components/shared-expense-editor-modal";
 import type { SharedExpenseEditorController } from "@/features/shared-expenses/hooks/use-shared-expense-editor";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import type { CurrencyCode } from "@/shared/constants/currencies";
 
 import type { TransactionDetailDialog } from "../hooks/use-transaction-detail-dialog";
 import type { TransactionFormDialog } from "../hooks/use-transaction-form-dialog";
@@ -17,6 +18,7 @@ export interface TransactionsModalsProps {
   wallets: readonly Wallet[];
   activeWallets: Wallet[];
   categories: readonly Category[];
+  preferredCurrency: CurrencyCode;
   mutating: boolean;
   mutationError: string | null;
   mutationFieldErrors: TransactionValidationErrors;
@@ -39,6 +41,7 @@ export function TransactionsModals({
   wallets,
   activeWallets,
   categories,
+  preferredCurrency,
   mutating,
   mutationError,
   mutationFieldErrors,
@@ -78,6 +81,7 @@ export function TransactionsModals({
         walletLookup={wallets}
         categories={categories}
         editingTransaction={form.editingTransaction}
+        preferredCurrency={preferredCurrency}
         onSubmit={(input) => void form.submit(input)}
         onDelete={form.deleteEditing}
         onClose={form.close}

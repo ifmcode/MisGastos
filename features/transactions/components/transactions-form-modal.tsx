@@ -4,6 +4,7 @@ import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { PageSheetFormModal } from "@/shared/components/molecules/page-sheet-form-modal";
+import type { CurrencyCode } from "@/shared/constants/currencies";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useConfirmDialog } from "@/shared/hooks/use-confirm-dialog";
 import { asTranslate } from "@/shared/i18n/translate";
@@ -27,6 +28,8 @@ export interface TransactionsFormModalProps {
   walletLookup?: readonly Wallet[];
   categories: readonly Category[];
   editingTransaction: Transaction | null;
+  /** Profile preference: the initial wallet of a new movement. */
+  preferredCurrency: CurrencyCode;
   onSubmit: (input: TransactionInput) => void;
   onDelete: () => void;
   onClose: () => void;
@@ -42,6 +45,7 @@ export function TransactionsFormModal({
   walletLookup = wallets,
   categories,
   editingTransaction,
+  preferredCurrency,
   onSubmit,
   onDelete,
   onClose,
@@ -97,6 +101,7 @@ export function TransactionsFormModal({
           wallets,
           editingTransaction,
           categories,
+          preferredCurrency,
         )}
         isEditing={Boolean(editingTransaction)}
         onSubmit={onSubmit}

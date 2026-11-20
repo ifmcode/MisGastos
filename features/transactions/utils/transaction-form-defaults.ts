@@ -1,5 +1,10 @@
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
+import {
+  DEFAULT_CURRENCY,
+  type CurrencyCode,
+} from "@/shared/constants/currencies";
 import { getDefaultMovementIsoDate } from "@/shared/utils/date-defaults";
 
 import {
@@ -13,11 +18,28 @@ import {
 
 const DEFAULT_TYPE = "expense";
 
+/**
+ * Initial wallet of a new movement: the first active wallet in the profile
+ * preferred currency, otherwise the existing first-wallet choice.
+ */
+function getDefaultWallet(
+  wallets: readonly Wallet[],
+  preferredCurrency: CurrencyCode,
+): Wallet | null {
+  const activeWallets = getActiveWallets(wallets);
+  const preferredWallet = activeWallets.find(
+    (wallet) => wallet.currency === preferredCurrency,
+  );
+
+  return preferredWallet ?? activeWallets[0] ?? wallets[0] ?? null;
+}
+
 /** Builds the form values for a new movement or an existing one. */
 export function buildTransactionFormValues(
   wallets: readonly Wallet[],
   editingTransaction: Transaction | null,
   categories: readonly Category[],
+  preferredCurrency: CurrencyCode = DEFAULT_CURRENCY,
 ): TransactionFormValues {
   if (editingTransaction) {
     return {
@@ -34,11 +56,13 @@ export function buildTransactionFormValues(
     };
   }
 
+  const wallet = getDefaultWallet(wallets, preferredCurrency);
+
   return {
     type: DEFAULT_TYPE,
     amount: "",
-    walletId: wallets[0]?.id ?? "",
-    currency: wallets[0]?.currency ?? "EUR",
+    walletId: wallet?.id ?? "",
+    currency: wallet?.currency ?? DEFAULT_CURRENCY,
     categoryId: getDefaultCategoryId(categories, DEFAULT_TYPE),
     concept: "",
     notes: "",
