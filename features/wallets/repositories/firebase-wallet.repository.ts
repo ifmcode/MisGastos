@@ -11,6 +11,7 @@ import { db } from "@/lib/firebase";
 
 import {
   CreateWalletDto,
+  DefaultWalletSeedResult,
   DeleteWalletOptions,
   UpdateWalletDto,
   Wallet,
@@ -20,6 +21,7 @@ import {
 import { deleteWalletDocument } from "./wallet-deletion.operation";
 import { mapWalletDocument } from "./wallet.mapper";
 import { loadWalletMovements, toWalletUsage } from "./wallet-movements";
+import { seedDefaultWalletDocument } from "./wallet-seed.operation";
 import { IWalletRepository } from "./wallet.repository";
 import {
   createWalletDocument,
@@ -64,6 +66,13 @@ export class FirebaseWalletRepository implements IWalletRepository {
 
   async createWallet(ownerId: string, dto: CreateWalletDto): Promise<Wallet> {
     return createWalletDocument(ownerId, dto);
+  }
+
+  async seedDefaultWallet(
+    ownerId: string,
+    dto: CreateWalletDto,
+  ): Promise<DefaultWalletSeedResult> {
+    return seedDefaultWalletDocument(ownerId, dto);
   }
 
   async updateWallet(

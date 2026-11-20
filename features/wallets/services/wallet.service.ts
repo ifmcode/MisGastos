@@ -6,11 +6,14 @@ import {
 } from "../schemas/wallet.schema";
 import {
   CreateWalletDto,
+  DefaultWalletSeedResult,
   DeleteWalletOptions,
+  SeedDefaultWalletInput,
   Wallet,
   WalletDeletionResult,
   WalletUsage,
 } from "../types/wallet.types";
+import { buildDefaultWalletDto } from "../utils/default-wallet";
 import { calculateWalletBalance } from "../utils/money";
 import { deleteWalletWithRepository } from "./wallet-delete";
 import { WalletValidationError } from "./wallet.errors";
@@ -52,6 +55,30 @@ export class WalletService {
     const dto: CreateWalletDto = { ...validation.value, initialBalance };
 
     return this.walletRepository.createWallet(normalizedOwnerId, dto);
+  }
+
+  /**
+   * Seeds the account's main wallet on the first authenticated load. The DTO
+   * comes from the shared wallet defaults so the seed cannot invent a different
+   * icon, colour or type.
+   */
+  async seedDefaultWallet(
+    ownerId: string,
+    input: SeedDefaultWalletInput,
+  ): Promise<DefaultWalletSeedResult> {
+    const normalizedOwnerId = normalizeOwnerId(ownerId);
+    const name = input.name.trim();
+
+    if (name.length === 0) {
+      throw new WalletValidationError([
+        { field: "name", code: "NAME_REQUIRED" },
+      ]);
+    }
+
+    return this.walletRepository.seedDefaultWallet(
+      normalizedOwnerId,
+      buildDefaultWalletDto(name, input.preferredCurrency),
+    );
   }
 
   async updateWallet(

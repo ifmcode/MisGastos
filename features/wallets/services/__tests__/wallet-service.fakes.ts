@@ -2,6 +2,7 @@ import { IWalletRepository } from "../../repositories/wallet.repository";
 import { WalletOperationError } from "../wallet.errors";
 import {
   CreateWalletDto,
+  DefaultWalletSeedResult,
   DeleteWalletOptions,
   UpdateWalletDto,
   Wallet,
@@ -12,6 +13,7 @@ import {
 export class FakeWalletRepository implements IWalletRepository {
   readonly getCalls: string[] = [];
   readonly createCalls: Array<{ ownerId: string; dto: CreateWalletDto }> = [];
+  readonly seedCalls: Array<{ ownerId: string; dto: CreateWalletDto }> = [];
   readonly updateCalls: Array<{
     ownerId: string;
     walletId: string;
@@ -35,6 +37,7 @@ export class FakeWalletRepository implements IWalletRepository {
     hasMovements: false,
   };
   deletionResult: WalletDeletionResult | null = null;
+  seedResult: DefaultWalletSeedResult = { status: "already-seeded" };
   failure: Error | null = null;
 
   async getWallets(ownerId: string): Promise<Wallet[]> {
@@ -71,6 +74,15 @@ export class FakeWalletRepository implements IWalletRepository {
 
     this.wallets = [wallet, ...this.wallets];
     return wallet;
+  }
+
+  async seedDefaultWallet(
+    ownerId: string,
+    dto: CreateWalletDto,
+  ): Promise<DefaultWalletSeedResult> {
+    this.seedCalls.push({ ownerId, dto });
+    if (this.failure) throw this.failure;
+    return this.seedResult;
   }
 
   async updateWallet(

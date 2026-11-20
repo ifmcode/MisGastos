@@ -10,6 +10,7 @@ export const mockDoc = jest.fn((...args: unknown[]) => ({
 }));
 export const mockGetDoc = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 export const mockGetDocs = jest.fn<(...args: unknown[]) => Promise<unknown>>();
+export const mockLimit = jest.fn<(...args: unknown[]) => unknown>();
 export const mockQuery = jest.fn<(...args: unknown[]) => unknown>();
 export const mockUpdateDoc = jest.fn<(...args: unknown[]) => Promise<void>>();
 export const mockWhere = jest.fn<(...args: unknown[]) => unknown>();
@@ -24,6 +25,7 @@ export const mockWriteBatch = jest.fn(() => ({
 export const mockTransactionGet = jest.fn<
   (...args: unknown[]) => Promise<unknown>
 >();
+export const mockTransactionSet = jest.fn<(...args: unknown[]) => void>();
 export const mockTransactionUpdate = jest.fn<(...args: unknown[]) => void>();
 export const mockTransactionDelete = jest.fn<(...args: unknown[]) => void>();
 export const mockRunTransaction = jest.fn<
@@ -41,6 +43,7 @@ jest.mock("firebase/firestore", () => ({
   doc: (...args: unknown[]) => mockDoc(...args),
   getDoc: (...args: unknown[]) => mockGetDoc(...args),
   getDocs: (...args: unknown[]) => mockGetDocs(...args),
+  limit: (...args: unknown[]) => mockLimit(...args),
   query: (...args: unknown[]) => mockQuery(...args),
   runTransaction: (
     database: unknown,
@@ -91,6 +94,7 @@ export function setupWalletRepositoryMocks(): void {
 
   mockCollection.mockReturnValue({ path: "collection" });
   mockWhere.mockReturnValue({ field: "ownerId" });
+  mockLimit.mockReturnValue({ kind: "limit" });
   mockQuery.mockReturnValue({ path: "query" });
   mockDoc.mockImplementation((...args: unknown[]) => ({
     kind: args[1],
@@ -105,6 +109,7 @@ export function setupWalletRepositoryMocks(): void {
   mockRunTransaction.mockImplementation(async (_db, callback) =>
     callback({
       get: mockTransactionGet,
+      set: mockTransactionSet,
       update: mockTransactionUpdate,
       delete: mockTransactionDelete,
     }),

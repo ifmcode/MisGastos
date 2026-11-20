@@ -439,7 +439,7 @@ plain chips.
 
 - `npx tsc --noEmit`
 - `npx expo lint`
-- `npx jest` (260 suites / 1556 tests, updated after TICKET-056)
-- `npm run check:copy` (260 TSX files)
+- `npx jest` (265 suites / 1583 tests, updated after TICKET-057)
+- `npm run check:copy` (261 TSX files)
 - Dark mode and web follow the same `useFormTheme` tokens as before; shared
   components never import feature palettes.

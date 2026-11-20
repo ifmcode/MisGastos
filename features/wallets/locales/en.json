@@ -146,5 +146,8 @@
     "restoreTitle": "Restore wallet",
     "archiveMessage": "“{{name}}” will stop appearing in selectors and totals, but will keep its full history.",
     "restoreMessage": "“{{name}}” will appear again in selectors and totals."
+  },
+  "defaults": {
+    "mainWalletName": "Main wallet"
   }
 }

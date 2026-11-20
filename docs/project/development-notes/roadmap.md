@@ -15,13 +15,13 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
-- **Phase:** 5 - Social vertical slice
-- **Current ticket:** TICKET-057 - default main wallet on account creation
+- **Phase:** 6 - Groups
+- **Current ticket:** TICKET-008 - create groups
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-056 - compact currency field and live remaining amount (20/11/2026)
+- **Last completed:** TICKET-057 - default main wallet on account creation (20/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-008 in Phase 6; Phase 5 closes with TICKET-057
-- **Next:** TICKET-057
+- **Queued:** TICKET-009 (group requirements), TICKET-010 and TICKET-011
+- **Next:** TICKET-008
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -42,7 +42,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 | 2 | MVP core | ✅ Done |
 | 3 | Personal finance complete | ✅ Done |
 | 4 | Architecture and workflow spike | ✅ Done |
-| 5 | Social vertical slice | 🚧 In progress |
+| 5 | Social vertical slice | ✅ Done |
 | 6 | Groups | ⏳ Queued |
 | 7 | Offline-first implementation | ⏳ Queued |
 | 8 | Retention and final polish | ⏳ Queued |
@@ -117,7 +117,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] Record the decisions in `session-notes/` and `guidelines/agents-and-skills.md`
 - This phase runs before Phase 5; the full offline implementation is Phase 7
 
-## Phase 5: Social vertical slice (IN PROGRESS)
+## Phase 5: Social vertical slice (COMPLETED)
 - [x] TICKET-007: friends and requests ✅ 15/11/2026
 - [x] Minimal subset of TICKET-009: 1:1 shared expense ✅ 15/11/2026 (ticket stays open for the group requirements)
 
@@ -147,7 +147,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] TICKET-056: compact currency field with **Cambiar** and the live remaining amount for the fixed split ✅ 20/11/2026
 
 ### 5.4 Initial onboarding
-- [ ] TICKET-057: default main wallet on account creation
+- [x] TICKET-057: default main wallet on account creation ✅ 20/11/2026
 
 ## Phase 6: Groups (QUEUED)
 - [ ] TICKET-008: create groups (consumes the Social → Tus grupos shell from TICKET-041)

@@ -146,5 +146,8 @@
     "restoreTitle": "Restaurar cartera",
     "archiveMessage": "«{{name}}» dejará de aparecer en los selectores y en los totales, pero conservará todo su historial.",
     "restoreMessage": "«{{name}}» volverá a aparecer en los selectores y en los totales."
+  },
+  "defaults": {
+    "mainWalletName": "Cartera principal"
   }
 }

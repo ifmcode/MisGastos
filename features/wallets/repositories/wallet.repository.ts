@@ -1,5 +1,6 @@
 import {
   CreateWalletDto,
+  DefaultWalletSeedResult,
   DeleteWalletOptions,
   UpdateWalletDto,
   Wallet,
@@ -11,6 +12,10 @@ export interface IWalletRepository {
   getWallets(ownerId: string): Promise<Wallet[]>;
   getWallet(ownerId: string, walletId: string): Promise<Wallet | null>;
   createWallet(ownerId: string, dto: CreateWalletDto): Promise<Wallet>;
+  seedDefaultWallet(
+    ownerId: string,
+    dto: CreateWalletDto,
+  ): Promise<DefaultWalletSeedResult>;
   updateWallet(
     ownerId: string,
     walletId: string,

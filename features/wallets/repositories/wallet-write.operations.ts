@@ -16,6 +16,7 @@ import {
   Wallet,
 } from "../types/wallet.types";
 import { roundMoney } from "../utils/money";
+import { buildWalletDocumentData } from "./wallet-document";
 import { mapWalletDocument } from "./wallet.mapper";
 
 const WALLET_COLLECTION = "wallets";
@@ -38,22 +39,7 @@ export async function createWalletDocument(
   dto: CreateWalletDto,
 ): Promise<Wallet> {
   const now = new Date().toISOString();
-  const initialBalance = roundMoney(dto.initialBalance);
-
-  const data = {
-    name: dto.name,
-    currency: dto.currency,
-    icon: dto.icon,
-    color: dto.color,
-    initialBalance,
-    balance: initialBalance,
-    type: dto.type,
-    includeInTotal: dto.includeInTotal,
-    ownerId,
-    createdAt: now,
-    updatedAt: now,
-    ...(dto.description ? { description: dto.description } : {}),
-  };
+  const data = buildWalletDocumentData(ownerId, dto, now);
 
   const walletsRef = collection(db, WALLET_COLLECTION);
   const reference = await addDoc(walletsRef, data);

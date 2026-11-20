@@ -1,6 +1,7 @@
 import { IWalletRepository } from "@/features/wallets/repositories/wallet.repository";
 import {
   CreateWalletDto,
+  DefaultWalletSeedResult,
   DeleteWalletOptions,
   UpdateWalletDto,
   Wallet,
@@ -41,6 +42,13 @@ export class FakeWalletRepository implements IWalletRepository {
     _walletId: string,
     _dto: UpdateWalletDto,
   ): Promise<Wallet> {
+    throw new Error("Not used in transfer tests");
+  }
+
+  async seedDefaultWallet(
+    _ownerId: string,
+    _dto: CreateWalletDto,
+  ): Promise<DefaultWalletSeedResult> {
     throw new Error("Not used in transfer tests");
   }
 

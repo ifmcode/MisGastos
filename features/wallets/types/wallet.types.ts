@@ -59,6 +59,21 @@ export interface WalletFormValues {
   description: string;
 }
 
+/**
+ * Input of the first-load seed. The wallet name is resolved from the `wallets`
+ * namespace by the caller because wallet names are stored, never re-translated.
+ * `preferredCurrency` is only a fallback: the stored profile value wins.
+ */
+export interface SeedDefaultWalletInput {
+  name: string;
+  preferredCurrency?: unknown;
+}
+
+export type DefaultWalletSeedResult =
+  | { status: "seeded"; wallet: Wallet }
+  | { status: "already-seeded" }
+  | { status: "skipped-existing-wallets" };
+
 export interface WalletUsage {
   transactionCount: number;
   transferCount: number;

@@ -32,6 +32,7 @@ simplicidad de uso.
 
 - 🔐 **Autenticación** con email/contraseña, registro, recuperación de contraseña y Google.
 - 👛 **Carteras múltiples** con nombre, moneda, tipo, color, icono y saldo inicial. La creación vive solo en el botón flotante **+**, centrado en la pantalla, así que la cabecera no repite una acción duplicada. El formulario elige la moneda en la misma fila compacta **Moneda: EUR € · Cambiar** que los gastos compartidos, y la bloquea al editar una cartera existente.
+- 👝 **Cartera principal automática**: cada cuenta recibe una única «Cartera principal» en su primera carga autenticada, tanto con email/contraseña como con Google, sin necesidad de abrir **Carteras** y sin bloquear la interfaz. Es una cartera normal: icono, color y tipo por defecto, incluida en el total y con saldo 0, con la moneda preferida del perfil (EUR si aún no hay perfil) y el nombre en el idioma activo en ese momento, que queda guardado y no se vuelve a traducir. Se puede renombrar, archivar y eliminar como cualquier otra. Las cuentas anteriores sin carteras la reciben en la siguiente carga y nunca se vuelve a crear: si borras todas las carteras, la cuenta se queda con cero carteras.
 - ⚖️ **Inclusión en el total** configurable por cartera.
 - 💸 **Ingresos y gastos** con actualización atómica del saldo de la cartera.
 - 🧾 **Historial de movimientos** con filtros y ordenamiento.
@@ -207,9 +208,9 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
-Estado actual (20/11/2026): **260 suites / 1556 tests**; la cobertura acotada a la
-lógica de negocio está en **98,94 % de sentencias, 94,55 % de ramas, 98,63 % de
-funciones y 99,37 % de líneas**, y `npm run check:copy` audita **260 archivos TSX**.
+Estado actual (20/11/2026): **265 suites / 1583 tests**; la cobertura acotada a la
+lógica de negocio está en **98,93 % de sentencias, 94,59 % de ramas, 98,55 % de
+funciones y 99,36 % de líneas**, y `npm run check:copy` audita **261 archivos TSX**.
 
 ## 🗺️ Roadmap
 
@@ -232,7 +233,7 @@ funciones y 99,37 % de líneas**, y `npm run check:copy` audita **260 archivos T
 - [x] Historial saldado plegado tras una liquidación completa, con separador al desplegarlo
 - [x] Bandeja de notificaciones in-app con pestañas **Pendientes**/**Vistas** y aviso flotante
 - [x] Moneda compacta con **Cambiar** y aviso de importe restante en el reparto por importe, con la moneda preferida como valor por defecto de los movimientos y transferencias nuevos
-- [ ] Cartera principal por defecto al crear la cuenta
+- [x] Cartera principal por defecto al crear la cuenta
 - [ ] Grupos y gastos compartidos dentro de grupos
 - [ ] Liquidación de deudas en grupos
 - [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización; implementación en la fase 7)
@@ -268,6 +269,7 @@ Consulta el roadmap completo en
 - [Bandeja de notificaciones in-app (TICKET-047, 18/11/2026)](docs/project/development-notes/session-notes/2026-11-18-notification-inbox.md): dos sellos (`seenAt`/`readAt`), segmentos **Pendientes**/**Vistas**, aviso flotante de 4 segundos con cola silenciosa y supresión en la bandeja, vuelta al origen con `friendUid` como respaldo sin historial (TICKET-058), seguimiento de cartera del acreedor al principio del detalle y reglas pendientes de despliegue.
 - [Historial unificado del detalle de amigo (TICKET-059, 19/11/2026)](docs/project/development-notes/session-notes/2026-11-19-friend-unified-timeline.md): gastos y liquidaciones entremezclados por fecha, filas con gutter de día, efecto `Prestaste`/`Pediste`, colapso conjunto al saldar la deuda y eliminación de las superficies anteriores.
 - [Historial saldado tras una liquidación completa (TICKET-060, 19/11/2026)](docs/project/development-notes/session-notes/2026-11-19-settled-history-split.md): corte por la última liquidación que dejó la deuda a cero, botón **Ver gastos anteriores** persistente, separador **Movimientos saldados** y ciclos nuevos sin reabrir lo saldado.
+- [Cartera principal automática (TICKET-057, 20/11/2026)](docs/project/development-notes/session-notes/2026-11-20-default-main-wallet.md): siembra en la primera carga autenticada con marcador en el perfil, flujo transaccional final, análisis de reglas (incluido el `get` denegado sobre un documento inexistente), resolución de moneda, límites aceptados y verificación.
 - [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)
 - [Guía de seguridad y validación](docs/project/guidelines/security-and-validation.md)
