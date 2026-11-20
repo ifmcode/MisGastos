@@ -3,7 +3,7 @@
 **Type:** Feature  
 **Priority:** High  
 **Status:** ⏳ Pending  
-**Related:** PM-007, PM-008; TICKET-009, TICKET-011, TICKET-046, TICKET-047  
+**Related:** PM-007, PM-008; TICKET-009, TICKET-011, TICKET-046, TICKET-047, TICKET-062, TICKET-064  
 **Sprint:** Post-MVP  
 
 ## Description
@@ -35,6 +35,7 @@ Show who owes whom inside each group, simplify debts and record payments between
 - Settlements affect the group ledger only. Moving money in a personal wallet is a separate future decision.
 - **Wallet movements:** TICKET-046 settles the 1:1 case with real wallet movements, bilateral confirmation and notifications. The group version should follow that model rather than moving group money straight into personal wallets.
 - **1:1 precedent:** TICKET-046 defines the settlement state machine, the payer/receiver wallet movements, the partial-settlement rules, the accepted-only balance fold and the notification events for a pair. Reuse that model for the group version instead of inventing a second settlement flow; the group version only adds the multi-member balance simplification on top.
+- **Reuse after Phase 6.0:** the group settlement reuses TICKET-046's direct-application model (no pending/accepted state) plus TICKET-062's editable amount with the live remaining message and TICKET-064's debt-selection step, adapted to the group's per-currency balances. The "bilateral confirmation" and "accepted-only" wording above is superseded by TICKET-046.
 
 ## Dependencies
 - TICKET-009 Shared Expenses

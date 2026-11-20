@@ -20,7 +20,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Status:** ⏳ Pending
 - **Last completed:** TICKET-057 - default main wallet on account creation (20/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-009 (group requirements), TICKET-010 and TICKET-011
+- **Queued:** TICKET-062, TICKET-063, TICKET-064, TICKET-065, TICKET-066 and TICKET-067 (Phase 6.0), TICKET-009 (group requirements), TICKET-010 and TICKET-011
 - **Next:** TICKET-008
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
@@ -155,6 +155,15 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [ ] TICKET-010: group balances and settlements (reuse the TICKET-046 direct-settlement model, the receiver wallet movement and notification events)
 - [ ] TICKET-011: group history
 - Constraint from the Phase 4 spike: shared expenses and settlements are append-only ledger entries folded by a shared pure function, so offline group movements work without a rewrite
+
+### 6.0 Settlement and form polish (QUEUED)
+> Execution order follows **Current Focus**; TICKET-010 must reuse TICKET-062 and TICKET-064 instead of a second settlement flow.
+- [ ] TICKET-062: editable settlement amount with the live remaining debt
+- [ ] TICKET-063: date field without manual input and a calendar pinned to the right
+- [ ] TICKET-064: settlement debt-selection step for multiple currencies
+- [ ] TICKET-065: single wallet picker button without preselection
+- [ ] TICKET-066: single category picker button with mandatory selection
+- [ ] TICKET-067: Social pending requests as a top-right header icon with a badge
 
 ## Phase 7: Offline-first implementation (QUEUED)
 - [ ] Full TICKET-023 (design accepted in Phase 4)
