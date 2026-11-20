@@ -16,12 +16,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 6 - Groups
-- **Current ticket:** TICKET-008 - create groups
+- **Current ticket:** TICKET-009 - group shared expenses
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-057 - default main wallet on account creation (20/11/2026)
+- **Last completed:** TICKET-008 - groups and invitations (20/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-062, TICKET-063, TICKET-064, TICKET-065, TICKET-066 and TICKET-067 (Phase 6.0), TICKET-009 (group requirements), TICKET-010 and TICKET-011
-- **Next:** TICKET-008
+- **Queued:** TICKET-062, TICKET-063, TICKET-064, TICKET-065, TICKET-066 and TICKET-067 (Phase 6.0), TICKET-009 (group requirements), TICKET-010, TICKET-011, TICKET-061 and TICKET-068
+- **Next:** TICKET-009
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -43,7 +43,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 | 3 | Personal finance complete | ✅ Done |
 | 4 | Architecture and workflow spike | ✅ Done |
 | 5 | Social vertical slice | ✅ Done |
-| 6 | Groups | ⏳ Queued |
+| 6 | Groups | 🚧 In progress |
 | 7 | Offline-first implementation | ⏳ Queued |
 | 8 | Retention and final polish | ⏳ Queued |
 
@@ -149,11 +149,13 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ### 5.4 Initial onboarding
 - [x] TICKET-057: default main wallet on account creation ✅ 20/11/2026
 
-## Phase 6: Groups (QUEUED)
-- [ ] TICKET-008: create groups (consumes the Social → Tus grupos shell from TICKET-041)
-- [ ] Full TICKET-009: the group requirements still open after the 1:1 subset (group membership and payer validation, group currency, expense in the group detail)
+## Phase 6: Groups (IN PROGRESS)
+- [x] TICKET-008: create groups, friend invitations, group detail and member management (consumes the Social → Tus grupos shell from TICKET-041) ✅ 20/11/2026
+- [ ] TICKET-061: group join code and join requests (deferred from TICKET-008)
+- [ ] Full TICKET-009: the group requirements still open after the 1:1 subset (group membership and payer validation, per-expense currency, expense in the group detail)
 - [ ] TICKET-010: group balances and settlements (reuse the TICKET-046 direct-settlement model, the receiver wallet movement and notification events)
 - [ ] TICKET-011: group history
+- [ ] TICKET-068: group membership lifecycle (leave, balance-safe removal and ownership transfer)
 - Constraint from the Phase 4 spike: shared expenses and settlements are append-only ledger entries folded by a shared pure function, so offline group movements work without a rewrite
 
 ### 6.0 Settlement and form polish (QUEUED)

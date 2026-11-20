@@ -12,6 +12,16 @@ export const SETTLEMENT_NOTIFICATION_TYPES: readonly SettlementNotificationType[
   ["settlement-created", "settlement-updated", "settlement-deleted"];
 
 /**
+ * TICKET-008 producer: an accepted friend was invited to a group. The payload
+ * carries ids and the denormalized group name so the inbox needs no extra read.
+ */
+export type GroupNotificationType = "group-invite";
+
+export const GROUP_NOTIFICATION_TYPES: readonly GroupNotificationType[] = [
+  "group-invite",
+];
+
+/**
  * Reserved by TICKET-047 for friend requests and group expenses. They are
  * read-compatible with the settlement shape (same document fields, no extra
  * payload contract) so the inbox can map and navigate them, but the rules still
@@ -33,11 +43,13 @@ export const RESERVED_NOTIFICATION_TYPES: readonly ReservedNotificationType[] = 
 
 export type NotificationType =
   | SettlementNotificationType
+  | GroupNotificationType
   | ReservedNotificationType;
 
 /** Every readable type; the mapper accepts this union and nothing else. */
 export const NOTIFICATION_TYPES: readonly NotificationType[] = [
   ...SETTLEMENT_NOTIFICATION_TYPES,
+  ...GROUP_NOTIFICATION_TYPES,
   ...RESERVED_NOTIFICATION_TYPES,
 ];
 
@@ -58,6 +70,17 @@ export interface SettlementNotificationPayload {
 }
 
 export type NotificationPayload = Record<string, unknown>;
+
+/**
+ * `group-invite` payload. `friendUid` is the inviter (the actor), so the row can
+ * resolve the name without another lookup; `groupName` avoids reading the group.
+ */
+export interface GroupInviteNotificationPayload {
+  invitationId: string;
+  groupId: string;
+  groupName: string;
+  friendUid: string;
+}
 
 /**
  * `notifications/{dedupeKey}` document, readable only by its recipient.

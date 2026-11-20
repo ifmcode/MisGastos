@@ -17,13 +17,18 @@ Add expenses inside a group, choose who paid and split the amount equally, by pe
 
 ## Requirements
 - [x] Create a shared expense with description, amount, date, payer and participants
+- [ ] Any active group member can create a group expense; the owner uses the same form
+- [ ] In the group form, choose the participating members: all active members are selected by default, a **Todos** shortcut selects or clears all, and only the selected participants appear in the split inputs and receive a share. Equal split divides the amount among the selected participants.
+- [ ] The payer must be an active group member and may be excluded from the participants (pays for others) with a 0 share; their net balance is credited the full amount.
+- [ ] The owner can edit or delete any group expense; the creator and the payer can edit or delete their own; the other members have read-only access.
 - [ ] Support equal, percentage, fixed-amount and share-based splits (domain and tests cover all four; since 16/11/2026 the 1:1 form exposes only **Igual** and **Importe**, so percentage and shares return with the group form in Phase 6)
 - [ ] Validate that all participants are group members and the payer is a member
 - [x] Validate that split values add up to the total, with deterministic rounding
-- [ ] Store the expense in the group currency
+- [ ] Store every group expense in its own currency, with the group default currency as the initial value for new expenses
 - [x] Allow editing and soft-deleting an expense while keeping an audit trail
 - [ ] Show the expense in the group detail and feed the balance calculation
 - [x] Add tests for every split mode, rounding and invalid inputs
+- [ ] Add tests for the participant selection, a payer outside the participant list and the owner/creator/payer edit permissions
 
 > The unchecked requirements are group-only and stay in roadmap Phase 6. The 1:1
 > subset stores the currency per expense and the list lives in the **Amigos** tab,
@@ -31,13 +36,16 @@ Add expenses inside a group, choose who paid and split the amount equally, by pe
 
 ## Acceptance Criteria
 - [ ] A member can add an expense and see it in the group
+- [ ] A member can choose which group members participated; the shares only cover those members and sum to the total
+- [ ] The payer can pay for others without consuming; their net balance is credited the full amount and the selected participants are debited their shares
+- [ ] The owner, the creator and the payer can edit/delete; the other members cannot
 - [x] Each participant's share is calculated correctly for all split modes
 - [x] The sum of shares always equals the expense total
 - [ ] Non-members cannot create or read the expense
 - [x] Editing or deleting an expense updates balances without losing history
 
-> The two unchecked criteria are written for groups. Their 1:1 equivalent is
-> enforced today: only the two participants can read, edit or soft-delete an
+> The group-only criteria are unchecked. The 1:1 subset already enforces the
+> equivalent for the two participants: only they can read, edit or soft-delete an
 > expense, and a create requires an existing friendship between both accounts.
 
 ## Implemented (1:1 subset, 15/11/2026)
@@ -156,10 +164,16 @@ Add expenses inside a group, choose who paid and split the amount equally, by pe
 
 ## Technical Notes
 - Suggested collection: `groups/{groupId}/expenses/{expenseId}` or a root `groupExpenses` collection with `groupId`.
-- Store money in integer cents to avoid floating-point errors. Reuse the existing money utilities where possible.
+- Store money in integer cents to avoid floating-point errors. Reuse the existing money utilities where possible. Each group expense stores its own `currency`; the group `defaultCurrency` is only the initial value for a new expense, and balances are grouped per currency and never converted (same model as 1:1 shared expenses).
 - Suggested fields: `payerId`, `amountCents`, `currency`, `splitMode`, `participants[{ userId, shareCents }]`, `description`, `date`, `createdBy`, `createdAt`, `updatedAt`, `deletedAt`.
 - The balance calculation belongs in a pure service used by both the group screen and the friends screen.
+- The group form reuses the split engine (`splitExpenseAmount`, `distributeByRemainder`, the split schemas) and the shared page-sheet patterns, but replaces the single friend field with a group member multi-select and a participant selector. Do not duplicate the money math or the four split modes.
+- Participant selector: all active members are selected by default; **Todos** selects or clears the whole list; only selected participants are rendered in the per-mode inputs and receive a share. The equal split divides the amount among the selected participants. A group expense must keep at least one selected participant.
+- The payer must be an active group member but may be absent from `participants` (pays for others) with a 0 share. The ledger credits the payer the full amount and debits each selected participant's share; a 0 share creates no debt.
+- Edit/delete permissions: the owner can moderate any group expense; the creator and the payer can edit/delete their own; the other members are read-only. The service returns `NOT_EXPENSE_EDITOR` (or the existing equivalent) before any write.
+- Collection decision: prefer a root `groupExpenses` collection with `groupId` (or `groups/{groupId}/expenses`) and document the access-control/read-budget trade-off. The 1:1 `sharedExpenses` mapper is pair-specific and must not be stretched to N participants without a deliberate schema change.
 - Personal wallet balances are not modified by group expenses unless a future ticket explicitly defines a settlement-to-wallet flow. TICKET-044 defines that flow for the payer of a 1:1 expense and TICKET-046 for 1:1 settlements; group expenses still leave personal wallets untouched.
+- Decision record for the participant selector and permissions: `session-notes/2026-11-20-group-expenses-and-membership-decisions.md`.
 
 ## Dependencies
 - TICKET-008 Groups

@@ -29,8 +29,34 @@ describe("buildNotificationRow payload resolution", () => {
     ]);
   });
 
-  it("prefers an already resolved actor name, as the banner does", () => {
-    const row = buildNotificationRow(buildNotification(), {
+  it("names the actor and the group of a group invite", () => {
+    const row = buildNotificationRow(
+      buildNotification({
+        type: "group-invite",
+        payload: { groupName: " Viaje ", friendUid: "user-a" },
+      }),
+      context,
+    );
+
+    expect(row.title).toContain("types.group-invite");
+    expect(row.title).toContain('"name":"Ana"');
+    expect(row.title).toContain('"group":"Viaje"');
+    expect(row.icon).toBe("mail-unread-outline");
+  });
+
+  it("survives a group invite without a usable group name", () => {
+    const row = buildNotificationRow(
+      buildNotification({
+        type: "group-invite",
+        payload: { groupName: 42, friendUid: "user-a" },
+      }),
+      context,
+    );
+
+    expect(row.title).toContain('"group":""');
+  });
+
+  it("prefers an already resolved actor name, as the banner does", () => {    const row = buildNotificationRow(buildNotification(), {
       ...context,
       actorName: "María",
     });

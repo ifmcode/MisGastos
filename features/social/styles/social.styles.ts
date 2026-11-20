@@ -105,6 +105,11 @@ export const socialStyles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  // Groups segment: invitations row plus groups list
+  groupsSegment: {
+    gap: 12,
+  },
+
   pressed: {
     opacity: 0.7,
   },

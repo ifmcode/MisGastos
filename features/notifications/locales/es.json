@@ -17,9 +17,9 @@
   },
   "empty": {
     "pendingTitle": "No tienes notificaciones pendientes",
-    "pendingMessage": "Cuando un amigo liquide una deuda contigo, aparecerá aquí hasta que la veas.",
+    "pendingMessage": "Cuando un amigo liquide una deuda o te invite a un grupo, aparecerá aquí hasta que lo veas.",
     "viewedTitle": "Todavía no has visto ninguna notificación",
-    "viewedMessage": "Las notificaciones que abras o descartes se guardarán en esta sección."
+    "viewedMessage": "Las notificaciones que abras o descartes, como las invitaciones a grupos, se guardarán en esta sección."
   },
   "markAllRead": {
     "label": "Marcar todo como leído",
@@ -57,6 +57,7 @@
     },
     "friend-request": "{{name}} te ha enviado una solicitud de amistad.",
     "friend-request-accepted": "{{name}} ha aceptado tu solicitud de amistad.",
+    "group-invite": "{{name}} te ha invitado al grupo «{{group}}».",
     "group-expense": "{{name}} ha añadido un gasto de grupo.",
     "group-settlement": "{{name}} ha registrado una liquidación de grupo."
   },

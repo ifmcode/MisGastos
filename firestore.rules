@@ -328,11 +328,16 @@ service cloud.firestore {
 
     function isNotificationType(value) {
       return value in
-        ['settlement-created', 'settlement-updated', 'settlement-deleted'];
+        [
+          'settlement-created',
+          'settlement-updated',
+          'settlement-deleted',
+          'group-invite'
+        ];
     }
 
     // Ids, numbers and booleans only: the copy lives in the locales.
-    function hasNotificationPayload(payload) {
+    function hasSettlementNotificationPayload(payload) {
       return payload is map
         && payload.keys().hasOnly(
              [
@@ -354,6 +359,52 @@ service cloud.firestore {
         && payload.currency is string
         && payload.isFull is bool
         && payload.canLinkWallet is bool;
+    }
+
+    // `group-invite` payload (TICKET-008): ids plus the denormalized group name,
+    // so the invitee row never reads the group. `friendUid` is the inviter.
+    function hasGroupInviteNotificationPayload(payload) {
+      return payload is map
+        && payload.keys().hasOnly(
+             ['invitationId', 'groupId', 'groupName', 'friendUid']
+           )
+        && isGroupText(payload.invitationId, 1500)
+        && isGroupText(payload.groupId, 1500)
+        && isGroupText(payload.groupName, 60)
+        && isGroupText(payload.friendUid, 1500);
+    }
+
+    function hasNotificationPayload(data) {
+      return data.type == 'group-invite'
+        ? hasGroupInviteNotificationPayload(data.payload)
+        : hasSettlementNotificationPayload(data.payload);
+    }
+
+    // The invitee is the recipient, the actor is the inviter, and the referenced
+    // invitation must agree with the payload. `getAfter` keeps working if a
+    // future producer writes the invitation and the notification together.
+    function isGroupInviteNotificationTarget(data) {
+      return isGroupInviteFor(
+        getAfter(
+          /databases/$(database)/documents/groups/$(data.payload.groupId)
+        ).data,
+        getAfter(
+          /databases/$(database)/documents/groupInvitations/$(data.payload.invitationId)
+        ).data,
+        data
+      );
+    }
+
+    // The referenced group must belong to the actor: an invitation document
+    // alone cannot authorize a notification for someone else's group.
+    function isGroupInviteFor(group, invitation, notification) {
+      return group.ownerId == request.auth.uid
+        && invitation.inviteeId == notification.userId
+        && invitation.inviterId == request.auth.uid
+        && invitation.inviterId == notification.payload.friendUid
+        && invitation.groupId == notification.payload.groupId
+        && invitation.groupName == notification.payload.groupName
+        && invitation.status == 'pending';
     }
 
     // The recipient must be the other participant of the referenced settlement
@@ -383,10 +434,24 @@ service cloud.firestore {
       return isSignedIn()
         && data.userId != request.auth.uid
         && data.payload is map
+        // Presence guard: a group-invite payload has no settlementId, and
+        // reading a missing map key would fail the whole get evaluation.
+        && ('settlementId' in data.payload)
         && data.payload.settlementId is string
         && request.auth.uid in getAfter(
              /databases/$(database)/documents/settlements/$(data.payload.settlementId)
            ).data.participantIds;
+    }
+
+    // The inviter may read the deterministic `group-invite` document so
+    // `createNotificationOperation` can skip an already written event. The
+    // recipient's readAt stays private because this only matches the actor.
+    function isGroupInviteNotificationActor(data) {
+      return isSignedIn()
+        && data.type == 'group-invite'
+        && data.payload is map
+        && ('friendUid' in data.payload)
+        && data.payload.friendUid == request.auth.uid;
     }
 
     // Shared expense links are expense-only; a settlement link is income-only.
@@ -420,6 +485,222 @@ service cloud.firestore {
           !('settlementId' in previous)
           || previous.settlementId == next.settlementId
         );
+    }
+
+    // ---- TICKET-008 groups -----------------------------------------------
+    // A group belongs to one owner and only its accepted members read it.
+    // Membership otherwise only grows through an accepted invitation, which is
+    // verified with `getAfter` so it can be written in the same transaction.
+    // Group expenses and their ledger stay in TICKET-009/010.
+    function isGroupMember(data) {
+      return isSignedIn() && request.auth.uid in data.memberIds;
+    }
+
+    function isGroupText(value, maxLength) {
+      return value is string && value.size() > 0 && value.size() <= maxLength;
+    }
+
+    // Bounded by GROUP_DESCRIPTION_MAX_LENGTH (200) in the group schema.
+    function isGroupDescription(value) {
+      return value == null || (value is string && value.size() <= 200);
+    }
+
+    function hasGroupCurrency(value) {
+      return value in ['EUR', 'USD', 'GBP', 'JPY', 'CHF'];
+    }
+
+    // Owner first, unique and 1..20 (GROUP_MAX_MEMBERS), the same contract as
+    // the mapper and the service.
+    function hasGroupMembers(memberIds, ownerId) {
+      return memberIds is list
+        && memberIds.size() > 0
+        && memberIds.size() <= 20
+        && memberIds[0] == ownerId
+        && memberIds.toSet().size() == memberIds.size();
+    }
+
+    function keepsGroupIdentity(previous, next) {
+      return next.ownerId == previous.ownerId
+        && next.createdAt == previous.createdAt;
+    }
+
+    // a) owner metadata edit: membership, owner and creation stamp are frozen.
+    function isGroupMetadataEdit(previous, next) {
+      return previous.ownerId == request.auth.uid
+        && next.diff(previous).affectedKeys().hasOnly(
+             ['name', 'description', 'defaultCurrency', 'updatedAt']
+           )
+        && isGroupText(next.name, 60)
+        && isGroupDescription(next.description)
+        && hasGroupCurrency(next.defaultCurrency)
+        && next.updatedAt is string;
+    }
+
+    // b) owner removes exactly one member; the owner can never leave.
+    function isGroupMemberRemoval(previous, next) {
+      return previous.ownerId == request.auth.uid
+        && next.diff(previous).affectedKeys().hasOnly(['memberIds', 'updatedAt'])
+        && next.memberIds.size() == previous.memberIds.size() - 1
+        && previous.memberIds.toSet().hasAll(next.memberIds)
+        && hasGroupMembers(next.memberIds, previous.ownerId)
+        && next.updatedAt is string;
+    }
+
+    // Deterministic invitation id: `groupId__inviteeId`.
+    function isGroupInvitationParticipant(data) {
+      return isSignedIn()
+        && (
+          data.inviterId == request.auth.uid
+          || data.inviteeId == request.auth.uid
+        );
+    }
+
+    function isGroupInvitationPair(data) {
+      return data.pairId is string
+        && data.pairId == (
+             data.inviterId < data.inviteeId
+               ? data.inviterId + '__' + data.inviteeId
+               : data.inviteeId + '__' + data.inviterId
+           );
+    }
+
+    // ONE friendship read per invitation create, passed into the helper, so a
+    // 19-invite creation batch stays inside the document-read budget. The group
+    // is never read here: the group update rule verifies the inviter instead.
+    function isFriendshipOf(friendship, first, second) {
+      return friendship.memberIds is list
+        && first in friendship.memberIds
+        && second in friendship.memberIds;
+    }
+
+    function hasGroupInvitationFields(data) {
+      return data.keys().hasOnly(
+          [
+            'groupId',
+            'groupName',
+            'inviterId',
+            'inviteeId',
+            'pairId',
+            'status',
+            'createdAt',
+            'updatedAt'
+          ]
+        )
+        && isGroupText(data.groupId, 1500)
+        && isGroupText(data.groupName, 60)
+        && isGroupText(data.inviterId, 1500)
+        && isGroupText(data.inviteeId, 1500)
+        && data.status in ['pending', 'accepted', 'rejected', 'cancelled']
+        && data.createdAt is string
+        && data.updatedAt is string;
+    }
+
+    function keepsGroupInvitationIdentity(previous, next) {
+      return next.inviterId == previous.inviterId
+        && next.inviteeId == previous.inviteeId
+        && next.groupId == previous.groupId
+        && next.pairId == previous.pairId
+        && next.createdAt == previous.createdAt;
+    }
+
+    function isInvitationStatusChange(previous, next) {
+      return next.diff(previous).affectedKeys().hasOnly(['status', 'updatedAt']);
+    }
+
+    // Invitee: pending -> accepted | rejected.
+    function isInviteeInvitationResponse(previous, next) {
+      return previous.inviteeId == request.auth.uid
+        && previous.status == 'pending'
+        && next.status in ['accepted', 'rejected']
+        && isInvitationStatusChange(previous, next);
+    }
+
+    // Inviter: pending -> cancelled.
+    function isInviterInvitationCancel(previous, next) {
+      return previous.inviterId == request.auth.uid
+        && previous.status == 'pending'
+        && next.status == 'cancelled'
+        && isInvitationStatusChange(previous, next);
+    }
+
+    // Inviter rename propagation while the invitation is still pending.
+    function isInvitationRename(previous, next) {
+      return previous.inviterId == request.auth.uid
+        && previous.status == 'pending'
+        && next.status == 'pending'
+        && isGroupText(next.groupName, 60)
+        && next.diff(previous).affectedKeys().hasOnly(
+             ['groupName', 'updatedAt']
+           );
+    }
+
+    // Inviter re-invite: a rejected/cancelled (or accepted-then-removed) row is
+    // reopened instead of duplicated; the service only does it for non-members.
+    function isInvitationReopen(previous, next) {
+      return previous.inviterId == request.auth.uid
+        && previous.status in ['rejected', 'cancelled', 'accepted']
+        && next.status == 'pending'
+        && isInvitationStatusChange(previous, next);
+    }
+
+    function isAcceptedGroupInvitation(invitation, groupId, ownerId) {
+      return invitation.groupId == groupId
+        && invitation.inviteeId == request.auth.uid
+        && invitation.inviterId == ownerId
+        && invitation.status == 'accepted';
+    }
+
+    // c) invitee joins: exactly one uid is appended, the owner stays first and
+    // the same transaction must set the deterministic invitation to accepted.
+    function joinsGroupThroughInvitation(previous, next, groupId) {
+      return !(request.auth.uid in previous.memberIds)
+        && request.auth.uid in next.memberIds
+        && next.diff(previous).affectedKeys().hasOnly(
+             ['memberIds', 'updatedAt']
+           )
+        && next.memberIds.size() == previous.memberIds.size() + 1
+        && next.memberIds.toSet().hasAll(previous.memberIds)
+        && hasGroupMembers(next.memberIds, previous.ownerId)
+        && next.updatedAt is string
+        && isAcceptedGroupInvitation(
+             getAfter(
+               /databases/$(database)/documents/groupInvitations/$(groupId + '__' + request.auth.uid)
+             ).data,
+             groupId,
+             previous.ownerId
+           );
+    }
+
+    // The invitee reads the group inside the accept transaction, so a pending
+    // deterministic invitation also grants that single-document get. A missing
+    // invitation makes `get` fail, which denies the read. The stored groupId is
+    // re-checked against the path, so the grant is tied to this exact group.
+    function isPendingInvitationForGroup(invitation, groupId) {
+      return invitation.status == 'pending'
+        && invitation.groupId == groupId;
+    }
+
+    function hasPendingGroupInvitation(groupId) {
+      return isPendingInvitationForGroup(
+        get(
+          /databases/$(database)/documents/groupInvitations/$(groupId + '__' + request.auth.uid)
+        ).data,
+        groupId
+      );
+    }
+
+    // Group ids are owner-namespaced: `${ownerId}__${autoId}`. Only the owner can
+    // create a group under their prefix, so an invitation create proves its
+    // group belongs to the caller WITHOUT reading the group. That keeps the
+    // budget at one friendship read per invitation (19 < 20 for a full batch)
+    // and closes forged invitations into someone else's group. `split` is used
+    // instead of a regex: Firebase uids and auto ids are alphanumeric, so the
+    // separator is unambiguous and no caller input reaches a pattern.
+    function isOwnedGroupId(groupId, ownerId) {
+      return groupId is string
+        && groupId.size() > ownerId.size() + 2
+        && groupId.split('__').size() >= 2
+        && groupId.split('__')[0] == ownerId;
     }
 
     // Profiles keep the Firebase uid in the `uid` field and are looked up by
@@ -820,6 +1101,106 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Groups (TICKET-008). Created in one batch with its pending invitations;
+    // the owner edits metadata and removes members; an invitee only appends
+    // themselves through an accepted invitation. No balance is validated here:
+    // group expenses and their ledger are TICKET-009/010.
+    //
+    // No composite index: `getGroupsOperation` filters only with
+    // `where('memberIds', 'array-contains', uid)` and sorts client-side.
+    match /groups/{groupId} {
+      // The invitee reads the group inside the accept transaction, so a pending
+      // invitation grants that single `get`. `list` stays member-only, which the
+      // `array-contains` query proves.
+      allow get: if isGroupMember(resource.data)
+        || hasPendingGroupInvitation(groupId);
+
+      allow list: if isGroupMember(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && isOwnedGroupId(groupId, request.auth.uid)
+        && request.resource.data.memberIds == [request.auth.uid]
+        && isGroupText(request.resource.data.name, 60)
+        && isGroupDescription(request.resource.data.description)
+        && hasGroupCurrency(request.resource.data.defaultCurrency)
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string
+        && request.resource.data.keys().hasOnly(
+             [
+               'ownerId',
+               'memberIds',
+               'name',
+               'description',
+               'defaultCurrency',
+               'createdAt',
+               'updatedAt'
+             ]
+           );
+
+      allow update: if keepsGroupIdentity(resource.data, request.resource.data)
+        && (
+          isGroupMetadataEdit(resource.data, request.resource.data)
+          || isGroupMemberRemoval(resource.data, request.resource.data)
+          || joinsGroupThroughInvitation(
+               resource.data,
+               request.resource.data,
+               groupId
+             )
+        );
+
+      allow delete: if false;
+    }
+
+    // Group invitations use the deterministic id `groupId__inviteeId`, so one
+    // document exists per pair and re-inviting reopens it. Only the owner writes
+    // them and only accepted friends can be invited: the create validates the
+    // owner-namespaced group id and the referenced friendship, while the group
+    // update validates the owner again with `getAfter`.
+    //
+    // `list` is participant-only. The repository queries by `inviterId` (owner
+    // list) or `inviteeId` (received list), each a single-field index that
+    // proves one of the two branches; a `groupId`-only query would not.
+    match /groupInvitations/{invitationId} {
+      // A `get` on a missing invitation must resolve to not-found so an
+      // idempotent invite can decide whether to create or reopen it. Same
+      // deliberate existence-oracle trade-off as the friend pair documents.
+      allow get: if isSignedIn()
+        && (
+          !exists(/databases/$(database)/documents/groupInvitations/$(invitationId))
+          || isGroupInvitationParticipant(resource.data)
+        );
+
+      allow list: if isGroupInvitationParticipant(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.inviterId == request.auth.uid
+        && isOwnedGroupId(request.resource.data.groupId, request.auth.uid)
+        && request.resource.data.status == 'pending'
+        && invitationId == request.resource.data.groupId
+             + '__' + request.resource.data.inviteeId
+        && request.resource.data.inviteeId != request.auth.uid
+        && isGroupInvitationPair(request.resource.data)
+        && hasGroupInvitationFields(request.resource.data)
+        && isFriendshipOf(
+             get(/databases/$(database)/documents/friendships/$(request.resource.data.pairId)).data,
+             request.resource.data.inviterId,
+             request.resource.data.inviteeId
+           );
+
+      allow update: if isGroupInvitationParticipant(resource.data)
+        && keepsGroupInvitationIdentity(resource.data, request.resource.data)
+        && hasGroupInvitationFields(request.resource.data)
+        && (
+          isInviteeInvitationResponse(resource.data, request.resource.data)
+          || isInviterInvitationCancel(resource.data, request.resource.data)
+          || isInvitationRename(resource.data, request.resource.data)
+          || isInvitationReopen(resource.data, request.resource.data)
+        );
+
+      allow delete: if false;
+    }
+
     // In-app notifications. The document id is the deterministic dedupe key, so a
     // retried event cannot duplicate it. The recipient lists and reads the inbox;
     // the actor writes it for the other participant and may `get` that single
@@ -835,22 +1216,24 @@ service cloud.firestore {
     //
     // The reserved TICKET-047 types (`friend-request`, `friend-request-accepted`,
     // `group-expense`, `group-settlement`) are read-compatible on the client but
-    // NOT writable yet: no producer exists, so `isNotificationType` keeps the
-    // create restricted to the three settlement events.
+    // NOT writable yet: no producer exists. `isNotificationType` allows the
+    // three settlement events plus the TICKET-008 `group-invite` producer.
     //
     // No composite index: `getNotificationsOperation`/`listenNotificationsOperation`
     // filter only with `where('userId', '==', uid)` and sort client-side.
     match /notifications/{notificationId} {
       // The actor needs a single `get` by its deterministic id to make the
-      // settlement transaction idempotent; the inbox `list` stays owner-only.
-      // A missing id must resolve to not-found instead of permission-denied so
-      // the first write can decide whether to create it. Same deliberate
-      // existence-oracle trade-off as the friend pair documents.
+      // settlement transaction (and the group-invite producer) idempotent; the
+      // inbox `list` stays owner-only. A missing id must resolve to not-found
+      // instead of permission-denied so the first write can decide whether to
+      // create it. Same deliberate existence-oracle trade-off as the friend
+      // pair documents.
       allow get: if isSignedIn()
         && (
           !exists(/databases/$(database)/documents/notifications/$(notificationId))
           || isNotificationOwner(resource.data)
           || isSettlementNotificationActor(resource.data)
+          || isGroupInviteNotificationActor(resource.data)
         );
 
       allow list: if isNotificationOwner(resource.data);
@@ -863,19 +1246,23 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(
              ['userId', 'type', 'payload', 'createdAt', 'readAt', 'seenAt', 'dedupeKey']
            )
-        && hasNotificationPayload(request.resource.data.payload)
+        && hasNotificationPayload(request.resource.data)
         && request.resource.data.readAt == null
         // Tolerant read: a TICKET-046 client that does not know `seenAt` can
         // still create its notification during a rolling deploy, and the mapper
         // treats the missing key exactly as null.
         && request.resource.data.get('seenAt', null) == null
         && request.resource.data.createdAt is string
-        && isNotificationTargetFor(
-             getAfter(
-               /databases/$(database)/documents/settlements/$(request.resource.data.payload.settlementId)
-             ).data,
-             request.resource.data
-           );
+        && (
+          request.resource.data.type == 'group-invite'
+            ? isGroupInviteNotificationTarget(request.resource.data)
+            : isNotificationTargetFor(
+                getAfter(
+                  /databases/$(database)/documents/settlements/$(request.resource.data.payload.settlementId)
+                ).data,
+                request.resource.data
+              )
+        );
 
       // Owner-only and limited to the two stamps: `userId` and the payload are
       // immutable. A stamp that already has a value must keep it, and a null

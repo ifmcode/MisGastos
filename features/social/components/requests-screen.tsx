@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
 import { FriendRequestSection } from "@/features/friends/components/friend-request-section";
+import { GroupInvitationsSection } from "@/features/groups/components/group-invitations-section";
 import { EmptyState } from "@/shared/components/molecules/empty-state";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
@@ -15,7 +16,7 @@ import { useRequestsScreen } from "../hooks/use-requests-screen";
 import { socialStyles as styles } from "../styles/social.styles";
 import { SocialRouteHeader } from "./social-route-header";
 
-/** Received and sent pending requests, with accept, reject and cancel. */
+/** Friend requests and received group invitations, with their actions. */
 export function RequestsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -23,9 +24,15 @@ export function RequestsScreen() {
   const { t } = useTranslation(["social", "friends", "common"]);
   const screen = useRequestsScreen();
   const hasData = screen.total > 0;
+  const loading = screen.loading || screen.groupsLoading;
   const showFullError = !!screen.error && !hasData;
+  const showEmpty =
+    !screen.loading &&
+    !screen.groupsLoading &&
+    screen.total === 0 &&
+    !screen.groupError;
   const subtitle =
-    screen.loading || showFullError
+    loading || showFullError
       ? undefined
       : hasData
         ? t("requests.subtitle", { count: screen.total })
@@ -39,7 +46,7 @@ export function RequestsScreen() {
         onBack={() => router.back()}
       />
 
-      {screen.loading ? (
+      {screen.loading && screen.groupTotal === 0 ? (
         <LoadingState message={t("requests.loading")} />
       ) : showFullError ? (
         <ErrorState
@@ -65,7 +72,7 @@ export function RequestsScreen() {
           <ErrorBanner message={screen.error} />
           <ErrorBanner message={screen.actionError} />
 
-          {screen.total === 0 ? (
+          {showEmpty ? (
             <EmptyState
               title={t("requests.emptyTitle")}
               message={t("requests.emptyMessage")}
@@ -80,6 +87,17 @@ export function RequestsScreen() {
                 onAccept={screen.acceptRequest}
                 onReject={screen.rejectRequest}
                 onCancel={screen.cancelRequest}
+              />
+              <GroupInvitationsSection
+                invitations={screen.groupInvitations}
+                loading={screen.groupsLoading}
+                error={screen.groupError}
+                actionError={screen.groupActionError}
+                pendingId={screen.groupPendingId}
+                pendingAction={screen.groupPendingAction}
+                onAccept={screen.acceptInvitation}
+                onReject={screen.rejectInvitation}
+                onRetry={screen.reloadGroups}
               />
               <FriendRequestSection
                 title={t("friends:requests.outgoingTitle")}

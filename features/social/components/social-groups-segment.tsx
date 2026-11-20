@@ -1,15 +1,75 @@
-import { EmptyState } from "@/shared/components/molecules/empty-state";
-import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
+import { useTranslation } from "react-i18next";
+import { View } from "react-native";
 
-/** "Tus grupos" segment: groups arrive in Phase 6, so there is no action. */
-export function SocialGroupsSegment() {
-  const { t } = useScopedTranslation("social");
+import { GroupsList } from "@/features/groups/components/groups-list";
+import type { Group } from "@/features/groups/types/group.types";
+import { ErrorBanner } from "@/shared/components/molecules/error-banner";
+import { ErrorState } from "@/shared/components/molecules/error-state";
+import { LoadingState } from "@/shared/components/molecules/loading-state";
+
+import { socialStyles as styles } from "../styles/social.styles";
+
+export interface SocialGroupsSegmentProps {
+  groups: readonly Group[];
+  loading: boolean;
+  error: string | null;
+  viewerUid: string;
+  /** False while friends load or when there are no accepted friends. */
+  canCreate: boolean;
+  onCreate: () => void;
+  onOpen: (group: Group) => void;
+  onEdit: (group: Group) => void;
+  onRetry: () => void;
+}
+
+/**
+ * "Tus grupos" segment. It owns its loading and error states so a friends
+ * failure never hides the groups and vice versa; a failed load with cached
+ * groups keeps the data and shows the banner instead of replacing it.
+ */
+export function SocialGroupsSegment({
+  groups,
+  loading,
+  error,
+  viewerUid,
+  canCreate,
+  onCreate,
+  onOpen,
+  onEdit,
+  onRetry,
+}: SocialGroupsSegmentProps) {
+  const { t } = useTranslation(["groups", "common"]);
+
+  if (loading) {
+    return (
+      <LoadingState variant="inline" message={t("list.loading")} />
+    );
+  }
+
+  if (error && groups.length === 0) {
+    return (
+      <ErrorState
+        variant="inline"
+        message={error}
+        retryLabel={t("common:actions.retry")}
+        retryAccessibilityLabel={t("list.retryAccessibility")}
+        onRetry={onRetry}
+      />
+    );
+  }
 
   return (
-    <EmptyState
-      title={t("groups.comingSoonTitle")}
-      message={t("groups.comingSoonMessage")}
-      variant="card"
-    />
+    <View style={styles.groupsSegment}>
+      <ErrorBanner message={error} />
+
+      <GroupsList
+        groups={groups}
+        viewerUid={viewerUid}
+        canCreate={canCreate}
+        onCreate={onCreate}
+        onOpen={onOpen}
+        onEdit={onEdit}
+      />
+    </View>
   );
 }

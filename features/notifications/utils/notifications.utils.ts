@@ -1,8 +1,10 @@
 import {
+  GROUP_NOTIFICATION_TYPES,
   NOTIFICATION_TYPES,
   RESERVED_NOTIFICATION_TYPES,
   SETTLEMENT_NOTIFICATION_TYPES,
   type AppNotification,
+  type GroupNotificationType,
   type NotificationType,
   type ReservedNotificationType,
   type SettlementNotificationType,
@@ -46,6 +48,16 @@ export function isReservedNotificationType(
   return (
     typeof value === "string" &&
     RESERVED_NOTIFICATION_TYPES.includes(value as ReservedNotificationType)
+  );
+}
+
+/** Active group events; `group-invite` is the TICKET-008 producer. */
+export function isGroupNotificationType(
+  value: unknown,
+): value is GroupNotificationType {
+  return (
+    typeof value === "string" &&
+    GROUP_NOTIFICATION_TYPES.includes(value as GroupNotificationType)
   );
 }
 

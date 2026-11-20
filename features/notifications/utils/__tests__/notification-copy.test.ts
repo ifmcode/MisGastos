@@ -33,6 +33,7 @@ function buildNotification(
 const context = {
   actorName: "Ana",
   amount: "10,00 €",
+  groupName: "Viaje a Roma",
   t: (key: string, options?: Record<string, unknown>) =>
     options ? `${key}:${JSON.stringify(options)}` : key,
 };
@@ -67,6 +68,27 @@ describe("resolveNotificationCopy", () => {
     expect(copy.icon).toBe("people-outline");
   });
 
+  it("names the actor and the group of a group invite", () => {
+    const copy = resolveNotificationCopy(
+      buildNotification({
+        type: "group-invite",
+        payload: {
+          invitationId: "group-1__user-b",
+          groupId: "group-1",
+          groupName: "Viaje a Roma",
+          friendUid: "user-a",
+        },
+      }),
+      context,
+    );
+
+    expect(copy.title).toBe(
+      'types.group-invite:{"name":"Ana","group":"Viaje a Roma"}',
+    );
+    expect(copy.title).not.toContain("10,00 €");
+    expect(copy.icon).toBe("mail-unread-outline");
+  });
+
   it("keeps an icon for every reserved and settlement type", () => {
     expect(getNotificationIcon("settlement-updated")).toBe("create-outline");
     expect(getNotificationIcon("settlement-deleted")).toBe("trash-outline");
@@ -77,6 +99,7 @@ describe("resolveNotificationCopy", () => {
     expect(getNotificationIcon("group-settlement")).toBe(
       "swap-horizontal-outline",
     );
+    expect(getNotificationIcon("group-invite")).toBe("mail-unread-outline");
   });
 
   it("falls back to the neutral bell for a legacy or unknown type", () => {

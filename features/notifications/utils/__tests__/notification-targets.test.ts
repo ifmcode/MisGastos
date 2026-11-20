@@ -68,6 +68,22 @@ describe("resolveNotificationTarget", () => {
     ).toEqual({ kind: "requests" });
   });
 
+  it("opens the requests list for a group invite", () => {
+    expect(
+      resolveNotificationTarget(
+        buildNotification({
+          type: "group-invite",
+          payload: {
+            invitationId: "group-1__user-b",
+            groupId: "group-1",
+            groupName: "Viaje",
+            friendUid: "user-a",
+          },
+        }),
+      ),
+    ).toEqual({ kind: "requests" });
+  });
+
   it("opens the friend detail for an accepted request", () => {
     expect(
       resolveNotificationTarget(

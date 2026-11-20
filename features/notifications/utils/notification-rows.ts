@@ -47,6 +47,13 @@ function readAmountCents(payload: NotificationPayload): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
+/** Denormalized group name of a `group-invite`; "" for every other type. */
+function readGroupName(payload: NotificationPayload): string {
+  const value = payload.groupName;
+
+  return typeof value === "string" ? value.trim() : "";
+}
+
 function readActorName(
   payload: NotificationPayload,
   context: NotificationRowContext,
@@ -81,6 +88,7 @@ export function buildNotificationRow(
   const copy = resolveNotificationCopy(notification, {
     actorName: readActorName(payload, context),
     amount,
+    groupName: readGroupName(payload),
     t: context.t,
   });
   const unread = isUnreadNotification(notification);

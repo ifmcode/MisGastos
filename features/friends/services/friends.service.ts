@@ -123,6 +123,16 @@ export class FriendsService {
     return this.repository.getPublicProfile(target);
   }
 
+  /** Batch identity resolution; blank and repeated uids never reach Firestore. */
+  async getPublicProfiles(uids: readonly string[]): Promise<PublicProfile[]> {
+    const targets = [...new Set(uids.map((uid) => uid.trim()))].filter(
+      (uid) => uid.length > 0,
+    );
+    if (targets.length === 0) return [];
+
+    return this.repository.getPublicProfiles(targets);
+  }
+
   private async requirePendingRequest(
     requestId: string,
     viewerUid: string,

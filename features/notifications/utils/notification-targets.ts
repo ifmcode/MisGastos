@@ -28,8 +28,9 @@ function readExpenseId(notification: AppNotification): string | null {
 /**
  * Where a notification opens, derived from `type` + payload so the row and the
  * banner cannot drift. A settlement event opens its detail; group events open
- * the shared expense; requests and accepted requests open their lists. A legacy
- * or unknown type falls back by payload, and a target without ids returns null.
+ * the shared expense; friend requests and group invitations open the requests
+ * list; an accepted request opens the friend. A legacy or unknown type falls
+ * back by payload, and a target without ids returns null.
  */
 export function resolveNotificationTarget(
   notification: AppNotification,
@@ -42,6 +43,10 @@ export function resolveNotificationTarget(
   }
 
   if (notification.type === "friend-request") return { kind: "requests" };
+
+  if (notification.type === "group-invite") {
+    return { kind: "requests" };
+  }
 
   if (notification.type === "friend-request-accepted") {
     return friendUid ? { kind: "friend", friendUid } : null;

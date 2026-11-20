@@ -2,6 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import { buildNotification } from "../../repositories/__tests__/notifications.fixtures";
 import {
+  isGroupNotificationType,
   isNotificationType,
   isPendingNotification,
   isReservedNotificationType,
@@ -11,7 +12,7 @@ import {
 } from "../notifications.utils";
 
 describe("isNotificationType", () => {
-  it("accepts settlements and the reserved TICKET-047 types", () => {
+  it("accepts settlements, the group invite and the reserved types", () => {
     expect(isNotificationType("settlement-created")).toBe(true);
     expect(isNotificationType("settlement-updated")).toBe(true);
     expect(isNotificationType("settlement-deleted")).toBe(true);
@@ -19,6 +20,7 @@ describe("isNotificationType", () => {
     expect(isNotificationType("friend-request-accepted")).toBe(true);
     expect(isNotificationType("group-expense")).toBe(true);
     expect(isNotificationType("group-settlement")).toBe(true);
+    expect(isNotificationType("group-invite")).toBe(true);
     expect(isNotificationType("other")).toBe(false);
     expect(isNotificationType(42)).toBe(false);
   });
@@ -37,6 +39,14 @@ describe("isReservedNotificationType", () => {
     expect(isReservedNotificationType("group-expense")).toBe(true);
     expect(isReservedNotificationType("settlement-created")).toBe(false);
     expect(isReservedNotificationType(42)).toBe(false);
+  });
+});
+
+describe("isGroupNotificationType", () => {
+  it("accepts only the active group events", () => {
+    expect(isGroupNotificationType("group-invite")).toBe(true);
+    expect(isGroupNotificationType("group-expense")).toBe(false);
+    expect(isGroupNotificationType(undefined)).toBe(false);
   });
 });
 

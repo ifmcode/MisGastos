@@ -1,6 +1,6 @@
 {
   "title": "Social",
-  "subtitle": "Tus amigos, tus solicitudes y, muy pronto, tus grupos.",
+  "subtitle": "Tus amigos, tus grupos y lo que compartís.",
   "loading": "Cargando tus amigos…",
   "errorTitle": "No se pudo cargar Social",
   "retryAccessibility": "Reintentar la carga de Social",
@@ -11,26 +11,27 @@
     "empty": "No tienes solicitudes pendientes",
     "rowAccessibility_one": "Peticiones pendientes: {{count}} solicitud",
     "rowAccessibility_other": "Peticiones pendientes: {{count}} solicitudes",
-    "hint": "Abre la lista de solicitudes recibidas y enviadas"
+    "hint": "Abre la lista de solicitudes de amistad e invitaciones a grupos"
   },
   "segments": {
     "accessibility": "Secciones de Social",
     "friends": "Tus amigos",
     "friendsHint": "Muestra a tus amigos y lo que tenéis pendiente",
     "groups": "Tus grupos",
-    "groupsHint": "Muestra tus grupos, disponibles próximamente"
-  },
-  "groups": {
-    "comingSoonTitle": "Tus grupos llegan pronto",
-    "comingSoonMessage": "Estamos preparando los gastos compartidos en grupo. Mientras tanto, organiza lo que compartes desde la pestaña Tus amigos."
+    "groupsHint": "Muestra los grupos a los que perteneces"
   },
   "routeBackHint": "Vuelve a la pantalla anterior",
   "fab": {
     "openAccessibility": "Abrir el menú de acciones de Social",
-    "openHint": "Abre las acciones para añadir amigos",
+    "openHint": "Abre las acciones para añadir amigos o crear un grupo",
     "menuTitle": "Acciones de Social",
     "addFriend": "Añadir amigo",
-    "addFriendHint": "Busca una cuenta por email y envíale una solicitud"
+    "addFriendHint": "Busca una cuenta por email y envíale una solicitud",
+    "createGroup": "Crear grupo",
+    "createGroupHint": "Ponle nombre al grupo e invita a tus amigos",
+    "createGroupDisabledHint": "Añade al menos un amigo para crear un grupo",
+    "createGroupErrorHint": "No se pudieron cargar tus amigos. Reintenta desde Social.",
+    "createGroupLoadingHint": "Cargando tus amigos…"
   },
   "requests": {
     "title": "Peticiones pendientes",
@@ -39,7 +40,7 @@
     "subtitle_other": "{{count}} solicitudes pendientes",
     "subtitleEmpty": "Nada pendiente por ahora",
     "emptyTitle": "No hay solicitudes pendientes",
-    "emptyMessage": "Cuando envíes o recibas una solicitud, aparecerá aquí hasta que se acepte, rechace o cancele."
+    "emptyMessage": "Cuando envíes o recibas una solicitud de amistad, o te inviten a un grupo, aparecerá aquí hasta que la aceptes, rechaces o canceles."
   },
   "addFriend": {
     "title": "Añadir amigo",

@@ -17,9 +17,9 @@
   },
   "empty": {
     "pendingTitle": "You have no pending notifications",
-    "pendingMessage": "When a friend settles a debt with you, it will wait here until you see it.",
+    "pendingMessage": "When a friend settles a debt or invites you to a group, it will wait here until you see it.",
     "viewedTitle": "You have not seen any notification yet",
-    "viewedMessage": "Notifications you open or dismiss will be kept in this section."
+    "viewedMessage": "Notifications you open or dismiss, such as group invitations, will be kept in this section."
   },
   "markAllRead": {
     "label": "Mark all as read",
@@ -57,6 +57,7 @@
     },
     "friend-request": "{{name}} sent you a friend request.",
     "friend-request-accepted": "{{name}} accepted your friend request.",
+    "group-invite": "{{name}} invited you to the group “{{group}}”.",
     "group-expense": "{{name}} added a group expense.",
     "group-settlement": "{{name}} recorded a group settlement."
   },

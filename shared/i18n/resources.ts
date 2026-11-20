@@ -6,6 +6,8 @@ import dashboardEn from "@/features/dashboard/locales/en.json";
 import dashboardEs from "@/features/dashboard/locales/es.json";
 import friendsEn from "@/features/friends/locales/en.json";
 import friendsEs from "@/features/friends/locales/es.json";
+import groupsEn from "@/features/groups/locales/en.json";
+import groupsEs from "@/features/groups/locales/es.json";
 import notificationsEn from "@/features/notifications/locales/en.json";
 import notificationsEs from "@/features/notifications/locales/es.json";
 import profileEn from "@/features/profile/locales/en.json";
@@ -41,6 +43,7 @@ export const NAMESPACES = [
   "transactions",
   "transfers",
   "friends",
+  "groups",
   "dashboard",
   "settings",
   "profile",
@@ -64,6 +67,7 @@ export const resources = {
     transactions: transactionsEs,
     transfers: transfersEs,
     friends: friendsEs,
+    groups: groupsEs,
     dashboard: dashboardEs,
     settings: settingsEs,
     profile: profileEs,
@@ -82,6 +86,7 @@ export const resources = {
     transactions: transactionsEn,
     transfers: transfersEn,
     friends: friendsEn,
+    groups: groupsEn,
     dashboard: dashboardEn,
     settings: settingsEn,
     profile: profileEn,

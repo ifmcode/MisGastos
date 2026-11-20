@@ -80,6 +80,41 @@ describe("FriendsService.ensurePublicProfile", () => {
   });
 });
 
+describe("FriendsService.getPublicProfiles", () => {
+  it("resolves unique, trimmed uids in one batch", async () => {
+    const { repository, service } = createService();
+    repository.seedProfile("user-1", "Ada", "ada@example.com");
+    repository.seedProfile("user-2", "Grace", "grace@example.com");
+
+    const profiles = await service.getPublicProfiles([
+      " user-1 ",
+      "user-1",
+      "user-2",
+      "  ",
+    ]);
+
+    expect(repository.profileBatchCalls).toEqual([["user-1", "user-2"]]);
+    expect(profiles.map((profile) => profile.uid)).toEqual(["user-1", "user-2"]);
+  });
+
+  it("reads nothing for an empty list", async () => {
+    const { repository, service } = createService();
+
+    await expect(service.getPublicProfiles([])).resolves.toEqual([]);
+    expect(repository.profileBatchCalls).toEqual([]);
+  });
+
+  it("propagates repository failures", async () => {
+    const { repository, service } = createService();
+    const failure = new Error("read failed");
+    repository.failure = failure;
+
+    await expect(
+      service.getPublicProfiles(["user-1"]),
+    ).rejects.toBe(failure);
+  });
+});
+
 describe("FriendsService.getPublicProfile", () => {
   it("returns the public profile of a trimmed uid", async () => {
     const { repository, service } = createService();

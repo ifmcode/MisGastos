@@ -15,6 +15,8 @@ export type NotificationIcon = ComponentProps<typeof Ionicons>["name"];
 export interface NotificationCopyContext {
   actorName: string;
   amount: string;
+  /** Denormalized group name of a `group-invite`; "" for other types. */
+  groupName: string;
   t: Translate;
 }
 
@@ -33,6 +35,7 @@ const ICONS: Record<NotificationType, NotificationIcon> = {
   "friend-request-accepted": "person-circle-outline",
   "group-expense": "people-outline",
   "group-settlement": "swap-horizontal-outline",
+  "group-invite": "mail-unread-outline",
 };
 
 /** Icon of the event; a legacy or unknown type keeps the neutral bell. */
@@ -43,8 +46,8 @@ export function getNotificationIcon(type: string): NotificationIcon {
 /**
  * Sentence and icon of a notification, resolved from `type` + payload so the
  * row and the banner never drift. Settlement events answer with the full or
- * partial variant; the reserved types have no amount yet, so they use one flat
- * sentence with the actor name.
+ * partial variant; a group invite names the actor and the group; the reserved
+ * types have no amount yet, so they use one flat sentence with the actor name.
  */
 export function resolveNotificationCopy(
   notification: AppNotification,
@@ -59,6 +62,16 @@ export function resolveNotificationCopy(
       title: context.t(`types.${notification.type}.${variant}`, {
         name: context.actorName,
         amount: context.amount,
+      }),
+      icon,
+    };
+  }
+
+  if (notification.type === "group-invite") {
+    return {
+      title: context.t("types.group-invite", {
+        name: context.actorName,
+        group: context.groupName,
       }),
       icon,
     };
