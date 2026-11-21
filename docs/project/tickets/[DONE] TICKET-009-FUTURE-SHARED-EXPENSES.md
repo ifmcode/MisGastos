@@ -1,52 +1,44 @@
-# TICKET-009 - Future: Shared Expenses
+# [DONE] TICKET-009 - Future: Shared Expenses
 
 **Type:** Feature  
 **Priority:** High  
-**Status:** 🚧 In progress  
+**Status:** ✅ Done (21/11/2026)  
 **Related:** PM-006; TICKET-008, TICKET-010, TICKET-011  
 **Sprint:** Post-MVP  
 
 ## Description
 Add expenses inside a group, choose who paid and split the amount equally, by percentage, by fixed amounts or by shares.
 
-> **Current focus (roadmap Phase 5):** only the 1:1 shared-expense subset ships now,
-> between two accepted friends and without groups. Decisions for this slice:
-> the four split modes, currency stored per expense (balances grouped by
-> currency) and the UI living in a section of the **Amigos** tab. Group expenses
-> stay in roadmap Phase 6 with TICKET-008 and the remaining group requirements.
+> The 1:1 subset (two accepted friends) shipped on 15/11/2026. The group
+> requirements below shipped on 21/11/2026 with their own `groupExpenses`
+> collection, the four split modes in the group form and a read-only detail
+> route. Group balances, settlement and history remain TICKET-010/011, and the
+> membership lifecycle remains TICKET-068.
 
 ## Requirements
 - [x] Create a shared expense with description, amount, date, payer and participants
-- [ ] Any active group member can create a group expense; the owner uses the same form
-- [ ] In the group form, choose the participating members: all active members are selected by default, a **Todos** shortcut selects or clears all, and only the selected participants appear in the split inputs and receive a share. Equal split divides the amount among the selected participants.
-- [ ] The payer must be an active group member and may be excluded from the participants (pays for others) with a 0 share; their net balance is credited the full amount.
-- [ ] The owner can edit or delete any group expense; the creator and the payer can edit or delete their own; the other members have read-only access.
-- [ ] Support equal, percentage, fixed-amount and share-based splits (domain and tests cover all four; since 16/11/2026 the 1:1 form exposes only **Igual** and **Importe**, so percentage and shares return with the group form in Phase 6)
-- [ ] Validate that all participants are group members and the payer is a member
+- [x] Any active group member can create a group expense; the owner uses the same form
+- [x] In the group form, choose the participating members: all active members are selected by default, a **Todos** shortcut selects or clears all, and only the selected participants appear in the split inputs and receive a share. Equal split divides the amount among the selected participants.
+- [x] The payer must be an active group member and may be excluded from the participants (pays for others) with a 0 share; their net balance is credited the full amount.
+- [x] The owner can edit or delete any group expense; the creator and the payer can edit or delete their own; the other members have read-only access.
+- [x] Support equal, percentage, fixed-amount and share-based splits (domain and tests cover all four; the 1:1 form keeps only **Igual** and **Importe**, while the group form exposes all four)
+- [x] Validate that all participants are group members and the payer is a member
 - [x] Validate that split values add up to the total, with deterministic rounding
-- [ ] Store every group expense in its own currency, with the group default currency as the initial value for new expenses
+- [x] Store every group expense in its own currency, with the group default currency as the initial value for new expenses
 - [x] Allow editing and soft-deleting an expense while keeping an audit trail
-- [ ] Show the expense in the group detail and feed the balance calculation
+- [x] Show the expense in the group detail and feed the balance calculation (the ledger emits the direct-debt rows; the balance view itself is TICKET-010)
 - [x] Add tests for every split mode, rounding and invalid inputs
-- [ ] Add tests for the participant selection, a payer outside the participant list and the owner/creator/payer edit permissions
-
-> The unchecked requirements are group-only and stay in roadmap Phase 6. The 1:1
-> subset stores the currency per expense and the list lives in the **Amigos** tab,
-> not in a group detail.
+- [x] Add tests for the participant selection, a payer outside the participant list and the owner/creator/payer edit permissions
 
 ## Acceptance Criteria
-- [ ] A member can add an expense and see it in the group
-- [ ] A member can choose which group members participated; the shares only cover those members and sum to the total
-- [ ] The payer can pay for others without consuming; their net balance is credited the full amount and the selected participants are debited their shares
-- [ ] The owner, the creator and the payer can edit/delete; the other members cannot
+- [x] A member can add an expense and see it in the group
+- [x] A member can choose which group members participated; the shares only cover those members and sum to the total
+- [x] The payer can pay for others without consuming; their net balance is credited the full amount and the selected participants are debited their shares
+- [x] The owner, the creator and the payer can edit/delete; the other members cannot
 - [x] Each participant's share is calculated correctly for all split modes
 - [x] The sum of shares always equals the expense total
-- [ ] Non-members cannot create or read the expense
+- [x] Non-members cannot create or read the expense
 - [x] Editing or deleting an expense updates balances without losing history
-
-> The group-only criteria are unchecked. The 1:1 subset already enforces the
-> equivalent for the two participants: only they can read, edit or soft-delete an
-> expense, and a create requires an existing friendship between both accounts.
 
 ## Implemented (1:1 subset, 15/11/2026)
 
@@ -156,11 +148,108 @@ Add expenses inside a group, choose who paid and split the amount equally, by pe
 - Currency is per expense, not per group; balances are grouped per currency and
   never converted.
 
-### Remaining for Phase 6
-- Groups (TICKET-008) and the group-only requirements above: group membership
-  and payer validation, group currency and group detail/balance.
+## Implemented (group part, 21/11/2026)
+
+### Data model
+- New feature `features/group-expenses/`. Root collection
+  `groupExpenses/{expenseId}` with a `groupId` field and a client-generated id.
+  The list is one `where('groupId', '==', groupId)` plus a client-side sort, so
+  **no composite index** is required. A `groups/{groupId}/expenses` subcollection
+  was rejected because a cross-group query would need a collection-group index.
+- `GroupExpense`: `groupId`, `payerId`, `amountCents` (integer cents),
+  `currency` per expense, `splitMode`, `participants[{ userId, shareCents,
+  percentageBps?, weight? }]`, `description`, `date`, `createdBy`, `createdAt`,
+  `updatedAt` and `deletedAt`. There is no wallet, category or linked movement:
+  group expenses never touch personal balances.
+- `groupExpenses.mapper.ts` drops malformed documents; the repository only
+  writes mutable fields on update and a single soft-delete stamp pair.
+- The group `defaultCurrency` is only the initial form value; balances stay
+  grouped per currency and are never converted.
+
+### Split, participants and permissions
+- The shared split engine is reused (`splitExpenseAmount`,
+  `distributeByRemainder`, the split schemas): equal, percentage, fixed and
+  shares in integer cents. The engine gained an explicit `minParticipants`
+  option (default 2, so the 1:1 contract is unchanged) and the group schema
+  passes `minParticipants: 1`, because a payer can be excluded and a group can
+  charge a single participant.
+- Participants: at least one, all active group members, unique; all selected by
+  default; **Todos** selects or clears the whole list; only selected members
+  appear in the split inputs and receive a share; equal divides among selected.
+- Payer: must be an active member and may be excluded from `participants`; the
+  full amount is credited implicitly and a 0 share creates no debt.
+- Any active member creates. The owner, the creator or the payer edits and
+  soft-deletes; other members are read-only. `groupId`, `createdBy` and
+  `createdAt` are immutable, soft-deleted records are never edited or
+  resurrected, delete is idempotent and hard delete is denied.
+- If a payer or participant is no longer a member (possible before TICKET-068's
+  balance-safe lifecycle), the expense is read-only (`EXPENSE_HAS_FORMER_MEMBERS`)
+  and can still be soft-deleted by an editor, so a smaller participant set can
+  never silently move debt.
+
+### Ledger seam for TICKET-010
+- `buildGroupExpenseLedgerEntries` emits one row per active non-payer
+  participant with a positive share (`fromUserId` owes `toUserId = payerId`),
+  reusing the same integer-cent convention as the 1:1 ledger;
+  `getGroupExpenseViewerShare` gives the list row its viewer share.
+- Net balances, zero-sum validation, simplification and settlements stay in
+  TICKET-010.
+
+### UI and routes
+- The group detail lists the active expenses newest first with loading, error,
+  empty and pull-to-refresh states, a **+** FAB and its page sheet. The
+  hardcoded **En paz** line is hidden while the group has expenses; TICKET-010
+  replaces it with the real per-currency balances.
+- The Movements FAB **Gasto de grupo** action is enabled and opens a group
+  picker before the form; the action is disabled with a **Social** hint when the
+  viewer has no groups and stays neutral while loading or after an error.
+- The form is a page sheet with group (locked when it comes from the group
+  detail or an edit), description, amount, per-expense currency, date,
+  participant multi-select, payer chips and the four split modes. A group picked
+  from Movements loads its members once; the group detail and the expense detail
+  reuse their already-loaded members.
+- `/social/group-expenses/[expenseId]` is the read-only detail with summary,
+  group/payer/split/date/participant-count fields, the per-participant shares
+  (viewer first, payer labelled), edit/delete only for the owner/creator/payer,
+  a safe missing state, back navigation to the group and a former-members
+  warning. `DetailView` gained per-action `showEdit`/`showDelete` flags whose
+  defaults preserve movements and transfers.
+- Copy lives in the `groupExpenses` es/en namespace; `npm run check:copy` audits
+  every string.
+
+### Firestore rules
+- New `groupExpenses` block: `get`/`list` require an active member, proven with
+  **one** group `get()` (Firestore caches it per request, same precedent as
+  `groupJoinRequests`); create validates `createdBy`, caller and payer in
+  `memberIds`, money/mode/description/date bounds, 1..20 participants, the exact
+  field list and `deletedAt: null`; update requires owner/creator/payer, freezes
+  `groupId`/`createdBy`/`createdAt`, accepts only the soft-delete diff or the
+  mutable-field diff and never resurrects; `delete` is denied.
+- Rules cannot iterate a list, so per-row participant membership, uniqueness and
+  the shares-sum invariant stay in the schema and the service; the block
+  documents this accepted trade-off.
+- The rules are **not deployed**: run `npm run firebase-deploy:rules`.
+
+### Tests and verification
+- New colocated tests cover the schema (membership, payer exclusion, the four
+  modes, invalid inputs), the ledger, permissions, mapper, repository,
+  operations, service guards and the factory, including the one-participant
+  split and the former-members read-only rule.
+- `npx tsc --noEmit`, `npx expo lint` and `npx jest` (329 suites / 2015 tests)
+  pass; `npm run test:coverage` passes its gate at 98.92 % statements,
+  94.66 % branches, 98.64 % functions and 99.5 % lines, and
+  `npm run check:copy` audits 308 TSX files.
+- `npx firebase deploy --only firestore:rules --dry-run` compiles the rules.
+- Device and dark-mode visual validation of the new sheet, picker and detail
+  route is still pending (the repo has no renderer).
+
+### Remaining after TICKET-009
 - Group balances, settlement and balance simplification (TICKET-010).
-- Full design and limitations: `docs/project/development-notes/session-notes/2026-11-15-shared-expenses-1to1.md`.
+- Group history (TICKET-011) and the membership lifecycle (TICKET-068).
+- Full 1:1 design and limitations:
+  `docs/project/development-notes/session-notes/2026-11-15-shared-expenses-1to1.md`;
+  group implementation:
+  `docs/project/development-notes/session-notes/2026-11-21-group-expenses.md`.
 
 ## Technical Notes
 - Suggested collection: `groups/{groupId}/expenses/{expenseId}` or a root `groupExpenses` collection with `groupId`.

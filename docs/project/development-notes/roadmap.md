@@ -1,7 +1,7 @@
 # Roadmap - MisGastos
 
 > Development guide: V1 scope, phase order, ticket order and the current ticket.
-> **Last reviewed:** 20/11/2026
+> **Last reviewed:** 21/11/2026
 
 ## Scope of this file
 - This file answers **what to build next and in which order**, plus the rules for doing it.
@@ -16,12 +16,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 6 - Groups
-- **Current ticket:** TICKET-009 - group shared expenses
+- **Current ticket:** TICKET-062 - editable settlement amount
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-061 - group join code and join requests (20/11/2026)
+- **Last completed:** TICKET-009 - group shared expenses (21/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-062, TICKET-063, TICKET-064, TICKET-065, TICKET-066 and TICKET-067 (Phase 6.0), TICKET-009 (group requirements), TICKET-010, TICKET-011 and TICKET-068
-- **Next:** TICKET-009
+- **Queued:** TICKET-063, TICKET-064, TICKET-065, TICKET-066 and TICKET-067 (Phase 6.0), TICKET-069 and TICKET-070 (Phase 6.1), TICKET-010, TICKET-011 and TICKET-068
+- **Next:** TICKET-062
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -152,7 +152,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Phase 6: Groups (IN PROGRESS)
 - [x] TICKET-008: create groups, friend invitations, group detail and member management (consumes the Social → Tus grupos shell from TICKET-041) ✅ 20/11/2026
 - [x] TICKET-061: group join code and join requests (deferred from TICKET-008) ✅ 20/11/2026
-- [ ] Full TICKET-009: the group requirements still open after the 1:1 subset (group membership and payer validation, per-expense currency, expense in the group detail)
+- [x] Full TICKET-009: group expenses with participant selection, payer outside the participants, per-expense currency, permissions, group detail list and detail route ✅ 21/11/2026
 - [ ] TICKET-010: group balances and settlements (reuse the TICKET-046 direct-settlement model, the receiver wallet movement and notification events)
 - [ ] TICKET-011: group history
 - [ ] TICKET-068: group membership lifecycle (leave, balance-safe removal and ownership transfer)
@@ -166,6 +166,10 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [ ] TICKET-065: single wallet picker button without preselection
 - [ ] TICKET-066: single category picker button with mandatory selection
 - [ ] TICKET-067: Social pending requests as a top-right header icon with a badge
+
+### 6.1 Group wallet link and request placement (QUEUED)
+- [ ] TICKET-069: optional personal movement for a group expense paid by the viewer, with the same wallet/category and atomic link as the 1:1 flow
+- [ ] TICKET-070: manage the owner's group join requests from Social instead of the group detail
 
 ## Phase 7: Offline-first implementation (QUEUED)
 - [ ] Full TICKET-023 (design accepted in Phase 4)
