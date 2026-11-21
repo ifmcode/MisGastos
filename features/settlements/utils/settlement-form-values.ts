@@ -6,16 +6,17 @@ import {
   formatSettlementAmountInput,
   getSettlementCurrencyOption,
   getSettlementCurrencyOptions,
-  getSettlementEditableNetCents,
 } from "./settlement-form-currency";
 import type {
-  SettlementAmountMode,
   SettlementCurrencyOption,
   SettlementFormDefaults,
   SettlementFormValues,
 } from "./settlement-form.types";
 
-/** Create defaults: the first debt currency, full amount and today. */
+/**
+ * Create defaults: the first debt currency, its full outstanding debt and
+ * today. The amount stays editable; it is only a starting point.
+ */
 export function createSettlementFormValues({
   viewerUid,
   friendUid,
@@ -30,7 +31,6 @@ export function createSettlementFormValues({
     viewerUid,
     friendUid,
     currency: first.currency,
-    mode: "total",
     amount: formatSettlementAmountInput(first.debtCents),
     date: today,
     dateText: formatDateInput(today),
@@ -41,26 +41,19 @@ export function createSettlementFormValues({
 }
 
 /**
- * Edit defaults: the currency is immutable, the amount bound is the debt
- * excluding this settlement and the creditor's own link is preselected.
+ * Edit defaults: the currency is immutable, the stored amount is prefilled and
+ * the creditor's own link is preselected. The edit bound lives in
+ * `useSettlementEditor`, so this builder only restores the stored state.
  */
 export function createSettlementEditFormValues({
   settlement,
   viewerUid,
-  currentNetCents,
   today,
 }: {
   settlement: Settlement;
   viewerUid: string;
-  currentNetCents: number;
   today: string;
 }): SettlementFormValues {
-  const editableNet = getSettlementEditableNetCents(
-    settlement,
-    viewerUid,
-    currentNetCents,
-  );
-  const debtCents = Math.abs(Math.round(editableNet));
   const viewerIsCreditor = settlement.toUserId === viewerUid;
 
   return {
@@ -68,8 +61,6 @@ export function createSettlementEditFormValues({
     friendUid:
       settlement.participantIds.find((uid) => uid !== viewerUid) ?? "",
     currency: settlement.currency,
-    mode:
-      debtCents > 0 && settlement.amountCents >= debtCents ? "total" : "partial",
     amount: formatSettlementAmountInput(settlement.amountCents),
     date: settlement.date || today,
     dateText: formatDateInput(settlement.date || today),
@@ -81,40 +72,20 @@ export function createSettlementEditFormValues({
   };
 }
 
-/** Switching currency restores the full amount of the new debt. */
+/** Switching currency prefills the full outstanding debt of the new one. */
 export function selectSettlementCurrency(
   values: SettlementFormValues,
   currency: CurrencyCode,
   options: readonly SettlementCurrencyOption[],
 ): SettlementFormValues {
   const option = getSettlementCurrencyOption(options, currency);
-  const debtCents = option?.debtCents ?? 0;
 
   return {
     ...values,
     currency,
-    amount:
-      values.mode === "total"
-        ? formatSettlementAmountInput(debtCents)
-        : values.amount,
+    amount: formatSettlementAmountInput(option?.debtCents ?? 0),
     walletId: "",
     categoryId: "",
-  };
-}
-
-/** Switching to total always writes the full debt; partial keeps the text. */
-export function selectSettlementMode(
-  values: SettlementFormValues,
-  mode: SettlementAmountMode,
-  debtCents: number,
-): SettlementFormValues {
-  return {
-    ...values,
-    mode,
-    amount:
-      mode === "total"
-        ? formatSettlementAmountInput(debtCents)
-        : values.amount,
   };
 }
 

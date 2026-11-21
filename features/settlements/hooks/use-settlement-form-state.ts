@@ -3,7 +3,6 @@ import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 
 import type { Category } from "@/features/categories/types/category.types";
 
 import {
-  formatSettlementAmountInput,
   getSettlementCurrencyOption,
   viewerIsCreditorFor,
   type SettlementCurrencyOption,
@@ -30,8 +29,9 @@ export interface UseSettlementFormStateOptions {
 
 /**
  * Draft values plus the bound and direction of the selected currency. A new
- * pair or currency replaces the draft; a background balance refresh keeps the
- * typed text in partial mode and re-syncs the locked amount in total mode.
+ * pair, or a refresh that changes the default currency, replaces the draft;
+ * a refresh of the selected currency's debt only moves the bound, so the typed
+ * amount is never overwritten.
  */
 export function useSettlementFormState({
   initialValues,
@@ -56,20 +56,6 @@ export function useSettlementFormState({
   const resolvedCreditor = option
     ? viewerIsCreditorFor(option)
     : viewerIsCreditor;
-
-  // "Total" is a contract, not a snapshot: if the pair debt refreshes while the
-  // form is open, the locked amount must follow it. The service would reject an
-  // overpayment, but a stale lower amount would silently save as partial.
-  useEffect(() => {
-    if (values.mode !== "total") return;
-
-    const nextAmount = formatSettlementAmountInput(boundCents);
-    if (values.amount === nextAmount) return;
-
-    setValues((current) =>
-      current.mode === "total" ? { ...current, amount: nextAmount } : current,
-    );
-  }, [boundCents, values.amount, values.mode, setValues]);
 
   return {
     values,

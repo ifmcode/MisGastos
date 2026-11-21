@@ -8,10 +8,8 @@ import {
   getSettlementAmountIssue,
   getSettlementDateIssue,
   selectSettlementCurrency,
-  selectSettlementMode,
   selectSettlementWallet,
   toSettlementInput,
-  type SettlementAmountMode,
 } from "../utils/settlement-form";
 import type {
   SettlementFormController,
@@ -68,11 +66,6 @@ export function useSettlementForm({
     clearErrors("currency", "amount", "walletId", "categoryId");
   }
 
-  function changeMode(mode: SettlementAmountMode) {
-    setValues((current) => selectSettlementMode(current, mode, boundCents));
-    clearErrors("amount");
-  }
-
   function changeAmount(amount: string) {
     setValues((current) => ({ ...current, amount }));
     clearErrors("amount");
@@ -122,7 +115,6 @@ export function useSettlementForm({
     amountIssue: getSettlementAmountIssue(values, boundCents),
     dateIssue: getSettlementDateIssue(values),
     changeCurrency,
-    changeMode,
     changeAmount,
     changeDateText,
     changeNote,

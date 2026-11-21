@@ -4,7 +4,6 @@ import type { CurrencyCode } from "@/shared/constants/currencies";
 import type { SettlementFieldErrors } from "../schemas/settlement-validation.types";
 import type { SettlementInput } from "../types/settlement.types";
 import type {
-  SettlementAmountMode,
   SettlementCurrencyOption,
   SettlementFormValues,
 } from "../utils/settlement-form";
@@ -31,7 +30,6 @@ export interface SettlementFormController extends SettlementFormState {
   amountIssue: SettlementAmountIssue | null;
   dateIssue: SettlementDateIssue | null;
   changeCurrency: (currency: CurrencyCode) => void;
-  changeMode: (mode: SettlementAmountMode) => void;
   changeAmount: (amount: string) => void;
   changeDateText: (text: string) => void;
   changeNote: (note: string) => void;

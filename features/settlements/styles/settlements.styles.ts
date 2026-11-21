@@ -54,12 +54,6 @@ export const settlementsStyles = StyleSheet.create({
     lineHeight: 18,
     fontWeight: "600",
   },
-  debtAmount: {
-    fontSize: 26,
-    lineHeight: 32,
-    fontWeight: "700",
-    fontVariant: ["tabular-nums"],
-  },
   debtDirection: {
     fontSize: 14,
     lineHeight: 20,
@@ -82,13 +76,6 @@ export const settlementsStyles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     marginTop: 6,
-  },
-  textInput: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    minHeight: 48,
-    fontSize: 16,
   },
   walletPicker: {
     marginTop: 10,

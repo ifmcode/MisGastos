@@ -16,12 +16,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 6 - Groups
-- **Current ticket:** TICKET-062 - editable settlement amount
+- **Current ticket:** TICKET-063 - date field without manual input
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-009 - group shared expenses (21/11/2026)
+- **Last completed:** TICKET-062 - editable settlement amount (21/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-063, TICKET-064, TICKET-065, TICKET-066 and TICKET-067 (Phase 6.0), TICKET-069 and TICKET-070 (Phase 6.1), TICKET-010, TICKET-011 and TICKET-068
-- **Next:** TICKET-062
+- **Queued:** TICKET-064, TICKET-065, TICKET-066 and TICKET-067 (Phase 6.0), TICKET-069 and TICKET-070 (Phase 6.1), TICKET-010, TICKET-011 and TICKET-068
+- **Next:** TICKET-063
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -160,7 +160,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ### 6.0 Settlement and form polish (QUEUED)
 > Execution order follows **Current Focus**; TICKET-010 must reuse TICKET-062 and TICKET-064 instead of a second settlement flow.
-- [ ] TICKET-062: editable settlement amount with the live remaining debt
+- [x] TICKET-062: editable settlement amount with the live remaining debt ✅ 21/11/2026
 - [ ] TICKET-063: date field without manual input and a calendar pinned to the right
 - [ ] TICKET-064: settlement debt-selection step for multiple currencies
 - [ ] TICKET-065: single wallet picker button without preselection

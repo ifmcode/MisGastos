@@ -166,12 +166,20 @@ keeps its translation keys, label differences and the delete confirmation flow.
 
 | Component | Props (copy comes resolved) |
 |---|---|
-| `AmountField` | `label`, `value`, `symbol`, `placeholder`, `accessibilityLabel`, `errorText?`, `helperText?`, `disabled`, `onChange` |
+| `AmountField` | `label`, `value`, `symbol`, `placeholder`, `accessibilityLabel`, `errorText?`, `helperText?`, `helperLive?`, `disabled`, `onChange` |
 | `NotesField` | `label`, `value`, `placeholder`, `accessibilityLabel`, `maxLength`, `errorText?`, `disabled`, `onChange` |
 | `DateFormField` | `label`, `text`, `value`, `error?`, `helperText`, `accessibilityLabel`, `disabled`, `showLastUsedDate?`, `onChange` |
 
 Consumers: the transaction and transfer forms through their existing feature
-wrappers, which resolve validation codes and translation keys.
+wrappers, which resolve validation codes and translation keys, and the
+settlement amount section through `SettlementFormMainFields`.
+
+`AmountField.helperLive` (opt-in, default `false`) marks the helper as polite
+live feedback: Android gets `accessibilityRole="text"` +
+`accessibilityLiveRegion="polite"` and iOS a queued
+`announceForAccessibilityWithOptions`; the mount value is skipped and nothing is
+announced while an error shows. The settlement amount section consumes it for
+the live remaining-debt line.
 
 ### `PageSheetFormModal`
 

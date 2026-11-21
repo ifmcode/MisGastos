@@ -36,7 +36,7 @@ export function SettlementCreateScreen({ friendUid }: SettlementCreateScreenProp
           initialValues={initialValues}
           options={options}
           friendName={friendName}
-          debtCents={fallback?.debtCents ?? 0}
+          debtCents={0}
           viewerIsCreditor={fallback?.direction === "friend-owes-viewer"}
           wallets={screen.wallets}
           categories={screen.categories}

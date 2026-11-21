@@ -46,7 +46,9 @@ export function SettlementFormBody({
   const { values, errors, boundCents, resolvedCreditor } = form;
   const amount = locale.formatCurrency(boundCents / 100, values.currency);
   const hasFieldError =
-    Object.values(errors).some(Boolean) || Boolean(form.dateIssue);
+    Object.values(errors).some(Boolean) ||
+    Boolean(form.dateIssue) ||
+    Boolean(form.amountIssue);
   const notice = error ?? (hasFieldError ? t("form.validationSummary") : null);
   const noticeTone = error
     ? {

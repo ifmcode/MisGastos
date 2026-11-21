@@ -13,7 +13,6 @@ import {
   getSettlementFormDirection,
   getSettlementDateIssue,
   selectSettlementCurrency,
-  selectSettlementMode,
   selectSettlementWallet,
   toSettlementInput,
   viewerIsCreditorFor,
@@ -59,7 +58,7 @@ describe("settlement form currency options", () => {
 });
 
 describe("createSettlementFormValues", () => {
-  it("defaults to the first debt currency, total mode and today", () => {
+  it("defaults to the first debt currency, its full debt and today", () => {
     const values = createSettlementFormValues({
       viewerUid: "user-a",
       friendUid: "user-b",
@@ -69,13 +68,23 @@ describe("createSettlementFormValues", () => {
 
     expect(values).toMatchObject({
       currency: "EUR",
-      mode: "total",
       amount: "12.50",
       date: today,
       dateText: "17/11/2026",
       walletId: "",
       categoryId: "",
     });
+  });
+
+  it("prefills the debt in a currency the friend owes the viewer", () => {
+    const values = createSettlementFormValues({
+      viewerUid: "user-a",
+      friendUid: "user-b",
+      balances: [{ currency: "USD", netBalanceCents: 400 }],
+      today,
+    });
+
+    expect(values).toMatchObject({ currency: "USD", amount: "4.00" });
   });
 
   it("returns null when every currency is settled", () => {
@@ -90,16 +99,17 @@ describe("createSettlementFormValues", () => {
   });
 });
 
-describe("currency and mode changes", () => {
-  it("selecting a currency resets the wallet and restores the total", () => {
+describe("currency and wallet changes", () => {
+  it("selecting a currency resets the wallet and prefills the new full debt", () => {
     const initial = createSettlementFormValues({
       viewerUid: "user-a",
       friendUid: "user-b",
       balances,
       today,
     })!;
+    const edited = { ...initial, amount: "1.00", walletId: "wallet-1" };
 
-    const next = selectSettlementCurrency(initial, "USD", [
+    const next = selectSettlementCurrency(edited, "USD", [
       ...getSettlementCurrencyOptions(balances),
     ]);
 
@@ -111,17 +121,27 @@ describe("currency and mode changes", () => {
     });
   });
 
-  it("partial mode keeps the typed amount and total mode overwrites it", () => {
+  it("prefills the full debt of the new currency even after typing another amount", () => {
     const initial = createSettlementFormValues({
       viewerUid: "user-a",
       friendUid: "user-b",
       balances,
       today,
     })!;
-    const partial = selectSettlementMode(initial, "partial", 1250);
+    const options = getSettlementCurrencyOptions(balances);
+    const usd = selectSettlementCurrency(
+      { ...initial, amount: "0.50" },
+      "USD",
+      options,
+    );
+    const eur = selectSettlementCurrency(
+      { ...usd, amount: "3.00" },
+      "EUR",
+      options,
+    );
 
-    expect(partial.amount).toBe("12.50");
-    expect(selectSettlementMode(partial, "total", 400).amount).toBe("4.00");
+    expect(usd.amount).toBe("4.00");
+    expect(eur.amount).toBe("12.50");
   });
 
   it("selecting a wallet fills the default category and clearing it removes both", () => {
@@ -145,30 +165,37 @@ describe("currency and mode changes", () => {
 });
 
 describe("amount issue", () => {
-  const values = {
-    ...createSettlementFormValues({
-      viewerUid: "user-a",
-      friendUid: "user-b",
-      balances,
-      today,
-    })!,
-    mode: "partial" as const,
-  };
+  const values = createSettlementFormValues({
+    viewerUid: "user-a",
+    friendUid: "user-b",
+    balances,
+    today,
+  })!;
 
-  it("accepts the exact debt and rejects zero, malformed and above the debt", () => {
+  it("accepts the exact debt and rejects empty, zero, malformed and above the debt", () => {
     expect(getSettlementAmountIssue({ ...values, amount: "12.50" }, 1250)).toBeNull();
     expect(getSettlementAmountIssue({ ...values, amount: "" }, 1250)).toBe(
       "AMOUNT_REQUIRED",
     );
+    expect(getSettlementAmountIssue({ ...values, amount: "   " }, 1250)).toBe(
+      "AMOUNT_REQUIRED",
+    );
+    expect(getSettlementAmountIssue({ ...values, amount: "0" }, 1250)).toBe(
+      "AMOUNT_INVALID",
+    );
+    expect(getSettlementAmountIssue({ ...values, amount: "0,00" }, 1250)).toBe(
+      "AMOUNT_INVALID",
+    );
     expect(getSettlementAmountIssue({ ...values, amount: "abc" }, 1250)).toBe(
       "AMOUNT_INVALID",
     );
+    expect(getSettlementAmountIssue({ ...values, amount: "12,50" }, 1250)).toBeNull();
     expect(getSettlementAmountIssue({ ...values, amount: "12.51" }, 1250)).toBe(
       "AMOUNT_EXCEEDS_DEBT",
     );
-    expect(
-      getSettlementAmountIssue({ ...values, mode: "total", amount: "0" }, 1250),
-    ).toBeNull();
+    expect(getSettlementAmountIssue({ ...values, amount: "1.00" }, 0)).toBe(
+      "AMOUNT_EXCEEDS_DEBT",
+    );
   });
 });
 
@@ -224,7 +251,7 @@ describe("edit values", () => {
     expect(getSettlementEditableNetCents(received, "user-a", 1250)).toBe(1450);
   });
 
-  it("preselects the creditor link and the partial mode when the settlement is partial", () => {
+  it("preselects the creditor link and keeps the stored amount on edit", () => {
     const settlement = buildSettlement({
       amountCents: 500,
       receiverWalletId: "wallet-1",
@@ -237,13 +264,11 @@ describe("edit values", () => {
     const values = createSettlementEditFormValues({
       settlement,
       viewerUid: "user-a",
-      currentNetCents: 500,
       today,
     });
 
     expect(values).toMatchObject({
       currency: "EUR",
-      mode: "partial",
       amount: "5.00",
       walletId: "wallet-1",
       categoryId: "category-1",
@@ -260,7 +285,6 @@ describe("edit values", () => {
     const values = createSettlementEditFormValues({
       settlement,
       viewerUid: "user-a",
-      currentNetCents: 0,
       today,
     });
 

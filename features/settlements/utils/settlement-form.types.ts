@@ -1,14 +1,11 @@
 import type { CurrencyCode } from "@/shared/constants/currencies";
 import type { FriendBalance } from "@/features/friends/types/friend.types";
 
-export type SettlementAmountMode = "total" | "partial";
-
 /** Raw form state; the amount stays as typed text. */
 export interface SettlementFormValues {
   viewerUid: string;
   friendUid: string;
   currency: CurrencyCode;
-  mode: SettlementAmountMode;
   amount: string;
   /** ISO date (`YYYY-MM-DD`); empty while the user types an invalid date. */
   date: string;

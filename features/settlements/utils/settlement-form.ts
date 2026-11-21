@@ -5,11 +5,15 @@
  * import path.
  */
 export type {
-  SettlementAmountMode,
   SettlementCurrencyOption,
   SettlementFormDefaults,
   SettlementFormValues,
 } from "./settlement-form.types";
+export type {
+  SettlementAmountState,
+  SettlementAmountStatus,
+} from "./settlement-amount-status";
+export { getSettlementAmountState } from "./settlement-amount-status";
 export {
   formatSettlementAmountInput,
   getSettlementCurrencyOption,
@@ -21,7 +25,6 @@ export {
   createSettlementEditFormValues,
   createSettlementFormValues,
   selectSettlementCurrency,
-  selectSettlementMode,
   selectSettlementWallet,
 } from "./settlement-form-values";
 export {

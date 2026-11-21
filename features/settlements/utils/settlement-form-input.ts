@@ -19,14 +19,12 @@ function toCents(value: number): number {
 
 /**
  * Amount issue the form can detect without the ledger: an empty, malformed or
- * above-the-debt partial amount. Total mode is always exact.
+ * zero amount, or one above the outstanding debt of the selected currency.
  */
 export function getSettlementAmountIssue(
   values: SettlementFormValues,
   debtCents: number,
 ): "AMOUNT_REQUIRED" | "AMOUNT_INVALID" | "AMOUNT_EXCEEDS_DEBT" | null {
-  if (values.mode === "total") return null;
-
   const trimmed = values.amount.trim();
   if (trimmed.length === 0) return "AMOUNT_REQUIRED";
 

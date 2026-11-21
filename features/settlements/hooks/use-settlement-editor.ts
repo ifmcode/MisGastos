@@ -94,11 +94,10 @@ export function useSettlementEditor({
         ? createSettlementEditFormValues({
             settlement,
             viewerUid,
-            currentNetCents,
             today: getTodayIsoDate(),
           })
         : null,
-    [currentNetCents, settlement, viewerUid],
+    [settlement, viewerUid],
   );
 
   const open = useCallback(() => {

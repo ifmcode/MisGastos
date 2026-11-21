@@ -2,6 +2,7 @@ import { getCurrencySymbol } from "@/features/wallets/utils/money";
 import { AmountField } from "@/shared/components/molecules/amount-field";
 import { DateFormField } from "@/shared/components/molecules/date-form-field";
 import { NotesField } from "@/shared/components/molecules/notes-field";
+import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { SETTLEMENT_NOTE_MAX_LENGTH } from "../schemas/settlement.schema";
@@ -11,7 +12,7 @@ import type {
   SettlementDateIssue,
   SettlementFormController,
 } from "../hooks/use-settlement-form";
-import { SettlementFormModeChips } from "./settlement-form-mode-chips";
+import { getSettlementAmountState } from "../utils/settlement-form";
 
 export interface SettlementFormMainFieldsProps {
   form: SettlementFormController;
@@ -19,14 +20,15 @@ export interface SettlementFormMainFieldsProps {
   disabled: boolean;
 }
 
-/** Mode, amount, date and note of the settlement form. */
+/** Amount with its live remaining debt, date and note of the settlement form. */
 export function SettlementFormMainFields({
   form,
   amountLocked,
   disabled,
 }: SettlementFormMainFieldsProps) {
   const { t, tr } = useScopedTranslation("settlements");
-  const { values, errors, amountIssue } = form;
+  const { formatCurrency } = useAppLocale();
+  const { values, errors, amountIssue, boundCents } = form;
 
   function errorText(
     code?: SettlementValidationCode | SettlementAmountIssue | SettlementDateIssue | null,
@@ -34,26 +36,35 @@ export function SettlementFormMainFields({
     return code ? tr(`errors.${code}`) : null;
   }
 
-  const amountDisabled =
-    disabled || values.mode === "total" || amountLocked;
+  // An amount above the debt already shows `AMOUNT_EXCEEDS_DEBT` as the field
+  // error, so the live message never duplicates it.
+  const amountState = amountLocked
+    ? null
+    : getSettlementAmountState(values.amount, boundCents);
+  const liveHelper =
+    amountState?.status === "remaining"
+      ? t("form.amountRemaining", {
+          amount: formatCurrency(
+            amountState.remainingCents / 100,
+            values.currency,
+          ),
+        })
+      : amountState?.status === "settled"
+        ? t("form.amountSettled")
+        : undefined;
 
   return (
     <>
-      <SettlementFormModeChips
-        mode={values.mode}
-        disabled={disabled || amountLocked}
-        onChange={form.changeMode}
-      />
-
       <AmountField
-        label={t("form.amountLabel")}
+        label={t("form.amountSectionLabel")}
         value={values.amount}
         symbol={getCurrencySymbol(values.currency)}
         placeholder={t("form.amountPlaceholder")}
         accessibilityLabel={t("form.amountAccessibility")}
         errorText={errorText(errors.amount ?? amountIssue)}
-        helperText={amountLocked ? t("form.amountLocked") : undefined}
-        disabled={amountDisabled}
+        helperText={amountLocked ? t("form.amountLocked") : liveHelper}
+        helperLive={Boolean(liveHelper)}
+        disabled={disabled || amountLocked}
         onChange={form.changeAmount}
       />
 
