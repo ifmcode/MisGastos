@@ -84,6 +84,49 @@ describe("resolveNotificationTarget", () => {
     ).toEqual({ kind: "requests" });
   });
 
+  it("opens the group detail for a join request or acceptance", () => {
+    for (const type of ["group-join-request", "group-join-accepted"] as const) {
+      expect(
+        resolveNotificationTarget(
+          buildNotification({
+            type,
+            payload: {
+              requestId: "group-1__user-b",
+              groupId: "group-1",
+              groupName: "Viaje",
+              friendUid: "user-a",
+            },
+          }),
+        ),
+      ).toEqual({ kind: "group", groupId: "group-1" });
+    }
+
+    expect(
+      resolveNotificationTarget(
+        buildNotification({
+          type: "group-join-accepted",
+          payload: { requestId: "group-1__user-b" },
+        }),
+      ),
+    ).toBeNull();
+  });
+
+  it("opens the requests list for a rejected join request", () => {
+    expect(
+      resolveNotificationTarget(
+        buildNotification({
+          type: "group-join-rejected",
+          payload: {
+            requestId: "group-1__user-b",
+            groupId: "group-1",
+            groupName: "Viaje",
+            friendUid: "user-a",
+          },
+        }),
+      ),
+    ).toEqual({ kind: "requests" });
+  });
+
   it("opens the friend detail for an accepted request", () => {
     expect(
       resolveNotificationTarget(

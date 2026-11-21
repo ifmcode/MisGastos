@@ -50,6 +50,33 @@ jest.mock("../group-accept.operation", () => ({
   acceptGroupInvitationOperation: (...args: unknown[]) => mockAccept(...args),
 }));
 
+const mockGetGroupCode = jest.fn(async (..._args: unknown[]) => "code");
+const mockGetGroupJoinRequest = jest.fn(async (..._args: unknown[]) => "request");
+const mockGetGroupJoinRequests = jest.fn(async (..._args: unknown[]) => [
+  "request",
+]);
+
+jest.mock("../group-join-read.operations", () => ({
+  getGroupCodeOperation: (...args: unknown[]) => mockGetGroupCode(...args),
+  getGroupJoinRequestOperation: (...args: unknown[]) =>
+    mockGetGroupJoinRequest(...args),
+  getGroupJoinRequestsOperation: (...args: unknown[]) =>
+    mockGetGroupJoinRequests(...args),
+}));
+
+const mockCreateJoinRequest = jest.fn(async (..._args: unknown[]) => "request");
+const mockRespondJoinRequest = jest.fn(async (..._args: unknown[]) => "result");
+const mockEnsureJoinCode = jest.fn(async (..._args: unknown[]) => "group");
+
+jest.mock("../group-join.operations", () => ({
+  createGroupJoinRequestOperation: (...args: unknown[]) =>
+    mockCreateJoinRequest(...args),
+  respondToGroupJoinRequestOperation: (...args: unknown[]) =>
+    mockRespondJoinRequest(...args),
+  ensureGroupJoinCodeOperation: (...args: unknown[]) =>
+    mockEnsureJoinCode(...args),
+}));
+
 import { FirebaseGroupsRepository } from "../firebase-groups.repository";
 
 const repository = new FirebaseGroupsRepository();
@@ -67,12 +94,22 @@ describe("FirebaseGroupsRepository delegation", () => {
     await expect(repository.getPendingInvitations("user-b")).resolves.toEqual([
       "invite",
     ]);
+    await expect(repository.getGroupCode("ABCD2345")).resolves.toBe("code");
+    await expect(repository.getGroupJoinRequest("group-1__user-b")).resolves.toBe(
+      "request",
+    );
+    await expect(repository.getGroupJoinRequests("group-1")).resolves.toEqual([
+      "request",
+    ]);
 
     expect(mockGetGroups).toHaveBeenCalledWith("user-a");
     expect(mockGetGroup).toHaveBeenCalledWith("group-1");
     expect(mockGetGroupInvitation).toHaveBeenCalledWith("group-1__user-b");
     expect(mockGetGroupInvitations).toHaveBeenCalledWith("user-a", "group-1");
     expect(mockGetPendingInvitations).toHaveBeenCalledWith("user-b");
+    expect(mockGetGroupCode).toHaveBeenCalledWith("ABCD2345");
+    expect(mockGetGroupJoinRequest).toHaveBeenCalledWith("group-1__user-b");
+    expect(mockGetGroupJoinRequests).toHaveBeenCalledWith("group-1");
   });
 
   it("delegates every write to its operation", async () => {
@@ -119,6 +156,30 @@ describe("FirebaseGroupsRepository delegation", () => {
     await expect(
       repository.cancelInvitation("group-1__user-b", update.updatedAt),
     ).resolves.toBe("invite");
+    await expect(
+      repository.createGroupJoinRequest({
+        groupId: "group-1",
+        requesterId: "user-b",
+        joinCode: "ABCD2345",
+        createdAt: update.updatedAt,
+      }),
+    ).resolves.toBe("request");
+    await expect(
+      repository.respondToGroupJoinRequest({
+        requestId: "group-1__user-b",
+        groupId: "group-1",
+        viewerUid: "user-a",
+        decision: "accepted",
+        updatedAt: update.updatedAt,
+      }),
+    ).resolves.toBe("result");
+    await expect(
+      repository.ensureGroupJoinCode({
+        groupId: "group-1",
+        code: "ABCD2345",
+        updatedAt: update.updatedAt,
+      }),
+    ).resolves.toBe("group");
 
     expect(mockCreate).toHaveBeenCalledWith(createInput);
     expect(mockUpdate).toHaveBeenCalledWith("group-1", update);

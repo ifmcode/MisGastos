@@ -18,6 +18,7 @@ import { GroupDetailsModal } from "./group-details-modal";
 import { GroupExpensesEmpty } from "./group-expenses-empty";
 import { GroupFormModal } from "./group-form-modal";
 import { GroupInviteModal } from "./group-invite-modal";
+import { GroupJoinRequestsSection } from "./group-join-requests-section";
 import { GroupRouteHeader } from "./group-route-header";
 
 function readGroupId(value: string | string[] | undefined): string {
@@ -90,6 +91,10 @@ export function GroupDetailScreen() {
             onInvite={invite.open}
           />
 
+          {screen.isOwner ? (
+            <GroupJoinRequestsSection {...screen.joinRequests} />
+          ) : null}
+
           <GroupExpensesEmpty />
         </ScrollView>
       )}
@@ -113,6 +118,7 @@ export function GroupDetailScreen() {
         detail={detail}
         isOwner={screen.isOwner}
         memberActions={screen.memberActions}
+        joinCode={screen.joinCode}
         onClose={screen.closeDetails}
       />
     </ThemedView>

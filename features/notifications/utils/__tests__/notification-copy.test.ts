@@ -89,6 +89,32 @@ describe("resolveNotificationCopy", () => {
     expect(copy.icon).toBe("mail-unread-outline");
   });
 
+  it("uses only the group name for the join-code events", () => {
+    const types = [
+      "group-join-request",
+      "group-join-accepted",
+      "group-join-rejected",
+    ] as const;
+
+    for (const type of types) {
+      const copy = resolveNotificationCopy(
+        buildNotification({
+          type,
+          payload: {
+            requestId: "group-1__user-b",
+            groupId: "group-1",
+            groupName: "Viaje a Roma",
+            friendUid: "user-a",
+          },
+        }),
+        context,
+      );
+
+      expect(copy.title).toBe(`types.${type}:{"group":"Viaje a Roma"}`);
+      expect(copy.title).not.toContain("Ana");
+    }
+  });
+
   it("keeps an icon for every reserved and settlement type", () => {
     expect(getNotificationIcon("settlement-updated")).toBe("create-outline");
     expect(getNotificationIcon("settlement-deleted")).toBe("trash-outline");
@@ -100,6 +126,15 @@ describe("resolveNotificationCopy", () => {
       "swap-horizontal-outline",
     );
     expect(getNotificationIcon("group-invite")).toBe("mail-unread-outline");
+    expect(getNotificationIcon("group-join-request")).toBe(
+      "person-add-outline",
+    );
+    expect(getNotificationIcon("group-join-accepted")).toBe(
+      "checkmark-circle-outline",
+    );
+    expect(getNotificationIcon("group-join-rejected")).toBe(
+      "close-circle-outline",
+    );
   });
 
   it("falls back to the neutral bell for a legacy or unknown type", () => {

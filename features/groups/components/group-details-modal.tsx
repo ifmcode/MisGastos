@@ -10,9 +10,11 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import type { GroupMemberActionsController } from "../hooks/use-group-member-actions";
+import type { GroupJoinCodeController } from "../hooks/use-group-join-code";
 import { groupsStyles as styles } from "../styles/groups.styles";
 import type { GroupDetail } from "../types/group.types";
 import { GroupDetailsInfo } from "./group-details-info";
+import { GroupJoinCodeCard } from "./group-join-code-card";
 import { GroupMemberRow } from "./group-member-row";
 import { GroupPendingInvitationRow } from "./group-pending-invitation-row";
 
@@ -21,15 +23,17 @@ export interface GroupDetailsModalProps {
   detail: GroupDetail | null;
   isOwner: boolean;
   memberActions: GroupMemberActionsController;
+  joinCode: GroupJoinCodeController;
   onClose: () => void;
 }
 
-/** Page sheet with the group information, members and pending invitations. */
+/** Page sheet with the group information, join code, members and invitations. */
 export function GroupDetailsModal({
   visible,
   detail,
   isOwner,
   memberActions,
+  joinCode,
   onClose,
 }: GroupDetailsModalProps) {
   const theme = useFormTheme();
@@ -61,6 +65,15 @@ export function GroupDetailsModal({
           <GroupDetailsInfo
             group={detail?.group ?? null}
             memberCount={members.length}
+          />
+
+          <GroupJoinCodeCard
+            code={joinCode.code}
+            isOwner={isOwner}
+            generating={joinCode.generating}
+            error={joinCode.error}
+            onGenerate={joinCode.generate}
+            onShare={joinCode.share}
           />
 
           <View style={styles.section}>

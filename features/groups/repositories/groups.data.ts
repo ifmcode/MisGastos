@@ -3,9 +3,12 @@ import type {
   GroupInvitation,
   GroupMetadataUpdate,
 } from "../types/group.types";
+import type { GroupCode, GroupJoinRequest } from "../types/group-join.types";
 
 export const GROUPS_COLLECTION = "groups";
 export const GROUP_INVITATIONS_COLLECTION = "groupInvitations";
+export const GROUP_CODES_COLLECTION = "groupCodes";
+export const GROUP_JOIN_REQUESTS_COLLECTION = "groupJoinRequests";
 
 export function toGroupData(group: Group): Record<string, unknown> {
   return {
@@ -14,6 +17,7 @@ export function toGroupData(group: Group): Record<string, unknown> {
     name: group.name,
     description: group.description,
     defaultCurrency: group.defaultCurrency,
+    joinCode: group.joinCode,
     createdAt: group.createdAt,
     updatedAt: group.updatedAt,
   };
@@ -63,4 +67,33 @@ export function toGroupInvitationRenameData(
   updatedAt: string,
 ): Record<string, unknown> {
   return { groupName, updatedAt };
+}
+
+/** `groupCodes/{code}` projection; the code lives in the document id. */
+export function toGroupCodeData(code: GroupCode): Record<string, unknown> {
+  return {
+    groupId: code.groupId,
+    ownerId: code.ownerId,
+    groupName: code.groupName,
+  };
+}
+
+/** Rename propagation of the code projection; only `groupName` may change. */
+export function toGroupCodeRenameData(
+  groupName: string,
+): Record<string, unknown> {
+  return { groupName };
+}
+
+export function toGroupJoinRequestData(
+  request: GroupJoinRequest,
+): Record<string, unknown> {
+  return {
+    groupId: request.groupId,
+    requesterId: request.requesterId,
+    joinCode: request.joinCode,
+    status: request.status,
+    createdAt: request.createdAt,
+    updatedAt: request.updatedAt,
+  };
 }

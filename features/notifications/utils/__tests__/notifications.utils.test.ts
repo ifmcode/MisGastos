@@ -2,6 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import { buildNotification } from "../../repositories/__tests__/notifications.fixtures";
 import {
+  isGroupJoinNotificationType,
   isGroupNotificationType,
   isNotificationType,
   isPendingNotification,
@@ -21,6 +22,9 @@ describe("isNotificationType", () => {
     expect(isNotificationType("group-expense")).toBe(true);
     expect(isNotificationType("group-settlement")).toBe(true);
     expect(isNotificationType("group-invite")).toBe(true);
+    expect(isNotificationType("group-join-request")).toBe(true);
+    expect(isNotificationType("group-join-accepted")).toBe(true);
+    expect(isNotificationType("group-join-rejected")).toBe(true);
     expect(isNotificationType("other")).toBe(false);
     expect(isNotificationType(42)).toBe(false);
   });
@@ -45,8 +49,19 @@ describe("isReservedNotificationType", () => {
 describe("isGroupNotificationType", () => {
   it("accepts only the active group events", () => {
     expect(isGroupNotificationType("group-invite")).toBe(true);
+    expect(isGroupNotificationType("group-join-request")).toBe(true);
     expect(isGroupNotificationType("group-expense")).toBe(false);
     expect(isGroupNotificationType(undefined)).toBe(false);
+  });
+});
+
+describe("isGroupJoinNotificationType", () => {
+  it("accepts only the join-code events", () => {
+    expect(isGroupJoinNotificationType("group-join-request")).toBe(true);
+    expect(isGroupJoinNotificationType("group-join-accepted")).toBe(true);
+    expect(isGroupJoinNotificationType("group-join-rejected")).toBe(true);
+    expect(isGroupJoinNotificationType("group-invite")).toBe(false);
+    expect(isGroupJoinNotificationType(42)).toBe(false);
   });
 });
 

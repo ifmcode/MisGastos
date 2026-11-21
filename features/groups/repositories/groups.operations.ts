@@ -8,7 +8,9 @@ import {
   sortInvitationsNewestFirst,
 } from "../utils/group-list";
 import {
+  GROUP_CODES_COLLECTION,
   GROUP_INVITATIONS_COLLECTION,
+  GROUP_JOIN_REQUESTS_COLLECTION,
   GROUPS_COLLECTION,
 } from "./groups.data";
 import {
@@ -20,11 +22,21 @@ export function groupRef(groupId: string) {
   return doc(db, GROUPS_COLLECTION, groupId);
 }
 
+export function groupCodeRef(code: string) {
+  return doc(db, GROUP_CODES_COLLECTION, code);
+}
+
+export function groupJoinRequestRef(requestId: string) {
+  return doc(db, GROUP_JOIN_REQUESTS_COLLECTION, requestId);
+}
+
 export function groupInvitationRef(invitationId: string) {
   return doc(db, GROUP_INVITATIONS_COLLECTION, invitationId);
 }
 
-export async function getGroupOperation(groupId: string): Promise<Group | null> {
+export async function getGroupOperation(
+  groupId: string,
+): Promise<Group | null> {
   const snapshot = await getDoc(groupRef(groupId));
   if (!snapshot.exists()) return null;
 
@@ -124,3 +136,4 @@ export async function getPendingInvitationsOperation(
 
   return sortInvitationsNewestFirst(filterPendingInvitations(invitations));
 }
+

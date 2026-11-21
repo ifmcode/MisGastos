@@ -6,6 +6,13 @@ import type {
   GroupMetadataUpdate,
   InviteMembersInput,
 } from "../types/group.types";
+import type {
+  CreateGroupJoinRequestInput,
+  EnsureGroupJoinCodeInput,
+  GroupCode,
+  GroupJoinRequest,
+  RespondToGroupJoinRequestInput,
+} from "../types/group-join.types";
 
 /**
  * Persistence contract of groups and their invitations. Every method returns
@@ -60,4 +67,25 @@ export interface IGroupsRepository {
     invitationId: string,
     updatedAt: string,
   ): Promise<GroupInvitation>;
+
+  /** Code projection read; `null` for an unknown or malformed code. */
+  getGroupCode(code: string): Promise<GroupCode | null>;
+
+  getGroupJoinRequest(requestId: string): Promise<GroupJoinRequest | null>;
+
+  /** Requests of one group, oldest first; no composite index. */
+  getGroupJoinRequests(groupId: string): Promise<GroupJoinRequest[]>;
+
+  /** Deterministic create; a duplicate is a denied Firestore update. */
+  createGroupJoinRequest(
+    input: CreateGroupJoinRequestInput,
+  ): Promise<GroupJoinRequest>;
+
+  /** Owner accept/reject in one transaction. */
+  respondToGroupJoinRequest(
+    input: RespondToGroupJoinRequestInput,
+  ): Promise<{ group: Group; request: GroupJoinRequest }>;
+
+  /** Lazy, idempotent backfill of a legacy group join code. */
+  ensureGroupJoinCode(input: EnsureGroupJoinCodeInput): Promise<Group>;
 }

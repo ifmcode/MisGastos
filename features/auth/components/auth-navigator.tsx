@@ -57,6 +57,10 @@ export function AuthNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="social/groups/join"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="social/settlements/new"
         options={{ headerShown: false }}
       />

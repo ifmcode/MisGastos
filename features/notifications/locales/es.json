@@ -58,6 +58,9 @@
     "friend-request": "{{name}} te ha enviado una solicitud de amistad.",
     "friend-request-accepted": "{{name}} ha aceptado tu solicitud de amistad.",
     "group-invite": "{{name}} te ha invitado al grupo «{{group}}».",
+    "group-join-request": "Alguien quiere unirse al grupo «{{group}}».",
+    "group-join-accepted": "Han aceptado tu solicitud para unirte al grupo «{{group}}».",
+    "group-join-rejected": "Han rechazado tu solicitud para unirte al grupo «{{group}}».",
     "group-expense": "{{name}} ha añadido un gasto de grupo.",
     "group-settlement": "{{name}} ha registrado una liquidación de grupo."
   },

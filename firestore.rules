@@ -332,7 +332,10 @@ service cloud.firestore {
           'settlement-created',
           'settlement-updated',
           'settlement-deleted',
-          'group-invite'
+          'group-invite',
+          'group-join-request',
+          'group-join-accepted',
+          'group-join-rejected'
         ];
     }
 
@@ -374,10 +377,33 @@ service cloud.firestore {
         && isGroupText(payload.friendUid, 1500);
     }
 
+    // TICKET-061 payload: request id, group, denormalized name and the actor.
+    // On the request event `friendUid` is the requester; on the outcome it is
+    // the owner. The copy never names them.
+    function hasGroupJoinNotificationPayload(payload) {
+      return payload is map
+        && payload.keys().hasOnly(
+             ['requestId', 'groupId', 'groupName', 'friendUid']
+           )
+        && isGroupText(payload.requestId, 1500)
+        && isGroupText(payload.groupId, 1500)
+        && isGroupText(payload.groupName, 60)
+        && isGroupText(payload.friendUid, 1500);
+    }
+
     function hasNotificationPayload(data) {
       return data.type == 'group-invite'
         ? hasGroupInviteNotificationPayload(data.payload)
-        : hasSettlementNotificationPayload(data.payload);
+        : (
+            data.type in
+              [
+                'group-join-request',
+                'group-join-accepted',
+                'group-join-rejected'
+              ]
+              ? hasGroupJoinNotificationPayload(data.payload)
+              : hasSettlementNotificationPayload(data.payload)
+          );
     }
 
     // The invitee is the recipient, the actor is the inviter, and the referenced
@@ -405,6 +431,71 @@ service cloud.firestore {
         && invitation.groupId == notification.payload.groupId
         && invitation.groupName == notification.payload.groupName
         && invitation.status == 'pending';
+    }
+
+    // TICKET-061: the owner receives the request and the requester the outcome.
+    // Both events read the request and the group with `getAfter`, so they work
+    // whether the notification is written after or with the decision. The
+    // deterministic dedupe key is part of the event: a requester cannot mint
+    // extra rows by inventing notification ids for the same request.
+    function isGroupJoinNotificationTarget(data, notificationId) {
+      return data.type == 'group-join-request'
+        ? isJoinRequestNotificationFor(
+            getAfter(
+              /databases/$(database)/documents/groups/$(data.payload.groupId)
+            ).data,
+            getAfter(
+              /databases/$(database)/documents/groupJoinRequests/$(data.payload.requestId)
+            ).data,
+            data,
+            notificationId
+          )
+        : isJoinOutcomeNotificationFor(
+            getAfter(
+              /databases/$(database)/documents/groups/$(data.payload.groupId)
+            ).data,
+            getAfter(
+              /databases/$(database)/documents/groupJoinRequests/$(data.payload.requestId)
+            ).data,
+            data,
+            notificationId
+          );
+    }
+
+    function isJoinRequestNotificationFor(
+      group,
+      request,
+      notification,
+      notificationId
+    ) {
+      return request.groupId == notification.payload.groupId
+        && request.requesterId == request.auth.uid
+        && request.requesterId == notification.payload.friendUid
+        && request.status == 'pending'
+        && group.ownerId == notification.userId
+        && group.name == notification.payload.groupName
+        && notificationId == 'group-join-request:'
+             + notification.payload.requestId + ':' + request.createdAt;
+    }
+
+    function isJoinOutcomeNotificationFor(
+      group,
+      request,
+      notification,
+      notificationId
+    ) {
+      return request.groupId == notification.payload.groupId
+        && request.requesterId == notification.userId
+        && group.ownerId == request.auth.uid
+        && group.ownerId == notification.payload.friendUid
+        && group.name == notification.payload.groupName
+        && request.status == (
+             notification.type == 'group-join-accepted'
+               ? 'accepted'
+               : 'rejected'
+           )
+        && notificationId == notification.type + ':'
+             + notification.payload.requestId + ':' + request.updatedAt;
     }
 
     // The recipient must be the other participant of the referenced settlement
@@ -449,6 +540,21 @@ service cloud.firestore {
     function isGroupInviteNotificationActor(data) {
       return isSignedIn()
         && data.type == 'group-invite'
+        && data.payload is map
+        && ('friendUid' in data.payload)
+        && data.payload.friendUid == request.auth.uid;
+    }
+
+    // TICKET-061 actor: the requester on the request event and the owner on the
+    // outcome. Same narrow grant as group-invite: only their own dedupe id.
+    function isGroupJoinNotificationActor(data) {
+      return isSignedIn()
+        && data.type in
+          [
+            'group-join-request',
+            'group-join-accepted',
+            'group-join-rejected'
+          ]
         && data.payload is map
         && ('friendUid' in data.payload)
         && data.payload.friendUid == request.auth.uid;
@@ -507,6 +613,14 @@ service cloud.firestore {
 
     function hasGroupCurrency(value) {
       return value in ['EUR', 'USD', 'GBP', 'JPY', 'CHF'];
+    }
+
+    // TICKET-061 join code: 8 chars from the bias-free alphabet (no 0/O/1/I).
+    // Mirrors GROUP_JOIN_CODE_ALPHABET in the client.
+    function isGroupJoinCode(value) {
+      return value is string
+        && value.size() == 8
+        && value.matches('^[2-9A-HJ-NP-Z]{8}$');
     }
 
     // Owner first, unique and 1..20 (GROUP_MAX_MEMBERS), the same contract as
@@ -687,6 +801,47 @@ service cloud.firestore {
         ).data,
         groupId
       );
+    }
+
+    // TICKET-061 lazy code for a group created before the field existed: the
+    // owner may only add `joinCode` (never rotate it) and stamp `updatedAt`.
+    function isGroupJoinCodeBackfill(previous, next) {
+      return previous.ownerId == request.auth.uid
+        && !('joinCode' in previous)
+        && isGroupJoinCode(next.joinCode)
+        && next.diff(previous).affectedKeys().hasOnly(['joinCode', 'updatedAt'])
+        && next.updatedAt is string;
+    }
+
+    // The single uid appended by an acceptance; size + hasAll prove it is one.
+    function addedGroupMember(previous, next) {
+      return next.memberIds.removeAll(previous.memberIds)[0];
+    }
+
+    function isAcceptedJoinRequest(request, groupId, requesterId) {
+      return request.groupId == groupId
+        && request.requesterId == requesterId
+        && request.status == 'accepted';
+    }
+
+    // d) owner accepts a join request: the request must already read accepted
+    // with `getAfter` and the appended uid must be its requester.
+    function joinsGroupThroughJoinRequest(previous, next, groupId) {
+      return previous.ownerId == request.auth.uid
+        && next.diff(previous).affectedKeys().hasOnly(
+             ['memberIds', 'updatedAt']
+           )
+        && next.memberIds.size() == previous.memberIds.size() + 1
+        && next.memberIds.toSet().hasAll(previous.memberIds)
+        && hasGroupMembers(next.memberIds, previous.ownerId)
+        && next.updatedAt is string
+        && isAcceptedJoinRequest(
+             getAfter(
+               /databases/$(database)/documents/groupJoinRequests/$(groupId + '__' + addedGroupMember(previous, next))
+             ).data,
+             groupId,
+             addedGroupMember(previous, next)
+           );
     }
 
     // Group ids are owner-namespaced: `${ownerId}__${autoId}`. Only the owner can
@@ -1101,10 +1256,11 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Groups (TICKET-008). Created in one batch with its pending invitations;
-    // the owner edits metadata and removes members; an invitee only appends
-    // themselves through an accepted invitation. No balance is validated here:
-    // group expenses and their ledger are TICKET-009/010.
+    // Groups (TICKET-008). Created in one batch with its pending invitations and
+    // its join-code projection (TICKET-061); the owner edits metadata and removes
+    // members; membership only grows through an accepted invitation or an
+    // owner-accepted join request. No balance is validated here: group expenses
+    // and their ledger are TICKET-009/010.
     //
     // No composite index: `getGroupsOperation` filters only with
     // `where('memberIds', 'array-contains', uid)` and sorts client-side.
@@ -1124,6 +1280,7 @@ service cloud.firestore {
         && isGroupText(request.resource.data.name, 60)
         && isGroupDescription(request.resource.data.description)
         && hasGroupCurrency(request.resource.data.defaultCurrency)
+        && isGroupJoinCode(request.resource.data.joinCode)
         && request.resource.data.createdAt is string
         && request.resource.data.updatedAt is string
         && request.resource.data.keys().hasOnly(
@@ -1133,6 +1290,7 @@ service cloud.firestore {
                'name',
                'description',
                'defaultCurrency',
+               'joinCode',
                'createdAt',
                'updatedAt'
              ]
@@ -1143,6 +1301,12 @@ service cloud.firestore {
           isGroupMetadataEdit(resource.data, request.resource.data)
           || isGroupMemberRemoval(resource.data, request.resource.data)
           || joinsGroupThroughInvitation(
+               resource.data,
+               request.resource.data,
+               groupId
+             )
+          || isGroupJoinCodeBackfill(resource.data, request.resource.data)
+          || joinsGroupThroughJoinRequest(
                resource.data,
                request.resource.data,
                groupId
@@ -1201,6 +1365,170 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ---- TICKET-061 join code projection and requests --------------------
+    // `groupCodes/{code}` is a lookup projection: any signed-in user may `get`
+    // one code, but `list` is denied so codes cannot be enumerated. Only the
+    // owner creates it (with the group in the same batch) and only the group
+    // name may be refreshed on rename.
+    function hasGroupCodeFields(data) {
+      return data.keys().hasOnly(['groupId', 'ownerId', 'groupName'])
+        && isGroupText(data.groupId, 1500)
+        && isGroupText(data.ownerId, 1500)
+        && isGroupText(data.groupName, 60);
+    }
+
+    function isGroupCodeFor(group, codeData, code) {
+      return group.ownerId == codeData.ownerId
+        && group.name == codeData.groupName
+        && group.joinCode == code;
+    }
+
+    match /groupCodes/{code} {
+      allow get: if isSignedIn();
+      allow list: if false;
+
+      allow create: if isSignedIn()
+        && isGroupJoinCode(code)
+        && hasGroupCodeFields(request.resource.data)
+        && request.resource.data.ownerId == request.auth.uid
+        && isGroupCodeFor(
+             getAfter(
+               /databases/$(database)/documents/groups/$(request.resource.data.groupId)
+             ).data,
+             request.resource.data,
+             code
+           );
+
+      // Rename propagation only: group, owner and the code itself are frozen.
+      // `getAfter` accepts the batch that renames the group and the projection
+      // together and keeps the shared name from drifting.
+      allow update: if isSignedIn()
+        && resource.data.ownerId == request.auth.uid
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.groupId == resource.data.groupId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+             ['groupName']
+           )
+        && isGroupText(request.resource.data.groupName, 60)
+        && getAfter(
+             /databases/$(database)/documents/groups/$(resource.data.groupId)
+           ).data.name == request.resource.data.groupName
+        && getAfter(
+             /databases/$(database)/documents/groups/$(resource.data.groupId)
+           ).data.joinCode == code;
+
+      allow delete: if false;
+    }
+
+    // Join requests use the deterministic id `groupId__requesterId`, so one
+    // document exists per pair. No `ownerId` is stored: the owner is proven
+    // with a group read in the rules, and `list` is participant-only.
+    //
+    // No composite index: the owner queue filters only with
+    // `where('groupId', '==', groupId)` and sorts client-side.
+    function hasGroupJoinRequestFields(data) {
+      return data.keys().hasOnly(
+          [
+            'groupId',
+            'requesterId',
+            'joinCode',
+            'status',
+            'createdAt',
+            'updatedAt'
+          ]
+        )
+        && isGroupText(data.groupId, 1500)
+        && isGroupText(data.requesterId, 1500)
+        && isGroupJoinCode(data.joinCode)
+        && data.status == 'pending'
+        && data.createdAt is string
+        && data.updatedAt is string;
+    }
+
+    function isJoinRequestParticipant(data) {
+      return isSignedIn()
+        && (
+          data.requesterId == request.auth.uid
+          || get(
+               /databases/$(database)/documents/groups/$(data.groupId)
+             ).data.ownerId == request.auth.uid
+        );
+    }
+
+    function isJoinRequestOwner(groupId) {
+      return get(
+        /databases/$(database)/documents/groups/$(groupId)
+      ).data.ownerId == request.auth.uid;
+    }
+
+    function isJoinRequestForGroup(group, codeData, requestData) {
+      return group.joinCode == requestData.joinCode
+        && !(request.auth.uid in group.memberIds)
+        && group.ownerId == codeData.ownerId
+        && group.name == codeData.groupName
+        && codeData.groupId == requestData.groupId;
+    }
+
+    function isJoinRequestStatusChange(previous, next) {
+      return previous.status == 'pending'
+        && next.status in ['accepted', 'rejected']
+        && next.diff(previous).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && next.updatedAt is string
+        && isJoinRequestOwner(previous.groupId);
+    }
+
+    // Acceptance must also prove the requester landed in `memberIds` with the
+    // group update written in the same transaction.
+    function acceptsJoinRequest(previous, next) {
+      return next.status == 'accepted'
+        && isJoinRequestStatusChange(previous, next)
+        && previous.requesterId in getAfter(
+             /databases/$(database)/documents/groups/$(previous.groupId)
+           ).data.memberIds;
+    }
+
+    function rejectsJoinRequest(previous, next) {
+      return next.status == 'rejected'
+        && isJoinRequestStatusChange(previous, next);
+    }
+
+    match /groupJoinRequests/{requestId} {
+      // A `get` on a missing request must resolve to not-found so a duplicate
+      // create can decide; existing rows stay participant-only.
+      allow get: if isSignedIn()
+        && (
+          !exists(
+            /databases/$(database)/documents/groupJoinRequests/$(requestId)
+          )
+          || isJoinRequestParticipant(resource.data)
+        );
+
+      allow list: if isJoinRequestParticipant(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.requesterId == request.auth.uid
+        && requestId == request.resource.data.groupId
+             + '__' + request.resource.data.requesterId
+        && hasGroupJoinRequestFields(request.resource.data)
+        && isJoinRequestForGroup(
+             getAfter(
+               /databases/$(database)/documents/groups/$(request.resource.data.groupId)
+             ).data,
+             getAfter(
+               /databases/$(database)/documents/groupCodes/$(request.resource.data.joinCode)
+             ).data,
+             request.resource.data
+           );
+
+      allow update: if isJoinRequestParticipant(resource.data)
+        && (
+          acceptsJoinRequest(resource.data, request.resource.data)
+          || rejectsJoinRequest(resource.data, request.resource.data)
+        );
+
+      allow delete: if false;
+    }
+
     // In-app notifications. The document id is the deterministic dedupe key, so a
     // retried event cannot duplicate it. The recipient lists and reads the inbox;
     // the actor writes it for the other participant and may `get` that single
@@ -1217,7 +1545,8 @@ service cloud.firestore {
     // The reserved TICKET-047 types (`friend-request`, `friend-request-accepted`,
     // `group-expense`, `group-settlement`) are read-compatible on the client but
     // NOT writable yet: no producer exists. `isNotificationType` allows the
-    // three settlement events plus the TICKET-008 `group-invite` producer.
+    // three settlement events, the TICKET-008 `group-invite` producer and the
+    // three TICKET-061 join-code events.
     //
     // No composite index: `getNotificationsOperation`/`listenNotificationsOperation`
     // filter only with `where('userId', '==', uid)` and sort client-side.
@@ -1234,6 +1563,7 @@ service cloud.firestore {
           || isNotificationOwner(resource.data)
           || isSettlementNotificationActor(resource.data)
           || isGroupInviteNotificationActor(resource.data)
+          || isGroupJoinNotificationActor(resource.data)
         );
 
       allow list: if isNotificationOwner(resource.data);
@@ -1256,11 +1586,23 @@ service cloud.firestore {
         && (
           request.resource.data.type == 'group-invite'
             ? isGroupInviteNotificationTarget(request.resource.data)
-            : isNotificationTargetFor(
-                getAfter(
-                  /databases/$(database)/documents/settlements/$(request.resource.data.payload.settlementId)
-                ).data,
-                request.resource.data
+            : (
+                request.resource.data.type in
+                  [
+                    'group-join-request',
+                    'group-join-accepted',
+                    'group-join-rejected'
+                  ]
+                  ? isGroupJoinNotificationTarget(
+                      request.resource.data,
+                      notificationId
+                    )
+                  : isNotificationTargetFor(
+                      getAfter(
+                        /databases/$(database)/documents/settlements/$(request.resource.data.payload.settlementId)
+                      ).data,
+                      request.resource.data
+                    )
               )
         );
 

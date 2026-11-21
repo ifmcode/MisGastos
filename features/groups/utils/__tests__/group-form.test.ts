@@ -15,6 +15,7 @@ const stored: Group = {
   name: "Viaje",
   description: "Finde",
   defaultCurrency: "USD",
+  joinCode: "ABCD2345",
   createdAt: "2026-11-20T10:00:00.000Z",
   updatedAt: "2026-11-20T10:00:00.000Z",
 };

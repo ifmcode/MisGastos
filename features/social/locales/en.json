@@ -23,10 +23,12 @@
   "routeBackHint": "Go back to the previous screen",
   "fab": {
     "openAccessibility": "Open the Social actions menu",
-    "openHint": "Open the actions to add friends or create a group",
+    "openHint": "Open the actions to join a group, create one or add friends",
     "menuTitle": "Social actions",
     "addFriend": "Add friend",
     "addFriendHint": "Search an account by email and send a request",
+    "joinGroup": "Join a group",
+    "joinGroupHint": "Enter the code you were given to ask to join",
     "createGroup": "Create group",
     "createGroupHint": "Name the group and invite your friends",
     "createGroupDisabledHint": "Add at least one friend to create a group",

@@ -12,8 +12,8 @@ import type {
   PendingGroupInvitationItem,
 } from "../types/group.types";
 import { createGroupWithFriends } from "./group-create";
-import type { GroupWriteDeps } from "./group-deps";
 import { assertGroupMember, requireGroupViewer } from "./group-guards";
+import { GroupsJoinUseCases } from "./groups-join.usecases";
 import {
   loadGroupDetailFor,
   loadGroups,
@@ -32,15 +32,13 @@ import {
 } from "./group-write";
 
 /** Groups use cases; guards, validation and persistence live in helpers. */
-export class GroupsService {
-  private readonly writeDeps: GroupWriteDeps;
-
+export class GroupsService extends GroupsJoinUseCases {
   constructor(
     repository: IGroupsRepository,
     friendsRepository: IFriendsRepository,
     notifications: IGroupNotificationPort,
   ) {
-    this.writeDeps = { repository, friendsRepository, notifications };
+    super({ repository, friendsRepository, notifications });
   }
 
   async getGroups(viewerUid: string): Promise<Group[]> {

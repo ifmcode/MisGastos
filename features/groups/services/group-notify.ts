@@ -1,5 +1,13 @@
-import type { IGroupNotificationPort } from "../repositories/group-notification.port";
-import { toGroupInviteNotificationInput } from "../repositories/group-notification.port";
+import type {
+  IGroupNotificationPort,
+} from "../repositories/group-notification.port";
+import {
+  toGroupInviteNotificationInput,
+} from "../repositories/group-notification.port";
+import type {
+  GroupJoinOutcomeNotificationInput,
+  GroupJoinRequestNotificationInput,
+} from "../repositories/group-notification.port";
 import type { GroupInvitation } from "../types/group.types";
 
 /**
@@ -18,4 +26,28 @@ export async function notifyGroupInvitations(
       port.notifyGroupInvite(toGroupInviteNotificationInput(invitation)),
     ),
   );
+}
+
+/** One best-effort write to the owner; a failure never fails the request. */
+export async function notifyGroupJoinRequest(
+  port: IGroupNotificationPort,
+  input: GroupJoinRequestNotificationInput,
+): Promise<void> {
+  try {
+    await port.notifyJoinRequest(input);
+  } catch {
+    // The group detail shows the pending request even without a notification.
+  }
+}
+
+/** One best-effort outcome write to the requester. */
+export async function notifyGroupJoinOutcome(
+  port: IGroupNotificationPort,
+  input: GroupJoinOutcomeNotificationInput,
+): Promise<void> {
+  try {
+    await port.notifyJoinOutcome(input);
+  } catch {
+    // The requester still sees the group or the rejection on the next refresh.
+  }
 }

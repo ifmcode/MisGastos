@@ -10,6 +10,18 @@ import {
   type SettlementNotificationType,
 } from "../types/notification.types";
 
+/** The TICKET-061 join-code events; the invite keeps its own copy. */
+export type GroupJoinNotificationType = Exclude<
+  GroupNotificationType,
+  "group-invite"
+>;
+
+const GROUP_JOIN_NOTIFICATION_TYPES: readonly GroupJoinNotificationType[] = [
+  "group-join-request",
+  "group-join-accepted",
+  "group-join-rejected",
+];
+
 /**
  * Pure inbox helpers: type guards, the two stamps, the Pendientes/Vistas split
  * and the sort. Targets and hrefs live in `notification-targets.ts` and are
@@ -58,6 +70,16 @@ export function isGroupNotificationType(
   return (
     typeof value === "string" &&
     GROUP_NOTIFICATION_TYPES.includes(value as GroupNotificationType)
+  );
+}
+
+/** Only the three TICKET-061 join-code events. */
+export function isGroupJoinNotificationType(
+  value: unknown,
+): value is GroupJoinNotificationType {
+  return (
+    typeof value === "string" &&
+    GROUP_JOIN_NOTIFICATION_TYPES.includes(value as GroupJoinNotificationType)
   );
 }
 

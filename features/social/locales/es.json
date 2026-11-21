@@ -23,10 +23,12 @@
   "routeBackHint": "Vuelve a la pantalla anterior",
   "fab": {
     "openAccessibility": "Abrir el menú de acciones de Social",
-    "openHint": "Abre las acciones para añadir amigos o crear un grupo",
+    "openHint": "Abre las acciones para unirte a un grupo, crear uno o añadir amigos",
     "menuTitle": "Acciones de Social",
     "addFriend": "Añadir amigo",
     "addFriendHint": "Busca una cuenta por email y envíale una solicitud",
+    "joinGroup": "Unirse a grupo",
+    "joinGroupHint": "Introduce el código que te han compartido para pedir entrar",
     "createGroup": "Crear grupo",
     "createGroupHint": "Ponle nombre al grupo e invita a tus amigos",
     "createGroupDisabledHint": "Añade al menos un amigo para crear un grupo",

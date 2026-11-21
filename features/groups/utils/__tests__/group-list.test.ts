@@ -19,6 +19,7 @@ function group(overrides: Partial<Group> = {}): Group {
     name: "Viaje",
     description: null,
     defaultCurrency: "EUR",
+    joinCode: "ABCD2345",
     createdAt: "2026-11-20T10:00:00.000Z",
     updatedAt: "2026-11-20T10:00:00.000Z",
     ...overrides,

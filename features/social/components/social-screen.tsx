@@ -103,6 +103,7 @@ export function SocialScreen() {
         onOpen={screen.openMenu}
         onClose={screen.closeMenu}
         onAddFriend={() => router.push("/social/add-friend" as Href)}
+        onJoinGroup={() => router.push("/social/groups/join" as Href)}
         onCreateGroup={editor.openCreate}
       />
 

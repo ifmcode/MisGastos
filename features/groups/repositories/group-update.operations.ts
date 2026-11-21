@@ -7,11 +7,13 @@ import type { Group, GroupMetadataUpdate } from "../types/group.types";
 import { removeGroupMember } from "../utils/group-membership";
 import {
   GROUP_INVITATIONS_COLLECTION,
+  toGroupCodeRenameData,
   toGroupInvitationRenameData,
   toGroupUpdateData,
 } from "./groups.data";
 import {
   getGroupInvitationsOperation,
+  groupCodeRef,
   groupRef,
 } from "./groups.operations";
 import { mapGroupDocument } from "./groups.mapper";
@@ -44,6 +46,13 @@ export async function updateGroupOperation(
   batch.update(groupRef(group.id), toGroupUpdateData(update));
 
   if (update.name !== group.name) {
+    if (group.joinCode) {
+      batch.update(
+        groupCodeRef(group.joinCode),
+        toGroupCodeRenameData(update.name),
+      );
+    }
+
     const invitations = await getGroupInvitationsOperation(
       group.ownerId,
       group.id,

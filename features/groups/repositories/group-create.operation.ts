@@ -14,10 +14,13 @@ import {
   createGroupDocumentId,
   createGroupInvitationId,
 } from "../utils/group-ids";
+import { generateGroupJoinCode } from "../utils/group-join-code";
 import { prepareGroupMemberIds } from "../utils/group-membership";
 import {
+  GROUP_CODES_COLLECTION,
   GROUP_INVITATIONS_COLLECTION,
   GROUPS_COLLECTION,
+  toGroupCodeData,
   toGroupData,
   toGroupInvitationData,
 } from "./groups.data";
@@ -36,6 +39,7 @@ export async function createGroupWithInvitationsOperation(
   if (groupId.length === 0) throw new GroupOperationError("DUPLICATE_INVITEE");
 
   const groupReference = doc(db, GROUPS_COLLECTION, groupId);
+  const joinCode = generateGroupJoinCode();
   const group: Group = {
     id: groupId,
     ownerId: input.ownerId,
@@ -43,6 +47,7 @@ export async function createGroupWithInvitationsOperation(
     name: input.name,
     description: input.description,
     defaultCurrency: input.defaultCurrency,
+    joinCode,
     createdAt: input.createdAt,
     updatedAt: input.createdAt,
   };
@@ -65,6 +70,15 @@ export async function createGroupWithInvitationsOperation(
 
   const batch = writeBatch(db);
   batch.set(groupReference, toGroupData(group));
+  batch.set(
+    doc(db, GROUP_CODES_COLLECTION, joinCode),
+    toGroupCodeData({
+      code: joinCode,
+      groupId: group.id,
+      ownerId: group.ownerId,
+      groupName: group.name,
+    }),
+  );
 
   for (const invitation of invitations) {
     batch.set(

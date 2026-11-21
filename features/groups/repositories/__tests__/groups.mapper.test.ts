@@ -1,8 +1,10 @@
 import { describe, expect, it } from "@jest/globals";
 
 import {
+  mapGroupCodeDocument,
   mapGroupDocument,
   mapGroupInvitationDocument,
+  mapGroupJoinRequestDocument,
 } from "../groups.mapper";
 
 const GROUP_ID = "user-a__group-1";
@@ -14,6 +16,7 @@ const groupData: Record<string, unknown> = {
   name: "Viaje",
   description: "Finde",
   defaultCurrency: "EUR",
+  joinCode: "ABCD2345",
   createdAt: "2026-11-20T10:00:00.000Z",
   updatedAt: "2026-11-20T10:00:00.000Z",
 };
@@ -46,6 +49,7 @@ describe("mapGroupDocument", () => {
       name: "Viaje",
       description: "Finde",
       defaultCurrency: "EUR",
+      joinCode: "ABCD2345",
       createdAt: "2026-11-20T10:00:00.000Z",
       updatedAt: "2026-11-20T10:00:00.000Z",
     });
@@ -60,8 +64,36 @@ describe("mapGroupDocument", () => {
     expect(group?.description).toBeNull();
   });
 
-  it("drops a group whose id is not owner-namespaced", () => {
-    expect(mapGroupDocument("group-1", groupData)).toBeNull();
+  it("normalizes a stored join code", () => {
+    const group = mapGroupDocument(GROUP_ID, {
+      ...groupData,
+      joinCode: "abcd-2345",
+    });
+
+    expect(group?.joinCode).toBe("ABCD2345");
+  });
+
+  it("maps a legacy group without a code to null", () => {
+    const legacy = { ...groupData };
+    delete legacy.joinCode;
+
+    expect(mapGroupDocument(GROUP_ID, legacy)?.joinCode).toBeNull();
+    expect(
+      mapGroupDocument(GROUP_ID, { ...groupData, joinCode: null })?.joinCode,
+    ).toBeNull();
+  });
+
+  it("keeps the group but drops an invalid join code", () => {
+    const group = mapGroupDocument(GROUP_ID, {
+      ...groupData,
+      joinCode: "ABCD2340",
+    });
+
+    expect(group).not.toBeNull();
+    expect(group?.joinCode).toBeNull();
+  });
+
+  it("drops a group whose id is not owner-namespaced", () => {    expect(mapGroupDocument("group-1", groupData)).toBeNull();
     expect(mapGroupDocument("user-b__group-1", groupData)).toBeNull();
     expect(mapGroupDocument("user-a_group-1", groupData)).toBeNull();
     expect(mapGroupDocument("user-a__", groupData)).toBeNull();

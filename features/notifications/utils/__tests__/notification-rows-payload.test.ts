@@ -56,6 +56,32 @@ describe("buildNotificationRow payload resolution", () => {
     expect(row.title).toContain('"group":""');
   });
 
+  it("uses only the group name for a join-code event", () => {
+    const types = [
+      "group-join-request",
+      "group-join-accepted",
+      "group-join-rejected",
+    ] as const;
+    const rows = buildNotificationRows(
+      types.map((type, index) =>
+        buildNotification({
+          id: `join-${index}`,
+          type,
+          payload: { groupName: " Viaje ", friendUid: "user-a" },
+        }),
+      ),
+      context,
+    );
+
+    expect(rows[0].title).toBe('types.group-join-request:{"group":"Viaje"}');
+    expect(rows[0].title).not.toContain("Ana");
+    expect(rows.map((row) => row.icon)).toEqual([
+      "person-add-outline",
+      "checkmark-circle-outline",
+      "close-circle-outline",
+    ]);
+  });
+
   it("prefers an already resolved actor name, as the banner does", () => {    const row = buildNotificationRow(buildNotification(), {
       ...context,
       actorName: "María",

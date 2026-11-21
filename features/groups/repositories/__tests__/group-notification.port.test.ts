@@ -5,6 +5,8 @@ import type { INotificationsRepository } from "@/features/notifications/reposito
 
 import {
   buildGroupInviteNotification,
+  buildGroupJoinOutcomeNotification,
+  buildGroupJoinRequestNotification,
   toGroupInviteNotificationInput,
 } from "../group-notification.port";
 import { FirebaseGroupNotificationPort } from "../firebase-group-notification.port";
@@ -64,5 +66,93 @@ describe("FirebaseGroupNotificationPort", () => {
 
     expect(writes).toHaveLength(1);
     expect(writes[0].type).toBe("group-invite");
+  });
+});
+
+describe("buildGroupJoinRequestNotification", () => {
+  it("writes a request event for the owner with the requester as actor", () => {
+    expect(
+      buildGroupJoinRequestNotification({
+        requestId: "group-1__user-b",
+        groupId: "group-1",
+        groupName: "Viaje",
+        requesterId: "user-b",
+        ownerId: "user-a",
+        notifiedAt: input.notifiedAt,
+      }),
+    ).toEqual({
+      userId: "user-a",
+      type: "group-join-request",
+      payload: {
+        requestId: "group-1__user-b",
+        groupId: "group-1",
+        groupName: "Viaje",
+        friendUid: "user-b",
+      },
+      dedupeKey:
+        "group-join-request:group-1__user-b:2026-11-20T10:00:00.000Z",
+      createdAt: input.notifiedAt,
+    });
+  });
+});
+
+describe("buildGroupJoinOutcomeNotification", () => {
+  const base = {
+    requestId: "group-1__user-b",
+    groupId: "group-1",
+    groupName: "Viaje",
+    requesterId: "user-b",
+    ownerId: "user-a",
+    notifiedAt: input.notifiedAt,
+  };
+
+  it("writes the acceptance for the requester with the owner as actor", () => {
+    expect(
+      buildGroupJoinOutcomeNotification({ ...base, decision: "accepted" }),
+    ).toMatchObject({
+      userId: "user-b",
+      type: "group-join-accepted",
+      payload: { friendUid: "user-a" },
+      dedupeKey: "group-join-accepted:group-1__user-b:2026-11-20T10:00:00.000Z",
+    });
+  });
+
+  it("writes the rejection with its own type and dedupe key", () => {
+    expect(
+      buildGroupJoinOutcomeNotification({ ...base, decision: "rejected" }),
+    ).toMatchObject({
+      userId: "user-b",
+      type: "group-join-rejected",
+      dedupeKey: "group-join-rejected:group-1__user-b:2026-11-20T10:00:00.000Z",
+    });
+  });
+});
+
+describe("FirebaseGroupNotificationPort join events", () => {
+  it("delegates the request and the outcome to the notifications repository", async () => {
+    const writes: NotificationWrite[] = [];
+    const notifications = {
+      createNotification: async (write: NotificationWrite) => {
+        writes.push(write);
+        return null;
+      },
+    } as unknown as INotificationsRepository;
+    const port = new FirebaseGroupNotificationPort(notifications);
+    const joinInput = {
+      requestId: "group-1__user-b",
+      groupId: "group-1",
+      groupName: "Viaje",
+      requesterId: "user-b",
+      ownerId: "user-a",
+      notifiedAt: input.notifiedAt,
+    };
+
+    await port.notifyJoinRequest(joinInput);
+    await port.notifyJoinOutcome({ ...joinInput, decision: "rejected" });
+
+    expect(writes.map((write) => write.type)).toEqual([
+      "group-join-request",
+      "group-join-rejected",
+    ]);
   });
 });

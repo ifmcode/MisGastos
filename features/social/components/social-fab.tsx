@@ -13,10 +13,11 @@ export interface SocialFabProps {
   onOpen: () => void;
   onClose: () => void;
   onAddFriend: () => void;
+  onJoinGroup: () => void;
   onCreateGroup: () => void;
 }
 
-/** FAB plus its menu: add a friend or create a group with accepted friends. */
+/** FAB plus its menu: join or create a group and add a friend. */
 export function SocialFab({
   menuVisible,
   bottom,
@@ -26,6 +27,7 @@ export function SocialFab({
   onOpen,
   onClose,
   onAddFriend,
+  onJoinGroup,
   onCreateGroup,
 }: SocialFabProps) {
   const { t } = useScopedTranslation("social");
@@ -58,6 +60,13 @@ export function SocialFab({
             hint: createGroupHint,
             disabled: createGroupDisabled,
             onPress: onCreateGroup,
+          },
+          {
+            key: "join-group",
+            label: t("fab.joinGroup"),
+            icon: "enter-outline",
+            hint: t("fab.joinGroupHint"),
+            onPress: onJoinGroup,
           },
           {
             key: "add-friend",

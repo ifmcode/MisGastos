@@ -1,7 +1,11 @@
 import { createFriendPairId } from "@/features/friends/utils/friend-pair";
 
 import type { IGroupNotificationPort } from "../../repositories/group-notification.port";
-import type { GroupInviteNotificationInput } from "../../repositories/group-notification.port";
+import type {
+  GroupInviteNotificationInput,
+  GroupJoinOutcomeNotificationInput,
+  GroupJoinRequestNotificationInput,
+} from "../../repositories/group-notification.port";
 import type { IGroupsRepository } from "../../repositories/groups.repository";
 import type {
   CreateGroupWithInvitationsInput,
@@ -11,13 +15,24 @@ import type {
   GroupMetadataUpdate,
   InviteMembersInput,
 } from "../../types/group.types";
+import type {
+  CreateGroupJoinRequestInput,
+  EnsureGroupJoinCodeInput,
+  GroupCode,
+  GroupJoinRequest,
+  RespondToGroupJoinRequestInput,
+} from "../../types/group-join.types";
 import { createGroupInvitationId } from "../../utils/group-ids";
+import { createGroupJoinRequestId } from "../../utils/group-join-code";
+import { sortJoinRequestsOldestFirst } from "../../utils/group-join-request";
 
 const NOW = "2026-11-20T10:00:00.000Z";
 
 export class FakeGroupsRepository implements IGroupsRepository {
   readonly groups = new Map<string, Group>();
   readonly invitations = new Map<string, GroupInvitation>();
+  readonly codes = new Map<string, GroupCode>();
+  readonly joinRequests = new Map<string, GroupJoinRequest>();
   readonly createInputs: CreateGroupWithInvitationsInput[] = [];
   readonly inviteInputs: InviteMembersInput[] = [];
   readonly updateInputs: Array<{ groupId: string; update: GroupMetadataUpdate }> =
@@ -25,6 +40,9 @@ export class FakeGroupsRepository implements IGroupsRepository {
   readonly removedMembers: Array<{ groupId: string; memberId: string }> = [];
   readonly accepted: Array<{ viewerUid: string; invitationId: string }> = [];
   readonly invitedCalls: string[] = [];
+  readonly joinRequestInputs: CreateGroupJoinRequestInput[] = [];
+  readonly respondInputs: RespondToGroupJoinRequestInput[] = [];
+  readonly ensureInputs: EnsureGroupJoinCodeInput[] = [];
   /** Group ids whose read must fail with permission-denied. */
   readonly denied: string[] = [];
   failure: Error | null = null;
@@ -42,6 +60,7 @@ export class FakeGroupsRepository implements IGroupsRepository {
       name: "Viaje",
       description: null,
       defaultCurrency: "EUR",
+      joinCode: "ABCD2345",
       createdAt: NOW,
       updatedAt: NOW,
       ...overrides,
@@ -49,6 +68,37 @@ export class FakeGroupsRepository implements IGroupsRepository {
     this.groups.set(id, group);
 
     return group;
+  }
+
+  /** Seeds the code projection that resolves to one group. */
+  seedCode(group: Group, code = group.joinCode ?? "ABCD2345"): GroupCode {
+    const projection: GroupCode = {
+      code,
+      groupId: group.id,
+      ownerId: group.ownerId,
+      groupName: group.name,
+    };
+    this.codes.set(code, projection);
+
+    return projection;
+  }
+
+  seedJoinRequest(overrides: Partial<GroupJoinRequest> = {}): GroupJoinRequest {
+    const groupId = overrides.groupId ?? "user-a__group-1";
+    const requesterId = overrides.requesterId ?? "user-b";
+    const request: GroupJoinRequest = {
+      id: createGroupJoinRequestId(groupId, requesterId),
+      groupId,
+      requesterId,
+      joinCode: "ABCD2345",
+      status: "pending",
+      createdAt: NOW,
+      updatedAt: NOW,
+      ...overrides,
+    };
+    this.joinRequests.set(request.id, request);
+
+    return request;
   }
 
   seedInvitation(overrides: Partial<GroupInvitation> = {}): GroupInvitation {
@@ -292,14 +342,139 @@ export class FakeGroupsRepository implements IGroupsRepository {
 
     return updated;
   }
+
+  async getGroupCode(code: string): Promise<GroupCode | null> {
+    this.guard();
+
+    return this.codes.get(code) ?? null;
+  }
+
+  async getGroupJoinRequest(
+    requestId: string,
+  ): Promise<GroupJoinRequest | null> {
+    this.guard();
+
+    return this.joinRequests.get(requestId) ?? null;
+  }
+
+  async getGroupJoinRequests(groupId: string): Promise<GroupJoinRequest[]> {
+    this.guard();
+
+    return sortJoinRequestsOldestFirst(
+      [...this.joinRequests.values()].filter(
+        (request) => request.groupId === groupId,
+      ),
+    );
+  }
+
+  async createGroupJoinRequest(
+    input: CreateGroupJoinRequestInput,
+  ): Promise<GroupJoinRequest> {
+    this.guard();
+    this.joinRequestInputs.push(input);
+
+    const id = createGroupJoinRequestId(input.groupId, input.requesterId);
+    if (this.joinRequests.has(id)) {
+      const error = new Error("Missing or insufficient permissions");
+      Object.assign(error, { code: "permission-denied" });
+      throw error;
+    }
+
+    const request: GroupJoinRequest = {
+      id,
+      groupId: input.groupId,
+      requesterId: input.requesterId,
+      joinCode: input.joinCode,
+      status: "pending",
+      createdAt: input.createdAt,
+      updatedAt: input.createdAt,
+    };
+    this.joinRequests.set(id, request);
+
+    return request;
+  }
+
+  async respondToGroupJoinRequest(
+    input: RespondToGroupJoinRequestInput,
+  ): Promise<{ group: Group; request: GroupJoinRequest }> {
+    this.guard();
+    this.respondInputs.push(input);
+
+    const request = this.joinRequests.get(input.requestId);
+    if (!request) throw new Error("request not found");
+    const group = this.groups.get(input.groupId);
+    if (!group) throw new Error("group not found");
+    if (group.ownerId !== input.viewerUid) throw new Error("not owner");
+    if (request.status !== "pending") throw new Error("not pending");
+
+    const nextRequest: GroupJoinRequest = {
+      ...request,
+      status: input.decision,
+      updatedAt: input.updatedAt,
+    };
+    this.joinRequests.set(request.id, nextRequest);
+
+    if (input.decision === "rejected") {
+      return { group, request: nextRequest };
+    }
+
+    const updated: Group = {
+      ...group,
+      memberIds: [...group.memberIds, request.requesterId],
+      updatedAt: input.updatedAt,
+    };
+    this.groups.set(group.id, updated);
+
+    return { group: updated, request: nextRequest };
+  }
+
+  async ensureGroupJoinCode(input: EnsureGroupJoinCodeInput): Promise<Group> {
+    this.guard();
+    this.ensureInputs.push(input);
+
+    const group = this.groups.get(input.groupId);
+    if (!group) throw new Error("group not found");
+    if (group.joinCode) return group;
+
+    const updated: Group = {
+      ...group,
+      joinCode: input.code,
+      updatedAt: input.updatedAt,
+    };
+    this.groups.set(group.id, updated);
+    this.codes.set(input.code, {
+      code: input.code,
+      groupId: group.id,
+      ownerId: group.ownerId,
+      groupName: group.name,
+    });
+
+    return updated;
+  }
 }
 
 export class FakeGroupNotificationPort implements IGroupNotificationPort {
   readonly sent: GroupInviteNotificationInput[] = [];
+  readonly joinRequests: GroupJoinRequestNotificationInput[] = [];
+  readonly joinOutcomes: GroupJoinOutcomeNotificationInput[] = [];
   failure: Error | null = null;
 
   async notifyGroupInvite(input: GroupInviteNotificationInput): Promise<void> {
     this.sent.push(input);
+    if (this.failure) throw this.failure;
+  }
+
+  async notifyJoinRequest(
+    input: GroupJoinRequestNotificationInput,
+  ): Promise<void> {
+    this.joinRequests.push(input);
+    if (this.failure) throw this.failure;
+  }
+
+  async notifyJoinOutcome(
+    input: GroupJoinOutcomeNotificationInput,
+  ): Promise<void> {
+    this.joinOutcomes.push(input);
     if (this.failure) throw this.failure;
   }
 }

@@ -18,9 +18,9 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Phase:** 6 - Groups
 - **Current ticket:** TICKET-009 - group shared expenses
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-008 - groups and invitations (20/11/2026)
+- **Last completed:** TICKET-061 - group join code and join requests (20/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-062, TICKET-063, TICKET-064, TICKET-065, TICKET-066 and TICKET-067 (Phase 6.0), TICKET-009 (group requirements), TICKET-010, TICKET-011, TICKET-061 and TICKET-068
+- **Queued:** TICKET-062, TICKET-063, TICKET-064, TICKET-065, TICKET-066 and TICKET-067 (Phase 6.0), TICKET-009 (group requirements), TICKET-010, TICKET-011 and TICKET-068
 - **Next:** TICKET-009
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
@@ -151,7 +151,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ## Phase 6: Groups (IN PROGRESS)
 - [x] TICKET-008: create groups, friend invitations, group detail and member management (consumes the Social → Tus grupos shell from TICKET-041) ✅ 20/11/2026
-- [ ] TICKET-061: group join code and join requests (deferred from TICKET-008)
+- [x] TICKET-061: group join code and join requests (deferred from TICKET-008) ✅ 20/11/2026
 - [ ] Full TICKET-009: the group requirements still open after the 1:1 subset (group membership and payer validation, per-expense currency, expense in the group detail)
 - [ ] TICKET-010: group balances and settlements (reuse the TICKET-046 direct-settlement model, the receiver wallet movement and notification events)
 - [ ] TICKET-011: group history

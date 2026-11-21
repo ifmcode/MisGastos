@@ -10,6 +10,14 @@ import type { GroupDetail } from "../types/group.types";
 import { useGroupDetail } from "./use-group-detail";
 import { useGroupEditor, type GroupEditorController } from "./use-group-editor";
 import {
+  useGroupJoinCode,
+  type GroupJoinCodeController,
+} from "./use-group-join-code";
+import {
+  useGroupJoinRequests,
+  type GroupJoinRequestsController,
+} from "./use-group-join-requests";
+import {
   useGroupInviteMembers,
   type GroupInviteMembersController,
 } from "./use-group-invite-members";
@@ -36,6 +44,8 @@ export interface GroupDetailScreenController {
   editor: GroupEditorController;
   invite: GroupInviteMembersController;
   memberActions: GroupMemberActionsController;
+  joinCode: GroupJoinCodeController;
+  joinRequests: GroupJoinRequestsController;
   reload: () => void;
   refresh: () => void;
   openDetails: () => void;
@@ -82,6 +92,21 @@ export function useGroupDetailScreen({
     onChanged: reload,
   });
 
+  const joinCode = useGroupJoinCode({
+    viewerUid,
+    groupId,
+    groupName: detail?.group.name ?? "",
+    joinCode: detail?.group.joinCode ?? null,
+    onGenerated: reload,
+  });
+
+  const joinRequests = useGroupJoinRequests({
+    viewerUid,
+    groupId,
+    requests: detail?.joinRequests ?? [],
+    onChanged: reload,
+  });
+
   const openDetails = useCallback(() => setDetailsVisible(true), []);
   const closeDetails = useCallback(() => setDetailsVisible(false), []);
 
@@ -107,6 +132,8 @@ export function useGroupDetailScreen({
     editor,
     invite,
     memberActions,
+    joinCode,
+    joinRequests,
     reload,
     refresh,
     openDetails,

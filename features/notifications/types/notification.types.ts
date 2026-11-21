@@ -12,13 +12,22 @@ export const SETTLEMENT_NOTIFICATION_TYPES: readonly SettlementNotificationType[
   ["settlement-created", "settlement-updated", "settlement-deleted"];
 
 /**
- * TICKET-008 producer: an accepted friend was invited to a group. The payload
- * carries ids and the denormalized group name so the inbox needs no extra read.
+ * TICKET-008 producer: an accepted friend was invited to a group. TICKET-061
+ * adds the join-code events: a request for the owner and the outcome for the
+ * requester. The payload carries ids and the denormalized group name so the
+ * inbox needs no extra read.
  */
-export type GroupNotificationType = "group-invite";
+export type GroupNotificationType =
+  | "group-invite"
+  | "group-join-request"
+  | "group-join-accepted"
+  | "group-join-rejected";
 
 export const GROUP_NOTIFICATION_TYPES: readonly GroupNotificationType[] = [
   "group-invite",
+  "group-join-request",
+  "group-join-accepted",
+  "group-join-rejected",
 ];
 
 /**
@@ -77,6 +86,18 @@ export type NotificationPayload = Record<string, unknown>;
  */
 export interface GroupInviteNotificationPayload {
   invitationId: string;
+  groupId: string;
+  groupName: string;
+  friendUid: string;
+}
+
+/**
+ * TICKET-061 join-code events. `friendUid` is the requester on
+ * `group-join-request` and the owner on the accepted/rejected outcome; the
+ * copy never names the actor, so a non-friend requester stays anonymous.
+ */
+export interface GroupJoinNotificationPayload {
+  requestId: string;
   groupId: string;
   groupName: string;
   friendUid: string;

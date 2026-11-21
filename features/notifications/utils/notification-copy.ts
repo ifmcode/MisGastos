@@ -7,7 +7,10 @@ import type {
   AppNotification,
   NotificationType,
 } from "../types/notification.types";
-import { isSettlementNotificationType } from "./notifications.utils";
+import {
+  isGroupJoinNotificationType,
+  isSettlementNotificationType,
+} from "./notifications.utils";
 
 export type NotificationIcon = ComponentProps<typeof Ionicons>["name"];
 
@@ -15,7 +18,7 @@ export type NotificationIcon = ComponentProps<typeof Ionicons>["name"];
 export interface NotificationCopyContext {
   actorName: string;
   amount: string;
-  /** Denormalized group name of a `group-invite`; "" for other types. */
+  /** Denormalized group name of the group events; "" for other types. */
   groupName: string;
   t: Translate;
 }
@@ -36,6 +39,9 @@ const ICONS: Record<NotificationType, NotificationIcon> = {
   "group-expense": "people-outline",
   "group-settlement": "swap-horizontal-outline",
   "group-invite": "mail-unread-outline",
+  "group-join-request": "person-add-outline",
+  "group-join-accepted": "checkmark-circle-outline",
+  "group-join-rejected": "close-circle-outline",
 };
 
 /** Icon of the event; a legacy or unknown type keeps the neutral bell. */
@@ -71,6 +77,16 @@ export function resolveNotificationCopy(
     return {
       title: context.t("types.group-invite", {
         name: context.actorName,
+        group: context.groupName,
+      }),
+      icon,
+    };
+  }
+
+  if (isGroupJoinNotificationType(notification.type)) {
+    // No actor name: the requester may not be a friend of the recipient.
+    return {
+      title: context.t(`types.${notification.type}`, {
         group: context.groupName,
       }),
       icon,

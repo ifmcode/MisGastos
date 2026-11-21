@@ -32,6 +32,12 @@ describe("buildNotificationTargetHref", () => {
     ).toBe("/social/expenses/expense%2F1?friendUid=user%20a");
   });
 
+  it("builds the group href and encodes the id", () => {
+    expect(
+      buildNotificationTargetHref({ kind: "group", groupId: "user-a__g/1" }),
+    ).toBe("/social/groups/user-a__g%2F1");
+  });
+
   it("builds the requests and friend hrefs", () => {
     expect(buildNotificationTargetHref({ kind: "requests" })).toBe(
       "/social/requests",

@@ -1,6 +1,8 @@
 import type { FriendProfile } from "@/features/friends/types/friend.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 
+import type { GroupJoinRequestItem } from "./group-join.types";
+
 /** Owner included; mirrored by `firestore.rules` and the group schema. */
 export const GROUP_MAX_MEMBERS = 20;
 
@@ -38,6 +40,8 @@ export interface Group {
   name: string;
   description: string | null;
   defaultCurrency: CurrencyCode;
+  /** Stable shareable code; `null` only for groups created before TICKET-061. */
+  joinCode: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -112,6 +116,8 @@ export interface GroupDetail {
   group: Group;
   members: GroupMember[];
   invitations: GroupInvitationItem[];
+  /** Pending join requests; `[]` for anyone who is not the owner. */
+  joinRequests: GroupJoinRequestItem[];
 }
 
 /** Metadata write; the service stamps `updatedAt` before persistence. */

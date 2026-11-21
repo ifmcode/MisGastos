@@ -6,8 +6,25 @@ import type {
   GroupMetadataUpdate,
   InviteMembersInput,
 } from "../types/group.types";
+import type {
+  CreateGroupJoinRequestInput,
+  EnsureGroupJoinCodeInput,
+  GroupCode,
+  GroupJoinRequest,
+  RespondToGroupJoinRequestInput,
+} from "../types/group-join.types";
 import { acceptGroupInvitationOperation } from "./group-accept.operation";
 import { createGroupWithInvitationsOperation } from "./group-create.operation";
+import {
+  createGroupJoinRequestOperation,
+  ensureGroupJoinCodeOperation,
+  respondToGroupJoinRequestOperation,
+} from "./group-join.operations";
+import {
+  getGroupCodeOperation,
+  getGroupJoinRequestOperation,
+  getGroupJoinRequestsOperation,
+} from "./group-join-read.operations";
 import {
   inviteMembersOperation,
   updateGroupInvitationStatusOperation,
@@ -97,5 +114,33 @@ export class FirebaseGroupsRepository implements IGroupsRepository {
       "cancelled",
       updatedAt,
     );
+  }
+
+  getGroupCode(code: string): Promise<GroupCode | null> {
+    return getGroupCodeOperation(code);
+  }
+
+  getGroupJoinRequest(requestId: string): Promise<GroupJoinRequest | null> {
+    return getGroupJoinRequestOperation(requestId);
+  }
+
+  getGroupJoinRequests(groupId: string): Promise<GroupJoinRequest[]> {
+    return getGroupJoinRequestsOperation(groupId);
+  }
+
+  createGroupJoinRequest(
+    input: CreateGroupJoinRequestInput,
+  ): Promise<GroupJoinRequest> {
+    return createGroupJoinRequestOperation(input);
+  }
+
+  respondToGroupJoinRequest(
+    input: RespondToGroupJoinRequestInput,
+  ): Promise<{ group: Group; request: GroupJoinRequest }> {
+    return respondToGroupJoinRequestOperation(input);
+  }
+
+  ensureGroupJoinCode(input: EnsureGroupJoinCodeInput): Promise<Group> {
+    return ensureGroupJoinCodeOperation(input);
   }
 }

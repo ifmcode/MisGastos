@@ -58,6 +58,9 @@
     "friend-request": "{{name}} sent you a friend request.",
     "friend-request-accepted": "{{name}} accepted your friend request.",
     "group-invite": "{{name}} invited you to the group “{{group}}”.",
+    "group-join-request": "Someone wants to join the group “{{group}}”.",
+    "group-join-accepted": "Your request to join the group “{{group}}” was accepted.",
+    "group-join-rejected": "Your request to join the group “{{group}}” was rejected.",
     "group-expense": "{{name}} added a group expense.",
     "group-settlement": "{{name}} recorded a group settlement."
   },

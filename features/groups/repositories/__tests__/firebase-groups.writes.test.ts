@@ -39,22 +39,31 @@ describe("createGroupWithInvitationsOperation", () => {
       createdAt: CREATED_AT,
     });
 
-    expect(mockBatchSet).toHaveBeenCalledTimes(2);
+    expect(mockBatchSet).toHaveBeenCalledTimes(3);
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
 
     const groupData = mockBatchSet.mock.calls[0][1];
     expect(result.group.id.startsWith("user-a__")).toBe(true);
+    expect(result.group.joinCode).toMatch(/^[2-9A-HJ-NP-Z]{8}$/);
     expect(groupData).toEqual({
       ownerId: "user-a",
       memberIds: ["user-a"],
       name: "Viaje",
       description: null,
       defaultCurrency: "EUR",
+      joinCode: result.group.joinCode,
       createdAt: CREATED_AT,
       updatedAt: CREATED_AT,
     });
 
-    const invitationData = mockBatchSet.mock.calls[1][1];
+    const codeData = mockBatchSet.mock.calls[1][1];
+    expect(codeData).toEqual({
+      groupId: result.group.id,
+      ownerId: "user-a",
+      groupName: "Viaje",
+    });
+
+    const invitationData = mockBatchSet.mock.calls[2][1];
     expect(invitationData).toMatchObject({
       groupId: result.group.id,
       groupName: "Viaje",
@@ -115,8 +124,8 @@ describe("updateGroupOperation", () => {
       name: "Viaje Nuevo",
       memberIds: ["user-a", "user-b"],
     });
-    // The group itself plus the one pending invitation (the rejected one stays).
-    expect(mockBatchUpdate).toHaveBeenCalledTimes(2);
+    // The group, its code projection and the one pending invitation.
+    expect(mockBatchUpdate).toHaveBeenCalledTimes(3);
     expect(mockBatchUpdate.mock.calls[0][1]).toEqual({
       name: "Viaje Nuevo",
       description: "Finde",
@@ -124,6 +133,9 @@ describe("updateGroupOperation", () => {
       updatedAt: "2026-11-21T10:00:00.000Z",
     });
     expect(mockBatchUpdate.mock.calls[1][1]).toEqual({
+      groupName: "Viaje Nuevo",
+    });
+    expect(mockBatchUpdate.mock.calls[2][1]).toEqual({
       groupName: "Viaje Nuevo",
       updatedAt: "2026-11-21T10:00:00.000Z",
     });

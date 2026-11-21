@@ -11,6 +11,12 @@ import {
   type GroupInvitationStatus,
 } from "../types/group.types";
 import { createGroupInvitationId, groupIdBelongsToOwner } from "../utils/group-ids";
+import { normalizeGroupJoinCode } from "../utils/group-join-code";
+
+export {
+  mapGroupCodeDocument,
+  mapGroupJoinRequestDocument,
+} from "./group-join.mapper";
 
 function readText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -42,6 +48,16 @@ function readStatus(value: unknown): GroupInvitationStatus | null {
 }
 
 /**
+ * Absent/null is a legacy group (no code yet); a present but malformed code
+ * maps to null instead of dropping the whole group.
+ */
+function readJoinCode(value: unknown): string | null {
+  if (value === null || value === undefined) return null;
+
+  return normalizeGroupJoinCode(value) || null;
+}
+
+/**
  * Converts a `groups` document. The id must be owner-namespaced
  * (`ownerId__autoId`) and the membership order is part of the contract, so an
  * owner that is not first, a duplicated uid, an oversized list, a bad currency,
@@ -60,6 +76,7 @@ export function mapGroupDocument(
   const currency = data.defaultCurrency;
   const createdAt = readText(data.createdAt);
   const updatedAt = readText(data.updatedAt);
+  const joinCode = readJoinCode(data.joinCode);
 
   if (groupId.length === 0 || ownerId.length === 0) return null;
   if (!groupIdBelongsToOwner(groupId, ownerId)) return null;
@@ -79,6 +96,7 @@ export function mapGroupDocument(
     name,
     description,
     defaultCurrency: currency,
+    joinCode,
     createdAt,
     updatedAt,
   };

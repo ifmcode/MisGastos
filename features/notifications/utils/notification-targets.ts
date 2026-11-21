@@ -4,7 +4,8 @@ export type NotificationTarget =
   | { kind: "settlement"; settlementId: string; friendUid: string | null }
   | { kind: "expense"; expenseId: string; friendUid: string | null }
   | { kind: "requests" }
-  | { kind: "friend"; friendUid: string };
+  | { kind: "friend"; friendUid: string }
+  | { kind: "group"; groupId: string };
 
 function readPayloadId(
   notification: AppNotification,
@@ -47,6 +48,16 @@ export function resolveNotificationTarget(
   if (notification.type === "group-invite") {
     return { kind: "requests" };
   }
+
+  if (
+    notification.type === "group-join-request" ||
+    notification.type === "group-join-accepted"
+  ) {
+    const groupId = readPayloadId(notification, "groupId");
+    return groupId ? { kind: "group", groupId } : null;
+  }
+
+  if (notification.type === "group-join-rejected") return { kind: "requests" };
 
   if (notification.type === "friend-request-accepted") {
     return friendUid ? { kind: "friend", friendUid } : null;
@@ -96,5 +107,7 @@ export function buildNotificationTargetHref(
       return "/social/requests";
     case "friend":
       return `/social/friends/${encodeURIComponent(target.friendUid)}`;
+    case "group":
+      return `/social/groups/${encodeURIComponent(target.groupId)}`;
   }
 }
