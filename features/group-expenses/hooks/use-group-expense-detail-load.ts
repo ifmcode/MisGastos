@@ -1,5 +1,5 @@
 import { useFocusEffect } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { GroupDetail } from "@/features/groups/types/group.types";
 import { useGroupsService } from "@/features/groups/hooks/use-groups-service";
@@ -110,6 +110,10 @@ export function useGroupExpenseDetailLoad({
     },
     [expenseId, groupsService, service, tr, viewerUid],
   );
+
+  useEffect(() => {
+    void load("initial");
+  }, [load]);
 
   const reload = useCallback(() => {
     void load("initial");
