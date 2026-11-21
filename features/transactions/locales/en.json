@@ -20,7 +20,8 @@
     "friendExpenseHint": "Split an expense with one of your accepted friends.",
     "friendExpenseNoFriendsHint": "Add a friend in the Social tab to share expenses.",
     "groupExpense": "Group expense",
-    "groupExpenseComingSoonHint": "Coming soon: group expenses arrive with groups."
+    "groupExpenseHint": "Record an expense and split it between the members of a group.",
+    "groupExpenseNoGroupsHint": "Create a group in Social to record group expenses."
   },
   "types": {
     "expense": "Expense",

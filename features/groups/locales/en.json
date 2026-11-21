@@ -101,9 +101,7 @@
     "joinAcceptAccessibility": "Accept the request from {{name}}",
     "joinReject": "Reject",
     "joinRejectAccessibility": "Reject the request from {{name}}",
-    "joinRequestBusyHint": "Another request is in progress. Wait a moment before continuing.",
-    "expensesEmptyTitle": "There are no expenses in this group yet",
-    "expensesEmptyMessage": "The shared expenses of the group will show up here."
+    "joinRequestBusyHint": "Another request is in progress. Wait a moment before continuing."
   },
   "details": {
     "title": "Group details",

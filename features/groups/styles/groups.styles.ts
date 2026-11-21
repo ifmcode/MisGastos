@@ -47,7 +47,7 @@ export const groupsStyles = StyleSheet.create({
   // Scroll bodies
   detailScrollContent: {
     paddingHorizontal: 24,
-    paddingBottom: 40,
+    paddingBottom: 120,
     gap: 18,
   },
 

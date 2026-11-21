@@ -67,6 +67,7 @@ export function TransactionsScreen() {
         onCloseFilters={screen.closeFilters}
         onCategoryCreated={screen.addCategory}
         sharedExpenseEditor={screen.createMenu.editor}
+        groupExpenseEditor={screen.createMenu.groupExpenseEditor}
         friends={screen.createMenu.friends}
       />
     </ThemedView>

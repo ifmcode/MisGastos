@@ -71,12 +71,15 @@ export function getDefaultSplitValues(
 /**
  * True when the values stored for a mode still produce an exact split of the
  * current amount, so switching back never overwrites what the user typed.
+ * `minParticipants` is forwarded to the split engine: the group form accepts a
+ * single participant, the 1:1 form keeps the default of two.
  */
 export function canReuseSplitValues(
   mode: ExpenseSplitMode,
   amountText: string,
   participantIds: readonly string[],
   values: Record<string, string>,
+  minParticipants = 2,
 ): boolean {
   if (mode === "equal") return true;
 
@@ -89,5 +92,5 @@ export function canReuseSplitValues(
   const total = amountToCents(amountText);
   if (total === null) return false;
 
-  return splitExpenseAmount(total, mode, parsed.value).ok;
+  return splitExpenseAmount(total, mode, parsed.value, { minParticipants }).ok;
 }

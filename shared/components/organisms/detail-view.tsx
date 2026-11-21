@@ -33,6 +33,12 @@ export interface DetailViewProps {
   children?: ReactNode;
   /** "back" on routes that push the detail; "close" inside a modal. */
   closeIcon?: DetailCloseIcon;
+  /**
+   * Per-action visibility, both `true` by default. Movements and transfers keep
+   * them; a group expense can be read-only, deletable-only or editable.
+   */
+  showEdit?: boolean;
+  showDelete?: boolean;
   onEdit: () => void;
   /** Opens the feature confirmation; the caller decides whether to delete. */
   onDelete: () => void;
@@ -57,6 +63,8 @@ export function DetailView({
   highlightContent,
   children,
   closeIcon,
+  showEdit = true,
+  showDelete = true,
   onEdit,
   onDelete,
   onClose,
@@ -73,6 +81,8 @@ export function DetailView({
             disabled={disabled}
             labels={labels}
             closeIcon={closeIcon}
+            showEdit={showEdit}
+            showDelete={showDelete}
             onEdit={onEdit}
             onDelete={onDelete}
             onClose={onClose}

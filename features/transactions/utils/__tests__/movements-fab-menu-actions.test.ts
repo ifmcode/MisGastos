@@ -22,7 +22,7 @@ function buildHandlers(): MovementsFabActionHandlers {
 describe("getMovementsFabMenuActions", () => {
   it("attaches a press handler to every action", () => {
     const menuActions = getMovementsFabMenuActions(
-      getMovementsFabActions(t, { friendsState: "ready" }),
+      getMovementsFabActions(t, { friendsState: "ready", groupsState: "ready" }),
       buildHandlers(),
     );
 
@@ -35,7 +35,7 @@ describe("getMovementsFabMenuActions", () => {
   it("calls only the matching handler of an enabled action", () => {
     const handlers = buildHandlers();
     const menuActions = getMovementsFabMenuActions(
-      getMovementsFabActions(t, { friendsState: "ready" }),
+      getMovementsFabActions(t, { friendsState: "ready", groupsState: "ready" }),
       handlers,
     );
 
@@ -46,10 +46,22 @@ describe("getMovementsFabMenuActions", () => {
     expect(handlers.groupExpense).not.toHaveBeenCalled();
   });
 
+  it("runs the group handler once its groups are ready", () => {
+    const handlers = buildHandlers();
+    const menuActions = getMovementsFabMenuActions(
+      getMovementsFabActions(t, { friendsState: "ready", groupsState: "ready" }),
+      handlers,
+    );
+
+    menuActions[2].onPress();
+
+    expect(handlers.groupExpense).toHaveBeenCalledTimes(1);
+  });
+
   it("never runs the handler of a disabled action", () => {
     const handlers = buildHandlers();
     const menuActions = getMovementsFabMenuActions(
-      getMovementsFabActions(t, { friendsState: "none" }),
+      getMovementsFabActions(t, { friendsState: "none", groupsState: "none" }),
       handlers,
     );
 

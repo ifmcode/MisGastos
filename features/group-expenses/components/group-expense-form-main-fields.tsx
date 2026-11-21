@@ -1,0 +1,125 @@
+import { TextInput, View } from "react-native";
+
+import { ThemedText } from "@/components/themed-text";
+import { getCurrencySymbol } from "@/features/wallets/utils/money";
+import { AmountField } from "@/shared/components/molecules/amount-field";
+import type { CurrencyOption } from "@/shared/components/molecules/currency-chip-selector";
+import { CurrencyField } from "@/shared/components/molecules/currency-field";
+import { DateFormField } from "@/shared/components/molecules/date-form-field";
+import type { CurrencyCode } from "@/shared/constants/currencies";
+import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
+
+import {
+  GROUP_EXPENSE_DESCRIPTION_MAX_LENGTH,
+  type GroupExpenseFieldErrors,
+  type GroupExpenseValidationCode,
+} from "../schemas/group-expense.schema";
+import { groupExpensesStyles as styles } from "../styles/group-expenses.styles";
+import type { GroupExpenseFormValues } from "../utils/group-expense-form";
+
+export interface GroupExpenseFormMainFieldsProps {
+  values: GroupExpenseFormValues;
+  errors: GroupExpenseFieldErrors;
+  disabled: boolean;
+  onDescriptionChange: (value: string) => void;
+  onAmountChange: (value: string) => void;
+  onCurrencyChange: (currency: CurrencyCode) => void;
+  onDateTextChange: (text: string) => void;
+}
+
+/** Description, total, currency and date of the group-expense form. */
+export function GroupExpenseFormMainFields({
+  values,
+  errors,
+  disabled,
+  onDescriptionChange,
+  onAmountChange,
+  onCurrencyChange,
+  onDateTextChange,
+}: GroupExpenseFormMainFieldsProps) {
+  const theme = useFormTheme();
+  const { t, tr } = useScopedTranslation("groupExpenses");
+
+  function errorText(code: GroupExpenseValidationCode | undefined) {
+    return code ? tr(`errors.${code}`) : null;
+  }
+
+  function currencyAccessibilityLabel(currency: CurrencyOption): string {
+    return t("form.currencyAccessibility", { name: currency.code });
+  }
+
+  const descriptionError = errorText(errors.description);
+
+  return (
+    <View>
+      <ThemedText style={styles.label}>
+        {t("form.descriptionLabel")}
+      </ThemedText>
+      <TextInput
+        value={values.description}
+        onChangeText={onDescriptionChange}
+        placeholder={t("form.descriptionPlaceholder")}
+        placeholderTextColor={theme.muted}
+        editable={!disabled}
+        maxLength={GROUP_EXPENSE_DESCRIPTION_MAX_LENGTH}
+        accessibilityLabel={t("form.descriptionAccessibility")}
+        style={[
+          styles.textInput,
+          {
+            borderColor: descriptionError ? theme.danger : theme.border,
+            backgroundColor: theme.surface,
+            color: theme.text,
+          },
+        ]}
+      />
+      {descriptionError ? (
+        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+          {descriptionError}
+        </ThemedText>
+      ) : null}
+
+      <AmountField
+        label={t("form.amountLabel")}
+        value={values.amount}
+        symbol={getCurrencySymbol(values.currency)}
+        placeholder={t("form.amountPlaceholder")}
+        accessibilityLabel={t("form.amountAccessibility")}
+        errorText={errorText(errors.amount)}
+        helperText={t("form.amountHelper")}
+        disabled={disabled}
+        onChange={onAmountChange}
+      />
+
+      <CurrencyField
+        label={t("form.currencyLabel")}
+        value={values.currency}
+        disabled={disabled}
+        changeLabel={t("form.currencyChange")}
+        changeAccessibilityLabel={t("form.currencyChangeAccessibility")}
+        changeAccessibilityHint={t("form.currencyChangeHint")}
+        pickerTitle={t("form.currencyPickerTitle")}
+        pickerCloseAccessibilityLabel={t("form.currencyPickerClose")}
+        pickerGroupAccessibilityLabel={t("form.currencyGroupAccessibility")}
+        getCurrencyAccessibilityLabel={currencyAccessibilityLabel}
+        onChange={onCurrencyChange}
+      />
+      {errorText(errors.currency) ? (
+        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
+          {errorText(errors.currency)}
+        </ThemedText>
+      ) : null}
+
+      <DateFormField
+        label={t("form.dateLabel")}
+        text={values.dateText}
+        value={values.date}
+        error={errorText(errors.date) ?? undefined}
+        helperText={t("form.dateHelper")}
+        accessibilityLabel={t("form.dateAccessibility")}
+        disabled={disabled}
+        onChange={onDateTextChange}
+      />
+    </View>
+  );
+}

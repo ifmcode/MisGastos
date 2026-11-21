@@ -8,23 +8,19 @@ import { DEFAULT_CURRENCY } from "@/shared/constants/currencies";
 
 import type { GroupDetail } from "../types/group.types";
 import { useGroupDetail } from "./use-group-detail";
+import {
+  useGroupDetailExpenses,
+  type GroupDetailExpensesController,
+} from "./use-group-detail-expenses";
+import {
+  useGroupDetailMembership,
+  type GroupDetailMembershipController,
+} from "./use-group-detail-membership";
 import { useGroupEditor, type GroupEditorController } from "./use-group-editor";
-import {
-  useGroupJoinCode,
-  type GroupJoinCodeController,
-} from "./use-group-join-code";
-import {
-  useGroupJoinRequests,
-  type GroupJoinRequestsController,
-} from "./use-group-join-requests";
 import {
   useGroupInviteMembers,
   type GroupInviteMembersController,
 } from "./use-group-invite-members";
-import {
-  useGroupMemberActions,
-  type GroupMemberActionsController,
-} from "./use-group-member-actions";
 
 export type GroupDetailStatus = "loading" | "error" | "missing" | "ready";
 
@@ -32,7 +28,8 @@ export interface UseGroupDetailScreenOptions {
   groupId: string;
 }
 
-export interface GroupDetailScreenController {
+export interface GroupDetailScreenController
+  extends GroupDetailMembershipController {
   status: GroupDetailStatus;
   detail: GroupDetail | null;
   viewerUid: string;
@@ -42,10 +39,8 @@ export interface GroupDetailScreenController {
   refreshing: boolean;
   detailsVisible: boolean;
   editor: GroupEditorController;
+  expenses: GroupDetailExpensesController;
   invite: GroupInviteMembersController;
-  memberActions: GroupMemberActionsController;
-  joinCode: GroupJoinCodeController;
-  joinRequests: GroupJoinRequestsController;
   reload: () => void;
   refresh: () => void;
   openDetails: () => void;
@@ -65,14 +60,24 @@ export function useGroupDetailScreen({
   const { detail, reload } = groupDetail;
   const detailRefresh = groupDetail.refresh;
   const [detailsVisible, setDetailsVisible] = useState(false);
+  const preferredCurrency = profile?.preferredCurrency ?? DEFAULT_CURRENCY;
+
+  const expenses = useGroupDetailExpenses({
+    viewerUid,
+    groupId,
+    detail,
+    preferredCurrency,
+    onGroupChanged: reload,
+  });
+  const expensesRefresh = expenses.refresh;
 
   const refresh = useCallback(() => {
-    void Promise.all([detailRefresh(), friendsRefresh()]);
-  }, [detailRefresh, friendsRefresh]);
+    void Promise.all([detailRefresh(), friendsRefresh(), expensesRefresh()]);
+  }, [detailRefresh, expensesRefresh, friendsRefresh]);
 
   const editor = useGroupEditor({
     viewerUid,
-    preferredCurrency: profile?.preferredCurrency ?? DEFAULT_CURRENCY,
+    preferredCurrency,
     onSaved: reload,
   });
 
@@ -86,24 +91,10 @@ export function useGroupDetailScreen({
     onInvited: reload,
   });
 
-  const memberActions = useGroupMemberActions({
+  const membership = useGroupDetailMembership({
     viewerUid,
     groupId,
-    onChanged: reload,
-  });
-
-  const joinCode = useGroupJoinCode({
-    viewerUid,
-    groupId,
-    groupName: detail?.group.name ?? "",
-    joinCode: detail?.group.joinCode ?? null,
-    onGenerated: reload,
-  });
-
-  const joinRequests = useGroupJoinRequests({
-    viewerUid,
-    groupId,
-    requests: detail?.joinRequests ?? [],
+    detail,
     onChanged: reload,
   });
 
@@ -121,6 +112,7 @@ export function useGroupDetailScreen({
           : "missing";
 
   return {
+    ...membership,
     status,
     detail,
     viewerUid: viewerUid ?? "",
@@ -130,10 +122,8 @@ export function useGroupDetailScreen({
     refreshing: groupDetail.refreshing || friendsOverview.refreshing,
     detailsVisible,
     editor,
+    expenses,
     invite,
-    memberActions,
-    joinCode,
-    joinRequests,
     reload,
     refresh,
     openDetails,

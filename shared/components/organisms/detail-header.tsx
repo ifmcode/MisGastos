@@ -17,6 +17,9 @@ export interface DetailHeaderProps {
   labels: DetailActionLabels;
   /** Route details share the header with the modal but keep a back arrow. */
   closeIcon?: DetailCloseIcon;
+  /** The close affordance always stays; each action can be hidden on its own. */
+  showEdit?: boolean;
+  showDelete?: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onClose: () => void;
@@ -28,6 +31,8 @@ export function DetailHeader({
   disabled,
   labels,
   closeIcon = "close",
+  showEdit = true,
+  showDelete = true,
   onEdit,
   onDelete,
   onClose,
@@ -65,39 +70,43 @@ export function DetailHeader({
       </View>
 
       <View style={styles.headerActions}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={labels.edit}
-          accessibilityHint={labels.editHint}
-          hitSlop={6}
-          onPress={onEdit}
-          disabled={disabled}
-          style={({ pressed }) => [
-            styles.actionButton,
-            { backgroundColor: theme.primarySoft },
-            pressed && styles.pressed,
-            disabled && styles.disabled,
-          ]}
-        >
-          <Ionicons name="pencil-outline" size={20} color={theme.primary} />
-        </Pressable>
+        {showEdit ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={labels.edit}
+            accessibilityHint={labels.editHint}
+            hitSlop={6}
+            onPress={onEdit}
+            disabled={disabled}
+            style={({ pressed }) => [
+              styles.actionButton,
+              { backgroundColor: theme.primarySoft },
+              pressed && styles.pressed,
+              disabled && styles.disabled,
+            ]}
+          >
+            <Ionicons name="pencil-outline" size={20} color={theme.primary} />
+          </Pressable>
+        ) : null}
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={labels.delete}
-          accessibilityHint={labels.deleteHint}
-          hitSlop={6}
-          onPress={onDelete}
-          disabled={disabled}
-          style={({ pressed }) => [
-            styles.actionButton,
-            { backgroundColor: theme.dangerSurface },
-            pressed && styles.pressed,
-            disabled && styles.disabled,
-          ]}
-        >
-          <Ionicons name="trash-outline" size={20} color={theme.danger} />
-        </Pressable>
+        {showDelete ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={labels.delete}
+            accessibilityHint={labels.deleteHint}
+            hitSlop={6}
+            onPress={onDelete}
+            disabled={disabled}
+            style={({ pressed }) => [
+              styles.actionButton,
+              { backgroundColor: theme.dangerSurface },
+              pressed && styles.pressed,
+              disabled && styles.disabled,
+            ]}
+          >
+            <Ionicons name="trash-outline" size={20} color={theme.danger} />
+          </Pressable>
+        ) : null}
       </View>
     </View>
   );

@@ -14,6 +14,8 @@ import { GroupDetailActions } from "./group-detail-actions";
 export interface GroupDetailHeaderProps {
   detail: GroupDetail;
   isOwner: boolean;
+  /** With active expenses the settled line would claim a zero balance. */
+  hasExpenses: boolean;
   onBack: () => void;
   onOpenDetails: () => void;
   onEdit: () => void;
@@ -27,6 +29,7 @@ export interface GroupDetailHeaderProps {
 export function GroupDetailHeader({
   detail,
   isOwner,
+  hasExpenses,
   onBack,
   onOpenDetails,
   onEdit,
@@ -103,9 +106,13 @@ export function GroupDetailHeader({
         <ThemedText style={[styles.headerMetaLine, { color: theme.muted }]}>
           {meta}
         </ThemedText>
-        <ThemedText style={[styles.headerBalance, { color: theme.success }]}>
-          {t("detail.settled")}
-        </ThemedText>
+        {/* TICKET-010 replaces this placeholder with the real per-currency
+            balances; while the group has expenses, a zero claim would lie. */}
+        {hasExpenses ? null : (
+          <ThemedText style={[styles.headerBalance, { color: theme.success }]}>
+            {t("detail.settled")}
+          </ThemedText>
+        )}
         {group.description ? (
           <ThemedText style={[styles.headerMetaLine, { color: theme.muted }]}>
             {group.description}

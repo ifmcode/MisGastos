@@ -10,11 +10,18 @@ function isNonNegativeInteger(value: number): boolean {
   return Number.isInteger(value) && value >= 0;
 }
 
-/** Trims the uids, rejects repeated ones and requires at least two participants. */
+/**
+ * Trims the uids, rejects repeated ones and requires `minParticipants` rows.
+ * The 1:1 form keeps the default of two; a group expense may invoice a single
+ * member when the payer pays for others and is excluded from `participants`.
+ */
 export function normalizeParticipants(
   participants: readonly SplitParticipantInput[],
+  minParticipants = 2,
 ): SplitParticipantInput[] | null {
-  if (participants.length < 2) return null;
+  const minimum = minParticipants > 1 ? Math.trunc(minParticipants) : 1;
+
+  if (participants.length < minimum) return null;
 
   const seen = new Set<string>();
 

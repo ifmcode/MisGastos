@@ -1316,6 +1316,175 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ---- TICKET-009 group expenses ---------------------------------------
+    // Root `groupExpenses/{expenseId}` with a `groupId` field: the client queries
+    // with one single-field `where('groupId', '==', groupId)` and sorts
+    // client-side, so no composite index is required. A
+    // `groups/{groupId}/expenses` subcollection would save the group read below
+    // but make a cross-group query impossible without a collection-group index.
+    //
+    // Access is proven with ONE group read (`memberIds`/`ownerId`); Firestore
+    // caches repeated reads of the same document inside a request, so a `list`
+    // pays it once. Rules cannot iterate a list, so the per-row participant check
+    // (uid is a member, uids are unique, shares sum to `amountCents`) stays in
+    // the schema and the service: the same class of trade-off as "rules cannot
+    // sum". Only the list shape and its first row are checked here.
+    function groupExpenseGroup(groupId) {
+      return get(/databases/$(database)/documents/groups/$(groupId)).data;
+    }
+
+    function isGroupExpenseRow(row) {
+      return row is map
+        && row.keys().hasOnly(
+             ['userId', 'shareCents', 'percentageBps', 'weight']
+           )
+        && row.userId is string
+        && row.userId.size() > 0
+        && row.shareCents is int
+        && row.shareCents >= 0
+        && row.shareCents <= 100000000;
+    }
+
+    function hasGroupExpenseShares(data) {
+      return data.participants is list
+        && data.participants.size() >= 1
+        && data.participants.size() <= 20
+        && isGroupExpenseRow(data.participants[0]);
+    }
+
+    // Bounded by GROUP_EXPENSE_AMOUNT_MAX_CENTS (100,000,000) and
+    // GROUP_EXPENSE_DESCRIPTION_MAX_LENGTH (120) in the group-expense schema.
+    function hasGroupExpenseMoney(data) {
+      return data.amountCents is int
+        && data.amountCents > 0
+        && data.amountCents <= 100000000
+        && hasGroupCurrency(data.currency)
+        && data.splitMode in ['equal', 'percentage', 'fixed', 'shares']
+        && data.description is string
+        && data.description.size() > 0
+        && data.description.size() <= 120
+        && data.date is string;
+    }
+
+    function hasGroupExpenseFields(data) {
+      return data.keys().hasOnly(
+        [
+          'groupId',
+          'payerId',
+          'amountCents',
+          'currency',
+          'splitMode',
+          'participants',
+          'description',
+          'date',
+          'createdBy',
+          'createdAt',
+          'updatedAt',
+          'deletedAt'
+        ]
+      );
+    }
+
+    // Identity and stamps: `groupId`, `createdBy` and `createdAt` are immutable.
+    function hasGroupExpenseIdentity(data) {
+      return isGroupText(data.groupId, 1500)
+        && isGroupText(data.payerId, 1500)
+        && data.createdAt is string
+        && data.updatedAt is string;
+    }
+
+    // Read: any active member of the expense group.
+    function isGroupExpenseMember(data) {
+      return isSignedIn()
+        && request.auth.uid in groupExpenseGroup(data.groupId).memberIds;
+    }
+
+    // Create: the caller writes their own record and both the caller and the
+    // payer are active members of the target group.
+    function isGroupExpenseCreateTarget(data, group) {
+      return data.createdBy == request.auth.uid
+        && request.auth.uid in group.memberIds
+        && data.payerId in group.memberIds;
+    }
+
+    // Owner, creator or payer; everyone else is read-only.
+    function isGroupExpenseEditor(data, group) {
+      return request.auth.uid in group.memberIds
+        && (
+          data.createdBy == request.auth.uid
+          || data.payerId == request.auth.uid
+          || group.ownerId == request.auth.uid
+        );
+    }
+
+    // Edits keep the group, the creator and the creation stamp frozen, the payer
+    // inside the group and `deletedAt` null or an ISO string. A soft-deleted
+    // expense is never edited nor resurrected (`previous.deletedAt == null`).
+    function isGroupExpenseUpdateTarget(previous, next, group) {
+      return previous.deletedAt == null
+        && isGroupExpenseEditor(previous, group)
+        && next.groupId == previous.groupId
+        && next.createdBy == previous.createdBy
+        && next.createdAt == previous.createdAt
+        && next.payerId in group.memberIds
+        && (next.deletedAt == null || next.deletedAt is string);
+    }
+
+    // The unlinked soft delete touches nothing but the two deletion stamps.
+    function isGroupExpenseSoftDelete(previous, next) {
+      return next.deletedAt is string
+        && next.diff(previous).affectedKeys().hasOnly(['deletedAt', 'updatedAt']);
+    }
+
+    // A regular edit may not add, clear or rewrite the deletion stamp.
+    function isGroupExpenseEdit(previous, next) {
+      return next.deletedAt == null
+        && next.diff(previous).affectedKeys().hasOnly(
+             [
+               'payerId',
+               'amountCents',
+               'currency',
+               'splitMode',
+               'participants',
+               'description',
+               'date',
+               'updatedAt'
+             ]
+           );
+    }
+
+    match /groupExpenses/{expenseId} {
+      allow get, list: if isGroupExpenseMember(resource.data);
+
+      allow create: if isSignedIn()
+        && isGroupExpenseCreateTarget(
+             request.resource.data,
+             groupExpenseGroup(request.resource.data.groupId)
+           )
+        && hasGroupExpenseMoney(request.resource.data)
+        && hasGroupExpenseShares(request.resource.data)
+        && hasGroupExpenseFields(request.resource.data)
+        && hasGroupExpenseIdentity(request.resource.data)
+        && request.resource.data.deletedAt == null;
+
+      allow update: if isSignedIn()
+        && isGroupExpenseUpdateTarget(
+             resource.data,
+             request.resource.data,
+             groupExpenseGroup(resource.data.groupId)
+           )
+        && hasGroupExpenseMoney(request.resource.data)
+        && hasGroupExpenseShares(request.resource.data)
+        && hasGroupExpenseFields(request.resource.data)
+        && hasGroupExpenseIdentity(request.resource.data)
+        && (
+          isGroupExpenseSoftDelete(resource.data, request.resource.data)
+          || isGroupExpenseEdit(resource.data, request.resource.data)
+        );
+
+      allow delete: if false;
+    }
+
     // Group invitations use the deterministic id `groupId__inviteeId`, so one
     // document exists per pair and re-inviting reopens it. Only the owner writes
     // them and only accepted friends can be invited: the create validates the

@@ -18,9 +18,11 @@ export interface MovementsFabAction {
 }
 
 export type MovementsFriendsState = "loading" | "error" | "none" | "ready";
+export type MovementsGroupsState = "loading" | "error" | "none" | "ready";
 
 export interface MovementsFabActionsOptions {
   friendsState: MovementsFriendsState;
+  groupsState: MovementsGroupsState;
 }
 
 export type MovementsFabActionHandlers = Record<
@@ -29,15 +31,15 @@ export type MovementsFabActionHandlers = Record<
 >;
 
 /**
- * The three create entries of the movements tab, already translated. Group
- * expenses stay disabled until TICKET-008 lands; the friend entry is enabled
- * only once the accepted friends are loaded, so it never opens a dead form.
- * Only a confirmed empty list points to Social: a loading or failed overview
- * keeps the neutral action hint instead of claiming there are no friends.
+ * The three create entries of the movements tab, already translated. Each
+ * shared-expense entry is enabled only once its source list is loaded, so it
+ * never opens a dead form. Only a confirmed empty list points to Social: a
+ * loading or failed overview keeps the neutral action hint instead of claiming
+ * there are no friends or groups.
  */
 export function getMovementsFabActions(
   t: Translate,
-  { friendsState }: MovementsFabActionsOptions,
+  { friendsState, groupsState }: MovementsFabActionsOptions,
 ): MovementsFabAction[] {
   return [
     {
@@ -60,8 +62,11 @@ export function getMovementsFabActions(
       key: "groupExpense",
       label: t("fab.groupExpense"),
       icon: "people-circle-outline",
-      hint: t("fab.groupExpenseComingSoonHint"),
-      disabled: true,
+      hint:
+        groupsState === "none"
+          ? t("fab.groupExpenseNoGroupsHint")
+          : t("fab.groupExpenseHint"),
+      disabled: groupsState !== "ready",
     },
   ];
 }

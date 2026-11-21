@@ -101,9 +101,7 @@
     "joinAcceptAccessibility": "Aceptar la solicitud de {{name}}",
     "joinReject": "Rechazar",
     "joinRejectAccessibility": "Rechazar la solicitud de {{name}}",
-    "joinRequestBusyHint": "Hay otra solicitud en curso. Espera un momento antes de continuar.",
-    "expensesEmptyTitle": "Todavía no hay gastos en este grupo",
-    "expensesEmptyMessage": "Los gastos compartidos del grupo aparecerán aquí."
+    "joinRequestBusyHint": "Hay otra solicitud en curso. Espera un momento antes de continuar."
   },
   "details": {
     "title": "Detalles del grupo",

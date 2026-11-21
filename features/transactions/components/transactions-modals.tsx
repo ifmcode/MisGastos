@@ -1,5 +1,7 @@
 import { Category } from "@/features/categories/types/category.types";
 import type { Friend } from "@/features/friends/types/friend.types";
+import { GroupExpenseFormModal } from "@/features/group-expenses/components/group-expense-form-modal";
+import type { GroupExpenseEditorController } from "@/features/group-expenses/hooks/use-group-expense-editor";
 import { SharedExpenseEditorModal } from "@/features/shared-expenses/components/shared-expense-editor-modal";
 import type { SharedExpenseEditorController } from "@/features/shared-expenses/hooks/use-shared-expense-editor";
 import { Wallet } from "@/features/wallets/types/wallet.types";
@@ -33,6 +35,7 @@ export interface TransactionsModalsProps {
   onCloseFilters: () => void;
   onCategoryCreated: (category: Category) => void;
   sharedExpenseEditor: SharedExpenseEditorController;
+  groupExpenseEditor: GroupExpenseEditorController;
   friends: readonly Friend[];
 }
 
@@ -56,6 +59,7 @@ export function TransactionsModals({
   onCloseFilters,
   onCategoryCreated,
   sharedExpenseEditor,
+  groupExpenseEditor,
   friends,
 }: TransactionsModalsProps) {
   return (
@@ -92,6 +96,8 @@ export function TransactionsModals({
         editor={sharedExpenseEditor}
         friends={friends}
       />
+
+      <GroupExpenseFormModal editor={groupExpenseEditor} />
 
       <TransactionsFiltersDialog
         visible={filtersVisible}

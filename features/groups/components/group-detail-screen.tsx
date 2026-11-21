@@ -5,8 +5,11 @@ import { RefreshControl, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
+import { GroupExpensesSection } from "@/features/group-expenses/components/group-expenses-section";
+import type { GroupExpense } from "@/features/group-expenses/types/group-expense.types";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
+import { Fab } from "@/shared/components/molecules/fab";
 import { LoadingState } from "@/shared/components/molecules/loading-state";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
@@ -14,10 +17,7 @@ import { useGroupDetailScreen } from "../hooks/use-group-detail-screen";
 import { groupsStyles as styles } from "../styles/groups.styles";
 import { GroupDetailHeader } from "./group-detail-header";
 import { GroupDetailMissingState } from "./group-detail-missing-state";
-import { GroupDetailsModal } from "./group-details-modal";
-import { GroupExpensesEmpty } from "./group-expenses-empty";
-import { GroupFormModal } from "./group-form-modal";
-import { GroupInviteModal } from "./group-invite-modal";
+import { GroupDetailModals } from "./group-detail-modals";
 import { GroupJoinRequestsSection } from "./group-join-requests-section";
 import { GroupRouteHeader } from "./group-route-header";
 
@@ -27,15 +27,15 @@ function readGroupId(value: string | string[] | undefined): string {
   return (first ?? "").trim();
 }
 
-/** Group detail route: header, members sheet, invite and the expenses card. */
+/** Group detail route: header, member sheets, expenses and the create FAB. */
 export function GroupDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const theme = useFormTheme();
-  const { t } = useTranslation(["groups", "common"]);
+  const { t } = useTranslation(["groups", "common", "groupExpenses"]);
   const params = useLocalSearchParams<{ groupId?: string | string[] }>();
   const screen = useGroupDetailScreen({ groupId: readGroupId(params.groupId) });
-  const { detail, editor, invite } = screen;
+  const { detail, editor, invite, expenses } = screen;
   // Loading and full errors have no group header yet, so they keep a back action.
   const showRouteHeader =
     screen.status === "loading" || screen.status === "error";
@@ -48,6 +48,17 @@ export function GroupDetailScreen() {
 
     router.replace("/(tabs)/social" as Href);
   }, [router]);
+
+  // The row only navigates: edit and delete live in the expense detail.
+  const openExpense = useCallback(
+    (expense: GroupExpense) => {
+      const groupId = encodeURIComponent(expense.groupId);
+      router.push(
+        `/social/group-expenses/${expense.id}?groupId=${groupId}` as Href,
+      );
+    },
+    [router],
+  );
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + 16 }]}>
@@ -85,6 +96,9 @@ export function GroupDetailScreen() {
           <GroupDetailHeader
             detail={detail}
             isOwner={screen.isOwner}
+            hasExpenses={
+              expenses.loading || expenses.error !== null || expenses.hasExpenses
+            }
             onBack={leave}
             onOpenDetails={screen.openDetails}
             onEdit={() => editor.openEdit(detail.group)}
@@ -95,31 +109,40 @@ export function GroupDetailScreen() {
             <GroupJoinRequestsSection {...screen.joinRequests} />
           ) : null}
 
-          <GroupExpensesEmpty />
+          <GroupExpensesSection
+            expenses={expenses.expenses}
+            members={detail.members}
+            viewerUid={screen.viewerUid}
+            loading={expenses.loading}
+            error={expenses.error}
+            onRetry={expenses.retry}
+            onOpenExpense={openExpense}
+          />
         </ScrollView>
       )}
 
-      <GroupFormModal
-        visible={editor.formVisible}
-        isEditing={editor.editingGroup !== null}
-        initialValues={editor.initialValues}
-        friends={screen.friends}
-        fieldErrors={editor.fieldErrors}
-        error={editor.formError}
-        submitting={editor.submitting}
-        onSubmit={editor.submit}
-        onClose={editor.closeForm}
-      />
+      {detail ? (
+        <Fab
+          accessibilityLabel={t("groupExpenses:fab.addAccessibility", {
+            name: detail.group.name,
+          })}
+          accessibilityHint={t("groupExpenses:fab.addHint")}
+          bottom={insets.bottom + 24}
+          onPress={expenses.editor.openCreate}
+        />
+      ) : null}
 
-      <GroupInviteModal invite={invite} />
-
-      <GroupDetailsModal
-        visible={screen.detailsVisible}
+      <GroupDetailModals
+        editor={editor}
+        expenses={expenses.editor}
+        invite={invite}
         detail={detail}
+        friends={screen.friends}
         isOwner={screen.isOwner}
+        detailsVisible={screen.detailsVisible}
         memberActions={screen.memberActions}
         joinCode={screen.joinCode}
-        onClose={screen.closeDetails}
+        onCloseDetails={screen.closeDetails}
       />
     </ThemedView>
   );

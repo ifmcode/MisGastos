@@ -20,7 +20,8 @@
     "friendExpenseHint": "Reparte un gasto con uno de tus amigos aceptados.",
     "friendExpenseNoFriendsHint": "Añade un amigo en la pestaña Social para poder compartir gastos.",
     "groupExpense": "Gasto de grupo",
-    "groupExpenseComingSoonHint": "Próximamente: los gastos de grupo llegarán con los grupos."
+    "groupExpenseHint": "Registra un gasto y repártelo entre los miembros de un grupo.",
+    "groupExpenseNoGroupsHint": "Crea un grupo en Social para poder registrar gastos de grupo."
   },
   "types": {
     "expense": "Gasto",

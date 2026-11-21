@@ -38,7 +38,8 @@ const FAB_KEYS = [
   "friendExpenseHint",
   "friendExpenseNoFriendsHint",
   "groupExpense",
-  "groupExpenseComingSoonHint",
+  "groupExpenseHint",
+  "groupExpenseNoGroupsHint",
 ] as const;
 
 type FabKey = (typeof FAB_KEYS)[number];
