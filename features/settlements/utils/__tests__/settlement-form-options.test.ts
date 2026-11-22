@@ -4,7 +4,7 @@ import type { Category } from "@/features/categories/types/category.types";
 import type { Wallet } from "@/features/wallets/types/wallet.types";
 
 import {
-  getSettlementDefaultCategoryId,
+  findSettlementIncomeCategoryOption,
   getSettlementIncomeCategoryOptions,
   getSettlementWalletChoices,
 } from "../settlement-form-options";
@@ -31,7 +31,7 @@ function buildCategory(overrides: Partial<Category>): Category {
   return {
     id: "category-1",
     name: "Salario",
-    icon: "cash",
+    icon: "cash-outline",
     color: "#000000",
     type: "income",
     ownerId: "user-a",
@@ -73,7 +73,7 @@ describe("getSettlementWalletChoices", () => {
 });
 
 describe("settlement income categories", () => {
-  it("keeps only income categories and a stale selected one", () => {
+  it("keeps only income categories and a stale selected one, with its icon", () => {
     const options = getSettlementIncomeCategoryOptions(
       [
         buildCategory({ id: "salary" }),
@@ -83,18 +83,40 @@ describe("settlement income categories", () => {
     );
 
     expect(options).toEqual([
-      { id: "salary", name: "Salario", unavailable: false },
-      { id: "removed", name: "", unavailable: true },
+      {
+        id: "salary",
+        name: "Salario",
+        icon: "cash-outline",
+        unavailable: false,
+      },
+      {
+        id: "removed",
+        name: "",
+        icon: "receipt-outline",
+        unavailable: true,
+      },
     ]);
   });
 
-  it("defaults to the first income category", () => {
-    expect(
-      getSettlementDefaultCategoryId([
-        buildCategory({ id: "expense", type: "expense" }),
-        buildCategory({ id: "salary" }),
-      ]),
-    ).toBe("salary");
-    expect(getSettlementDefaultCategoryId([])).toBe("");
+  it("falls back to the receipt icon for an unknown stored icon", () => {
+    const options = getSettlementIncomeCategoryOptions([
+      buildCategory({ id: "salary", icon: "not-an-icon" }),
+    ]);
+
+    expect(options[0].icon).toBe("receipt-outline");
+  });
+
+  it("keeps a legacy selected id selected instead of marking it unavailable", () => {
+    const options = getSettlementIncomeCategoryOptions(
+      [buildCategory({ id: "user-a__salary", legacyId: "salary" })],
+      "salary",
+    );
+
+    expect(options).toHaveLength(1);
+    expect(options[0].unavailable).toBe(false);
+    expect(findSettlementIncomeCategoryOption(options, "salary")?.id).toBe(
+      "user-a__salary",
+    );
+    expect(findSettlementIncomeCategoryOption(options, "")).toBeUndefined();
   });
 });

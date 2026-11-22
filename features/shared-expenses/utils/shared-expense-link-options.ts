@@ -10,9 +10,6 @@ import type { Translate } from "@/shared/i18n/translate";
 
 import { getSharedExpenseCategoryId } from "../services/shared-expense-category";
 
-/** Maximum number of category chips shown inline before the `+` action. */
-export const SHARED_EXPENSE_CATEGORY_CHIP_LIMIT = 3;
-
 /** Label of a still-selected id whose category is no longer stored. */
 export const SHARED_EXPENSE_CATEGORY_FALLBACK_KEY = "form.categoryUnavailable";
 
@@ -22,6 +19,8 @@ export interface SharedExpenseCategoryOption {
   label: string;
   labelKey?: string;
   icon: CategoryIcon;
+  /** Alias of a default category migrated from the old local catalog. */
+  legacyId?: string;
 }
 
 /**
@@ -68,6 +67,7 @@ export function getSharedExpenseCategoryOptions(
       id: category.id,
       label: category.name,
       icon: getCategoryIconName(category.icon),
+      ...(category.legacyId ? { legacyId: category.legacyId } : {}),
     }));
 
   return withSelectedFallback(
@@ -84,7 +84,7 @@ function withSelectedFallback(
 ): SharedExpenseCategoryOption[] {
   if (
     selectedCategoryId.length === 0 ||
-    options.some((option) => option.id === selectedCategoryId)
+    findSharedExpenseCategoryOption(options, selectedCategoryId)
   ) {
     return options;
   }
@@ -100,26 +100,27 @@ function withSelectedFallback(
   ];
 }
 
+/**
+ * Selected option by document id or legacy id, which keeps an old default
+ * category selected instead of turning it into an unavailable row.
+ */
+export function findSharedExpenseCategoryOption(
+  options: readonly SharedExpenseCategoryOption[],
+  selectedCategoryId: string,
+): SharedExpenseCategoryOption | undefined {
+  if (selectedCategoryId.length === 0) return undefined;
+
+  return options.find(
+    (option) =>
+      option.id === selectedCategoryId ||
+      option.legacyId === selectedCategoryId,
+  );
+}
+
 /** Stored name or the translated label the synthetic options carry. */
 export function getSharedExpenseCategoryLabel(
   option: SharedExpenseCategoryOption,
   t: Translate,
 ): string {
   return option.labelKey ? t(option.labelKey) : option.label;
-}
-
-/** Compact chips: the selected category always leads and stays visible. */
-export function getSharedExpenseCategoryChips(
-  options: readonly SharedExpenseCategoryOption[],
-  selectedCategoryId: string,
-  limit: number = SHARED_EXPENSE_CATEGORY_CHIP_LIMIT,
-): SharedExpenseCategoryOption[] {
-  const selected = options.find(
-    (option) => option.id === selectedCategoryId,
-  );
-  const ordered = selected
-    ? [selected, ...options.filter((option) => option.id !== selected.id)]
-    : [...options];
-
-  return ordered.slice(0, Math.max(0, limit));
 }

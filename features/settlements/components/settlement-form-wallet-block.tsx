@@ -10,7 +10,7 @@ import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 import type { SettlementFormController } from "../hooks/use-settlement-form";
 import { settlementsStyles as styles } from "../styles/settlements.styles";
 import { getSettlementIncomeCategoryOptions } from "../utils/settlement-form-options";
-import { SettlementFormCategoryChips } from "./settlement-form-category-chips";
+import { SettlementFormCategoryField } from "./settlement-form-category-field";
 import { SettlementFormWalletSelector } from "./settlement-form-wallet-selector";
 
 export interface SettlementFormWalletBlockProps {
@@ -62,7 +62,7 @@ export function SettlementFormWalletBlock({
       />
 
       {hasWallet ? (
-        <SettlementFormCategoryChips
+        <SettlementFormCategoryField
           options={categoryOptions}
           selectedId={values.categoryId}
           disabled={disabled}

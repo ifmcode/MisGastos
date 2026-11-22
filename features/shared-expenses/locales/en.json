@@ -124,11 +124,12 @@
     "categoryLabel": "Movement category",
     "categoryGroupAccessibility": "Category of the linked movement",
     "categoryChipAccessibility": "Use the category {{name}}",
+    "categorySelect": "Select category",
+    "categorySelectedAccessibility": "Category: {{name}}. Change",
     "categoryHint": "Choose the category the movement is saved with.",
     "categoryUnavailable": "Category unavailable",
     "categoryPickerTitle": "Select category",
     "categoryPickerClose": "Close the category selector",
-    "categoryPickerOpenAccessibility": "See all categories",
     "categoryPickerEmpty": "No expense categories available."
   },
   "badge": {

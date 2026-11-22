@@ -60,12 +60,18 @@ describe("transaction category validation", () => {
     ).toBe(true);
   });
 
-  it("rejects missing and unknown categories", () => {
+  it("requires a category when the field is empty", () => {
+    expect(
+      getIssues({ ...baseInput, categoryId: "" }).map((issue) => issue.code),
+    ).toEqual(["CATEGORY_REQUIRED"]);
     expect(
       getIssues({ ...baseInput, categoryId: "   " }).map(
         (issue) => issue.code,
       ),
-    ).toEqual(["INVALID_CATEGORY"]);
+    ).toEqual(["CATEGORY_REQUIRED"]);
+  });
+
+  it("rejects unknown categories without treating them as missing", () => {
     expect(
       getIssues({ ...baseInput, categoryId: "missing" }).map(
         (issue) => issue.code,

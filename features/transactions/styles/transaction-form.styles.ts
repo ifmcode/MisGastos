@@ -52,32 +52,6 @@ export const transactionFormStyles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // Category chips
-  categoryChips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: 8,
-  },
-  categoryItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    minHeight: 44,
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  categoryText: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  categoryAddItem: {
-    borderStyle: "dashed",
-  },
-
   // Category picker popup
   pickerOverlay: {
     ...absoluteFill,
@@ -156,5 +130,19 @@ export const transactionFormStyles = StyleSheet.create({
   pickerCreateText: {
     fontSize: 15,
     fontWeight: "700",
+  },
+
+  // Bottom notice
+  formNotice: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 18,
+  },
+  formNoticeText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "600",
   },
 });

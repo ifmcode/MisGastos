@@ -64,7 +64,6 @@ export function SettlementForm({
     options,
     debtCents,
     viewerIsCreditor,
-    categories,
     fieldErrors,
     onSubmit,
   });

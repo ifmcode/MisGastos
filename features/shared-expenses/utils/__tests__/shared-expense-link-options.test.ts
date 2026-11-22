@@ -5,7 +5,7 @@ import type { Wallet } from "@/features/wallets/types/wallet.types";
 
 import { getSharedExpenseCategoryId } from "../../services/shared-expense-category";
 import {
-  getSharedExpenseCategoryChips,
+  findSharedExpenseCategoryOption,
   getSharedExpenseCategoryLabel,
   getSharedExpenseCategoryOptions,
   getSharedExpenseWalletOptions,
@@ -166,26 +166,20 @@ describe("getSharedExpenseCategoryOptions", () => {
 
     expect(options.map((option) => option.id)).toEqual(["category-1"]);
   });
-});
 
-describe("getSharedExpenseCategoryChips", () => {
-  it("leads with the selected option and respects the limit", () => {
-    const options = [
-      { id: "a", label: "A", icon: "receipt-outline" as const },
-      { id: "b", label: "B", icon: "receipt-outline" as const },
-      { id: "c", label: "C", icon: "receipt-outline" as const },
-      { id: "d", label: "D", icon: "receipt-outline" as const },
-    ];
+  it("keeps a legacy selected id selected instead of marking it unavailable", () => {
+    const options = getSharedExpenseCategoryOptions(
+      [buildCategory({ id: "user-a__food", legacyId: "food" })],
+      "user-a",
+      "food",
+    );
 
-    expect(
-      getSharedExpenseCategoryChips(options, "d").map((option) => option.id),
-    ).toEqual(["d", "a", "b"]);
-  });
-
-  it("handles an empty selection", () => {
-    const options = [{ id: "a", label: "A", icon: "receipt-outline" as const }];
-
-    expect(getSharedExpenseCategoryChips(options, "", 0)).toEqual([]);
+    expect(options).toHaveLength(1);
+    expect(options.some((option) => option.labelKey)).toBe(false);
+    expect(findSharedExpenseCategoryOption(options, "food")?.id).toBe(
+      "user-a__food",
+    );
+    expect(findSharedExpenseCategoryOption(options, "")).toBeUndefined();
   });
 });
 

@@ -1,21 +1,17 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 
-import type { Category } from "@/features/categories/types/category.types";
-
 import {
   getSettlementCurrencyOption,
   viewerIsCreditorFor,
   type SettlementCurrencyOption,
   type SettlementFormValues,
 } from "../utils/settlement-form";
-import { getSettlementDefaultCategoryId } from "../utils/settlement-form-options";
 
 export interface SettlementFormState {
   values: SettlementFormValues;
   setValues: Dispatch<SetStateAction<SettlementFormValues>>;
   boundCents: number;
   resolvedCreditor: boolean;
-  defaultCategoryId: string;
   option: SettlementCurrencyOption | null;
 }
 
@@ -24,7 +20,6 @@ export interface UseSettlementFormStateOptions {
   options: readonly SettlementCurrencyOption[];
   debtCents: number;
   viewerIsCreditor: boolean;
-  categories: readonly Category[];
 }
 
 /**
@@ -38,7 +33,6 @@ export function useSettlementFormState({
   options,
   debtCents,
   viewerIsCreditor,
-  categories,
 }: UseSettlementFormStateOptions): SettlementFormState {
   const [values, setValues] = useState<SettlementFormValues>(initialValues);
   const resetKey = `${initialValues.viewerUid}|${initialValues.friendUid}|${initialValues.currency}`;
@@ -62,7 +56,6 @@ export function useSettlementFormState({
     setValues,
     boundCents,
     resolvedCreditor,
-    defaultCategoryId: getSettlementDefaultCategoryId(categories),
     option,
   };
 }

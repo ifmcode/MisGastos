@@ -42,6 +42,7 @@
     "INVALID_AMOUNT": "Enter an amount greater than 0 with up to 2 decimals.",
     "INVALID_CURRENCY": "The movement currency is not valid.",
     "WALLET_REQUIRED": "Select a wallet.",
+    "CATEGORY_REQUIRED": "Select a category to continue.",
     "INVALID_CATEGORY": "Select a valid category.",
     "CATEGORY_TYPE_MISMATCH": "The category does not match the movement type.",
     "CONCEPT_REQUIRED": "The concept is required.",

@@ -134,7 +134,7 @@ describe("createSettlementFormValues", () => {
 });
 
 describe("wallet changes", () => {
-  it("selecting a wallet fills the default category and clearing it removes both", () => {
+  it("never fills a category and clears it when the wallet is cleared", () => {
     const initial = createSettlementFormValues({
       viewerUid: "user-a",
       friendUid: "user-b",
@@ -142,13 +142,20 @@ describe("wallet changes", () => {
       balances,
       today,
     })!;
-    const withWallet = selectSettlementWallet(initial, "wallet-1", "category-1");
+    const withWallet = selectSettlementWallet(initial, "wallet-1");
 
     expect(withWallet).toMatchObject({
       walletId: "wallet-1",
+      categoryId: "",
+    });
+
+    const withCategory = { ...withWallet, categoryId: "category-1" };
+
+    expect(selectSettlementWallet(withCategory, "wallet-2")).toMatchObject({
+      walletId: "wallet-2",
       categoryId: "category-1",
     });
-    expect(selectSettlementWallet(withWallet, "", "category-1")).toMatchObject({
+    expect(selectSettlementWallet(withCategory, "")).toMatchObject({
       walletId: "",
       categoryId: "",
     });

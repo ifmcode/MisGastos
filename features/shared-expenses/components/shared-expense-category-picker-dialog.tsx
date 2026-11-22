@@ -6,7 +6,10 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { linkedMovementStyles as styles } from "../styles/shared-expense-linked-movement.styles";
-import type { SharedExpenseCategoryOption } from "../utils/shared-expense-link-options";
+import {
+  findSharedExpenseCategoryOption,
+  type SharedExpenseCategoryOption,
+} from "../utils/shared-expense-link-options";
 import { SharedExpenseCategoryPickerOption } from "./shared-expense-category-picker-option";
 
 export interface SharedExpenseCategoryPickerDialogProps {
@@ -29,6 +32,7 @@ export function SharedExpenseCategoryPickerDialog({
 }: SharedExpenseCategoryPickerDialogProps) {
   const theme = useFormTheme();
   const { t } = useScopedTranslation("sharedExpenses");
+  const selectedOption = findSharedExpenseCategoryOption(options, selectedId);
 
   return (
     <Modal
@@ -46,6 +50,7 @@ export function SharedExpenseCategoryPickerDialog({
         />
         <View
           accessibilityViewIsModal
+          accessibilityLabel={t("form.categoryGroupAccessibility")}
           onAccessibilityEscape={onClose}
           style={[
             styles.pickerCard,
@@ -87,7 +92,7 @@ export function SharedExpenseCategoryPickerDialog({
               <SharedExpenseCategoryPickerOption
                 key={option.id}
                 option={option}
-                selected={selectedId === option.id}
+                selected={selectedOption?.id === option.id}
                 disabled={disabled}
                 onSelect={onSelect}
               />

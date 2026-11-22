@@ -117,7 +117,7 @@ describe("validateTransactionInput", () => {
       "INVALID_AMOUNT",
       "INVALID_CURRENCY",
       "WALLET_REQUIRED",
-      "INVALID_CATEGORY",
+      "CATEGORY_REQUIRED",
       "CONCEPT_REQUIRED",
       "NOTES_TOO_LONG",
       "INVALID_DATE",

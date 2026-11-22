@@ -1,5 +1,3 @@
-import type { Category } from "@/features/categories/types/category.types";
-
 import type { SettlementFieldErrors } from "../schemas/settlement-validation.types";
 import type { SettlementInput } from "../types/settlement.types";
 import type {
@@ -19,7 +17,6 @@ export interface UseSettlementFormOptions {
   debtCents: number;
   /** Fallback direction, used when `options` has no entry. */
   viewerIsCreditor: boolean;
-  categories: readonly Category[];
   fieldErrors: SettlementFieldErrors;
   onSubmit: (input: SettlementInput) => void;
 }

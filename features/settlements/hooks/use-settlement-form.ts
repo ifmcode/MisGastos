@@ -33,7 +33,6 @@ export function useSettlementForm({
   options,
   debtCents,
   viewerIsCreditor,
-  categories,
   fieldErrors,
   onSubmit,
 }: UseSettlementFormOptions): SettlementFormController {
@@ -42,11 +41,9 @@ export function useSettlementForm({
     options,
     debtCents,
     viewerIsCreditor,
-    categories,
   });
   const [localErrors, setLocalErrors] = useState<SettlementFieldErrors>({});
-  const { values, setValues, boundCents, resolvedCreditor, defaultCategoryId } =
-    state;
+  const { values, setValues, boundCents, resolvedCreditor } = state;
   const errors: SettlementFieldErrors = { ...localErrors, ...fieldErrors };
 
   function clearErrors(...fields: (keyof SettlementFieldErrors)[]) {
@@ -80,9 +77,7 @@ export function useSettlementForm({
   }
 
   function changeWallet(walletId: string) {
-    setValues((current) =>
-      selectSettlementWallet(current, walletId, defaultCategoryId),
-    );
+    setValues((current) => selectSettlementWallet(current, walletId));
     clearErrors("walletId", "categoryId");
   }
 

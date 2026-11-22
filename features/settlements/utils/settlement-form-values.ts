@@ -80,13 +80,14 @@ export function createSettlementEditFormValues({
 export function selectSettlementWallet(
   values: SettlementFormValues,
   walletId: string,
-  defaultCategoryId: string,
 ): SettlementFormValues {
   const trimmed = walletId.trim();
 
   return {
     ...values,
     walletId: trimmed,
-    categoryId: trimmed.length > 0 ? values.categoryId || defaultCategoryId : "",
+    // A chosen category stays while the wallet remains; the user picks one
+    // explicitly, so linking a wallet never fills it for them.
+    categoryId: trimmed.length > 0 ? values.categoryId : "",
   };
 }

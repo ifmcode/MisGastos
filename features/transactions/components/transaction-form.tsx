@@ -1,14 +1,9 @@
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useTransactionForm } from "../hooks/use-transaction-form";
@@ -18,15 +13,8 @@ import {
 } from "../schemas/transaction.schema";
 import { transactionFormStyles as styles } from "../styles/transaction-form.styles";
 import { TransactionFormValues } from "../types/transaction.types";
-import { TransactionFormActions } from "./transaction-form-actions";
-import { TransactionFormAmountField } from "./transaction-form-amount-field";
-import { TransactionFormCategoryField } from "./transaction-form-category-field";
-import { TransactionFormConceptField } from "./transaction-form-concept-field";
-import { TransactionFormDateField } from "./transaction-form-date-field";
+import { TransactionFormBody } from "./transaction-form-body";
 import { TransactionFormHeader } from "./transaction-form-header";
-import { TransactionFormNotesField } from "./transaction-form-notes-field";
-import { TransactionFormTypeSelector } from "./transaction-form-type-selector";
-import { TransactionFormWalletField } from "./transaction-form-wallet-field";
 
 export interface TransactionFormProps {
   submitting: boolean;
@@ -42,6 +30,7 @@ export interface TransactionFormProps {
   onCategoryCreated?: (category: Category) => void;
 }
 
+/** Page sheet of the movement form; it only orchestrates header and body. */
 export function TransactionForm({
   submitting,
   error,
@@ -56,15 +45,7 @@ export function TransactionForm({
   onCategoryCreated,
 }: TransactionFormProps) {
   const theme = useFormTheme();
-  const {
-    values,
-    errors,
-    categories: typeCategories,
-    symbol,
-    updateValue,
-    selectDate,
-    submit,
-  } = useTransactionForm({
+  const form = useTransactionForm({
     wallets,
     categories,
     initialValues,
@@ -94,67 +75,15 @@ export function TransactionForm({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <ErrorBanner message={error} />
-
-            <TransactionFormTypeSelector
-              value={values.type}
-              disabled={submitting}
-              onChange={(type) => updateValue("type", type)}
-            />
-
-            <TransactionFormAmountField
-              value={values.amount}
-              symbol={symbol}
-              error={errors.amount}
-              disabled={submitting}
-              onChange={(value) => updateValue("amount", value)}
-            />
-
-            <TransactionFormWalletField
+            <TransactionFormBody
+              form={form}
               wallets={wallets}
-              value={values.walletId}
-              error={errors.walletId}
-              disabled={submitting}
-              onChange={(walletId) => updateValue("walletId", walletId)}
-            />
-
-            <TransactionFormCategoryField
-              categories={typeCategories}
-              value={values.categoryId}
-              type={values.type}
-              error={errors.categoryId}
-              disabled={submitting}
-              onChange={(categoryId) => updateValue("categoryId", categoryId)}
-              onCategoryCreated={onCategoryCreated}
-            />
-
-            <TransactionFormConceptField
-              value={values.concept}
-              error={errors.concept}
-              disabled={submitting}
-              onChange={(value) => updateValue("concept", value)}
-            />
-
-            <TransactionFormDateField
-              valueIso={values.date}
-              error={errors.date}
-              disabled={submitting}
-              onSelectDate={selectDate}
-            />
-
-            <TransactionFormNotesField
-              value={values.notes}
-              error={errors.notes}
-              disabled={submitting}
-              onChange={(value) => updateValue("notes", value)}
-            />
-
-            <TransactionFormActions
+              error={error}
               submitting={submitting}
               isEditing={isEditing}
               onCancel={onCancel}
-              onSubmit={submit}
               onDelete={onDelete}
+              onCategoryCreated={onCategoryCreated}
             />
           </ScrollView>
         </ThemedView>

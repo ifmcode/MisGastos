@@ -124,11 +124,12 @@
     "categoryLabel": "Categoría del movimiento",
     "categoryGroupAccessibility": "Categoría del movimiento vinculado",
     "categoryChipAccessibility": "Usar la categoría {{name}}",
+    "categorySelect": "Seleccionar categoría",
+    "categorySelectedAccessibility": "Categoría: {{name}}. Cambiar",
     "categoryHint": "Elige la categoría con la que se guarda el movimiento.",
     "categoryUnavailable": "Categoría no disponible",
     "categoryPickerTitle": "Seleccionar categoría",
     "categoryPickerClose": "Cerrar selector de categoría",
-    "categoryPickerOpenAccessibility": "Ver todas las categorías",
     "categoryPickerEmpty": "No hay categorías de gasto disponibles."
   },
   "badge": {

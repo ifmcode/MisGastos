@@ -91,6 +91,7 @@ export function useSharedExpenseFormState({
 
   function changeCategory(categoryId: string) {
     setValues((current) => selectSharedExpenseCategory(current, categoryId));
+    clearError("categoryId");
   }
 
   function changeRegisterInWallet(enabled: boolean) {

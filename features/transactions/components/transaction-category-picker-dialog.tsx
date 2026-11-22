@@ -24,7 +24,7 @@ export interface TransactionCategoryPickerDialogProps {
 }
 
 /**
- * Full-category popup opened from the compact selector. It lists every
+ * Full-category popup opened from the category trigger. It lists every
  * category of the current movement type and keeps the inline creation action.
  */
 export function TransactionCategoryPickerDialog({

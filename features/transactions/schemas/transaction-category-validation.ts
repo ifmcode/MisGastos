@@ -9,7 +9,7 @@ import {
   TransactionValidationIssue,
 } from "./transaction-validation.types";
 
-/** Validates that the selected category exists and matches the movement type. */
+/** Validates that a category was chosen and that it exists for the type. */
 export function getTransactionCategoryIssue(
   input: TransactionInput,
   categories?: readonly Category[],
@@ -18,7 +18,7 @@ export function getTransactionCategoryIssue(
     typeof input.categoryId === "string" ? input.categoryId.trim() : "";
 
   if (categoryId.length === 0) {
-    return { field: "categoryId", code: "INVALID_CATEGORY" };
+    return { field: "categoryId", code: "CATEGORY_REQUIRED" };
   }
 
   if (!categories) return null;

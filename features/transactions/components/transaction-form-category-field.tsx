@@ -5,6 +5,7 @@ import { useCategoryCreator } from "@/features/categories/hooks/use-category-cre
 import { CategoryInput } from "@/features/categories/schemas/category.schema";
 import { Category } from "@/features/categories/types/category.types";
 
+import type { TransactionValidationCode } from "../schemas/transaction-validation.types";
 import { TransactionType } from "../types/transaction.types";
 import { TransactionCategory } from "../utils/transaction-options";
 import { TransactionCategoryPickerDialog } from "./transaction-category-picker-dialog";
@@ -14,16 +15,16 @@ export interface TransactionFormCategoryFieldProps {
   categories: readonly TransactionCategory[];
   value: string;
   type: TransactionType;
-  error?: string;
+  error?: TransactionValidationCode;
   disabled: boolean;
   onChange: (categoryId: string) => void;
   onCategoryCreated?: (category: Category) => void;
 }
 
 /**
- * Compact category picker, its full-category popup and the inline creation
- * modal. Keeping them together lets the form create and select a category
- * without leaving the movement flow.
+ * Category trigger of the movement form, its full-category popup and the
+ * inline creation modal. Keeping them together lets the form create and
+ * select a category without leaving the movement flow.
  */
 export function TransactionFormCategoryField({
   categories,
@@ -63,7 +64,6 @@ export function TransactionFormCategoryField({
         value={value}
         error={error}
         disabled={disabled}
-        onChange={onChange}
         onOpenPicker={() => setPickerVisible(true)}
       />
 

@@ -9,17 +9,14 @@ import {
   Transaction,
   TransactionFormValues,
 } from "../types/transaction.types";
-import {
-  findTransactionCategory,
-  getDefaultCategoryId,
-} from "./transaction-options";
+import { findTransactionCategory } from "./transaction-options";
 
 const DEFAULT_TYPE = "expense";
 
 /**
  * Builds the form values for a new movement or an existing one. A new movement
- * starts without a wallet: the preferred currency is only provisional and the
- * selected wallet currency replaces it once the user picks one.
+ * starts without a wallet or category: the preferred currency is only
+ * provisional, and the user always chooses both consciously.
  */
 export function buildTransactionFormValues(
   editingTransaction: Transaction | null,
@@ -46,7 +43,7 @@ export function buildTransactionFormValues(
     amount: "",
     walletId: "",
     currency: preferredCurrency,
-    categoryId: getDefaultCategoryId(categories, DEFAULT_TYPE),
+    categoryId: "",
     concept: "",
     notes: "",
     date: getDefaultMovementIsoDate(),

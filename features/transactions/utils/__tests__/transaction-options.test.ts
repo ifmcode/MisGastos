@@ -3,6 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 import { Category } from "@/features/categories/types/category.types";
 
 import {
+  findTransactionCategoryOption,
   getCategoriesForType,
   isTransactionCategoryId,
 } from "../transaction-options";
@@ -32,6 +33,25 @@ describe("isTransactionCategoryId", () => {
     expect(isTransactionCategoryId(categories, "missing")).toBe(false);
     expect(isTransactionCategoryId(categories, 42)).toBe(false);
     expect(isTransactionCategoryId(categories, null)).toBe(false);
+  });
+});
+
+describe("findTransactionCategoryOption", () => {
+  it("resolves document and legacy ids and leaves an empty selection undefined", () => {
+    const options = getCategoriesForType(
+      [
+        buildCategory({ id: "food", legacyId: "legacy-food" }),
+        buildCategory({ id: "salary", type: "income" }),
+      ],
+      "expense",
+    );
+
+    expect(findTransactionCategoryOption(options, "food")?.id).toBe("food");
+    expect(findTransactionCategoryOption(options, "legacy-food")?.id).toBe(
+      "food",
+    );
+    expect(findTransactionCategoryOption(options, "missing")).toBeUndefined();
+    expect(findTransactionCategoryOption(options, "")).toBeUndefined();
   });
 });
 

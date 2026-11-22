@@ -75,6 +75,19 @@ describe("buildTransactionFormValues", () => {
     expect(values.currency).toBe("EUR");
   });
 
+  it("starts a new movement without a category even when categories exist", () => {
+    const values = buildTransactionFormValues(
+      null,
+      [
+        buildCategory({ id: "expense-1", sortOrder: 0 }),
+        buildCategory({ id: "income-1", type: "income", sortOrder: 1 }),
+      ],
+    );
+
+    expect(values.type).toBe("expense");
+    expect(values.categoryId).toBe("");
+  });
+
   it("uses the preferred currency as the provisional currency", () => {
     const values = buildTransactionFormValues(null, [], "USD");
 

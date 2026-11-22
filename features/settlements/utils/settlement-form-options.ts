@@ -1,4 +1,8 @@
 import type { Category } from "@/features/categories/types/category.types";
+import {
+  getCategoryIconName,
+  type CategoryIcon,
+} from "@/features/categories/utils/category-options";
 import type { Wallet } from "@/features/wallets/types/wallet.types";
 import { getActiveWallets } from "@/features/wallets/utils/wallet-status";
 import type { CurrencyCode } from "@/shared/constants/currencies";
@@ -7,6 +11,9 @@ export interface SettlementIncomeCategory {
   id: string;
   /** Stored name; empty when `unavailable` resolves the translated label. */
   name: string;
+  icon: CategoryIcon;
+  /** Alias of a default category migrated from the old local catalog. */
+  legacyId?: string;
   /** The selected category no longer exists but must stay visible. */
   unavailable: boolean;
 }
@@ -43,25 +50,42 @@ export function getSettlementIncomeCategoryOptions(
     .map((category) => ({
       id: category.id,
       name: category.name,
+      icon: getCategoryIconName(category.icon),
+      ...(category.legacyId ? { legacyId: category.legacyId } : {}),
       unavailable: false,
     }));
 
   if (
     selectedCategoryId.length === 0 ||
-    options.some((option) => option.id === selectedCategoryId)
+    findSettlementIncomeCategoryOption(options, selectedCategoryId)
   ) {
     return options;
   }
 
   return [
     ...options,
-    { id: selectedCategoryId, name: "", unavailable: true },
+    {
+      id: selectedCategoryId,
+      name: "",
+      icon: "receipt-outline",
+      unavailable: true,
+    },
   ];
 }
 
-/** First income category, preselected when the creditor links a wallet. */
-export function getSettlementDefaultCategoryId(
-  categories: readonly Category[],
-): string {
-  return categories.find((category) => category.type === "income")?.id ?? "";
+/**
+ * Selected option by document id or legacy id, so an old default category
+ * stays selected instead of becoming an unavailable row.
+ */
+export function findSettlementIncomeCategoryOption(
+  options: readonly SettlementIncomeCategory[],
+  selectedCategoryId: string,
+): SettlementIncomeCategory | undefined {
+  if (selectedCategoryId.length === 0) return undefined;
+
+  return options.find(
+    (option) =>
+      option.id === selectedCategoryId ||
+      option.legacyId === selectedCategoryId,
+  );
 }

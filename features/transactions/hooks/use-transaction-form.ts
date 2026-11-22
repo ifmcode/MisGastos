@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Category } from "@/features/categories/types/category.types";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { getCurrencySymbol } from "@/features/wallets/utils/money";
+import { getDefaultMovementIsoDate } from "@/shared/utils/date-defaults";
 
 import {
   toTransactionFieldErrors,
@@ -11,12 +12,8 @@ import {
   TransactionValidationErrors,
 } from "../schemas/transaction.schema";
 import { TransactionFormValues } from "../types/transaction.types";
-import { getDefaultMovementIsoDate } from "@/shared/utils/date-defaults";
-import {
-  findTransactionCategory,
-  getCategoriesForType,
-  getDefaultCategoryId,
-} from "../utils/transaction-options";
+import { resolveCategoryForTypeChange } from "../utils/transaction-form-category";
+import { getCategoriesForType } from "../utils/transaction-options";
 
 export interface UseTransactionFormOptions {
   wallets: Wallet[];
@@ -86,13 +83,11 @@ export function useTransactionForm({
 
       if (key === "type") {
         const typeValue = value as TransactionFormValues["type"];
-        const currentCategory = findTransactionCategory(
-          categories,
+        next.categoryId = resolveCategoryForTypeChange(
           next.categoryId,
+          categories,
+          typeValue,
         );
-        if (!currentCategory || currentCategory.type !== typeValue) {
-          next.categoryId = getDefaultCategoryId(categories, typeValue);
-        }
       }
 
       return next;

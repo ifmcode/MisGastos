@@ -96,11 +96,18 @@ export function getCategoriesForType(
     .map(toTransactionCategory);
 }
 
-export function getDefaultCategoryId(
-  categories: readonly Category[],
-  type: TransactionType,
-): string {
-  return categories.find((category) => category.type === type)?.id ?? "";
+/**
+ * Selected option of an already-mapped list. It resolves document and legacy
+ * ids like `findTransactionCategory`, but returns `undefined` instead of a
+ * fallback so an empty field keeps its empty state.
+ */
+export function findTransactionCategoryOption(
+  options: readonly TransactionCategory[],
+  categoryId: string | null | undefined,
+): TransactionCategory | undefined {
+  return options.find(
+    (option) => option.id === categoryId || option.legacyId === categoryId,
+  );
 }
 
 export function isTransactionCategoryId(

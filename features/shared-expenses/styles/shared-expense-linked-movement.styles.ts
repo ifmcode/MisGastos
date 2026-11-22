@@ -10,35 +10,9 @@ export const linkedMovementStyles = StyleSheet.create({
     gap: 8,
   },
 
-  // Wallet chips (mandatory while the viewer pays)
+  // Empty wallet state
   group: {
     gap: 8,
-  },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: 8,
-  },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    minHeight: 44,
-    maxWidth: "100%",
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  chipText: {
-    flexShrink: 1,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  chipAdd: {
-    borderStyle: "dashed",
   },
 
   // Wallet registration toggle (TICKET-055)

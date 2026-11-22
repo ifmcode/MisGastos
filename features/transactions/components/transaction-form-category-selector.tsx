@@ -1,111 +1,77 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { CategorySelectButton } from "@/shared/components/molecules/category-select-button";
 import { formFieldStyles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { asTranslate } from "@/shared/i18n/translate";
 
-import { transactionFormStyles as styles } from "../styles/transaction-form.styles";
-import { getTransactionCategoryChips } from "../utils/transaction-category-chips";
+import type { TransactionValidationCode } from "../schemas/transaction-validation.types";
+import { getTransactionFieldErrorText } from "../utils/transaction-field-error";
 import {
+  findTransactionCategoryOption,
   getTransactionCategoryLabel,
-  TransactionCategory,
+  type TransactionCategory,
 } from "../utils/transaction-options";
 
 export interface TransactionFormCategorySelectorProps {
   categories: readonly TransactionCategory[];
   value: string;
-  error?: string;
+  error?: TransactionValidationCode;
   disabled: boolean;
-  onChange: (categoryId: string) => void;
   onOpenPicker: () => void;
 }
 
 /**
- * Compact category picker: up to three chips plus a `+` chip that opens the
- * full category popup. The selected category is always one of the chips.
+ * Single category trigger of the movement form: the chosen category once there
+ * is one, otherwise the translated empty-state label. It only opens the popup.
  */
 export function TransactionFormCategorySelector({
   categories,
   value,
   error,
   disabled,
-  onChange,
   onOpenPicker,
 }: TransactionFormCategorySelectorProps) {
   const theme = useFormTheme();
-  const { t } = useTranslation("transactions");
-  const { visible } = getTransactionCategoryChips(categories, value);
+  const { t } = useTranslation(["transactions", "validation"]);
+  const translate = asTranslate(t);
+  const selected = findTransactionCategoryOption(categories, value);
+  const label = selected
+    ? getTransactionCategoryLabel(selected, translate)
+    : t("form.selectCategory");
+  const accessibilityLabel = selected
+    ? t("form.selectedCategoryAccessibility", { name: label })
+    : t("form.selectCategory");
+  const errorText = error ? getTransactionFieldErrorText(error, translate) : null;
 
   return (
     <View>
       <ThemedText style={formFieldStyles.label}>{t("form.category")}</ThemedText>
-      <View style={styles.categoryChips}>
-        {visible.map((category) => {
-          const selected = value === category.id;
-          const label = getTransactionCategoryLabel(category, asTranslate(t));
 
-          return (
-            <Pressable
-              key={category.id}
-              accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              accessibilityLabel={label}
-              onPress={() => onChange(category.id)}
-              disabled={disabled}
-              style={[
-                styles.categoryItem,
-                {
-                  backgroundColor: selected
-                    ? theme.primarySoft
-                    : theme.surface,
-                  borderColor: selected ? theme.primary : theme.border,
-                },
-              ]}
-            >
-              <Ionicons
-                name={category.icon}
-                size={20}
-                color={selected ? theme.primary : theme.muted}
-              />
-              <ThemedText
-                style={[
-                  styles.categoryText,
-                  { color: selected ? theme.primary : theme.text },
-                ]}
-                numberOfLines={1}
-              >
-                {label}
-              </ThemedText>
-            </Pressable>
-          );
-        })}
+      <CategorySelectButton
+        icon={selected ? selected.icon : null}
+        label={label}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={t("form.selectCategoryHint")}
+        disabled={disabled}
+        hasError={Boolean(error)}
+        iconColor={selected?.color}
+        onPress={onOpenPicker}
+      />
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("form.selectCategory")}
-          accessibilityHint={t("form.selectCategoryHint")}
-          onPress={onOpenPicker}
-          disabled={disabled}
-          style={[
-            styles.categoryItem,
-            styles.categoryAddItem,
-            { backgroundColor: theme.surface, borderColor: theme.border },
-          ]}
-        >
-          <Ionicons name="add" size={20} color={theme.primary} />
-        </Pressable>
-      </View>
       {categories.length === 0 ? (
         <ThemedText style={[formFieldStyles.helper, { color: theme.muted }]}>
           {t("form.noCategories")}
         </ThemedText>
       ) : null}
-      {error ? (
-        <ThemedText style={[formFieldStyles.fieldError, { color: theme.danger }]}>
-          {error}
+
+      {errorText ? (
+        <ThemedText
+          style={[formFieldStyles.fieldError, { color: theme.danger }]}
+        >
+          {errorText}
         </ThemedText>
       ) : null}
     </View>

@@ -1,15 +1,14 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { CategorySelectButton } from "@/shared/components/molecules/category-select-button";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
-import { linkedMovementStyles as styles } from "../styles/shared-expense-linked-movement.styles";
 import { sharedExpensesStyles } from "../styles/shared-expenses.styles";
 import {
-  getSharedExpenseCategoryChips,
+  findSharedExpenseCategoryOption,
   getSharedExpenseCategoryLabel,
   type SharedExpenseCategoryOption,
 } from "../utils/shared-expense-link-options";
@@ -24,7 +23,7 @@ export interface SharedExpenseCategoryFieldProps {
   onChange: (categoryId: string) => void;
 }
 
-/** Linked-movement category: compact chips plus the full-list popup. */
+/** Linked-movement category trigger plus its full-list popup. */
 export function SharedExpenseCategoryField({
   options,
   selectedId,
@@ -35,7 +34,13 @@ export function SharedExpenseCategoryField({
   const theme = useFormTheme();
   const { t, tr } = useScopedTranslation("sharedExpenses");
   const [pickerVisible, setPickerVisible] = useState(false);
-  const chips = getSharedExpenseCategoryChips(options, selectedId);
+  const selected = findSharedExpenseCategoryOption(options, selectedId);
+  const label = selected
+    ? getSharedExpenseCategoryLabel(selected, tr)
+    : t("form.categorySelect");
+  const accessibilityLabel = selected
+    ? t("form.categorySelectedAccessibility", { name: label })
+    : t("form.categorySelect");
 
   function select(categoryId: string) {
     onChange(categoryId);
@@ -47,75 +52,16 @@ export function SharedExpenseCategoryField({
       <ThemedText style={sharedExpensesStyles.label}>
         {t("form.categoryLabel")}
       </ThemedText>
-      <View
-        style={styles.chipRow}
-        accessibilityRole="radiogroup"
-        accessibilityLabel={t("form.categoryGroupAccessibility")}
-      >
-        {chips.map((option) => {
-          const selected = selectedId === option.id;
-          const label = getSharedExpenseCategoryLabel(option, tr);
 
-          return (
-            <Pressable
-              key={option.id}
-              accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              accessibilityLabel={t("form.categoryChipAccessibility", {
-                name: label,
-              })}
-              accessibilityHint={t("form.categoryHint")}
-              onPress={() => onChange(option.id)}
-              disabled={disabled}
-              style={({ pressed }) => [
-                styles.chip,
-                {
-                  backgroundColor: selected ? theme.primarySoft : theme.surface,
-                  borderColor: selected ? theme.primary : theme.border,
-                },
-                pressed && styles.pickerOptionPressed,
-              ]}
-            >
-              <Ionicons
-                name={option.icon}
-                size={18}
-                color={selected ? theme.primary : theme.muted}
-                accessible={false}
-              />
-              <ThemedText
-                style={[
-                  styles.chipText,
-                  { color: selected ? theme.primary : theme.text },
-                ]}
-                numberOfLines={1}
-              >
-                {label}
-              </ThemedText>
-            </Pressable>
-          );
-        })}
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("form.categoryPickerOpenAccessibility")}
-          accessibilityHint={t("form.categoryHint")}
-          onPress={() => setPickerVisible(true)}
-          disabled={disabled}
-          style={({ pressed }) => [
-            styles.chip,
-            styles.chipAdd,
-            { backgroundColor: theme.surface, borderColor: theme.border },
-            pressed && styles.pickerOptionPressed,
-          ]}
-        >
-          <Ionicons
-            name="add"
-            size={20}
-            color={theme.primary}
-            accessible={false}
-          />
-        </Pressable>
-      </View>
+      <CategorySelectButton
+        icon={selected ? selected.icon : null}
+        label={label}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={t("form.categoryHint")}
+        disabled={disabled}
+        hasError={Boolean(errorText)}
+        onPress={() => setPickerVisible(true)}
+      />
 
       {errorText ? (
         <ThemedText

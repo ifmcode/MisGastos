@@ -42,6 +42,7 @@
     "INVALID_AMOUNT": "Introduce un importe mayor que 0 con hasta 2 decimales.",
     "INVALID_CURRENCY": "La moneda del movimiento no es válida.",
     "WALLET_REQUIRED": "Selecciona una cartera.",
+    "CATEGORY_REQUIRED": "Selecciona una categoría para continuar.",
     "INVALID_CATEGORY": "Selecciona una categoría válida.",
     "CATEGORY_TYPE_MISMATCH": "La categoría no corresponde al tipo de movimiento.",
     "CONCEPT_REQUIRED": "El concepto es obligatorio.",
