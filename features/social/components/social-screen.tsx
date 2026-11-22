@@ -16,10 +16,12 @@ import { SocialFab } from "./social-fab";
 import { SocialFriendsSegment } from "./social-friends-segment";
 import { SocialGroupsSegment } from "./social-groups-segment";
 import { SocialHeader } from "./social-header";
-import { SocialPendingRow } from "./social-pending-row";
 import { SocialSegmentControl } from "./social-segment-control";
 
-/** Social hub: pending row, friends/groups segments and the action menu. */
+/**
+ * Social hub: header with the requests entry point, the friends/groups segments
+ * and the action menu.
+ */
 export function SocialScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -45,7 +47,10 @@ export function SocialScreen() {
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + 16 }]}>
-      <SocialHeader />
+      <SocialHeader
+        pendingCount={screen.pendingCount}
+        onOpenRequests={() => router.push("/social/requests" as Href)}
+      />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -60,11 +65,6 @@ export function SocialScreen() {
         }
       >
         {friendsFailed ? null : <ErrorBanner message={screen.error} />}
-
-        <SocialPendingRow
-          count={screen.pendingCount}
-          onPress={() => router.push("/social/requests" as Href)}
-        />
 
         <SocialSegmentControl
           value={screen.segment}

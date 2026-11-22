@@ -27,6 +27,10 @@
 > TICKET-065 (22/11/2026) replaces the compact chip row (`WalletChipSelector`) with
 > the feature component `WalletSelectButton` and adds the optional `noneOption` row
 > to `WalletPickerDialog`; no `shared/components` molecule changed.
+> TICKET-067 (22/11/2026) extracts `IconBadgeButton`, the icon-with-count-badge button
+> now shared by the dashboard bell and the Social header. Both render one
+> `theme.danger` badge with a `99+` cap, and the removed `SocialPendingRow` banner no
+> longer exists.
 
 ## Decisions
 
@@ -49,6 +53,7 @@
 | Row meta separator (` · `) | `transaction-item.tsx`, `transfer-item.tsx` | **Extract helper** | `shared/utils/join-meta.ts` (`joinMetaParts`) |
 | Currency chips | wallet form currency selector and the TICKET-006 profile currency selector | **Extract (TICKET-006)** | `shared/components/molecules/currency-chip-selector.tsx` |
 | Compact currency field | shared-expense form inline chips and the wallet form currency selector | **Extract (TICKET-056)** | `shared/components/molecules/currency-field.tsx` + `currency-picker-dialog.tsx` |
+| Header icon with count badge | `notifications-bell.tsx` and the deleted `social-pending-row.tsx`, with two different badge colours and only one `99+` cap | **Extract (TICKET-067)** | `shared/components/molecules/icon-badge-button.tsx` |
 | Info banner | `transfer-form-info-banner.tsx` only | **Keep** | Single consumer; its bordered/neutral layout differs from the error banner |
 | Text fields | movement concept, wallet name/description, category name | **Keep wrappers** | Validation codes and copy stay in each feature; only the styles moved to `form-field.styles.ts` |
 | Screen headers | wallets, transactions, categories, transfer history, dashboard | **Keep** | Each header owns different actions (add filter, back, greeting) and copy |
@@ -464,6 +469,26 @@ settlement's **Sin cartera**), selected while `selectedId` is empty; both compon
 live in `features/wallets/components` and own their `wallets` copy, like
 `WalletPickerOption`.
 
+### `IconBadgeButton`
+
+```ts
+interface IconBadgeButtonProps {
+  icon: ComponentProps<typeof Ionicons>["name"];
+  count: number;                     // badge hidden at zero, capped at `99+`
+  accessibilityLabel: string;        // already translated, announces the count
+  accessibilityHint: string;         // already translated, says where it goes
+  onPress: () => void;
+}
+```
+
+TICKET-067 extracted the header counter from `notifications-bell.tsx`: an icon-only
+44x44 `Pressable` with the pressed feedback and `accessibilityRole="button"`. The badge
+uses `theme.danger` with `theme.onPrimary` text, the icon uses `theme.text` and the badge
+is decorative (`accessibilityElementsHidden` + `importantForAccessibility="no-hide-descendants"`).
+It receives translated copy and no colour prop, so it imports no feature palette.
+Consumers: the dashboard bell and the Social header (which replaced the deleted
+`SocialPendingRow` banner).
+
 ## Removed after extraction
 
 - Feature state components: `wallets-*-state`, `transactions-*-state`,
@@ -477,8 +502,19 @@ live in `features/wallets/components` and own their `wallets` copy, like
 - `confirmDialogStyles.modalRoot`, now owned by `PageSheetFormModal`.
 - `WalletChipSelector`, `getWalletChips`/`COMPACT_WALLET_LIMIT` and the chip styles,
   replaced by `WalletSelectButton` and `WalletPickerDialog` in TICKET-065.
+- `SocialPendingRow` (`social-pending-row.tsx`), its `pendingRow`/`pendingBody`/
+  `pendingCount`/`badge`/`badgeText` styles and its `pending.title`/`pending.count_*`/
+  `pending.empty` copy, replaced by `IconBadgeButton` in the Social header in TICKET-067.
+- `notificationsStyles.bell`, `bellBadge` and `bellBadgeText`, now owned by
+  `IconBadgeButton` (TICKET-067).
 
 ## Intentional visual changes
+
+- The Social pending requests entry point is now an icon button in the top-right of the
+  header (formerly a full-width list banner): the icon is `theme.text` and its badge
+  `theme.danger` with a `99+` cap, matching the dashboard bell instead of the former
+  `theme.primary` badge. The subtitle may wrap to two lines on narrow screens, because
+  the title block now leaves room for the 44x44 button.
 
 - Wallet form actions now use the shared `gap: 10` and the shared min widths
   (`110`/`130`), matching the transaction, transfer and category forms. The previous
@@ -491,7 +527,7 @@ live in `features/wallets/components` and own their `wallets` copy, like
 
 - `npx tsc --noEmit`
 - `npx expo lint`
-- `npx jest` (331 suites / 2026 tests, updated after TICKET-065)
-- `npm run check:copy` (310 TSX files)
+- `npx jest` (332 suites / 2030 tests, updated after TICKET-067)
+- `npm run check:copy` (315 TSX files)
 - Dark mode and web follow the same `useFormTheme` tokens as before; shared
   components never import feature palettes.

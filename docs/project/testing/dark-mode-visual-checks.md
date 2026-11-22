@@ -85,3 +85,19 @@ text, border and placeholder token:
   `Ver historial de transferencias`).
 - The row and the shared `TransferFormModal` render on web; the web bundle was
   verified with `npx expo export --platform web`.
+
+## Social pending requests header icon (22/11/2026)
+
+> Ticket: TICKET-067 - Social pending requests as a top-right header icon with a badge
+
+- The Social header icon and the dashboard bell now share
+  `shared/components/molecules/icon-badge-button.tsx`: the icon takes `theme.text` and
+  the badge `theme.danger` (`#C62828` light, `#EF5350` dark) with `theme.onPrimary`
+  (`#FFFFFF`) text, so both screens use theme tokens only and no hardcoded colour.
+- **Manual pass pending:** side-by-side comparison of the Social icon and the dashboard
+  bell in light and dark mode, the badge with 0, 1 and more than 99 pending items, and
+  the header with a two-line subtitle on a narrow screen.
+- Known limitation carried over from the bell: white 11px text on `theme.danger` is fine
+  in light mode but falls under WCAG AA in dark mode (`#EF5350`). Fixing it needs a
+  dedicated badge-text token and is out of TICKET-067 scope, which only converges the
+  two badges.

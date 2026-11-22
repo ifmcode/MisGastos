@@ -16,12 +16,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 6 - Groups
-- **Current ticket:** TICKET-067 - Social pending requests as a top-right header icon with a badge
+- **Current ticket:** TICKET-069 - Optional personal movement for a group expense paid by the viewer
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-066 - single category picker button with mandatory selection (22/11/2026)
+- **Last completed:** TICKET-067 - Social pending requests as a top-right header icon with a badge (22/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-069 and TICKET-070 (Phase 6.1), TICKET-010, TICKET-011 and TICKET-068
-- **Next:** TICKET-067
+- **Queued:** TICKET-070 (Phase 6.1), TICKET-010, TICKET-011 and TICKET-068
+- **Next:** TICKET-069
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -165,7 +165,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] TICKET-064: settlement debt-selection step for multiple currencies ✅ 22/11/2026
 - [x] TICKET-065: single wallet picker button without preselection ✅ 22/11/2026
 - [x] TICKET-066: single category picker button with mandatory selection ✅ 22/11/2026
-- [ ] TICKET-067: Social pending requests as a top-right header icon with a badge
+- [x] TICKET-067: Social pending requests as a top-right header icon with a badge ✅ 22/11/2026
 
 ### 6.1 Group wallet link and request placement (QUEUED)
 - [ ] TICKET-069: optional personal movement for a group expense paid by the viewer, with the same wallet/category and atomic link as the 1:1 flow

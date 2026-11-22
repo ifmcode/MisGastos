@@ -82,28 +82,6 @@ export const notificationsStyles = StyleSheet.create({
   pressed: {
     opacity: 0.7,
   },
-  bell: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bellBadge: {
-    position: "absolute",
-    top: 2,
-    right: 2,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    paddingHorizontal: 4,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bellBadgeText: {
-    fontSize: 11,
-    lineHeight: 14,
-    fontWeight: "700",
-  },
 
   // Segmented control: base + variant, mirroring the Social pattern.
   segmentControl: {

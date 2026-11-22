@@ -21,8 +21,13 @@ export const socialStyles = StyleSheet.create({
 
   // Tab header
   header: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 24,
     paddingBottom: 18,
+  },
+  headerText: {
+    flex: 1,
   },
 
   // Route header with a back action
@@ -52,36 +57,6 @@ export const socialStyles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginTop: 2,
-  },
-
-  // Pending requests row
-  pendingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 16,
-  },
-  pendingBody: {
-    flex: 1,
-    gap: 2,
-  },
-  pendingCount: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  badge: {
-    minWidth: 24,
-    height: 24,
-    borderRadius: 12,
-    paddingHorizontal: 6,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  badgeText: {
-    fontSize: 13,
-    fontWeight: "700",
   },
 
   // Segmented control

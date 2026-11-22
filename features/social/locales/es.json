@@ -5,12 +5,9 @@
   "errorTitle": "No se pudo cargar Social",
   "retryAccessibility": "Reintentar la carga de Social",
   "pending": {
-    "title": "Peticiones pendientes",
-    "count_one": "{{count}} solicitud esperando respuesta",
-    "count_other": "{{count}} solicitudes esperando respuesta",
-    "empty": "No tienes solicitudes pendientes",
     "rowAccessibility_one": "Peticiones pendientes: {{count}} solicitud",
     "rowAccessibility_other": "Peticiones pendientes: {{count}} solicitudes",
+    "labelZero": "Peticiones pendientes",
     "hint": "Abre la lista de solicitudes de amistad e invitaciones a grupos"
   },
   "segments": {

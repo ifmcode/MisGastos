@@ -5,12 +5,9 @@
   "errorTitle": "Could not load Social",
   "retryAccessibility": "Retry loading Social",
   "pending": {
-    "title": "Pending requests",
-    "count_one": "{{count}} request waiting for an answer",
-    "count_other": "{{count}} requests waiting for an answer",
-    "empty": "You have no pending requests",
     "rowAccessibility_one": "Pending requests: {{count}} request",
     "rowAccessibility_other": "Pending requests: {{count}} requests",
+    "labelZero": "Pending requests",
     "hint": "Open the list of friend requests and group invitations"
   },
   "segments": {
