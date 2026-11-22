@@ -49,8 +49,6 @@
     "save": "Save",
     "saveAccessibility": "Save the settlement",
     "saving": "Saving…",
-    "currencyLabel": "Currency",
-    "currencyAccessibility": "Settle the debt in {{name}}",
     "outstanding": "Outstanding debt: {{amount}}",
     "amountSectionLabel": "Amount to settle",
     "amountAccessibility": "Settlement amount",
@@ -86,7 +84,15 @@
     "missingMessage": "This debt is already settled. Go back to the friend detail to see the expenses.",
     "back": "Go back",
     "backAccessibility": "Go back to the friend detail",
-    "backHint": "Go back to the previous screen."
+    "backHint": "Go back to the previous screen.",
+    "debtStep": {
+      "title": "Which debt do you want to settle?",
+      "subtitle": "Choose the currency of the debt with {{name}}.",
+      "rowAccessibility": "Settle the {{amount}} debt in {{currency}}. {{direction}}.",
+      "listAccessibility": "Outstanding debts by currency",
+      "empty": "There is no debt to settle.",
+      "emptyMessage": "The debt was settled while you were choosing. Go back to the friend detail to see the expenses."
+    }
   },
   "friendDetail": {
     "settle": "Settle debts",

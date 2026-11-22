@@ -60,6 +60,40 @@ export const settlementsStyles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  // Debt step
+  debtStepList: {
+    gap: 12,
+  },
+  debtOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    minHeight: 44,
+  },
+  debtOptionBody: {
+    flex: 1,
+    gap: 2,
+  },
+  debtOptionCurrency: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "600",
+  },
+  debtOptionAmount: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: "700",
+  },
+  debtOptionDirection: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "600",
+  },
+
   // Form fields
   label: {
     fontSize: 14,

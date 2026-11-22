@@ -1,7 +1,7 @@
 # Roadmap - MisGastos
 
 > Development guide: V1 scope, phase order, ticket order and the current ticket.
-> **Last reviewed:** 21/11/2026
+> **Last reviewed:** 22/11/2026
 
 ## Scope of this file
 - This file answers **what to build next and in which order**, plus the rules for doing it.
@@ -16,12 +16,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 6 - Groups
-- **Current ticket:** TICKET-064 - settlement debt-selection step
+- **Current ticket:** TICKET-065 - single wallet picker button without preselection
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-063 - date field without manual input (21/11/2026)
+- **Last completed:** TICKET-064 - settlement debt-selection step (22/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-065, TICKET-066 and TICKET-067 (Phase 6.0), TICKET-069 and TICKET-070 (Phase 6.1), TICKET-010, TICKET-011 and TICKET-068
-- **Next:** TICKET-064
+- **Queued:** TICKET-066 and TICKET-067 (Phase 6.0), TICKET-069 and TICKET-070 (Phase 6.1), TICKET-010, TICKET-011 and TICKET-068
+- **Next:** TICKET-065
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -162,7 +162,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 > Execution order follows **Current Focus**; TICKET-010 must reuse TICKET-062 and TICKET-064 instead of a second settlement flow.
 - [x] TICKET-062: editable settlement amount with the live remaining debt ✅ 21/11/2026
 - [x] TICKET-063: date field without manual input and a calendar pinned to the right ✅ 21/11/2026
-- [ ] TICKET-064: settlement debt-selection step for multiple currencies
+- [x] TICKET-064: settlement debt-selection step for multiple currencies ✅ 22/11/2026
 - [ ] TICKET-065: single wallet picker button without preselection
 - [ ] TICKET-066: single category picker button with mandatory selection
 - [ ] TICKET-067: Social pending requests as a top-right header icon with a badge

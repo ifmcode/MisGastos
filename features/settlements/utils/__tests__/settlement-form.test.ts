@@ -12,7 +12,6 @@ import {
   getSettlementEditableNetCents,
   getSettlementFormDirection,
   getSettlementDateIssue,
-  selectSettlementCurrency,
   selectSettlementWallet,
   toSettlementInput,
   viewerIsCreditorFor,
@@ -51,6 +50,17 @@ describe("settlement form currency options", () => {
     expect(viewerIsCreditorFor(options[1])).toBe(true);
   });
 
+  it("drops non-finite and rounded-to-zero balances before building a row", () => {
+    expect(
+      getSettlementCurrencyOptions([
+        { currency: "EUR", netBalanceCents: Number.NaN },
+        { currency: "USD", netBalanceCents: Number.POSITIVE_INFINITY },
+        { currency: "GBP", netBalanceCents: Number.NEGATIVE_INFINITY },
+        { currency: "CHF", netBalanceCents: 0.2 },
+      ]),
+    ).toEqual([]);
+  });
+
   it("formats cents as an input value with two decimals", () => {
     expect(formatSettlementAmountInput(1250)).toBe("12.50");
     expect(formatSettlementAmountInput(0)).toBe("0.00");
@@ -58,10 +68,11 @@ describe("settlement form currency options", () => {
 });
 
 describe("createSettlementFormValues", () => {
-  it("defaults to the first debt currency, its full debt and today", () => {
+  it("prefills the chosen currency, its full debt and today", () => {
     const values = createSettlementFormValues({
       viewerUid: "user-a",
       friendUid: "user-b",
+      currency: "EUR",
       balances,
       today,
     });
@@ -80,6 +91,7 @@ describe("createSettlementFormValues", () => {
     const values = createSettlementFormValues({
       viewerUid: "user-a",
       friendUid: "user-b",
+      currency: "USD",
       balances: [{ currency: "USD", netBalanceCents: 400 }],
       today,
     });
@@ -87,11 +99,33 @@ describe("createSettlementFormValues", () => {
     expect(values).toMatchObject({ currency: "USD", amount: "4.00" });
   });
 
+  it("returns null when the chosen currency has no debt", () => {
+    expect(
+      createSettlementFormValues({
+        viewerUid: "user-a",
+        friendUid: "user-b",
+        currency: "USD",
+        balances: [{ currency: "USD", netBalanceCents: 0 }],
+        today,
+      }),
+    ).toBeNull();
+    expect(
+      createSettlementFormValues({
+        viewerUid: "user-a",
+        friendUid: "user-b",
+        currency: "GBP",
+        balances,
+        today,
+      }),
+    ).toBeNull();
+  });
+
   it("returns null when every currency is settled", () => {
     expect(
       createSettlementFormValues({
         viewerUid: "user-a",
         friendUid: "user-b",
+        currency: "EUR",
         balances: [],
         today,
       }),
@@ -99,55 +133,12 @@ describe("createSettlementFormValues", () => {
   });
 });
 
-describe("currency and wallet changes", () => {
-  it("selecting a currency resets the wallet and prefills the new full debt", () => {
-    const initial = createSettlementFormValues({
-      viewerUid: "user-a",
-      friendUid: "user-b",
-      balances,
-      today,
-    })!;
-    const edited = { ...initial, amount: "1.00", walletId: "wallet-1" };
-
-    const next = selectSettlementCurrency(edited, "USD", [
-      ...getSettlementCurrencyOptions(balances),
-    ]);
-
-    expect(next).toMatchObject({
-      currency: "USD",
-      amount: "4.00",
-      walletId: "",
-      categoryId: "",
-    });
-  });
-
-  it("prefills the full debt of the new currency even after typing another amount", () => {
-    const initial = createSettlementFormValues({
-      viewerUid: "user-a",
-      friendUid: "user-b",
-      balances,
-      today,
-    })!;
-    const options = getSettlementCurrencyOptions(balances);
-    const usd = selectSettlementCurrency(
-      { ...initial, amount: "0.50" },
-      "USD",
-      options,
-    );
-    const eur = selectSettlementCurrency(
-      { ...usd, amount: "3.00" },
-      "EUR",
-      options,
-    );
-
-    expect(usd.amount).toBe("4.00");
-    expect(eur.amount).toBe("12.50");
-  });
-
+describe("wallet changes", () => {
   it("selecting a wallet fills the default category and clearing it removes both", () => {
     const initial = createSettlementFormValues({
       viewerUid: "user-a",
       friendUid: "user-b",
+      currency: "EUR",
       balances,
       today,
     })!;
@@ -168,6 +159,7 @@ describe("amount issue", () => {
   const values = createSettlementFormValues({
     viewerUid: "user-a",
     friendUid: "user-b",
+    currency: "EUR",
     balances,
     today,
   })!;
@@ -203,6 +195,7 @@ describe("date issue", () => {
   const values = createSettlementFormValues({
     viewerUid: "user-a",
     friendUid: "user-b",
+    currency: "EUR",
     balances,
     today,
   })!;
@@ -298,6 +291,7 @@ describe("direction and payload", () => {
     const values = createSettlementFormValues({
       viewerUid: "user-a",
       friendUid: "user-b",
+      currency: "EUR",
       balances,
       today,
     })!;
@@ -324,6 +318,7 @@ describe("direction and payload", () => {
     const values = createSettlementFormValues({
       viewerUid: "user-a",
       friendUid: "user-b",
+      currency: "EUR",
       balances,
       today,
     })!;
@@ -342,6 +337,7 @@ describe("direction and payload", () => {
       ...createSettlementFormValues({
         viewerUid: "user-a",
         friendUid: "user-b",
+        currency: "EUR",
         balances,
         today,
       })!,

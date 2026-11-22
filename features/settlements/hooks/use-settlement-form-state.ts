@@ -28,10 +28,10 @@ export interface UseSettlementFormStateOptions {
 }
 
 /**
- * Draft values plus the bound and direction of the selected currency. A new
- * pair, or a refresh that changes the default currency, replaces the draft;
- * a refresh of the selected currency's debt only moves the bound, so the typed
- * amount is never overwritten.
+ * Draft values plus the bound and direction of the resolved currency. A
+ * different pair or currency replaces the draft; a refresh of the same
+ * currency's debt only moves the bound, so the typed amount is never
+ * overwritten.
  */
 export function useSettlementFormState({
   initialValues,

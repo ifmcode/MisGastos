@@ -30,6 +30,8 @@ export interface SettlementCurrencyOption {
 export interface SettlementFormDefaults {
   viewerUid: string;
   friendUid: string;
+  /** Currency chosen in the debt step; it must still have a debt. */
+  currency: CurrencyCode;
   balances: readonly FriendBalance[];
   today: string;
 }

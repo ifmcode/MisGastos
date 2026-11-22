@@ -7,18 +7,16 @@ import { FormActions } from "@/shared/components/molecules/form-actions";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
+import { formatCurrencyLabel } from "@/shared/utils/currency-label";
 
 import type { SettlementFormController } from "../hooks/use-settlement-form";
 import { settlementsStyles as styles } from "../styles/settlements.styles";
-import type { SettlementCurrencyOption } from "../utils/settlement-form";
-import { SettlementFormCurrencyChips } from "./settlement-form-currency-chips";
 import { SettlementFormDebtCard } from "./settlement-form-debt-card";
 import { SettlementFormMainFields } from "./settlement-form-main-fields";
 import { SettlementFormWalletBlock } from "./settlement-form-wallet-block";
 
 export interface SettlementFormBodyProps {
   form: SettlementFormController;
-  options: readonly SettlementCurrencyOption[];
   isEditing: boolean;
   amountLocked: boolean;
   wallets: readonly Wallet[];
@@ -31,7 +29,6 @@ export interface SettlementFormBodyProps {
 /** Fields, debtor/creditor block, notice and actions of the settlement form. */
 export function SettlementFormBody({
   form,
-  options,
   isEditing,
   amountLocked,
   wallets,
@@ -65,16 +62,9 @@ export function SettlementFormBody({
   return (
     <>
       <SettlementFormDebtCard
+        currencyLabel={formatCurrencyLabel(values.currency)}
         amount={amount}
         viewerIsCreditor={resolvedCreditor}
-      />
-
-      <SettlementFormCurrencyChips
-        value={values.currency}
-        options={options}
-        disabled={submitting || isEditing}
-        error={errors.currency}
-        onChange={form.changeCurrency}
       />
 
       <SettlementFormMainFields

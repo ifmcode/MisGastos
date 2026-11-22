@@ -1,5 +1,4 @@
 import type { Category } from "@/features/categories/types/category.types";
-import type { CurrencyCode } from "@/shared/constants/currencies";
 
 import type { SettlementFieldErrors } from "../schemas/settlement-validation.types";
 import type { SettlementInput } from "../types/settlement.types";
@@ -29,7 +28,6 @@ export interface SettlementFormController extends SettlementFormState {
   errors: SettlementFieldErrors;
   amountIssue: SettlementAmountIssue | null;
   dateIssue: SettlementDateIssue | null;
-  changeCurrency: (currency: CurrencyCode) => void;
   changeAmount: (amount: string) => void;
   selectDate: (isoDate: string) => void;
   changeNote: (note: string) => void;

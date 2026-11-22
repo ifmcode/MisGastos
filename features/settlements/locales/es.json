@@ -49,8 +49,6 @@
     "save": "Guardar",
     "saveAccessibility": "Guardar la liquidación",
     "saving": "Guardando…",
-    "currencyLabel": "Moneda",
-    "currencyAccessibility": "Liquidar la deuda en {{name}}",
     "outstanding": "Deuda pendiente: {{amount}}",
     "amountSectionLabel": "Importe a liquidar",
     "amountAccessibility": "Importe de la liquidación",
@@ -86,7 +84,15 @@
     "missingMessage": "Esta deuda ya está saldada. Vuelve al detalle del amigo para ver los gastos.",
     "back": "Volver",
     "backAccessibility": "Volver al detalle del amigo",
-    "backHint": "Vuelve a la pantalla anterior."
+    "backHint": "Vuelve a la pantalla anterior.",
+    "debtStep": {
+      "title": "¿Qué deuda quieres liquidar?",
+      "subtitle": "Elige la moneda de la deuda con {{name}}.",
+      "rowAccessibility": "Liquidar la deuda de {{amount}} en {{currency}}. {{direction}}.",
+      "listAccessibility": "Deudas pendientes por moneda",
+      "empty": "No hay deuda que liquidar.",
+      "emptyMessage": "La deuda se ha saldado mientras elegías. Vuelve al detalle del amigo para ver los gastos."
+    }
   },
   "friendDetail": {
     "settle": "Liquidar deudas",

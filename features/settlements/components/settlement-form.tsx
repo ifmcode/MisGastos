@@ -20,7 +20,7 @@ import { SettlementFormBody } from "./settlement-form-body";
 
 export interface SettlementFormProps {
   initialValues: SettlementFormValues;
-  /** Currencies with a debt; in edit mode it carries the editable bound. */
+  /** Debt currencies; they only resolve the amount bound and the direction. */
   options: readonly SettlementCurrencyOption[];
   friendName: string;
   /** Bound used when `options` has no entry for the selected currency. */
@@ -95,7 +95,6 @@ export function SettlementForm({
           >
             <SettlementFormBody
               form={form}
-              options={options}
               isEditing={isEditing}
               amountLocked={amountLocked}
               wallets={wallets}

@@ -15,23 +15,31 @@ export function formatSettlementAmountInput(cents: number): string {
 }
 
 /**
- * Only currencies with a real debt can be settled. The order follows
- * `Friend.balances[]` (EUR first) so the default does not depend on the device.
+ * Only currencies with a real debt can be settled. The net is normalized first,
+ * so a `NaN` or `Infinity` balance cannot become a 0,00 row. The order follows
+ * `Friend.balances[]` (EUR first) so the step order does not depend on the
+ * device.
  */
 export function getSettlementCurrencyOptions(
   balances: readonly FriendBalance[],
 ): SettlementCurrencyOption[] {
-  return balances
-    .filter((balance) => balance.netBalanceCents !== 0)
-    .map((balance) => ({
-      currency: balance.currency,
-      netBalanceCents: balance.netBalanceCents,
-      debtCents: Math.abs(toCents(balance.netBalanceCents)),
-      direction:
-        getSettlementDirection(balance.netBalanceCents) === "friend-owes-viewer"
-          ? "friend-owes-viewer"
-          : "viewer-owes-friend",
-    }));
+  return balances.flatMap<SettlementCurrencyOption>((balance) => {
+    const cents = toCents(balance.netBalanceCents);
+
+    if (cents === 0) return [];
+
+    return [
+      {
+        currency: balance.currency,
+        netBalanceCents: cents,
+        debtCents: Math.abs(cents),
+        direction:
+          getSettlementDirection(cents) === "friend-owes-viewer"
+            ? "friend-owes-viewer"
+            : "viewer-owes-friend",
+      },
+    ];
+  });
 }
 
 export function getSettlementCurrencyOption(

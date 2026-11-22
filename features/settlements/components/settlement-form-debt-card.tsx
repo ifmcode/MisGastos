@@ -7,13 +7,16 @@ import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 import { settlementsStyles as styles } from "../styles/settlements.styles";
 
 export interface SettlementFormDebtCardProps {
+  /** Already formatted debt currency (`EUR €`); the form has no selector. */
+  currencyLabel: string;
   /** Already formatted debt of the selected currency. */
   amount: string;
   viewerIsCreditor: boolean;
 }
 
-/** Outstanding debt of the selected currency plus the fixed direction. */
+/** Debt currency, outstanding amount and fixed direction of the settlement. */
 export function SettlementFormDebtCard({
+  currencyLabel,
   amount,
   viewerIsCreditor,
 }: SettlementFormDebtCardProps) {
@@ -27,6 +30,9 @@ export function SettlementFormDebtCard({
         { borderColor: theme.border, backgroundColor: theme.surface },
       ]}
     >
+      <ThemedText style={[styles.debtLabel, { color: theme.muted }]}>
+        {currencyLabel}
+      </ThemedText>
       <ThemedText style={[styles.debtLabel, { color: theme.muted }]}>
         {t("form.outstanding", { amount })}
       </ThemedText>

@@ -1,43 +1,42 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
-import { EmptyState } from "@/shared/components/molecules/empty-state";
-import { ErrorState } from "@/shared/components/molecules/error-state";
-import { LoadingState } from "@/shared/components/molecules/loading-state";
-import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { useSettlementCreateScreen } from "../hooks/use-settlement-create-screen";
 import { settlementsStyles as styles } from "../styles/settlements.styles";
+import { viewerIsCreditorFor } from "../utils/settlement-form";
+import { SettlementCreateState } from "./settlement-create-state";
+import { SettlementDebtStep } from "./settlement-debt-step";
 import { SettlementForm } from "./settlement-form";
-import { SettlementRouteHeader } from "./settlement-route-header";
 
 export interface SettlementCreateScreenProps {
   /** Route friend uid, already normalized to a single trimmed string. */
   friendUid: string;
+  /** Optional `currency` route param, already normalized; empty when absent. */
+  currency: string;
 }
 
-/** Create route: loads the pair debt and opens the shared settlement form. */
-export function SettlementCreateScreen({ friendUid }: SettlementCreateScreenProps) {
+/**
+ * Create route: loads the pair debt, decides between the debt-selection step
+ * and the shared settlement form, and never settles a defaulted currency.
+ */
+export function SettlementCreateScreen({
+  friendUid,
+  currency,
+}: SettlementCreateScreenProps) {
   const insets = useSafeAreaInsets();
-  const { t } = useScopedTranslation(["settlements", "common"]);
-  const screen = useSettlementCreateScreen({ friendUid });
-  const { initialValues, friendName, options } = screen;
-  const fallback = options[0];
+  const screen = useSettlementCreateScreen({ friendUid, currency });
+  const { status, friendName, options, selectedOption, initialValues } = screen;
 
-  return (
-    <ThemedView
-      style={[
-        styles.container,
-        screen.status === "ready" ? null : { paddingTop: insets.top + 16 },
-      ]}
-    >
-      {screen.status === "ready" && initialValues && friendName ? (
+  if (status === "ready" && initialValues && selectedOption) {
+    return (
+      <ThemedView style={styles.container}>
         <SettlementForm
           initialValues={initialValues}
           options={options}
           friendName={friendName}
-          debtCents={0}
-          viewerIsCreditor={fallback?.direction === "friend-owes-viewer"}
+          debtCents={selectedOption.debtCents}
+          viewerIsCreditor={viewerIsCreditorFor(selectedOption)}
           wallets={screen.wallets}
           categories={screen.categories}
           fieldErrors={screen.fieldErrors}
@@ -48,43 +47,28 @@ export function SettlementCreateScreen({ friendUid }: SettlementCreateScreenProp
           onSubmit={screen.submit}
           onCancel={screen.leave}
         />
-      ) : (
-        <>
-          <SettlementRouteHeader
-            title={t("form.createTitle")}
-            subtitle={
-              friendName ? t("form.subtitle", { name: friendName }) : undefined
-            }
-            onBack={screen.leave}
-          />
+      </ThemedView>
+    );
+  }
 
-          {screen.status === "loading" ? (
-            <LoadingState message={t("form.loading")} />
-          ) : screen.status === "error" ? (
-            <ErrorState
-              title={t("form.errorTitle")}
-              message={screen.error ?? ""}
-              retryLabel={t("common:actions.retry")}
-              retryAccessibilityLabel={t("form.retryAccessibility")}
-              onRetry={screen.reload}
-            />
-          ) : (
-            <EmptyState
-              icon="checkmark-done-outline"
-              title={
-                screen.status === "missing"
-                  ? t("errors.FRIEND_NOT_FOUND")
-                  : t("form.missingTitle")
-              }
-              message={t("form.missingMessage")}
-              primaryAction={{
-                label: t("form.back"),
-                accessibilityLabel: t("form.backAccessibility"),
-                onPress: screen.leave,
-              }}
-            />
-          )}
-        </>
+  return (
+    <ThemedView style={[styles.container, { paddingTop: insets.top + 16 }]}>
+      {status === "select" ? (
+        <SettlementDebtStep
+          friendName={friendName}
+          options={options}
+          onSelect={screen.selectCurrency}
+          onBack={screen.leave}
+        />
+      ) : (
+        <SettlementCreateState
+          status={status}
+          friendName={friendName}
+          debtDisappeared={screen.debtDisappeared}
+          error={screen.error}
+          onBack={screen.leave}
+          onRetry={screen.reload}
+        />
       )}
     </ThemedView>
   );

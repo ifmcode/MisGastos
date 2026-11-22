@@ -1,13 +1,11 @@
 import { useState } from "react";
 
-import type { CurrencyCode } from "@/shared/constants/currencies";
 import { formatDateInput } from "@/shared/utils/date";
 
 import type { SettlementFieldErrors } from "../schemas/settlement-validation.types";
 import {
   getSettlementAmountIssue,
   getSettlementDateIssue,
-  selectSettlementCurrency,
   selectSettlementWallet,
   toSettlementInput,
 } from "../utils/settlement-form";
@@ -26,8 +24,9 @@ export type {
 
 /**
  * Values of the settlement form. The debt bound and the direction always follow
- * the selected currency option, so a currency change cannot settle a different
- * amount than the one shown in the debt card.
+ * the currency option resolved by the debt step; the currency is immutable
+ * inside the form, so it cannot settle a different amount than the one shown in
+ * the debt card.
  */
 export function useSettlementForm({
   initialValues,
@@ -59,11 +58,6 @@ export function useSettlementForm({
       found.forEach((field) => delete next[field]);
       return next;
     });
-  }
-
-  function changeCurrency(currency: CurrencyCode) {
-    setValues((current) => selectSettlementCurrency(current, currency, options));
-    clearErrors("currency", "amount", "walletId", "categoryId");
   }
 
   function changeAmount(amount: string) {
@@ -114,7 +108,6 @@ export function useSettlementForm({
     errors,
     amountIssue: getSettlementAmountIssue(values, boundCents),
     dateIssue: getSettlementDateIssue(values),
-    changeCurrency,
     changeAmount,
     selectDate,
     changeNote,

@@ -1,4 +1,3 @@
-import type { CurrencyCode } from "@/shared/constants/currencies";
 import { formatDateInput } from "@/shared/utils/date";
 
 import type { Settlement } from "../types/settlement.types";
@@ -8,30 +7,35 @@ import {
   getSettlementCurrencyOptions,
 } from "./settlement-form-currency";
 import type {
-  SettlementCurrencyOption,
   SettlementFormDefaults,
   SettlementFormValues,
 } from "./settlement-form.types";
 
 /**
- * Create defaults: the first debt currency, its full outstanding debt and
- * today. The amount stays editable; it is only a starting point.
+ * Create defaults: the currency chosen in the debt step, its full outstanding
+ * debt and today. It returns `null` when that currency has no debt, so a forged
+ * or stale choice never settles a defaulted currency. The amount stays
+ * editable; it is only a starting point.
  */
 export function createSettlementFormValues({
   viewerUid,
   friendUid,
+  currency,
   balances,
   today,
 }: SettlementFormDefaults): SettlementFormValues | null {
-  const [first] = getSettlementCurrencyOptions(balances);
+  const option = getSettlementCurrencyOption(
+    getSettlementCurrencyOptions(balances),
+    currency,
+  );
 
-  if (!first) return null;
+  if (!option) return null;
 
   return {
     viewerUid,
     friendUid,
-    currency: first.currency,
-    amount: formatSettlementAmountInput(first.debtCents),
+    currency: option.currency,
+    amount: formatSettlementAmountInput(option.debtCents),
     date: today,
     dateText: formatDateInput(today),
     note: "",
@@ -69,23 +73,6 @@ export function createSettlementEditFormValues({
     categoryId: viewerIsCreditor
       ? (settlement.receiverCategoryId ?? "")
       : "",
-  };
-}
-
-/** Switching currency prefills the full outstanding debt of the new one. */
-export function selectSettlementCurrency(
-  values: SettlementFormValues,
-  currency: CurrencyCode,
-  options: readonly SettlementCurrencyOption[],
-): SettlementFormValues {
-  const option = getSettlementCurrencyOption(options, currency);
-
-  return {
-    ...values,
-    currency,
-    amount: formatSettlementAmountInput(option?.debtCents ?? 0),
-    walletId: "",
-    categoryId: "",
   };
 }
 
