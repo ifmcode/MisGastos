@@ -61,11 +61,10 @@ export function TransferForm({
     currency,
     symbol,
     amountHelper,
-    dateText,
     canSubmit,
     updateValue,
     changeFromWallet,
-    changeDate,
+    selectDate,
     submit,
   } = useTransferForm({
     wallets,
@@ -133,11 +132,10 @@ export function TransferForm({
             />
 
             <TransferFormDateField
-              text={dateText}
-              value={values.date}
+              valueIso={values.date}
               error={errors.date}
               disabled={submitting}
-              onChange={changeDate}
+              onSelectDate={selectDate}
             />
 
             <TransferFormNotesField

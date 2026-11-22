@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { CurrencyCode } from "@/shared/constants/currencies";
-import { parseDateInput } from "@/shared/utils/date";
+import { formatDateInput } from "@/shared/utils/date";
 
 import type { SettlementFieldErrors } from "../schemas/settlement-validation.types";
 import {
@@ -71,11 +71,11 @@ export function useSettlementForm({
     clearErrors("amount");
   }
 
-  function changeDateText(text: string) {
+  function selectDate(isoDate: string) {
     setValues((current) => ({
       ...current,
-      dateText: text,
-      date: parseDateInput(text) ?? "",
+      date: isoDate,
+      dateText: formatDateInput(isoDate),
     }));
     clearErrors("date");
   }
@@ -116,7 +116,7 @@ export function useSettlementForm({
     dateIssue: getSettlementDateIssue(values),
     changeCurrency,
     changeAmount,
-    changeDateText,
+    selectDate,
     changeNote,
     changeWallet,
     changeCategory,

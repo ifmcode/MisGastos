@@ -36,6 +36,7 @@ simplicidad de uso.
 - ⚖️ **Inclusión en el total** configurable por cartera.
 - 💸 **Ingresos y gastos** con actualización atómica del saldo de la cartera.
 - 🧾 **Historial de movimientos** con filtros y ordenamiento.
+- 🗓️ **Fecha sin escritura manual**: los formularios de movimientos, transferencias, gastos compartidos, gastos de grupo y liquidaciones, y los filtros de fechas, eligen el día con los chips **Hoy**/**Ayer** (y **Último** en movimientos y transferencias) o con el calendario, siempre fijo a la derecha de los chips. Una línea resume la selección con **Fecha seleccionada: DD/MM/AAAA** cuando el día no es rápido; un error de fecha ocupa ese mismo hueco.
 - 🔁 **Transferencias entre carteras** de la misma moneda, con historial inmutable y detalle de cada transferencia con editar y eliminar.
 - 📊 **Dashboard** con totales globales y por cartera agrupados por moneda, tres movimientos y tres transferencias recientes, detalle de movimientos y transferencias con editar y eliminar, acceso al historial completo y datos refrescados al volver a la pestaña.
 - 👤 **Perfil y moneda preferida** en Ajustes: nombre visible editable y sincronizado con Firebase Auth, correo de la cuenta, moneda por defecto para las nuevas carteras, los movimientos y las transferencias (un registro nuevo preselecciona una cartera activa de esa moneda y, si no hay, la primera como antes; una edición conserva lo guardado y una transferencia mantiene origen y destino en la misma moneda) y el interruptor **Registrar los gastos compartidos en una cartera por defecto**, que solo se aplica a los gastos compartidos nuevos.
@@ -214,8 +215,8 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
-Estado actual (21/11/2026): **330 suites / 2026 tests**; la cobertura acotada a la
-lógica de negocio está en **98,92 % de sentencias, 94,69 % de ramas, 98,57 % de
+Estado actual (21/11/2026): **331 suites / 2035 tests**; la cobertura acotada a la
+lógica de negocio está en **98,92 % de sentencias, 94,7 % de ramas, 98,57 % de
 funciones y 99,5 % de líneas**, y `npm run check:copy` audita **307 archivos TSX**.
 
 ## 🗺️ Roadmap
@@ -236,6 +237,7 @@ funciones y 99,5 % de líneas**, y `npm run check:copy` audita **307 archivos TS
 - [x] Menú de creación en Movimientos con gasto con amigo y gasto de grupo
 - [x] Liquidación de deudas 1:1 con aplicación directa y notificaciones
 - [x] Importe editable en la liquidación 1:1 con la deuda restante en vivo (TICKET-062)
+- [x] Campos de fecha sin escritura manual y calendario fijo a la derecha (TICKET-063)
 - [x] Historial unificado de gastos compartidos y liquidaciones en el detalle de amigo
 - [x] Historial saldado plegado tras una liquidación completa, con separador al desplegarlo
 - [x] Bandeja de notificaciones in-app con pestañas **Pendientes**/**Vistas** y aviso flotante
@@ -286,6 +288,7 @@ Consulta el roadmap completo en
 - [Código de grupo y solicitudes de unión (TICKET-061, 20/11/2026)](docs/project/development-notes/session-notes/2026-11-20-group-join-code.md): `joinCode` de 8 caracteres con proyección `groupCodes`, backfill perezoso del propietario, `groupJoinRequests` con estados terminales, aceptación transaccional con el límite de 20, notificaciones `group-join-request`/`group-join-accepted`/`group-join-rejected`, pantalla **Unirse a grupo**, reglas con `getAfter`, decisiones aceptadas y despliegue pendiente.
 - [Gastos de grupo (TICKET-009, 21/11/2026)](docs/project/development-notes/session-notes/2026-11-21-group-expenses.md): colección raíz `groupExpenses`, moneda por gasto, motor de reparto con `minParticipants`, selección de participantes y pagador, permisos, ledger directo para TICKET-010, ruta de detalle, reglas con una lectura de grupo y el caso de participantes que ya no son miembros.
 - [Importe editable en la liquidación (TICKET-062, 21/11/2026)](docs/project/development-notes/session-notes/2026-11-21-settlement-amount-section.md): sección única **Importe a liquidar** siempre editable, helper `getSettlementAmountState` con los estados restante/saldada/excedida, prefill de la deuda completa, bloqueo de TICKET-046, anuncio diferido en iOS del `AmountField` y contrato de reutilización para TICKET-010.
+- [Campo de fecha sin escritura manual (TICKET-063, 21/11/2026)](docs/project/development-notes/session-notes/2026-11-21-date-field-without-input.md): selector compartido con chips y calendario fijo a la derecha, resumen derivado (`getDateFieldSummary`), handlers `selectDate` en los seis consumidores, filtros con rango vacío válido y limpieza de las claves `dateHelper`/`placeholder`.
 - [Decisiones de gastos de grupo y membresía (20/11/2026)](docs/project/development-notes/session-notes/2026-11-20-group-expenses-and-membership-decisions.md): saldo neto pagado − cuota, selección de participantes, simplificación de deudas con ajuste por grupo, permisos de edición, salida con deuda saldada y transferencia de propiedad.
 - [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)

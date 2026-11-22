@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import type { Wallet } from "@/features/wallets/types/wallet.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
-import { parseDateInput } from "@/shared/utils/date";
+import { formatDateInput } from "@/shared/utils/date";
 
 import type { SharedExpenseFieldErrors } from "../schemas/shared-expense.schema";
 import type { ExpenseSplitMode } from "../types/shared-expense.types";
@@ -45,7 +45,7 @@ export interface SharedExpenseFormState {
   /** Turns the linked movement on or off; off clears the wallet and category. */
   changeRegisterInWallet: (enabled: boolean) => void;
   changeFriend: (friendUid: string) => void;
-  changeDateText: (text: string) => void;
+  selectDate: (isoDate: string) => void;
   changeSplitMode: (mode: ExpenseSplitMode) => void;
   changeSplitValue: (userId: string, value: string) => void;
   /** Replaces the local errors with the ones a submit produced. */
@@ -114,9 +114,12 @@ export function useSharedExpenseFormState({
     clearError("participants", "payerId");
   }
 
-  function changeDateText(text: string) {
-    const isoDate = parseDateInput(text) ?? "";
-    setValues((current) => ({ ...current, dateText: text, date: isoDate }));
+  function selectDate(isoDate: string) {
+    setValues((current) => ({
+      ...current,
+      date: isoDate,
+      dateText: formatDateInput(isoDate),
+    }));
     clearError("date");
   }
 
@@ -141,7 +144,7 @@ export function useSharedExpenseFormState({
     changeCategory,
     changeRegisterInWallet,
     changeFriend,
-    changeDateText,
+    selectDate,
     changeSplitMode,
     changeSplitValue,
     setValidationErrors,

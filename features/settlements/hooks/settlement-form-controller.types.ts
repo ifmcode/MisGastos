@@ -31,7 +31,7 @@ export interface SettlementFormController extends SettlementFormState {
   dateIssue: SettlementDateIssue | null;
   changeCurrency: (currency: CurrencyCode) => void;
   changeAmount: (amount: string) => void;
-  changeDateText: (text: string) => void;
+  selectDate: (isoDate: string) => void;
   changeNote: (note: string) => void;
   changeWallet: (walletId: string) => void;
   changeCategory: (categoryId: string) => void;

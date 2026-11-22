@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import { formatDateInput, parseDateInput } from "@/shared/utils/date";
 import { CurrencyCode } from "@/shared/constants/currencies";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { getCurrencySymbol } from "@/features/wallets/utils/money";
@@ -36,14 +35,13 @@ export interface UseTransferFormResult {
   availableSourceBalance: number;
   projectedSourceBalance: number;
   amountHelper: string | undefined;
-  dateText: string;
   canSubmit: boolean;
   updateValue: <K extends keyof TransferFormValues>(
     key: K,
     value: TransferFormValues[K],
   ) => void;
   changeFromWallet: (walletId: string) => void;
-  changeDate: (text: string) => void;
+  selectDate: (isoDate: string) => void;
   submit: () => void;
 }
 
@@ -59,9 +57,6 @@ export function useTransferForm({
     getInitialTransferFormValues(initialValues),
   );
   const [localErrors, setLocalErrors] = useState<TransferValidationErrors>({});
-  const [dateText, setDateText] = useState(() =>
-    values.date ? formatDateInput(values.date) : "",
-  );
 
   const derived = useTransferFormDerived({
     wallets,
@@ -117,17 +112,8 @@ export function useTransferForm({
     });
   }
 
-  function changeDate(text: string) {
-    setDateText(text);
-
-    const parsed = parseDateInput(text);
-    if (parsed) {
-      updateValue("date", parsed);
-      return;
-    }
-
-    setValues((current) => ({ ...current, date: "" }));
-    clearLocalError("date");
+  function selectDate(isoDate: string) {
+    updateValue("date", isoDate);
   }
 
   function submit() {
@@ -152,11 +138,10 @@ export function useTransferForm({
     errors,
     ...derived,
     symbol: getCurrencySymbol(derived.currency),
-    dateText,
     canSubmit: Boolean(derived.fromWallet) && Boolean(derived.toWallet),
     updateValue,
     changeFromWallet,
-    changeDate,
+    selectDate,
     submit,
   };
 }

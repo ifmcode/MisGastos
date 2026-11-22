@@ -15,9 +15,9 @@ export interface SharedExpenseFormValues {
   description: string;
   amount: string;
   currency: CurrencyCode;
-  /** ISO date (`YYYY-MM-DD`); empty while the user types an invalid date. */
+  /** ISO date (`YYYY-MM-DD`). */
   date: string;
-  /** Same date as typed (`DD/MM/YYYY`). */
+  /** Display text derived from `date` (`DD/MM/YYYY`). */
   dateText: string;
   payerId: string;
   splitMode: ExpenseSplitMode;

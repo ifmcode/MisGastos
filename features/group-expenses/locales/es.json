@@ -56,7 +56,6 @@
     "currencyGroupAccessibility": "Monedas disponibles",
     "dateLabel": "Fecha",
     "dateAccessibility": "Fecha del gasto del grupo",
-    "dateHelper": "Formato DD/MM/AAAA.",
     "participantsLabel": "Participantes",
     "participantsHelper": "Solo los seleccionados reciben una parte. Al crear, están todos marcados.",
     "participantsEmpty": "Selecciona al menos un participante.",

@@ -57,7 +57,7 @@ export function GroupExpenseFormBody({
         onDescriptionChange={form.changeDescription}
         onAmountChange={form.changeAmount}
         onCurrencyChange={form.changeCurrency}
-        onDateTextChange={form.changeDateText}
+        onDateSelect={form.selectDate}
       />
 
       <GroupExpenseParticipantsField

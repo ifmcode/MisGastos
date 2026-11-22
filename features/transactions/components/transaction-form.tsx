@@ -56,8 +56,21 @@ export function TransactionForm({
   onCategoryCreated,
 }: TransactionFormProps) {
   const theme = useFormTheme();
-  const { values, errors, categories: typeCategories, dateText, symbol, updateValue, changeDate, submit } =
-    useTransactionForm({ wallets, categories, initialValues, fieldErrors, onSubmit });
+  const {
+    values,
+    errors,
+    categories: typeCategories,
+    symbol,
+    updateValue,
+    selectDate,
+    submit,
+  } = useTransactionForm({
+    wallets,
+    categories,
+    initialValues,
+    fieldErrors,
+    onSubmit,
+  });
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -123,11 +136,10 @@ export function TransactionForm({
             />
 
             <TransactionFormDateField
-              text={dateText}
-              value={values.date}
+              valueIso={values.date}
               error={errors.date}
               disabled={submitting}
-              onChange={changeDate}
+              onSelectDate={selectDate}
             />
 
             <TransactionFormNotesField

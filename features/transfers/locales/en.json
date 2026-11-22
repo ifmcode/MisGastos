@@ -22,7 +22,6 @@
     "amountHelper": "Available: {{available}} · Resulting balance: {{projected}}",
     "insufficientBalance": "Insufficient balance. Available: {{amount}}.",
     "date": "Date",
-    "dateHelper": "Tap Today or Yesterday, or choose another date.",
     "dateAccessibility": "Transfer date",
     "notes": "Notes (optional)",
     "notesPlaceholder": "E.g. Transfer to savings",

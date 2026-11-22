@@ -7,9 +7,9 @@ export interface SettlementFormValues {
   friendUid: string;
   currency: CurrencyCode;
   amount: string;
-  /** ISO date (`YYYY-MM-DD`); empty while the user types an invalid date. */
+  /** ISO date (`YYYY-MM-DD`). */
   date: string;
-  /** Same date as typed (`DD/MM/YYYY`). */
+  /** Display text derived from `date` (`DD/MM/YYYY`). */
   dateText: string;
   note: string;
   /** Creditor-owned wallet; empty keeps the settlement without a movement. */

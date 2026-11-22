@@ -7,23 +7,15 @@ import { DateQuickSelector } from "@/shared/components/molecules/date-quick-sele
 import { transactionFiltersStyles as styles } from "../styles/transaction-filters.styles";
 
 export interface TransactionFiltersDateRangeProps {
-  fromText: string;
   fromIso: string;
-  toText: string;
   toIso: string;
-  onChangeFrom: (text: string) => void;
-  onChangeTo: (text: string) => void;
   onSelectFrom: (isoDate: string) => void;
   onSelectTo: (isoDate: string) => void;
 }
 
 export function TransactionFiltersDateRange({
-  fromText,
   fromIso,
-  toText,
   toIso,
-  onChangeFrom,
-  onChangeTo,
   onSelectFrom,
   onSelectTo,
 }: TransactionFiltersDateRangeProps) {
@@ -35,10 +27,8 @@ export function TransactionFiltersDateRange({
         {t("filters.from")}
       </ThemedText>
       <DateQuickSelector
-        text={fromText}
         valueIso={fromIso}
         accessibilityLabel={t("filters.fromAccessibility")}
-        onChangeText={onChangeFrom}
         onSelectDate={onSelectFrom}
       />
 
@@ -46,10 +36,8 @@ export function TransactionFiltersDateRange({
         {t("filters.to")}
       </ThemedText>
       <DateQuickSelector
-        text={toText}
         valueIso={toIso}
         accessibilityLabel={t("filters.toAccessibility")}
-        onChangeText={onChangeTo}
         onSelectDate={onSelectTo}
       />
     </View>

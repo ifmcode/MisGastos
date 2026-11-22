@@ -47,13 +47,9 @@ export function TransactionFiltersModal({
   const { t } = useTranslation("transactions");
   const {
     localFilters,
-    fromText,
-    toText,
     fromIso,
     toIso,
     updateFilters,
-    changeFromDate,
-    changeToDate,
     selectFromDate,
     selectToDate,
     apply,
@@ -125,12 +121,8 @@ export function TransactionFiltersModal({
 
             <ThemedText style={styles.label}>{t("filters.dateRange")}</ThemedText>
             <TransactionFiltersDateRange
-              fromText={fromText}
               fromIso={fromIso}
-              toText={toText}
               toIso={toIso}
-              onChangeFrom={changeFromDate}
-              onChangeTo={changeToDate}
               onSelectFrom={selectFromDate}
               onSelectTo={selectToDate}
             />

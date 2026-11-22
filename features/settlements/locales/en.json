@@ -60,7 +60,6 @@
     "amountLocked": "The amount is locked because the other friend already linked their wallet.",
     "dateLabel": "Transfer date",
     "dateAccessibility": "Transfer date of the settlement",
-    "dateHelper": "Format DD/MM/YYYY. It cannot be a future date.",
     "noteLabel": "Note (optional)",
     "notePlaceholder": "Reason or detail…",
     "noteAccessibility": "Settlement note",

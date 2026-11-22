@@ -75,7 +75,7 @@ export function SharedExpenseFormBody({
         onDescriptionChange={form.changeDescription}
         onAmountChange={form.changeAmount}
         onCurrencyChange={form.changeCurrency}
-        onDateTextChange={form.changeDateText}
+        onDateSelect={form.selectDate}
       />
 
       <SharedExpenseFormParticipants

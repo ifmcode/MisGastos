@@ -89,7 +89,6 @@
     "currencyGroupAccessibility": "Monedas disponibles",
     "dateLabel": "Fecha",
     "dateAccessibility": "Fecha del gasto compartido",
-    "dateHelper": "Formato DD/MM/AAAA.",
     "payerLabel": "¿Quién pagó?",
     "payerYou": "Pagaste tú",
     "payerFriend": "Pagó {{name}}",

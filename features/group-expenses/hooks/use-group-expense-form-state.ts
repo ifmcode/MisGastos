@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { CurrencyCode } from "@/shared/constants/currencies";
-import { parseDateInput } from "@/shared/utils/date";
+import { formatDateInput } from "@/shared/utils/date";
 
 import type { GroupExpenseFieldErrors } from "../schemas/group-expense.schema";
 import type { ExpenseSplitMode } from "../types/group-expense.types";
@@ -30,7 +30,7 @@ export interface GroupExpenseFormState {
   changeAmount: (value: string) => void;
   changeCurrency: (currency: CurrencyCode) => void;
   changePayer: (payerId: string) => void;
-  changeDateText: (text: string) => void;
+  selectDate: (isoDate: string) => void;
   toggleParticipant: (userId: string) => void;
   toggleAllParticipants: () => void;
   changeSplitMode: (mode: ExpenseSplitMode) => void;
@@ -68,9 +68,12 @@ export function useGroupExpenseFormState({
     clearError("payerId");
   }
 
-  function changeDateText(text: string) {
-    const isoDate = parseDateInput(text) ?? "";
-    setValues((current) => ({ ...current, dateText: text, date: isoDate }));
+  function selectDate(isoDate: string) {
+    setValues((current) => ({
+      ...current,
+      date: isoDate,
+      dateText: formatDateInput(isoDate),
+    }));
     clearError("date");
   }
 
@@ -109,7 +112,7 @@ export function useGroupExpenseFormState({
     changeAmount,
     changeCurrency,
     changePayer,
-    changeDateText,
+    selectDate,
     toggleParticipant,
     toggleAllParticipants,
     changeSplitMode,

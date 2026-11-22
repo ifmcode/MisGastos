@@ -22,7 +22,6 @@
     "amountHelper": "Disponible: {{available}} · Saldo resultante: {{projected}}",
     "insufficientBalance": "Saldo insuficiente. Disponible: {{amount}}.",
     "date": "Fecha",
-    "dateHelper": "Toca Hoy o Ayer, o elige otra fecha.",
     "dateAccessibility": "Fecha de la transferencia",
     "notes": "Notas (opcional)",
     "notesPlaceholder": "Ej. Traspaso al fondo de ahorro",

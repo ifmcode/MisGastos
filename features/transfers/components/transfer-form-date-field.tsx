@@ -2,34 +2,33 @@ import { useTranslation } from "react-i18next";
 
 import { DateFormField } from "@/shared/components/molecules/date-form-field";
 
+import type { TransferValidationCode } from "../schemas/transfer.schema";
+
 export interface TransferFormDateFieldProps {
-  text: string;
-  value: string;
-  error?: string;
+  valueIso: string;
+  error?: TransferValidationCode;
   disabled: boolean;
-  onChange: (text: string) => void;
+  onSelectDate: (isoDate: string) => void;
 }
 
 export function TransferFormDateField({
-  text,
-  value,
+  valueIso,
   error,
   disabled,
-  onChange,
+  onSelectDate,
 }: TransferFormDateFieldProps) {
-  const { t } = useTranslation("transfers");
+  const { t } = useTranslation(["transfers", "validation"]);
+  const errorText = error ? t(`validation:transfers.${error}`) : null;
 
   return (
     <DateFormField
       label={t("form.date")}
-      text={text}
-      value={value}
-      error={error}
-      helperText={t("form.dateHelper")}
+      valueIso={valueIso}
+      error={errorText ?? undefined}
       accessibilityLabel={t("form.dateAccessibility")}
       disabled={disabled}
       showLastUsedDate
-      onChange={onChange}
+      onSelectDate={onSelectDate}
     />
   );
 }

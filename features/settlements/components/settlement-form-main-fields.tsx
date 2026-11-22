@@ -70,13 +70,11 @@ export function SettlementFormMainFields({
 
       <DateFormField
         label={t("form.dateLabel")}
-        text={values.dateText}
-        value={values.date}
+        valueIso={values.date}
         error={errorText(errors.date ?? form.dateIssue) ?? undefined}
-        helperText={t("form.dateHelper")}
         accessibilityLabel={t("form.dateAccessibility")}
         disabled={disabled}
-        onChange={form.changeDateText}
+        onSelectDate={form.selectDate}
       />
 
       <NotesField

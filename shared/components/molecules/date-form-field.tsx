@@ -1,5 +1,4 @@
 import { ThemedText } from "@/components/themed-text";
-import { formatDateInput } from "@/shared/utils/date";
 
 import { DateQuickSelector } from "./date-quick-selector";
 import { formFieldStyles as styles } from "./form-field.styles";
@@ -7,41 +6,34 @@ import { formFieldStyles as styles } from "./form-field.styles";
 export interface DateFormFieldProps {
   /** Already translated copy. */
   label: string;
-  text: string;
-  value: string;
+  valueIso: string;
   error?: string;
-  helperText: string;
   accessibilityLabel: string;
   disabled: boolean;
   showLastUsedDate?: boolean;
-  onChange: (text: string) => void;
+  onSelectDate: (isoDate: string) => void;
 }
 
 /** Labelled wrapper around the shared quick date selector used by forms. */
 export function DateFormField({
   label,
-  text,
-  value,
+  valueIso,
   error,
-  helperText,
   accessibilityLabel,
   disabled,
   showLastUsedDate = false,
-  onChange,
+  onSelectDate,
 }: DateFormFieldProps) {
   return (
     <>
       <ThemedText style={styles.label}>{label}</ThemedText>
       <DateQuickSelector
-        text={text}
-        valueIso={value}
+        valueIso={valueIso}
         error={error}
         disabled={disabled}
-        helperText={helperText}
         showLastUsedDate={showLastUsedDate}
         accessibilityLabel={accessibilityLabel}
-        onChangeText={onChange}
-        onSelectDate={(isoDate) => onChange(formatDateInput(isoDate))}
+        onSelectDate={onSelectDate}
       />
     </>
   );

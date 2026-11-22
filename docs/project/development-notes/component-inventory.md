@@ -168,11 +168,15 @@ keeps its translation keys, label differences and the delete confirmation flow.
 |---|---|
 | `AmountField` | `label`, `value`, `symbol`, `placeholder`, `accessibilityLabel`, `errorText?`, `helperText?`, `helperLive?`, `disabled`, `onChange` |
 | `NotesField` | `label`, `value`, `placeholder`, `accessibilityLabel`, `maxLength`, `errorText?`, `disabled`, `onChange` |
-| `DateFormField` | `label`, `text`, `value`, `error?`, `helperText`, `accessibilityLabel`, `disabled`, `showLastUsedDate?`, `onChange` |
+| `DateFormField` | `label`, `valueIso`, `error?`, `accessibilityLabel`, `disabled`, `showLastUsedDate?`, `onSelectDate` |
 
-Consumers: the transaction and transfer forms through their existing feature
-wrappers, which resolve validation codes and translation keys, and the
-settlement amount section through `SettlementFormMainFields`.
+Consumers: the transaction, transfer, shared-expense, group-expense and
+settlement forms, plus the transaction date filters through
+`DateQuickSelector` directly; the feature wrappers resolve validation codes and
+translation keys. Since TICKET-063 there is no manual input: `DateQuickSelector`
+renders the Hoy/Ayer (and optional Último) chips, a 48x48 calendar pinned at the
+right of a wrapping `flex: 1` chip group, and one summary/error line derived by
+`getDateFieldSummary` (`error` always wins the slot).
 
 `AmountField.helperLive` (opt-in, default `false`) marks the helper as polite
 live feedback: Android gets `accessibilityRole="text"` +

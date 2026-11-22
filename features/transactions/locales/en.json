@@ -43,7 +43,6 @@
     "notesPlaceholder": "Add extra details",
     "notesAccessibility": "Notes",
     "date": "Date",
-    "dateHelper": "Tap Today or Yesterday, or choose another date.",
     "dateAccessibility": "Date",
     "wallet": "Wallet",
     "noWallets": "You have no wallets. Create one in the \"Wallets\" tab to record movements.",

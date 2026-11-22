@@ -11,7 +11,6 @@ import {
   TransactionValidationErrors,
 } from "../schemas/transaction.schema";
 import { TransactionFormValues } from "../types/transaction.types";
-import { formatDateInput, parseDateInput } from "@/shared/utils/date";
 import { getDefaultMovementIsoDate } from "@/shared/utils/date-defaults";
 import {
   findTransactionCategory,
@@ -31,13 +30,12 @@ export interface UseTransactionFormResult {
   values: TransactionFormValues;
   errors: TransactionValidationErrors;
   categories: ReturnType<typeof getCategoriesForType>;
-  dateText: string;
   symbol: string;
   updateValue: <K extends keyof TransactionFormValues>(
     key: K,
     value: TransactionFormValues[K],
   ) => void;
-  changeDate: (text: string) => void;
+  selectDate: (isoDate: string) => void;
   submit: () => void;
 }
 
@@ -55,9 +53,6 @@ export function useTransactionForm({
   }));
   const [localErrors, setLocalErrors] = useState<TransactionValidationErrors>(
     {},
-  );
-  const [dateText, setDateText] = useState(() =>
-    values.date ? formatDateInput(values.date) : "",
   );
 
   const errors: TransactionValidationErrors = {
@@ -112,17 +107,8 @@ export function useTransactionForm({
     });
   }
 
-  function changeDate(text: string) {
-    setDateText(text);
-
-    const parsed = parseDateInput(text);
-    if (parsed) {
-      updateValue("date", parsed);
-      return;
-    }
-
-    setValues((current) => ({ ...current, date: "" }));
-    setLocalErrors((current) => ({ ...current, date: undefined }));
+  function selectDate(isoDate: string) {
+    updateValue("date", isoDate);
   }
 
   function submit() {
@@ -153,10 +139,9 @@ export function useTransactionForm({
     values,
     errors,
     categories: typeCategories,
-    dateText,
     symbol: getCurrencySymbol(selectedWallet?.currency ?? values.currency),
     updateValue,
-    changeDate,
+    selectDate,
     submit,
   };
 }

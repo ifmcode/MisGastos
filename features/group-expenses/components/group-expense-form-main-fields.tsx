@@ -25,7 +25,7 @@ export interface GroupExpenseFormMainFieldsProps {
   onDescriptionChange: (value: string) => void;
   onAmountChange: (value: string) => void;
   onCurrencyChange: (currency: CurrencyCode) => void;
-  onDateTextChange: (text: string) => void;
+  onDateSelect: (isoDate: string) => void;
 }
 
 /** Description, total, currency and date of the group-expense form. */
@@ -36,7 +36,7 @@ export function GroupExpenseFormMainFields({
   onDescriptionChange,
   onAmountChange,
   onCurrencyChange,
-  onDateTextChange,
+  onDateSelect,
 }: GroupExpenseFormMainFieldsProps) {
   const theme = useFormTheme();
   const { t, tr } = useScopedTranslation("groupExpenses");
@@ -112,13 +112,11 @@ export function GroupExpenseFormMainFields({
 
       <DateFormField
         label={t("form.dateLabel")}
-        text={values.dateText}
-        value={values.date}
+        valueIso={values.date}
         error={errorText(errors.date) ?? undefined}
-        helperText={t("form.dateHelper")}
         accessibilityLabel={t("form.dateAccessibility")}
         disabled={disabled}
-        onChange={onDateTextChange}
+        onSelectDate={onDateSelect}
       />
     </View>
   );

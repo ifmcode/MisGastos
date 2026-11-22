@@ -1,11 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, TextInput, View } from "react-native";
+import { AccessibilityInfo, Platform, Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useLastUsedDate } from "@/shared/hooks/use-last-used-date";
+import { formatDateInput } from "@/shared/utils/date";
+import { getDateFieldSummary } from "@/shared/utils/date-field-summary";
 import {
   getDateQuickOptions,
   getLastUsedDateOption,
@@ -16,31 +18,26 @@ import { DateQuickChip } from "./date-quick-chip";
 import { dateQuickSelectorStyles as styles } from "./date-quick-selector.styles";
 
 export interface DateQuickSelectorProps {
-  text: string;
   valueIso: string;
   error?: string;
   disabled?: boolean;
-  helperText?: string;
   showLastUsedDate?: boolean;
   accessibilityLabel: string;
-  onChangeText: (text: string) => void;
   onSelectDate: (isoDate: string) => void;
 }
 
 export function DateQuickSelector({
-  text,
   valueIso,
   error,
   disabled = false,
-  helperText,
   showLastUsedDate = false,
   accessibilityLabel,
-  onChangeText,
   onSelectDate,
 }: DateQuickSelectorProps) {
   const theme = useFormTheme();
   const { t } = useTranslation("common");
   const [pickerVisible, setPickerVisible] = useState(false);
+  const mountedRef = useRef(false);
   const lastUsedDate = useLastUsedDate();
   const quickOptions = getDateQuickOptions();
   const lastOption = showLastUsedDate
@@ -50,6 +47,31 @@ export function DateQuickSelector({
     ? [lastOption, quickOptions.today, quickOptions.yesterday]
     : [quickOptions.today, quickOptions.yesterday];
 
+  const summary = getDateFieldSummary({
+    valueIso,
+    todayIso: quickOptions.today.isoDate,
+    lastUsedIso: lastUsedDate,
+  });
+  const summaryText =
+    summary === "selected"
+      ? t("date.selected", { date: formatDateInput(valueIso) })
+      : t("date.hint");
+  const slotText = error ?? summaryText;
+
+  // `accessibilityLiveRegion` only reaches Android; iOS needs an explicit
+  // queued announcement. The mount text is skipped so opening the form is not
+  // interrupted.
+  useEffect(() => {
+    const firstRender = !mountedRef.current;
+    mountedRef.current = true;
+
+    if (firstRender || Platform.OS !== "ios") return;
+
+    AccessibilityInfo.announceForAccessibilityWithOptions(slotText, {
+      queue: true,
+    });
+  }, [slotText]);
+
   function selectDate(isoDate: string) {
     setPickerVisible(false);
     onSelectDate(isoDate);
@@ -57,16 +79,18 @@ export function DateQuickSelector({
 
   return (
     <View>
-      <View style={styles.quickRow}>
-        {options.map((option) => (
-          <DateQuickChip
-            key={option.key}
-            option={option}
-            selected={valueIso === option.isoDate}
-            disabled={disabled}
-            onPress={() => selectDate(option.isoDate)}
-          />
-        ))}
+      <View style={styles.row}>
+        <View style={styles.quickRow}>
+          {options.map((option) => (
+            <DateQuickChip
+              key={option.key}
+              option={option}
+              selected={valueIso === option.isoDate}
+              disabled={disabled}
+              onPress={() => selectDate(option.isoDate)}
+            />
+          ))}
+        </View>
         {DATE_PICKER_SUPPORTED ? (
           <Pressable
             accessibilityRole="button"
@@ -95,35 +119,15 @@ export function DateQuickSelector({
         ) : null}
       </View>
 
-      <View style={styles.inputRow}>
-        <TextInput
-          value={text}
-          onChangeText={onChangeText}
-          placeholder={t("date.placeholder")}
-          placeholderTextColor={theme.muted}
-          editable={!disabled}
-          accessibilityLabel={accessibilityLabel}
-          style={[
-            styles.input,
-            {
-              backgroundColor: theme.surface,
-              borderColor: error ? theme.danger : theme.border,
-              color: theme.text,
-            },
-            disabled && styles.disabled,
-          ]}
-        />
-      </View>
-
-      {error ? (
-        <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
-          {error}
-        </ThemedText>
-      ) : helperText ? (
-        <ThemedText style={[styles.helper, { color: theme.muted }]}>
-          {helperText}
-        </ThemedText>
-      ) : null}
+      <ThemedText
+        accessibilityLiveRegion="polite"
+        style={[
+          error ? styles.fieldError : styles.helper,
+          { color: error ? theme.danger : theme.muted },
+        ]}
+      >
+        {slotText}
+      </ThemedText>
 
       {pickerVisible ? (
         <DatePickerModal

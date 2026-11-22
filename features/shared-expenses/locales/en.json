@@ -89,7 +89,6 @@
     "currencyGroupAccessibility": "Available currencies",
     "dateLabel": "Date",
     "dateAccessibility": "Date of the shared expense",
-    "dateHelper": "Format DD/MM/YYYY.",
     "payerLabel": "Who paid?",
     "payerYou": "You paid",
     "payerFriend": "{{name}} paid",

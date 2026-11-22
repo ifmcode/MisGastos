@@ -60,7 +60,6 @@
     "amountLocked": "El importe está bloqueado porque el otro amigo ya vinculó su cartera.",
     "dateLabel": "Fecha de la transferencia",
     "dateAccessibility": "Fecha de la transferencia de la liquidación",
-    "dateHelper": "Formato DD/MM/AAAA. No puede ser una fecha futura.",
     "noteLabel": "Nota (opcional)",
     "notePlaceholder": "Motivo o detalle…",
     "noteAccessibility": "Nota de la liquidación",

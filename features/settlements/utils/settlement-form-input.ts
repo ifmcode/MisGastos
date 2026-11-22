@@ -44,7 +44,7 @@ export function getSettlementDateIssue(
   values: SettlementFormValues,
   today: string = getTodayIsoDate(),
 ): "DATE_INVALID" | "DATE_IN_FUTURE" | null {
-  const date = parseDateInput(values.date.trim() || values.dateText);
+  const date = parseDateInput(values.date.trim());
 
   if (date === null) return "DATE_INVALID";
   if (today.length > 0 && date > today) return "DATE_IN_FUTURE";

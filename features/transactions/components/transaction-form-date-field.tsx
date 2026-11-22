@@ -2,34 +2,33 @@ import { useTranslation } from "react-i18next";
 
 import { DateFormField } from "@/shared/components/molecules/date-form-field";
 
+import type { TransactionValidationCode } from "../schemas/transaction.schema";
+
 export interface TransactionFormDateFieldProps {
-  text: string;
-  value: string;
-  error?: string;
+  valueIso: string;
+  error?: TransactionValidationCode;
   disabled: boolean;
-  onChange: (text: string) => void;
+  onSelectDate: (isoDate: string) => void;
 }
 
 export function TransactionFormDateField({
-  text,
-  value,
+  valueIso,
   error,
   disabled,
-  onChange,
+  onSelectDate,
 }: TransactionFormDateFieldProps) {
-  const { t } = useTranslation("transactions");
+  const { t } = useTranslation(["transactions", "validation"]);
+  const errorText = error ? t(`validation:transactions.${error}`) : null;
 
   return (
     <DateFormField
       label={t("form.date")}
-      text={text}
-      value={value}
-      error={error}
-      helperText={t("form.dateHelper")}
+      valueIso={valueIso}
+      error={errorText ?? undefined}
       accessibilityLabel={t("form.dateAccessibility")}
       disabled={disabled}
       showLastUsedDate
-      onChange={onChange}
+      onSelectDate={onSelectDate}
     />
   );
 }

@@ -1,7 +1,13 @@
 import { StyleSheet } from "react-native";
 
 export const dateQuickSelectorStyles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   quickRow: {
+    flex: 1,
     flexDirection: "row",
     flexWrap: "wrap",
     alignItems: "center",
@@ -24,23 +30,10 @@ export const dateQuickSelectorStyles = StyleSheet.create({
     fontSize: 12,
     fontVariant: ["tabular-nums"],
   },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 8,
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    minHeight: 48,
-    fontSize: 16,
-  },
   calendarButton: {
     width: 48,
     height: 48,
+    flexShrink: 0,
     borderWidth: 1,
     borderRadius: 12,
     alignItems: "center",
