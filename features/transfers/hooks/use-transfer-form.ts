@@ -35,7 +35,6 @@ export interface UseTransferFormResult {
   availableSourceBalance: number;
   projectedSourceBalance: number;
   amountHelper: string | undefined;
-  canSubmit: boolean;
   updateValue: <K extends keyof TransferFormValues>(
     key: K,
     value: TransferFormValues[K],
@@ -97,9 +96,7 @@ export function useTransferForm({
         ...current,
         fromWalletId: walletId,
         currency: selectedWallet?.currency ?? current.currency,
-        toWalletId: destinationStillValid
-          ? current.toWalletId
-          : destinations[0]?.id ?? "",
+        toWalletId: destinationStillValid ? current.toWalletId : "",
       };
     });
 
@@ -138,7 +135,6 @@ export function useTransferForm({
     errors,
     ...derived,
     symbol: getCurrencySymbol(derived.currency),
-    canSubmit: Boolean(derived.fromWallet) && Boolean(derived.toWallet),
     updateValue,
     changeFromWallet,
     selectDate,

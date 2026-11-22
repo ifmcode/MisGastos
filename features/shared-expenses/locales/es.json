@@ -117,7 +117,6 @@
     "walletRegistrationNo": "No",
     "walletRegistrationAccessibility": "Registrar el gasto en una cartera",
     "walletRegistrationHint": "Actívalo para elegir la cartera y la categoría del movimiento. Desactívalo para guardar el gasto solo en el registro compartido.",
-    "walletGroupAccessibility": "Cartera del movimiento vinculado",
     "walletAccessibilityPrefix": "Cartera del movimiento",
     "walletHint": "Se creará un movimiento en Movimientos con el total del gasto.",
     "walletEmpty": "No tienes carteras activas en {{currency}}. Crea una en Carteras para poder guardar el gasto.",

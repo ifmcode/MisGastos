@@ -8,32 +8,57 @@ export const walletPickerPalette = {
 } as const;
 
 export const walletPickerStyles = StyleSheet.create({
-  // Compact chips
-  chipRow: {
+  // Trigger button
+  selectButton: {
     flexDirection: "row",
-    flexWrap: "wrap",
     alignItems: "center",
-    gap: 8,
+    gap: 12,
+    minHeight: 52,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
   },
-  chip: {
-    flexDirection: "row",
+  selectButtonPressed: {
+    opacity: 0.7,
+  },
+  selectButtonEmpty: {
+    borderStyle: "dashed",
+  },
+  selectButtonDisabled: {
+    opacity: 0.5,
+  },
+  selectIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    minHeight: 44,
-    maxWidth: "100%",
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
   },
-  chipText: {
-    flexShrink: 1,
-    fontSize: 13,
+  selectText: {
+    flex: 1,
+  },
+  selectLabel: {
+    fontSize: 15,
     fontWeight: "600",
   },
-  chipAdd: {
-    borderStyle: "dashed",
+  selectMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 2,
+  },
+  selectMetaText: {
+    fontSize: 13,
+  },
+  selectBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  selectBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
   },
 
   // Feedback

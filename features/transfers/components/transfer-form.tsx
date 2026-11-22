@@ -61,7 +61,6 @@ export function TransferForm({
     currency,
     symbol,
     amountHelper,
-    canSubmit,
     updateValue,
     changeFromWallet,
     selectDate,
@@ -117,6 +116,7 @@ export function TransferForm({
               destinations={availableDestinations}
               selectedId={values.toWalletId}
               currency={currency}
+              hasSource={Boolean(values.fromWalletId)}
               error={errors.toWalletId}
               disabled={submitting}
               onSelect={(walletId) => updateValue("toWalletId", walletId)}
@@ -148,7 +148,6 @@ export function TransferForm({
             <TransferFormActions
               submitting={submitting}
               isEditing={isEditing}
-              canSubmit={canSubmit}
               onCancel={onCancel}
               onSubmit={submit}
               onDelete={onDelete}

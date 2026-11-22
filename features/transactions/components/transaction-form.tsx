@@ -152,7 +152,6 @@ export function TransactionForm({
             <TransactionFormActions
               submitting={submitting}
               isEditing={isEditing}
-              canSubmit={wallets.length > 0}
               onCancel={onCancel}
               onSubmit={submit}
               onDelete={onDelete}

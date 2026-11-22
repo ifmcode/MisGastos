@@ -117,7 +117,6 @@
     "walletRegistrationNo": "No",
     "walletRegistrationAccessibility": "Register the expense in a wallet",
     "walletRegistrationHint": "Turn it on to choose the wallet and the category of the movement. Turn it off to save the expense only in the shared ledger.",
-    "walletGroupAccessibility": "Wallet of the linked movement",
     "walletAccessibilityPrefix": "Wallet of the movement",
     "walletHint": "A movement for the full expense will be created in Movements.",
     "walletEmpty": "You have no active wallets in {{currency}}. Create one in Wallets to save this expense.",

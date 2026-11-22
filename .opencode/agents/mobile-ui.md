@@ -62,7 +62,7 @@ components, style modules, accessibility and UI state.
   translation namespace (`features/<feature>/locales/{es,en}.json`). Never
   hardcode user-facing copy; run `npm run check:copy`.
 - Reuse `RecordCard`, `LoadingState`, `ErrorState`, `EmptyState`, `FormActions`,
-  `PageSheetFormModal`, `DateQuickSelector`, `WalletChipSelector` and the other
+  `PageSheetFormModal`, `DateQuickSelector`, `WalletSelectButton` and the other
   shared molecules before creating anything new.
 - Interactive rows are `Pressable` with role, label, hint and pressed feedback.
 - No `Alert`/`window.confirm`: use the project `ConfirmDialog`.

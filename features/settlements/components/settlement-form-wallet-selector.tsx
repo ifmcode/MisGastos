@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
-import { WalletChipSelector } from "@/features/wallets/components/wallet-chip-selector";
 import { WalletPickerDialog } from "@/features/wallets/components/wallet-picker-dialog";
+import { WalletSelectButton } from "@/features/wallets/components/wallet-select-button";
 import type { Wallet } from "@/features/wallets/types/wallet.types";
 import { isWalletArchived } from "@/features/wallets/utils/wallet-status";
 import type { CurrencyCode } from "@/shared/constants/currencies";
@@ -24,9 +24,10 @@ export interface SettlementFormWalletSelectorProps {
 }
 
 /**
- * Optional income wallet. "No wallet" stays selected by default; only active
- * same-currency wallets can be linked, while an already linked archived wallet
- * remains visible (and removable) instead of disappearing silently.
+ * Optional income wallet. "No wallet" is the first row of the popup and stays
+ * selected while the field is empty; only active same-currency wallets can be
+ * linked, while an already linked archived wallet remains visible (and
+ * removable) instead of disappearing silently.
  */
 export function SettlementFormWalletSelector({
   wallets,
@@ -44,9 +45,10 @@ export function SettlementFormWalletSelector({
     () => getSettlementWalletChoices(wallets, currency, walletId),
     [currency, walletId, wallets],
   );
-  const selectedWallet = wallets.find((wallet) => wallet.id === walletId);
+  const selectedWallet =
+    wallets.find((wallet) => wallet.id === walletId) ?? null;
   const archived = selectedWallet ? isWalletArchived(selectedWallet) : false;
-  const noWallet = walletId.length === 0;
+  const accessibilityPrefix = t("form.walletGroupAccessibility");
 
   function select(id: string) {
     onChange(id);
@@ -56,56 +58,20 @@ export function SettlementFormWalletSelector({
   return (
     <View>
       <ThemedText style={styles.label}>{t("form.walletLabel")}</ThemedText>
-      <View
-        style={styles.chipRow}
-        accessibilityRole="radiogroup"
-        accessibilityLabel={t("form.walletGroupAccessibility")}
-      >
-        <Pressable
-          accessibilityRole="radio"
-          accessibilityState={{ selected: noWallet, disabled }}
-          accessibilityLabel={t("form.walletNoneAccessibility")}
-          disabled={disabled}
-          onPress={() => select("")}
-          style={({ pressed }) => [
-            styles.optionChip,
-            {
-              backgroundColor: noWallet ? theme.primarySoft : theme.surface,
-              borderColor: noWallet ? theme.primary : theme.border,
-            },
-            disabled && styles.optionChipDisabled,
-            pressed && styles.pressed,
-          ]}
-        >
-          <ThemedText
-            style={[
-              styles.optionChipText,
-              { color: noWallet ? theme.primary : theme.text },
-            ]}
-          >
-            {t("form.walletNone")}
-          </ThemedText>
-        </Pressable>
-      </View>
+
+      <WalletSelectButton
+        wallet={selectedWallet}
+        disabled={disabled}
+        hasError={Boolean(error)}
+        accessibilityPrefix={accessibilityPrefix}
+        onPress={() => setPickerVisible(true)}
+      />
 
       {choices.length === 0 ? (
         <ThemedText style={[styles.helper, { color: theme.muted }]}>
           {t("form.walletEmpty", { currency })}
         </ThemedText>
       ) : null}
-
-      <View style={styles.walletPicker}>
-        <WalletChipSelector
-          wallets={choices}
-          selectedId={walletId}
-          disabled={disabled}
-          accessibilityPrefix={t("form.walletChipAccessibility", {
-            name: "",
-          }).trim()}
-          onSelect={select}
-          onOpenPicker={() => setPickerVisible(true)}
-        />
-      </View>
 
       <ThemedText style={[styles.helper, { color: theme.muted }]}>
         {t("form.walletHint")}
@@ -128,9 +94,11 @@ export function SettlementFormWalletSelector({
         wallets={choices}
         selectedId={walletId}
         disabled={disabled}
-        accessibilityPrefix={t("form.walletChipAccessibility", {
-          name: "",
-        }).trim()}
+        accessibilityPrefix={accessibilityPrefix}
+        noneOption={{
+          label: t("form.walletNone"),
+          accessibilityLabel: t("form.walletNoneAccessibility"),
+        }}
         onSelect={select}
         onClose={() => setPickerVisible(false)}
       />

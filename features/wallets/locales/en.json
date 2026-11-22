@@ -98,8 +98,10 @@
     "title": "Select wallet",
     "close": "Close wallet selector",
     "empty": "No wallets available.",
+    "select": "Select wallet",
     "selectAccessibility": "Select wallet",
-    "selectHint": "Open the full wallet list",
+    "selectedAccessibility": "Selected wallet: {{name}}. Change",
+    "selectHint": "Opens the wallet list.",
     "optionAccessibility": "{{prefix}} {{name}}, {{type}}, {{currency}}, balance {{balance}}",
     "prefix": "Wallet"
   },

@@ -5,7 +5,6 @@ import { FormActions } from "@/shared/components/molecules/form-actions";
 export interface TransferFormActionsProps {
   submitting: boolean;
   isEditing: boolean;
-  canSubmit: boolean;
   onCancel: () => void;
   onSubmit: () => void;
   onDelete?: () => void;
@@ -14,7 +13,6 @@ export interface TransferFormActionsProps {
 export function TransferFormActions({
   submitting,
   isEditing,
-  canSubmit,
   onCancel,
   onSubmit,
   onDelete,
@@ -25,7 +23,6 @@ export function TransferFormActions({
     <FormActions
       submitting={submitting}
       isEditing={isEditing}
-      canSubmit={canSubmit}
       cancelLabel={t("form.cancel")}
       cancelAccessibilityLabel={t("form.cancelAccessibility")}
       submitLabel={isEditing ? t("form.save") : t("form.transfer")}

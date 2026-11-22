@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import { Category } from "@/features/categories/types/category.types";
-import { Wallet } from "@/features/wallets/types/wallet.types";
 import { getTodayIsoDate } from "@/shared/utils/date";
 import {
   rememberLastUsedDate,
@@ -29,24 +28,6 @@ function buildTransaction(overrides: Partial<Transaction>): Transaction {
   };
 }
 
-function buildWallet(overrides: Partial<Wallet>): Wallet {
-  return {
-    id: "wallet-1",
-    name: "Cuenta principal",
-    currency: "EUR",
-    icon: "wallet",
-    color: "#0A7EA4",
-    initialBalance: 0,
-    balance: 0,
-    type: "bank",
-    includeInTotal: true,
-    ownerId: "user-1",
-    createdAt: "2026-10-29T10:00:00.000Z",
-    updatedAt: "2026-10-29T10:00:00.000Z",
-    ...overrides,
-  };
-}
-
 function buildCategory(overrides: Partial<Category>): Category {
   return {
     id: "category-1",
@@ -69,14 +50,13 @@ describe("buildTransactionFormValues", () => {
   it("preselects the last used date for a new movement", () => {
     rememberLastUsedDate("2020-01-15");
 
-    expect(buildTransactionFormValues([], null, []).date).toBe("2020-01-15");
+    expect(buildTransactionFormValues(null, []).date).toBe("2020-01-15");
   });
 
   it("keeps the date of the edited movement", () => {
     rememberLastUsedDate("2020-01-15");
 
     const values = buildTransactionFormValues(
-      [],
       buildTransaction({ date: "2019-12-31" }),
       [],
     );
@@ -85,15 +65,26 @@ describe("buildTransactionFormValues", () => {
   });
 
   it("falls back to today when there is no session date", () => {
-    expect(buildTransactionFormValues([], null, []).date).toBe(
-      getTodayIsoDate(),
-    );
+    expect(buildTransactionFormValues(null, []).date).toBe(getTodayIsoDate());
+  });
+
+  it("starts a new movement without a wallet", () => {
+    const values = buildTransactionFormValues(null, []);
+
+    expect(values.walletId).toBe("");
+    expect(values.currency).toBe("EUR");
+  });
+
+  it("uses the preferred currency as the provisional currency", () => {
+    const values = buildTransactionFormValues(null, [], "USD");
+
+    expect(values.walletId).toBe("");
+    expect(values.currency).toBe("USD");
   });
 
   it("prefills every field when editing a movement from its detail view", () => {
     expect(
       buildTransactionFormValues(
-        [buildWallet({})],
         buildTransaction({
           type: "income",
           amount: 1500,
@@ -118,54 +109,8 @@ describe("buildTransactionFormValues", () => {
     });
   });
 
-  it("preselects an active wallet in the preferred currency", () => {
-    const wallets = [
-      buildWallet({ id: "wallet-eur", currency: "EUR" }),
-      buildWallet({ id: "wallet-usd", currency: "USD" }),
-    ];
-
-    const values = buildTransactionFormValues(wallets, null, [], "USD");
-
-    expect(values.walletId).toBe("wallet-usd");
-    expect(values.currency).toBe("USD");
-  });
-
-  it("falls back to the first wallet when no wallet uses the preferred currency", () => {
-    const wallets = [
-      buildWallet({ id: "wallet-eur", currency: "EUR" }),
-      buildWallet({ id: "wallet-usd", currency: "USD" }),
-    ];
-
-    const values = buildTransactionFormValues(wallets, null, [], "GBP");
-
-    expect(values.walletId).toBe("wallet-eur");
-    expect(values.currency).toBe("EUR");
-  });
-
-  it("ignores an archived wallet even when it matches the preferred currency", () => {
-    const wallets = [
-      buildWallet({
-        id: "wallet-usd-archived",
-        currency: "USD",
-        archivedAt: "2026-11-01T10:00:00.000Z",
-      }),
-      buildWallet({ id: "wallet-eur", currency: "EUR" }),
-    ];
-
-    const values = buildTransactionFormValues(wallets, null, [], "USD");
-
-    expect(values.walletId).toBe("wallet-eur");
-    expect(values.currency).toBe("EUR");
-  });
-
   it("keeps the stored wallet and currency when editing", () => {
-    const wallets = [
-      buildWallet({ id: "wallet-eur", currency: "EUR" }),
-      buildWallet({ id: "wallet-usd", currency: "USD" }),
-    ];
-
     const values = buildTransactionFormValues(
-      wallets,
       buildTransaction({ walletId: "wallet-eur", currency: "EUR" }),
       [],
       "USD",

@@ -2,10 +2,10 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 
 import { ThemedText } from "@/components/themed-text";
-import { formFieldStyles } from "@/shared/components/molecules/form-field.styles";
-import { WalletChipSelector } from "@/features/wallets/components/wallet-chip-selector";
 import { WalletPickerDialog } from "@/features/wallets/components/wallet-picker-dialog";
+import { WalletSelectButton } from "@/features/wallets/components/wallet-select-button";
 import { Wallet } from "@/features/wallets/types/wallet.types";
+import { formFieldStyles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 export interface TransferFormSourceSelectorProps {
@@ -26,6 +26,8 @@ export function TransferFormSourceSelector({
   const theme = useFormTheme();
   const { t } = useTranslation("transfers");
   const [pickerVisible, setPickerVisible] = useState(false);
+  const selectedWallet =
+    wallets.find((wallet) => wallet.id === selectedId) ?? null;
 
   function selectWallet(walletId: string) {
     onSelect(walletId);
@@ -35,13 +37,12 @@ export function TransferFormSourceSelector({
   return (
     <>
       <ThemedText style={formFieldStyles.label}>{t("form.from")}</ThemedText>
-      <WalletChipSelector
-        wallets={wallets}
-        selectedId={selectedId}
+      <WalletSelectButton
+        wallet={selectedWallet}
         disabled={disabled}
+        hasError={Boolean(error)}
         accessibilityPrefix={t("form.from")}
-        onSelect={onSelect}
-        onOpenPicker={() => setPickerVisible(true)}
+        onPress={() => setPickerVisible(true)}
       />
       {error ? (
         <ThemedText style={[formFieldStyles.fieldError, { color: theme.danger }]}>

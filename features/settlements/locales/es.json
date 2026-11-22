@@ -65,7 +65,6 @@
     "walletHint": "Si eliges una cartera se creará un ingreso en Movimientos. También puedes liquidar sin cartera y elegirla más tarde.",
     "walletNone": "Sin cartera",
     "walletNoneAccessibility": "No asignar ninguna cartera a esta liquidación",
-    "walletChipAccessibility": "Recibir el dinero en {{name}}",
     "walletEmpty": "No tienes carteras activas en {{currency}}. Puedes liquidar sin cartera.",
     "walletArchivedHint": "La cartera vinculada está archivada. Puedes quitar la cartera, pero no volver a vincularla.",
     "walletGroupAccessibility": "Cartera donde recibes el dinero",

@@ -65,7 +65,6 @@
     "walletHint": "If you choose a wallet, an income will be created in Movements. You can also settle without a wallet and choose it later.",
     "walletNone": "No wallet",
     "walletNoneAccessibility": "Do not assign a wallet to this settlement",
-    "walletChipAccessibility": "Receive the money in {{name}}",
     "walletEmpty": "You have no active wallets in {{currency}}. You can settle without a wallet.",
     "walletArchivedHint": "The linked wallet is archived. You can remove the wallet, but not link it again.",
     "walletGroupAccessibility": "Wallet where you receive the money",

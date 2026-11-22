@@ -111,9 +111,6 @@ export const settlementsStyles = StyleSheet.create({
     lineHeight: 18,
     marginTop: 6,
   },
-  walletPicker: {
-    marginTop: 10,
-  },
   chipRow: {
     flexDirection: "row",
     flexWrap: "wrap",

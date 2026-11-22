@@ -2,10 +2,10 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { WalletSelectButton } from "@/features/wallets/components/wallet-select-button";
+import { Wallet } from "@/features/wallets/types/wallet.types";
 import { formFieldStyles } from "@/shared/components/molecules/form-field.styles";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
-import { WalletChipSelector } from "@/features/wallets/components/wallet-chip-selector";
-import { Wallet } from "@/features/wallets/types/wallet.types";
 
 import { transactionFormStyles as styles } from "../styles/transaction-form.styles";
 
@@ -14,7 +14,6 @@ export interface TransactionFormWalletSelectorProps {
   value: string;
   error?: string;
   disabled: boolean;
-  onChange: (walletId: string) => void;
   onOpenPicker: () => void;
 }
 
@@ -23,11 +22,11 @@ export function TransactionFormWalletSelector({
   value,
   error,
   disabled,
-  onChange,
   onOpenPicker,
 }: TransactionFormWalletSelectorProps) {
   const theme = useFormTheme();
   const { t } = useTranslation("transactions");
+  const selectedWallet = wallets.find((wallet) => wallet.id === value) ?? null;
 
   return (
     <View>
@@ -46,13 +45,12 @@ export function TransactionFormWalletSelector({
         </View>
       ) : null}
 
-      <WalletChipSelector
-        wallets={wallets}
-        selectedId={value}
+      <WalletSelectButton
+        wallet={selectedWallet}
         disabled={disabled}
+        hasError={Boolean(error)}
         accessibilityPrefix={t("form.wallet")}
-        onSelect={onChange}
-        onOpenPicker={onOpenPicker}
+        onPress={onOpenPicker}
       />
 
       {error ? (

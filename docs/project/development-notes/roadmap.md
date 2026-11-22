@@ -16,12 +16,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 6 - Groups
-- **Current ticket:** TICKET-065 - single wallet picker button without preselection
+- **Current ticket:** TICKET-066 - single category picker button with mandatory selection
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-064 - settlement debt-selection step (22/11/2026)
+- **Last completed:** TICKET-065 - single wallet picker button without preselection (22/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-066 and TICKET-067 (Phase 6.0), TICKET-069 and TICKET-070 (Phase 6.1), TICKET-010, TICKET-011 and TICKET-068
-- **Next:** TICKET-065
+- **Queued:** TICKET-067 (Phase 6.0), TICKET-069 and TICKET-070 (Phase 6.1), TICKET-010, TICKET-011 and TICKET-068
+- **Next:** TICKET-066
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -163,7 +163,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] TICKET-062: editable settlement amount with the live remaining debt ✅ 21/11/2026
 - [x] TICKET-063: date field without manual input and a calendar pinned to the right ✅ 21/11/2026
 - [x] TICKET-064: settlement debt-selection step for multiple currencies ✅ 22/11/2026
-- [ ] TICKET-065: single wallet picker button without preselection
+- [x] TICKET-065: single wallet picker button without preselection ✅ 22/11/2026
 - [ ] TICKET-066: single category picker button with mandatory selection
 - [ ] TICKET-067: Social pending requests as a top-right header icon with a badge
 

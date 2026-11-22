@@ -2,9 +2,9 @@
 
 > Audit delivered by TICKET-037 on 13/11/2026. Scope: duplicated UI behavior across
 > wallets, transactions, transfers, categories and the dashboard. The reusable
-> detail-view scaffold (TICKET-035), `ConfirmDialog`, `DateQuickSelector`,
-> `WalletChipSelector` and the translation layer were already shared and are listed
-> here only to state that they stay as they are.
+> detail-view scaffold (TICKET-035), `ConfirmDialog`, `DateQuickSelector` and the
+> translation layer were already shared and are listed here only to state that they
+> stay as they are.
 > Updated by TICKET-041 (16/11/2026) with the FAB action menu; the TICKET-037
 > decisions above are unchanged.
 > Updated again by TICKET-043 (16/11/2026) with the route-safe `DetailView`,
@@ -24,6 +24,9 @@
 > (compact currency row whose dialog content is the existing chip selector), the
 > pure `formatCurrencyLabel` in `shared/utils/` and the feature-only
 > `SharedExpenseSplitRemaining` line; `CurrencyChipSelector` keeps its consumers.
+> TICKET-065 (22/11/2026) replaces the compact chip row (`WalletChipSelector`) with
+> the feature component `WalletSelectButton` and adds the optional `noneOption` row
+> to `WalletPickerDialog`; no `shared/components` molecule changed.
 
 ## Decisions
 
@@ -310,10 +313,11 @@ participant rows and before the existing error text, with
 (`features/shared-expenses/utils/expense-remaining.ts`) over integer cents, and
 `FIXED_SUM_MISMATCH`/`INVALID_FIXED_AMOUNT` still decide whether the form saves.
 `features/transactions/utils/transaction-form-defaults.ts` and
-`features/transfers/utils/transfer-form-defaults.ts` now accept the profile
-preferred currency as an optional last argument: a new record preselects an active
-wallet (or an active same-currency pair) in that currency and falls back to the
-previous first-wallet behaviour, while edits keep the stored values.
+`features/transfers/utils/transfer-form-defaults.ts` accept the profile preferred
+currency as an optional last argument. Since TICKET-065 a new movement or transfer
+starts with no wallet (and a transfer destination is chosen explicitly after the
+source); that currency is only provisional and the selected wallet currency replaces
+it, while edits keep the stored values.
 
 ### `Fab`
 
@@ -426,6 +430,40 @@ so there is still one currency list. Consumers: the shared-expense form
 (`WalletFormCurrencySelector`, `wallets` copy). The profile selector keeps the
 plain chips.
 
+### `WalletSelectButton` / `WalletPickerDialog`
+
+```ts
+interface WalletSelectButtonProps {
+  wallet: Wallet | null;             // null while the field is empty
+  disabled: boolean;
+  hasError?: boolean;                // danger border, set by the caller
+  accessibilityPrefix: string;       // already translated field context
+  onPress: () => void;
+}
+
+interface WalletPickerDialogProps {
+  visible: boolean;
+  wallets: readonly Wallet[];
+  selectedId: string;
+  disabled: boolean;
+  accessibilityPrefix: string;
+  noneOption?: { label: string; accessibilityLabel: string };
+  onSelect: (walletId: string) => void;
+  onClose: () => void;
+}
+```
+
+TICKET-065 replaced the former compact chip row with one trigger button in
+`features/wallets/components/wallet-select-button.tsx`: **Seleccionar cartera** while
+empty, otherwise the wallet name, its currency and the archived badge, with a wallet
+icon, a chevron, a 44pt+ target and the danger border on a field error. Consumers:
+movement wallet, transfer source and destination, the shared-expense wallet while the
+registration toggle is **Yes**, and the settlement's optional wallet. `WalletPickerDialog`
+stays the read-only popup and gained the optional `noneOption` first row (the
+settlement's **Sin cartera**), selected while `selectedId` is empty; both components
+live in `features/wallets/components` and own their `wallets` copy, like
+`WalletPickerOption`.
+
 ## Removed after extraction
 
 - Feature state components: `wallets-*-state`, `transactions-*-state`,
@@ -437,6 +475,8 @@ plain chips.
   `transferFormPalette`, `transferHistoryPalette` and the unused dashboard danger /
   soft tones).
 - `confirmDialogStyles.modalRoot`, now owned by `PageSheetFormModal`.
+- `WalletChipSelector`, `getWalletChips`/`COMPACT_WALLET_LIMIT` and the chip styles,
+  replaced by `WalletSelectButton` and `WalletPickerDialog` in TICKET-065.
 
 ## Intentional visual changes
 
@@ -451,7 +491,7 @@ plain chips.
 
 - `npx tsc --noEmit`
 - `npx expo lint`
-- `npx jest` (265 suites / 1583 tests, updated after TICKET-057)
-- `npm run check:copy` (261 TSX files)
+- `npx jest` (331 suites / 2026 tests, updated after TICKET-065)
+- `npm run check:copy` (310 TSX files)
 - Dark mode and web follow the same `useFormTheme` tokens as before; shared
   components never import feature palettes.

@@ -98,7 +98,6 @@ export function TransferFormModal({
         fieldErrors={fieldErrors}
         wallets={wallets}
         initialValues={buildTransferFormValues(
-          wallets,
           editingTransfer,
           preferredCurrency,
         )}

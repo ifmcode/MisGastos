@@ -15,8 +15,8 @@ export interface TransactionFormWalletFieldProps {
 }
 
 /**
- * Compact wallet picker plus its full-wallet popup. The popup state stays with
- * the field so the form only orchestrates the selected value.
+ * Wallet button plus its full-wallet popup. The popup state stays with the
+ * field so the form only orchestrates the selected value.
  */
 export function TransactionFormWalletField({
   wallets,
@@ -40,7 +40,6 @@ export function TransactionFormWalletField({
         value={value}
         error={error}
         disabled={disabled}
-        onChange={onChange}
         onOpenPicker={() => setPickerVisible(true)}
       />
 

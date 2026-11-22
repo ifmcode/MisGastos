@@ -2,8 +2,8 @@ import { useState } from "react";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
-import { WalletChipSelector } from "@/features/wallets/components/wallet-chip-selector";
 import { WalletPickerDialog } from "@/features/wallets/components/wallet-picker-dialog";
+import { WalletSelectButton } from "@/features/wallets/components/wallet-select-button";
 import type { Wallet } from "@/features/wallets/types/wallet.types";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
@@ -40,6 +40,8 @@ export function SharedExpenseWalletField({
   const { t } = useScopedTranslation("sharedExpenses");
   const [pickerVisible, setPickerVisible] = useState(false);
   const hasOptions = wallets.length > 0;
+  const selectedWallet =
+    wallets.find((wallet) => wallet.id === selectedId) ?? null;
 
   function select(walletId: string) {
     onSelect(walletId);
@@ -53,20 +55,13 @@ export function SharedExpenseWalletField({
       </ThemedText>
 
       {hasOptions ? (
-        <View
-          style={styles.group}
-          accessibilityRole="radiogroup"
-          accessibilityLabel={t("form.walletGroupAccessibility")}
-        >
-          <WalletChipSelector
-            wallets={wallets}
-            selectedId={selectedId}
-            disabled={disabled}
-            accessibilityPrefix={t("form.walletAccessibilityPrefix")}
-            onSelect={onSelect}
-            onOpenPicker={() => setPickerVisible(true)}
-          />
-        </View>
+        <WalletSelectButton
+          wallet={selectedWallet}
+          disabled={disabled}
+          hasError={Boolean(errorText)}
+          accessibilityPrefix={t("form.walletAccessibilityPrefix")}
+          onPress={() => setPickerVisible(true)}
+        />
       ) : (
         <View style={styles.group}>
           <ThemedText

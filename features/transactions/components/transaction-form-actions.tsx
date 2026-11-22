@@ -5,7 +5,6 @@ import { FormActions } from "@/shared/components/molecules/form-actions";
 export interface TransactionFormActionsProps {
   submitting: boolean;
   isEditing: boolean;
-  canSubmit: boolean;
   onCancel: () => void;
   onSubmit: () => void;
   onDelete?: () => void;
@@ -14,7 +13,6 @@ export interface TransactionFormActionsProps {
 export function TransactionFormActions({
   submitting,
   isEditing,
-  canSubmit,
   onCancel,
   onSubmit,
   onDelete,
@@ -25,7 +23,6 @@ export function TransactionFormActions({
     <FormActions
       submitting={submitting}
       isEditing={isEditing}
-      canSubmit={canSubmit}
       cancelLabel={t("common:actions.cancel")}
       cancelAccessibilityLabel={t("common:actions.cancel")}
       submitLabel={isEditing ? t("form.save") : t("form.createShort")}

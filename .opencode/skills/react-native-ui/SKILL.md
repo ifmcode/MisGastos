@@ -24,7 +24,7 @@ description: Themed styles, shared component reuse, accessibility, dark mode and
 `LoadingState`, `ErrorState`, `EmptyState`, `ErrorBanner`, `FormHeader`,
 `FormActions`, `AmountField`, `NotesField`, `DateFormField`,
 `PageSheetFormModal`, `RecordCard`, `Fab`, `ConfirmDialog`,
-`CurrencyChipSelector`, `DateQuickSelector`, `WalletChipSelector`,
+`CurrencyChipSelector`, `DateQuickSelector`, `WalletSelectButton`,
 `WalletPickerDialog` and the `DetailModal` family.
 
 Before creating a component, check `docs/project/development-notes/component-inventory.md`

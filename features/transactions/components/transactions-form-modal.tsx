@@ -98,7 +98,6 @@ export function TransactionsFormModal({
         wallets={wallets}
         categories={categories}
         initialValues={buildTransactionFormValues(
-          wallets,
           editingTransaction,
           categories,
           preferredCurrency,

@@ -7,6 +7,10 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { walletPickerStyles as styles } from "../styles/wallet-picker.styles";
 import { Wallet } from "../types/wallet.types";
+import {
+  WalletPickerNoneOption,
+  WalletPickerNoneOptionRow,
+} from "./wallet-picker-none-option";
 import { WalletPickerOption } from "./wallet-picker-option";
 
 export interface WalletPickerDialogProps {
@@ -16,13 +20,14 @@ export interface WalletPickerDialogProps {
   disabled: boolean;
   /** Screen-reader context, already translated by the caller. */
   accessibilityPrefix: string;
+  noneOption?: WalletPickerNoneOption;
   onSelect: (walletId: string) => void;
   onClose: () => void;
 }
 
 /**
- * Read-only wallet popup opened from the compact selector. It lists every
- * wallet it receives exactly once and never offers a creation action.
+ * Read-only wallet popup opened from the wallet button. It lists every wallet
+ * it receives exactly once and never offers a creation action.
  */
 export function WalletPickerDialog({
   visible,
@@ -30,11 +35,13 @@ export function WalletPickerDialog({
   selectedId,
   disabled,
   accessibilityPrefix,
+  noneOption,
   onSelect,
   onClose,
 }: WalletPickerDialogProps) {
   const theme = useFormTheme();
   const { t } = useTranslation("wallets");
+  const noneSelected = selectedId.trim().length === 0;
 
   return (
     <Modal
@@ -83,6 +90,15 @@ export function WalletPickerDialog({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
+            {noneOption ? (
+              <WalletPickerNoneOptionRow
+                option={noneOption}
+                selected={noneSelected}
+                disabled={disabled}
+                onSelect={() => onSelect("")}
+              />
+            ) : null}
+
             {wallets.length === 0 ? (
               <ThemedText style={[styles.helper, { color: theme.muted }]}>
                 {t("picker.empty")}

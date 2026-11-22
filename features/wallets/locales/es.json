@@ -98,8 +98,10 @@
     "title": "Seleccionar cartera",
     "close": "Cerrar selector de cartera",
     "empty": "No hay carteras disponibles.",
+    "select": "Seleccionar cartera",
     "selectAccessibility": "Seleccionar cartera",
-    "selectHint": "Abre la lista completa de carteras",
+    "selectedAccessibility": "Cartera seleccionada: {{name}}. Cambiar",
+    "selectHint": "Abre la lista de carteras.",
     "optionAccessibility": "{{prefix}} {{name}}, {{type}}, {{currency}}, saldo {{balance}}",
     "prefix": "Cartera"
   },
