@@ -14,14 +14,18 @@ import {
   GROUP_NAME_MAX_LENGTH,
 } from "../types/group.types";
 import type { GroupFormValues } from "../utils/group-form";
+import { GroupSimplifyDebtsField } from "./group-simplify-debts-field";
 
 export interface GroupFormFieldsProps {
   values: GroupFormValues;
   errors: GroupValidationErrors;
   disabled: boolean;
+  /** The simplify-debts setting is owner-editable, so only edits show it. */
+  isEditing: boolean;
   onChangeName: (value: string) => void;
   onChangeDescription: (value: string) => void;
   onChangeCurrency: (currency: CurrencyCode) => void;
+  onChangeSimplifyDebts: (value: boolean) => void;
 }
 
 /** Name, description and default currency of the group form. */
@@ -29,9 +33,11 @@ export function GroupFormFields({
   values,
   errors,
   disabled,
+  isEditing,
   onChangeName,
   onChangeDescription,
   onChangeCurrency,
+  onChangeSimplifyDebts,
 }: GroupFormFieldsProps) {
   const theme = useFormTheme();
   const { t, tr } = useScopedTranslation("groups");
@@ -121,6 +127,14 @@ export function GroupFormFields({
         <ThemedText style={[styles.fieldError, { color: theme.danger }]}>
           {errorText(errors.defaultCurrency)}
         </ThemedText>
+      ) : null}
+
+      {isEditing ? (
+        <GroupSimplifyDebtsField
+          value={values.simplifyDebts}
+          disabled={disabled}
+          onChange={onChangeSimplifyDebts}
+        />
       ) : null}
     </View>
   );

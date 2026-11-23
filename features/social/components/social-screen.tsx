@@ -82,6 +82,7 @@ export function SocialScreen() {
         ) : (
           <SocialGroupsSegment
             groups={screen.groups.groups}
+            balanceSummaries={screen.groups.balanceSummaries}
             loading={screen.groups.loading}
             error={screen.groups.error}
             viewerUid={screen.viewerUid}

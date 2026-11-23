@@ -8,6 +8,10 @@ import {
   type GroupInvitationResponse,
 } from "@/features/groups/hooks/use-group-invitation-actions";
 import { useGroupInvitations } from "@/features/groups/hooks/use-group-invitations";
+import {
+  useOwnerJoinRequests,
+  type OwnerJoinRequestsController,
+} from "@/features/groups/hooks/use-owner-join-requests";
 import type { PendingGroupInvitationItem } from "@/features/groups/types/group.types";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -30,6 +34,7 @@ export interface RequestsScreenController {
   groupActionError: string | null;
   groupPendingId: string | null;
   groupPendingAction: GroupInvitationResponse | null;
+  ownerJoinRequests: OwnerJoinRequestsController;
   reload: () => void;
   refresh: () => void;
   reloadGroups: () => void;
@@ -40,18 +45,15 @@ export interface RequestsScreenController {
   rejectInvitation: (invitationId: string) => void;
 }
 
-/** `social/requests`: friend requests plus the received group invitations. */
+/**
+ * `social/requests`: the owner join-request queue, received group invitations
+ * and friend requests. Each source keeps its own loading and error state.
+ */
 export function useRequestsScreen(): RequestsScreenController {
   const { user } = useAuth();
   const viewerUid = user?.uid;
-  const {
-    overview,
-    loading,
-    refreshing,
-    error,
-    reload,
-    refresh,
-  } = useFriendsOverview({ viewerUid });
+  const { overview, loading, refreshing, error, reload, refresh } =
+    useFriendsOverview({ viewerUid });
   const actions = useFriendActions({ viewerUid, onChanged: refresh });
   const groupInvitations = useGroupInvitations({ viewerUid });
   const { removeInvitation } = groupInvitations;
@@ -59,10 +61,16 @@ export function useRequestsScreen(): RequestsScreenController {
     viewerUid,
     onResponded: removeInvitation,
   });
-  const pending = useMemo(() => getPendingRequests(overview), [overview]);
+  const { reload: reloadGroups, refresh: refreshGroups } = groupInvitations;
+  const ownerJoinRequests = useOwnerJoinRequests({ viewerUid });
+  const pending = useMemo(
+    () => getPendingRequests(overview, ownerJoinRequests.count),
+    [overview, ownerJoinRequests.count],
+  );
   const { acceptRequest: accept, rejectRequest: reject, cancelRequest: cancel } =
     actions;
-  const { reload: reloadGroups, refresh: refreshGroups } = groupInvitations;
+  const { reload: reloadOwnerQueue, refresh: refreshOwnerQueue } =
+    ownerJoinRequests;
 
   const acceptRequest = useCallback(
     (requestId: string) => {
@@ -88,20 +96,23 @@ export function useRequestsScreen(): RequestsScreenController {
   const reloadAll = useCallback(() => {
     void reload();
     void reloadGroups();
-  }, [reload, reloadGroups]);
+    void reloadOwnerQueue();
+  }, [reload, reloadGroups, reloadOwnerQueue]);
 
   const refreshAll = useCallback(() => {
     void refresh();
     void refreshGroups();
-  }, [refresh, refreshGroups]);
+    void refreshOwnerQueue();
+  }, [refresh, refreshGroups, refreshOwnerQueue]);
 
   return {
-    loading,
-    refreshing: refreshing || groupInvitations.refreshing,
+    loading: loading || ownerJoinRequests.loading,
+    refreshing:
+      refreshing || groupInvitations.refreshing || ownerJoinRequests.refreshing,
     error,
     actionError: actions.error,
     pendingId: actions.pendingId,
-    friendTotal: pending.total,
+    friendTotal: pending.incoming.length + pending.outgoing.length,
     groupTotal: groupInvitations.count,
     total: pending.total + groupInvitations.count,
     incoming: pending.incoming,
@@ -112,6 +123,7 @@ export function useRequestsScreen(): RequestsScreenController {
     groupActionError: groupActions.error,
     groupPendingId: groupActions.pendingId,
     groupPendingAction: groupActions.pendingAction,
+    ownerJoinRequests,
     reload: reloadAll,
     refresh: refreshAll,
     reloadGroups: () => {

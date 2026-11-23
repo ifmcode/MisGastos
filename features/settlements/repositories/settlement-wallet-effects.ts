@@ -5,7 +5,10 @@ import {
   settlementWalletRef,
   type SettlementTransaction,
 } from "./settlement-movement.helpers";
-import { readSettlementWallet } from "./settlement-wallet.helpers";
+import {
+  readSettlementWallet,
+  type SettlementErrorFactory,
+} from "./settlement-wallet.helpers";
 
 /**
  * Wallet work of an edit, computed before any write so every read happens
@@ -44,6 +47,7 @@ export async function applySettlementWalletEffects(
   currency: CurrencyCode,
   now: string,
   port: ISettlementMovementPort,
+  onError?: SettlementErrorFactory,
 ): Promise<void> {
   const ids = collectWalletIds(effects);
   const balances = new Map<string, number>();
@@ -59,6 +63,7 @@ export async function applySettlementWalletEffects(
         // A revert-only wallet may be archived; linking or resizing an income
         // still requires an active wallet.
         walletId !== effects.applyWalletId,
+        onError,
       ),
     );
   }

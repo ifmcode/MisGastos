@@ -23,12 +23,6 @@ export const groupExpensesStyles = StyleSheet.create({
   section: {
     gap: 10,
   },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    justifyContent: "space-between",
-    gap: 12,
-  },
   sectionTitle: {
     flexShrink: 1,
     fontSize: 13,
@@ -36,65 +30,12 @@ export const groupExpensesStyles = StyleSheet.create({
     letterSpacing: 0.6,
     textTransform: "uppercase",
   },
-  sectionCount: {
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  list: {
-    gap: 8,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    minHeight: 56,
-  },
-  dateGutter: {
-    alignItems: "center",
-    minWidth: 32,
-  },
-  dateMonth: {
-    fontSize: 11,
-    fontWeight: "600",
-    textTransform: "capitalize",
-  },
-  dateDay: {
-    fontSize: 16,
-    fontWeight: "700",
-    lineHeight: 20,
-  },
-  iconTile: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+  timelineList: {
+    gap: 2,
   },
   rowBody: {
     flex: 1,
     gap: 2,
-  },
-  rowTitle: {
-    flexShrink: 1,
-    fontSize: 15,
-  },
-  rowMeta: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  rowAmountColumn: {
-    alignItems: "flex-end",
-    maxWidth: 120,
-  },
-  rowAmount: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: "700",
-    textAlign: "right",
   },
 
   // Form shell
@@ -205,26 +146,13 @@ export const groupExpensesStyles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-
-  // Participant multi-select
-  participantsHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  selectAllChip: {
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    minHeight: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  selectAllText: {
-    fontSize: 14,
+  pickerOptionText: {
+    flex: 1,
+    fontSize: 15,
     fontWeight: "600",
   },
+
+  // Participant multi-select
   participantList: {
     gap: 8,
     marginTop: 10,

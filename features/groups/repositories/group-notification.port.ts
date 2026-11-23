@@ -5,6 +5,13 @@ import type {
 } from "@/features/notifications/types/notification.types";
 
 import type { GroupInvitation } from "../types/group.types";
+import type { GroupSettlementNotificationInput } from "./group-settlement-notification";
+
+export {
+  buildGroupSettlementNotification,
+  type GroupSettlementNotificationEvent,
+  type GroupSettlementNotificationInput,
+} from "./group-settlement-notification";
 
 /** Everything a `group-invite` notification needs; ids and names only. */
 export interface GroupInviteNotificationInput {
@@ -50,6 +57,7 @@ export interface IGroupNotificationPort {
   notifyGroupInvite(input: GroupInviteNotificationInput): Promise<void>;
   notifyJoinRequest(input: GroupJoinRequestNotificationInput): Promise<void>;
   notifyJoinOutcome(input: GroupJoinOutcomeNotificationInput): Promise<void>;
+  notifyGroupSettlement(input: GroupSettlementNotificationInput): Promise<void>;
 }
 
 export function toGroupInviteNotificationInput(

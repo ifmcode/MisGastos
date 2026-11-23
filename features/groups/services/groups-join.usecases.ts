@@ -3,10 +3,12 @@ import type {
   GroupJoinLookup,
   GroupJoinRequest,
   GroupJoinRequestItem,
+  OwnerJoinRequestItem,
 } from "../types/group-join.types";
+import { buildOwnerJoinRequests } from "../utils/group-join-request";
 import type { GroupWriteDeps } from "./group-deps";
 import { loadGroupJoinRequestItems } from "./group-detail";
-import { assertGroupOwner, requireGroup, requireGroupViewer } from "./group-guards";
+import { requireGroupViewer } from "./group-guards";
 import {
   ensureGroupJoinCode,
   lookupGroupJoinCode,
@@ -39,20 +41,34 @@ export class GroupsJoinUseCases {
     return requestToJoinGroup(this.writeDeps, viewer, rawCode);
   }
 
-  /** Owner-only pending queue; the detail read already includes it. */
-  async getJoinRequests(
+  /**
+   * Every pending join request of the viewer's own groups, oldest first.
+   * `groupJoinRequests` has no denormalized owner, so the queue fans out one
+   * read per owned group (at most 20); the accepted V1 read budget.
+   */
+  async getOwnerJoinRequests(
     viewerUid: string,
-    groupId: string,
-  ): Promise<GroupJoinRequestItem[]> {
+  ): Promise<OwnerJoinRequestItem[]> {
     const viewer = requireGroupViewer(viewerUid);
-    const group = await requireGroup(this.writeDeps.repository, groupId);
-    assertGroupOwner(group, viewer);
+    const groups = await this.writeDeps.repository.getGroups(viewer);
+    const ownedGroups = groups.filter((group) => group.ownerId === viewer);
+    if (ownedGroups.length === 0) return [];
 
-    return loadGroupJoinRequestItems(
-      this.writeDeps.repository,
-      this.writeDeps.friendsRepository,
-      group,
+    const itemsByGroup = new Map<string, readonly GroupJoinRequestItem[]>();
+    await Promise.all(
+      ownedGroups.map(async (group) => {
+        itemsByGroup.set(
+          group.id,
+          await loadGroupJoinRequestItems(
+            this.writeDeps.repository,
+            this.writeDeps.friendsRepository,
+            group,
+          ),
+        );
+      }),
     );
+
+    return buildOwnerJoinRequests(ownedGroups, itemsByGroup);
   }
 
   async respondToJoinRequest(

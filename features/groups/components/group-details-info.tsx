@@ -13,7 +13,7 @@ export interface GroupDetailsInfoProps {
   memberCount: number;
 }
 
-/** Read-only card of the details sheet: name, description, currency, members. */
+/** Read-only card of the details sheet: metadata plus the simplify-debts setting. */
 export function GroupDetailsInfo({ group, memberCount }: GroupDetailsInfoProps) {
   const theme = useFormTheme();
   const { t } = useScopedTranslation("groups");
@@ -37,6 +37,13 @@ export function GroupDetailsInfo({ group, memberCount }: GroupDetailsInfoProps) 
       key: "members",
       label: t("details.membersLabel"),
       value: t("list.memberCount", { count: memberCount }),
+    },
+    {
+      key: "simplifyDebts",
+      label: t("details.simplifyDebtsLabel"),
+      value: group?.simplifyDebts
+        ? t("details.simplifyDebtsOn")
+        : t("details.simplifyDebtsOff"),
     },
   ];
 

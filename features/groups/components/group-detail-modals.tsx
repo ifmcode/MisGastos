@@ -22,6 +22,8 @@ export interface GroupDetailModalsProps {
   memberActions: GroupMemberActionsController;
   joinCode: GroupJoinCodeController;
   onCloseDetails: () => void;
+  /** Closes the details sheet and opens the group edit form. */
+  onEditGroup: () => void;
 }
 
 /** Group, invite, expense and details sheets of the group detail route. */
@@ -36,6 +38,7 @@ export function GroupDetailModals({
   memberActions,
   joinCode,
   onCloseDetails,
+  onEditGroup,
 }: GroupDetailModalsProps) {
   return (
     <>
@@ -62,6 +65,7 @@ export function GroupDetailModals({
         memberActions={memberActions}
         joinCode={joinCode}
         onClose={onCloseDetails}
+        onEdit={onEditGroup}
       />
     </>
   );

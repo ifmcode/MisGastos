@@ -41,6 +41,7 @@ describe("isSettlementNotificationType", () => {
 describe("isReservedNotificationType", () => {
   it("accepts only the reserved types", () => {
     expect(isReservedNotificationType("group-expense")).toBe(true);
+    expect(isReservedNotificationType("group-settlement")).toBe(false);
     expect(isReservedNotificationType("settlement-created")).toBe(false);
     expect(isReservedNotificationType(42)).toBe(false);
   });
@@ -50,6 +51,7 @@ describe("isGroupNotificationType", () => {
   it("accepts only the active group events", () => {
     expect(isGroupNotificationType("group-invite")).toBe(true);
     expect(isGroupNotificationType("group-join-request")).toBe(true);
+    expect(isGroupNotificationType("group-settlement")).toBe(true);
     expect(isGroupNotificationType("group-expense")).toBe(false);
     expect(isGroupNotificationType(undefined)).toBe(false);
   });

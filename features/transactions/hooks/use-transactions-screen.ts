@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useFocusEffect, useRouter, type Href } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 
 import { useCategories } from "@/features/categories/hooks/use-categories";
 import { useProfile } from "@/features/profile/hooks/use-profile";
@@ -12,6 +12,7 @@ import { useTransactionFormDialog } from "./use-transaction-form-dialog";
 import { useTransactions } from "./use-transactions";
 import { useTransactionsCreateMenu } from "./use-transactions-create-menu";
 import type { Transaction } from "../types/transaction.types";
+import { getTransactionDetailTarget } from "../utils/transaction-detail-target";
 import type { TransactionFilters } from "../utils/transaction-filters";
 
 /** Orchestration of the movements screen: data, dialogs, filters and routing. */
@@ -93,15 +94,10 @@ export function useTransactionsScreen() {
   }
 
   function openDetail(transaction: Transaction) {
-    // Linked movements belong to their social record: the personal detail (and
-    // its edit/delete actions) must never open for them.
-    if (transaction.settlementId) {
-      router.push(`/social/settlements/${transaction.settlementId}` as Href);
-      return;
-    }
+    const target = getTransactionDetailTarget(transaction);
 
-    if (transaction.sharedExpenseId) {
-      router.push(`/social/expenses/${transaction.sharedExpenseId}` as Href);
+    if (target) {
+      router.push(target);
       return;
     }
 

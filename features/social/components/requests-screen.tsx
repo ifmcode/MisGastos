@@ -14,23 +14,29 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useRequestsScreen } from "../hooks/use-requests-screen";
 import { socialStyles as styles } from "../styles/social.styles";
+import { OwnerJoinRequestsSection } from "./owner-join-requests-section";
 import { SocialRouteHeader } from "./social-route-header";
 
-/** Friend requests and received group invitations, with their actions. */
+/**
+ * Owner join requests, received group invitations and friend requests. Each
+ * source keeps its own loading, empty and error state.
+ */
 export function RequestsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const theme = useFormTheme();
   const { t } = useTranslation(["social", "friends", "common"]);
   const screen = useRequestsScreen();
+  const owner = screen.ownerJoinRequests;
   const hasData = screen.total > 0;
-  const loading = screen.loading || screen.groupsLoading;
+  const loading = screen.loading || screen.groupsLoading || owner.loading;
   const showFullError = !!screen.error && !hasData;
   const showEmpty =
-    !screen.loading &&
-    !screen.groupsLoading &&
+    !loading &&
     screen.total === 0 &&
-    !screen.groupError;
+    !screen.groupError &&
+    !owner.error &&
+    !owner.actionError;
   const subtitle =
     loading || showFullError
       ? undefined
@@ -46,7 +52,7 @@ export function RequestsScreen() {
         onBack={() => router.back()}
       />
 
-      {screen.loading && screen.groupTotal === 0 ? (
+      {screen.loading && screen.total === 0 ? (
         <LoadingState message={t("requests.loading")} />
       ) : showFullError ? (
         <ErrorState
@@ -80,13 +86,15 @@ export function RequestsScreen() {
             />
           ) : (
             <>
-              <FriendRequestSection
-                title={t("friends:requests.incomingTitle")}
-                requests={screen.incoming}
-                pendingId={screen.pendingId}
-                onAccept={screen.acceptRequest}
-                onReject={screen.rejectRequest}
-                onCancel={screen.cancelRequest}
+              <OwnerJoinRequestsSection
+                items={owner.items}
+                loading={owner.loading}
+                error={owner.error}
+                actionError={owner.actionError}
+                pendingId={owner.pendingId}
+                pendingDecision={owner.pendingDecision}
+                onRespond={owner.respond}
+                onRetry={owner.reload}
               />
               <GroupInvitationsSection
                 invitations={screen.groupInvitations}
@@ -98,6 +106,14 @@ export function RequestsScreen() {
                 onAccept={screen.acceptInvitation}
                 onReject={screen.rejectInvitation}
                 onRetry={screen.reloadGroups}
+              />
+              <FriendRequestSection
+                title={t("friends:requests.incomingTitle")}
+                requests={screen.incoming}
+                pendingId={screen.pendingId}
+                onAccept={screen.acceptRequest}
+                onReject={screen.rejectRequest}
+                onCancel={screen.cancelRequest}
               />
               <FriendRequestSection
                 title={t("friends:requests.outgoingTitle")}

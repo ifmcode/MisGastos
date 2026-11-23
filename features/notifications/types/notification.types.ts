@@ -14,20 +14,23 @@ export const SETTLEMENT_NOTIFICATION_TYPES: readonly SettlementNotificationType[
 /**
  * TICKET-008 producer: an accepted friend was invited to a group. TICKET-061
  * adds the join-code events: a request for the owner and the outcome for the
- * requester. The payload carries ids and the denormalized group name so the
- * inbox needs no extra read.
+ * requester. TICKET-010 Phase B activates `group-settlement` for the other
+ * member of a settled pair. The payload carries ids and the denormalized group
+ * name so the inbox needs no extra read.
  */
 export type GroupNotificationType =
   | "group-invite"
   | "group-join-request"
   | "group-join-accepted"
-  | "group-join-rejected";
+  | "group-join-rejected"
+  | "group-settlement";
 
 export const GROUP_NOTIFICATION_TYPES: readonly GroupNotificationType[] = [
   "group-invite",
   "group-join-request",
   "group-join-accepted",
   "group-join-rejected",
+  "group-settlement",
 ];
 
 /**
@@ -36,18 +39,19 @@ export const GROUP_NOTIFICATION_TYPES: readonly GroupNotificationType[] = [
  * payload contract) so the inbox can map and navigate them, but the rules still
  * reject them on create: no producer exists yet. Enabling a producer only needs
  * a payload contract and a rules entry, never a second collection.
+ *
+ * `group-settlement` left this union in TICKET-010 Phase B; it stays readable
+ * because `NotificationType` still includes every stored type.
  */
 export type ReservedNotificationType =
   | "friend-request"
   | "friend-request-accepted"
-  | "group-expense"
-  | "group-settlement";
+  | "group-expense";
 
 export const RESERVED_NOTIFICATION_TYPES: readonly ReservedNotificationType[] = [
   "friend-request",
   "friend-request-accepted",
   "group-expense",
-  "group-settlement",
 ];
 
 export type NotificationType =
@@ -101,6 +105,21 @@ export interface GroupJoinNotificationPayload {
   groupId: string;
   groupName: string;
   friendUid: string;
+}
+
+/**
+ * `group-settlement` payload (TICKET-010 Phase B). `settlementId` is the
+ * `groupSettlements` document, `groupName` avoids reading the group and
+ * `friendUid` is the actor. The amount and currency are the persisted ones, so
+ * the row never claims a number the record does not contain.
+ */
+export interface GroupSettlementNotificationPayload {
+  settlementId: string;
+  groupId: string;
+  groupName: string;
+  friendUid: string;
+  amountCents: number;
+  currency: CurrencyCode;
 }
 
 /**

@@ -13,6 +13,7 @@ import type { GroupMemberActionsController } from "../hooks/use-group-member-act
 import type { GroupJoinCodeController } from "../hooks/use-group-join-code";
 import { groupsStyles as styles } from "../styles/groups.styles";
 import type { GroupDetail } from "../types/group.types";
+import { GroupDetailsEditButton } from "./group-details-edit-button";
 import { GroupDetailsInfo } from "./group-details-info";
 import { GroupJoinCodeCard } from "./group-join-code-card";
 import { GroupMemberRow } from "./group-member-row";
@@ -25,6 +26,8 @@ export interface GroupDetailsModalProps {
   memberActions: GroupMemberActionsController;
   joinCode: GroupJoinCodeController;
   onClose: () => void;
+  /** Closes the sheet and opens the group edit form. */
+  onEdit: () => void;
 }
 
 /** Page sheet with the group information, join code, members and invitations. */
@@ -35,6 +38,7 @@ export function GroupDetailsModal({
   memberActions,
   joinCode,
   onClose,
+  onEdit,
 }: GroupDetailsModalProps) {
   const theme = useFormTheme();
   const { t } = useScopedTranslation("groups");
@@ -62,6 +66,8 @@ export function GroupDetailsModal({
           contentContainerStyle={styles.modalContent}
           showsVerticalScrollIndicator={false}
         >
+          {isOwner ? <GroupDetailsEditButton onPress={onEdit} /> : null}
+
           <GroupDetailsInfo
             group={detail?.group ?? null}
             memberCount={members.length}

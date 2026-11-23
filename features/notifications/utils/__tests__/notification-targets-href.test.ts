@@ -38,6 +38,15 @@ describe("buildNotificationTargetHref", () => {
     ).toBe("/social/groups/user-a__g%2F1");
   });
 
+  it("builds the group settlement href and encodes the id", () => {
+    expect(
+      buildNotificationTargetHref({
+        kind: "groupSettlement",
+        settlementId: "group/settlement-1",
+      }),
+    ).toBe("/social/group-settlements/group%2Fsettlement-1");
+  });
+
   it("builds the requests and friend hrefs", () => {
     expect(buildNotificationTargetHref({ kind: "requests" })).toBe(
       "/social/requests",

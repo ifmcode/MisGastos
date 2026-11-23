@@ -18,8 +18,12 @@ export interface Transaction extends BaseEntity {
   ownerId: string;
   /** Linked `sharedExpenses` record. Only expense movements can carry one. */
   sharedExpenseId?: string;
+  /** Linked `groupExpenses` record. Only expense movements can carry one. */
+  groupExpenseId?: string;
   /** Linked `settlements` record. Only income movements can carry one. */
   settlementId?: string;
+  /** Linked `groupSettlements` record. Only income movements can carry one. */
+  groupSettlementId?: string;
   /** Soft-delete marker; linked movements are never hard-deleted. */
   deletedAt: string | null;
 }
@@ -35,8 +39,12 @@ export interface CreateTransactionDto {
   date: string;
   /** Ignored unless `type` is `expense`; the mapper drops it otherwise. */
   sharedExpenseId?: string;
+  /** Ignored unless `type` is `expense`; the mapper drops it otherwise. */
+  groupExpenseId?: string;
   /** Ignored unless `type` is `income`; the mapper drops it otherwise. */
   settlementId?: string;
+  /** Ignored unless `type` is `income`; the mapper drops it otherwise. */
+  groupSettlementId?: string;
   /** Optional soft-delete stamp; new movements default to `null`. */
   deletedAt?: string | null;
 }

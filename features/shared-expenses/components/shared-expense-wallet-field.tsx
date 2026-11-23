@@ -10,6 +10,7 @@ import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { linkedMovementStyles as styles } from "../styles/shared-expense-linked-movement.styles";
 import { sharedExpensesStyles } from "../styles/shared-expenses.styles";
+import type { SharedExpenseLinkScope } from "../types/shared-expense-link.types";
 
 export interface SharedExpenseWalletFieldProps {
   /** Filtered wallets; the stored one is included even when archived. */
@@ -20,13 +21,16 @@ export interface SharedExpenseWalletFieldProps {
   errorText?: string | null;
   /** Translated guidance shown when the currency has no active wallets. */
   emptyText: string;
+  /** Copy namespace; the 1:1 form is the default, groups pass their own. */
+  scope?: SharedExpenseLinkScope;
   onSelect: (walletId: string) => void;
 }
 
 /**
- * Wallet of the linked movement while the viewer registers the expense in one.
- * The block only renders when the registration toggle is **Yes** and the viewer
- * is the payer; a social-only expense never shows it.
+ * Wallet of the linked movement while the viewer registers the expense in one,
+ * shared by the 1:1 and the group forms with their own copy. The block only
+ * renders when the registration toggle is **Yes** and the viewer is the payer;
+ * a social-only expense never shows it.
  */
 export function SharedExpenseWalletField({
   wallets,
@@ -34,10 +38,11 @@ export function SharedExpenseWalletField({
   disabled,
   errorText,
   emptyText,
+  scope = "sharedExpenses",
   onSelect,
 }: SharedExpenseWalletFieldProps) {
   const theme = useFormTheme();
-  const { t } = useScopedTranslation("sharedExpenses");
+  const { t } = useScopedTranslation(scope);
   const [pickerVisible, setPickerVisible] = useState(false);
   const hasOptions = wallets.length > 0;
   const selectedWallet =

@@ -72,6 +72,8 @@ export function useTransactionsCreateMenu({
     viewerUid,
     groups,
     preferredCurrency,
+    registerInWalletByDefault:
+      profile?.registerSharedExpensesInWallet ?? false,
     onSaved: onChanged,
   });
   const { openGroupPicker } = groupExpenseEditor;

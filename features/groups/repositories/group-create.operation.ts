@@ -48,6 +48,7 @@ export async function createGroupWithInvitationsOperation(
     description: input.description,
     defaultCurrency: input.defaultCurrency,
     joinCode,
+    simplifyDebts: true,
     createdAt: input.createdAt,
     updatedAt: input.createdAt,
   };

@@ -22,7 +22,7 @@ describe("resolveNotificationTarget", () => {
     ).toEqual({ kind: "friend", friendUid: "user-a" });
   });
 
-  it("opens the shared expense for group types", () => {
+  it("opens the shared expense for a group expense and the group for a settlement", () => {
     expect(
       resolveNotificationTarget(
         buildNotification({
@@ -36,13 +36,33 @@ describe("resolveNotificationTarget", () => {
       resolveNotificationTarget(
         buildNotification({
           type: "group-settlement",
-          payload: { sharedExpenseId: "expense-2" },
+          payload: { settlementId: "group-settlement-1", groupId: "group-1" },
         }),
       ),
     ).toEqual({
-      kind: "expense",
-      expenseId: "expense-2",
-      friendUid: null,
+      kind: "groupSettlement",
+      settlementId: "group-settlement-1",
+    });
+
+    expect(
+      resolveNotificationTarget(
+        buildNotification({
+          type: "group-settlement",
+          payload: { groupId: "group-1" },
+        }),
+      ),
+    ).toEqual({ kind: "group", groupId: "group-1" });
+
+    expect(
+      resolveNotificationTarget(
+        buildNotification({
+          type: "group-settlement",
+          payload: { settlementId: "group-settlement-1" },
+        }),
+      ),
+    ).toEqual({
+      kind: "groupSettlement",
+      settlementId: "group-settlement-1",
     });
   });
 
@@ -84,22 +104,34 @@ describe("resolveNotificationTarget", () => {
     ).toEqual({ kind: "requests" });
   });
 
-  it("opens the group detail for a join request or acceptance", () => {
-    for (const type of ["group-join-request", "group-join-accepted"] as const) {
-      expect(
-        resolveNotificationTarget(
-          buildNotification({
-            type,
-            payload: {
-              requestId: "group-1__user-b",
-              groupId: "group-1",
-              groupName: "Viaje",
-              friendUid: "user-a",
-            },
-          }),
-        ),
-      ).toEqual({ kind: "group", groupId: "group-1" });
-    }
+  it("opens the requests list for a join request and the group for an acceptance", () => {
+    expect(
+      resolveNotificationTarget(
+        buildNotification({
+          type: "group-join-request",
+          payload: {
+            requestId: "group-1__user-b",
+            groupId: "group-1",
+            groupName: "Viaje",
+            friendUid: "user-a",
+          },
+        }),
+      ),
+    ).toEqual({ kind: "requests" });
+
+    expect(
+      resolveNotificationTarget(
+        buildNotification({
+          type: "group-join-accepted",
+          payload: {
+            requestId: "group-1__user-b",
+            groupId: "group-1",
+            groupName: "Viaje",
+            friendUid: "user-a",
+          },
+        }),
+      ),
+    ).toEqual({ kind: "group", groupId: "group-1" });
 
     expect(
       resolveNotificationTarget(

@@ -7,7 +7,10 @@ import {
   getGroupExpenseParticipantFields,
 } from "@/features/group-expenses/utils/group-expense-detail";
 import { buildGroupExpenseDetailFields } from "@/features/group-expenses/utils/group-expense-detail-fields";
-import type { GroupExpenseDetailContext } from "@/features/group-expenses/utils/group-expense-detail.types";
+import type {
+  GroupExpenseDetailContext,
+  GroupExpenseDetailLinkedMovement,
+} from "@/features/group-expenses/utils/group-expense-detail.types";
 import type { useAppLocale } from "@/shared/hooks/use-app-locale";
 import type { Translate } from "@/shared/i18n/translate";
 import type { DetailField, DetailSummary } from "@/shared/types/detail.types";
@@ -23,6 +26,7 @@ export interface UseGroupExpenseDetailViewOptions {
   groupName: string;
   viewerUid: string;
   members: readonly GroupMember[];
+  linkedMovement: GroupExpenseDetailLinkedMovement | null;
   locale: ReturnType<typeof useAppLocale>;
   tr: Translate;
 }
@@ -36,6 +40,7 @@ export function useGroupExpenseDetailView({
   groupName,
   viewerUid,
   members,
+  linkedMovement,
   locale,
   tr,
 }: UseGroupExpenseDetailViewOptions): GroupExpenseDetailView | null {
@@ -48,6 +53,7 @@ export function useGroupExpenseDetailView({
       formatCurrency: locale.formatCurrency,
       formatDate: locale.formatDate,
       t: tr,
+      linkedMovement,
     };
 
     return {
@@ -55,5 +61,5 @@ export function useGroupExpenseDetailView({
       fields: buildGroupExpenseDetailFields(expense, groupName, context),
       participants: getGroupExpenseParticipantFields(expense, context),
     };
-  }, [expense, groupName, locale, members, tr, viewerUid]);
+  }, [expense, groupName, linkedMovement, locale, members, tr, viewerUid]);
 }

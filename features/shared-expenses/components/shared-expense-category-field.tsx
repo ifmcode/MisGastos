@@ -7,6 +7,7 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { sharedExpensesStyles } from "../styles/shared-expenses.styles";
+import type { SharedExpenseLinkScope } from "../types/shared-expense-link.types";
 import {
   findSharedExpenseCategoryOption,
   getSharedExpenseCategoryLabel,
@@ -20,19 +21,22 @@ export interface SharedExpenseCategoryFieldProps {
   disabled: boolean;
   /** Translated category error, already resolved from its validation code. */
   errorText?: string | null;
+  /** Copy namespace; the 1:1 form is the default, groups pass their own. */
+  scope?: SharedExpenseLinkScope;
   onChange: (categoryId: string) => void;
 }
 
-/** Linked-movement category trigger plus its full-list popup. */
+/** Linked-movement category trigger plus its full-list popup; both forms. */
 export function SharedExpenseCategoryField({
   options,
   selectedId,
   disabled,
   errorText,
+  scope = "sharedExpenses",
   onChange,
 }: SharedExpenseCategoryFieldProps) {
   const theme = useFormTheme();
-  const { t, tr } = useScopedTranslation("sharedExpenses");
+  const { t, tr } = useScopedTranslation(scope);
   const [pickerVisible, setPickerVisible] = useState(false);
   const selected = findSharedExpenseCategoryOption(options, selectedId);
   const label = selected
@@ -76,6 +80,7 @@ export function SharedExpenseCategoryField({
         options={options}
         selectedId={selectedId}
         disabled={disabled}
+        scope={scope}
         onSelect={select}
         onClose={() => setPickerVisible(false)}
       />

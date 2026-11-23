@@ -4,12 +4,12 @@ import { centsToAmount } from "@/features/friends/utils/friend-balance";
 import type { Friend } from "@/features/friends/types/friend.types";
 import type { Settlement } from "@/features/settlements/types/settlement.types";
 import { getSharedExpenseParticipantName } from "@/features/shared-expenses/utils/shared-expense-friends";
+import { TimelineRow } from "@/shared/components/molecules/timeline-row";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { joinMetaParts } from "@/shared/utils/join-meta";
 
 import type { FriendTimelineEntry } from "../utils/friend-timeline";
-import { FriendTimelineRow } from "./friend-timeline-row";
 
 export interface FriendTimelineSettlementRowProps {
   entry: Extract<FriendTimelineEntry, { kind: "settlement" }>;
@@ -54,7 +54,7 @@ export function FriendTimelineSettlementRow({
   const accessibilityLabel = joinMetaParts([date, title, note]);
 
   return (
-    <FriendTimelineRow
+    <TimelineRow
       date={settlement.date}
       icon="cash-outline"
       iconColor={theme.success}

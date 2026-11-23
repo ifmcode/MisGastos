@@ -76,6 +76,7 @@ export async function updateGroupOperation(
     name: update.name,
     description: update.description,
     defaultCurrency: update.defaultCurrency,
+    simplifyDebts: update.simplifyDebts,
     updatedAt: update.updatedAt,
   };
 }

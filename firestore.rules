@@ -133,6 +133,23 @@ service cloud.firestore {
         : data.get('categoryId', null) != null;
     }
 
+    // TICKET-069 mirrors the 1:1 link on a group expense: only the payer links
+    // one of their own wallets, and the movement is a personal mirror that never
+    // changes the group ledger. Same all-or-nothing shape as the pair above.
+    function hasGroupExpenseLinks(data) {
+      return (!('walletId' in data) || isOptionalExpenseId(data.walletId))
+        && (!('categoryId' in data) || isOptionalExpenseId(data.categoryId))
+        && (!('linkedTransactionId' in data)
+            || isOptionalExpenseId(data.linkedTransactionId));
+    }
+
+    function hasGroupExpenseLinkCoherence(data) {
+      return data.get('walletId', null) == null
+        ? data.get('categoryId', null) == null
+          && data.get('linkedTransactionId', null) == null
+        : data.get('categoryId', null) != null;
+    }
+
     // The unlinked soft delete touches nothing but the deletion stamps, so an
     // expense can be closed without rewriting the link. The linked delete may
     // also clear `linkedTransactionId` and passes through
@@ -198,6 +215,38 @@ service cloud.firestore {
         && (
           !('sharedExpenseId' in previous)
           || previous.sharedExpenseId == next.sharedExpenseId
+        );
+    }
+
+    // A group-expense movement is an expense of the payer with the same currency
+    // as the referenced expense, which must not be deleted. `getAfter` covers the
+    // same-transaction create: `get` would not see the new expense yet. Rules
+    // cannot compare the movement id or the wallet with the expense fields, so
+    // the pair stays proven by the operation and by the expense's own link keys.
+    function hasValidGroupExpenseLink(data) {
+      return data.type == 'expense'
+        && data.groupExpenseId is string
+        && data.groupExpenseId.size() > 0
+        && isGroupExpenseLinkTarget(
+             getAfter(
+               /databases/$(database)/documents/groupExpenses/$(data.groupExpenseId)
+             ).data,
+             data
+           );
+    }
+
+    function isGroupExpenseLinkTarget(expense, movement) {
+      return expense.payerId == request.auth.uid
+        && expense.currency == movement.currency
+        && expense.get('deletedAt', null) == null;
+    }
+
+    // `groupExpenseId` is immutable and can never be swapped for another link.
+    function keepsGroupExpenseLink(previous, next) {
+      return ('groupExpenseId' in previous) == ('groupExpenseId' in next)
+        && (
+          !('groupExpenseId' in previous)
+          || previous.groupExpenseId == next.groupExpenseId
         );
     }
 
@@ -335,7 +384,8 @@ service cloud.firestore {
           'group-invite',
           'group-join-request',
           'group-join-accepted',
-          'group-join-rejected'
+          'group-join-rejected',
+          'group-settlement'
         ];
     }
 
@@ -391,6 +441,30 @@ service cloud.firestore {
         && isGroupText(payload.friendUid, 1500);
     }
 
+    // TICKET-010 group settlement payload: the settlement id, the group, its
+    // denormalized name, the actor and the persisted amount and currency.
+    function hasGroupSettlementNotificationPayload(payload) {
+      return payload is map
+        && payload.keys().hasOnly(
+             [
+               'settlementId',
+               'groupId',
+               'groupName',
+               'friendUid',
+               'amountCents',
+               'currency'
+             ]
+           )
+        && isSettlementIdValue(payload.settlementId)
+        && isGroupText(payload.groupId, 1500)
+        && isGroupText(payload.groupName, 60)
+        && isGroupText(payload.friendUid, 1500)
+        && payload.amountCents is int
+        && payload.amountCents > 0
+        && payload.amountCents <= 100000000
+        && payload.currency is string;
+    }
+
     function hasNotificationPayload(data) {
       return data.type == 'group-invite'
         ? hasGroupInviteNotificationPayload(data.payload)
@@ -402,7 +476,11 @@ service cloud.firestore {
                 'group-join-rejected'
               ]
               ? hasGroupJoinNotificationPayload(data.payload)
-              : hasSettlementNotificationPayload(data.payload)
+              : (
+                  data.type == 'group-settlement'
+                    ? hasGroupSettlementNotificationPayload(data.payload)
+                    : hasSettlementNotificationPayload(data.payload)
+                )
           );
     }
 
@@ -515,6 +593,33 @@ service cloud.firestore {
         && notification.payload.currency == settlement.currency;
     }
 
+    // TICKET-010: the recipient is the other member of the pair, the actor is a
+    // participant, and the payload must agree with the persisted settlement and
+    // its group. One settlement read plus one group read.
+    function isGroupSettlementNotificationTarget(data) {
+      return isGroupSettlementNotificationFor(
+        getAfter(
+          /databases/$(database)/documents/groupSettlements/$(data.payload.settlementId)
+        ).data,
+        get(
+          /databases/$(database)/documents/groups/$(data.payload.groupId)
+        ).data,
+        data
+      );
+    }
+
+    function isGroupSettlementNotificationFor(settlement, group, notification) {
+      return settlement.participantIds is list
+        && request.auth.uid in settlement.participantIds
+        && notification.userId in settlement.participantIds
+        && notification.userId != request.auth.uid
+        && notification.payload.friendUid == request.auth.uid
+        && notification.payload.groupId == settlement.groupId
+        && group.name == notification.payload.groupName
+        && notification.payload.amountCents == settlement.amountCents
+        && notification.payload.currency == settlement.currency;
+    }
+
     // The actor writes the notification for the other participant and must read
     // the deterministic document inside the same transaction to stay idempotent.
     // `list` stays owner-only; this is a single-document `get` for a settlement
@@ -531,6 +636,21 @@ service cloud.firestore {
         && data.payload.settlementId is string
         && request.auth.uid in getAfter(
              /databases/$(database)/documents/settlements/$(data.payload.settlementId)
+           ).data.participantIds;
+    }
+
+    // TICKET-010 actor grant for the group settlement row: same narrow trade-off
+    // as the 1:1 one, on the `groupSettlements` path so a settlement notification
+    // never reads another collection.
+    function isGroupSettlementNotificationActor(data) {
+      return isSignedIn()
+        && data.type == 'group-settlement'
+        && data.userId != request.auth.uid
+        && data.payload is map
+        && ('settlementId' in data.payload)
+        && data.payload.settlementId is string
+        && request.auth.uid in getAfter(
+             /databases/$(database)/documents/groupSettlements/$(data.payload.settlementId)
            ).data.participantIds;
     }
 
@@ -560,10 +680,18 @@ service cloud.firestore {
         && data.payload.friendUid == request.auth.uid;
     }
 
-    // Shared expense links are expense-only; a settlement link is income-only.
-    // Both are optional, but a movement can never carry the two at once.
+    // Shared expense and group expense links are expense-only; a settlement and
+    // a group settlement link are income-only. All optional, but a movement can
+    // never carry two at once.
     function hasNoDoubleLink(data) {
-      return !(('sharedExpenseId' in data) && ('settlementId' in data));
+      return !(
+        (('sharedExpenseId' in data) && ('groupExpenseId' in data))
+        || (('sharedExpenseId' in data) && ('settlementId' in data))
+        || (('groupExpenseId' in data) && ('settlementId' in data))
+        || (('groupSettlementId' in data) && ('sharedExpenseId' in data))
+        || (('groupSettlementId' in data) && ('groupExpenseId' in data))
+        || (('groupSettlementId' in data) && ('settlementId' in data))
+      );
     }
 
     function hasValidSettlementLink(data) {
@@ -590,6 +718,38 @@ service cloud.firestore {
         && (
           !('settlementId' in previous)
           || previous.settlementId == next.settlementId
+        );
+    }
+
+    // TICKET-010 group settlement mirror: the income belongs to the creditor of
+    // the pair inside a group they still belong to. One settlement read plus one
+    // group read, still under the 10-document budget.
+    function hasValidGroupSettlementLink(data) {
+      return data.type == 'income'
+        && isSettlementIdValue(data.groupSettlementId)
+        && isGroupSettlementIncomeTarget(
+             getAfter(
+               /databases/$(database)/documents/groupSettlements/$(data.groupSettlementId)
+             ).data,
+             data
+           );
+    }
+
+    function isGroupSettlementIncomeTarget(settlement, movement) {
+      return settlement.participantIds is list
+        && settlement.toUserId == request.auth.uid
+        && settlement.currency == movement.currency
+        && settlement.deletedAt == null
+        && request.auth.uid in get(
+             /databases/$(database)/documents/groups/$(settlement.groupId)
+           ).data.memberIds;
+    }
+
+    function keepsGroupSettlementLink(previous, next) {
+      return ('groupSettlementId' in previous) == ('groupSettlementId' in next)
+        && (
+          !('groupSettlementId' in previous)
+          || previous.groupSettlementId == next.groupSettlementId
         );
     }
 
@@ -639,14 +799,23 @@ service cloud.firestore {
     }
 
     // a) owner metadata edit: membership, owner and creation stamp are frozen.
+    //    `simplifyDebts` (TICKET-010) is the simplify toggle, on by default; the
+    //    client always writes it on a metadata edit, so a legacy group gains it.
     function isGroupMetadataEdit(previous, next) {
       return previous.ownerId == request.auth.uid
         && next.diff(previous).affectedKeys().hasOnly(
-             ['name', 'description', 'defaultCurrency', 'updatedAt']
+             [
+               'name',
+               'description',
+               'defaultCurrency',
+               'simplifyDebts',
+               'updatedAt'
+             ]
            )
         && isGroupText(next.name, 60)
         && isGroupDescription(next.description)
         && hasGroupCurrency(next.defaultCurrency)
+        && next.simplifyDebts is bool
         && next.updatedAt is string;
     }
 
@@ -896,8 +1065,16 @@ service cloud.firestore {
           || hasValidSharedExpenseLink(request.resource.data)
         )
         && (
+          !('groupExpenseId' in request.resource.data)
+          || hasValidGroupExpenseLink(request.resource.data)
+        )
+        && (
           !('settlementId' in request.resource.data)
           || hasValidSettlementLink(request.resource.data)
+        )
+        && (
+          !('groupSettlementId' in request.resource.data)
+          || hasValidGroupSettlementLink(request.resource.data)
         );
 
       // An update must still be a valid linked record. `get` covers the stored
@@ -906,7 +1083,9 @@ service cloud.firestore {
       allow update: if isWalletOwner(resource.data)
         && request.resource.data.ownerId == resource.data.ownerId
         && keepsSharedExpenseLink(resource.data, request.resource.data)
+        && keepsGroupExpenseLink(resource.data, request.resource.data)
         && keepsSettlementLink(resource.data, request.resource.data)
+        && keepsGroupSettlementLink(resource.data, request.resource.data)
         && hasNoDoubleLink(request.resource.data)
         && (
           !('sharedExpenseId' in request.resource.data)
@@ -922,6 +1101,26 @@ service cloud.firestore {
               || isSharedExpenseLinkTarget(
                 getAfter(
                   /databases/$(database)/documents/sharedExpenses/$(request.resource.data.sharedExpenseId)
+                ).data,
+                request.resource.data
+              )
+            )
+          )
+        )
+        && (
+          !('groupExpenseId' in request.resource.data)
+          || (
+            request.resource.data.type == 'expense'
+            && (
+              isGroupExpenseLinkTarget(
+                get(
+                  /databases/$(database)/documents/groupExpenses/$(request.resource.data.groupExpenseId)
+                ).data,
+                request.resource.data
+              )
+              || isGroupExpenseLinkTarget(
+                getAfter(
+                  /databases/$(database)/documents/groupExpenses/$(request.resource.data.groupExpenseId)
                 ).data,
                 request.resource.data
               )
@@ -947,13 +1146,36 @@ service cloud.firestore {
               )
             )
           )
+        )
+        && (
+          !('groupSettlementId' in request.resource.data)
+          || (
+            request.resource.data.type == 'income'
+            && (
+              isGroupSettlementIncomeTarget(
+                get(
+                  /databases/$(database)/documents/groupSettlements/$(request.resource.data.groupSettlementId)
+                ).data,
+                request.resource.data
+              )
+              || isGroupSettlementIncomeTarget(
+                getAfter(
+                  /databases/$(database)/documents/groupSettlements/$(request.resource.data.groupSettlementId)
+                ).data,
+                request.resource.data
+              )
+            )
+          )
         );
 
       // Linked movements are only ever soft-deleted by their operations; a hard
-      // delete would leave the shared expense or the settlement pointing nowhere.
+      // delete would leave the shared expense, the group expense, the settlement
+      // or the group settlement pointing nowhere.
       allow delete: if isWalletOwner(resource.data)
         && !('sharedExpenseId' in resource.data)
-        && !('settlementId' in resource.data);
+        && !('groupExpenseId' in resource.data)
+        && !('settlementId' in resource.data)
+        && !('groupSettlementId' in resource.data);
     }
 
     // User-defined categories. The type is fixed after creation so historical
@@ -1281,6 +1503,7 @@ service cloud.firestore {
         && isGroupDescription(request.resource.data.description)
         && hasGroupCurrency(request.resource.data.defaultCurrency)
         && isGroupJoinCode(request.resource.data.joinCode)
+        && request.resource.data.simplifyDebts is bool
         && request.resource.data.createdAt is string
         && request.resource.data.updatedAt is string
         && request.resource.data.keys().hasOnly(
@@ -1291,6 +1514,7 @@ service cloud.firestore {
                'description',
                'defaultCurrency',
                'joinCode',
+               'simplifyDebts',
                'createdAt',
                'updatedAt'
              ]
@@ -1377,6 +1601,9 @@ service cloud.firestore {
           'participants',
           'description',
           'date',
+          'walletId',
+          'categoryId',
+          'linkedTransactionId',
           'createdBy',
           'createdAt',
           'updatedAt',
@@ -1436,7 +1663,27 @@ service cloud.firestore {
         && next.diff(previous).affectedKeys().hasOnly(['deletedAt', 'updatedAt']);
     }
 
-    // A regular edit may not add, clear or rewrite the deletion stamp.
+    // The linked soft delete clears the whole link as a unit: wallet, category
+    // and movement reference are all null, so a closed expense keeps no wallet
+    // that could outlive its movement.
+    function isGroupExpenseLinkedSoftDelete(previous, next) {
+      return next.deletedAt is string
+        && next.diff(previous).affectedKeys().hasOnly(
+             [
+               'deletedAt',
+               'updatedAt',
+               'walletId',
+               'categoryId',
+               'linkedTransactionId'
+             ]
+           )
+        && next.get('walletId', null) == null
+        && next.get('categoryId', null) == null
+        && next.get('linkedTransactionId', null) == null;
+    }
+
+    // A regular edit may not add, clear or rewrite the deletion stamp. The link
+    // keys travel here when the payer links, moves or clears the wallet.
     function isGroupExpenseEdit(previous, next) {
       return next.deletedAt == null
         && next.diff(previous).affectedKeys().hasOnly(
@@ -1448,9 +1695,153 @@ service cloud.firestore {
                'participants',
                'description',
                'date',
+               'walletId',
+               'categoryId',
+               'linkedTransactionId',
                'updatedAt'
              ]
            );
+    }
+
+    // ---- TICKET-010 group settlements ------------------------------------
+    // A group settlement cancels a pair debt inside a group and is applied by
+    // existing: `deletedAt: null` counts in the ledger, a soft-deleted row never
+    // does. Rules cannot sum the group ledger, so the pair direction and the
+    // debt bound stay in the service; here only the shape, the membership, the
+    // pair and the creditor-only receiver link are validated.
+    //
+    // No composite index: the repository filters only with
+    // `where('groupId', '==', groupId)` and sorts client-side.
+    function groupSettlementGroup(groupId) {
+      return get(/databases/$(database)/documents/groups/$(groupId)).data;
+    }
+
+    function isGroupSettlementLinkEmpty(data) {
+      return data.receiverWalletId == null
+        && data.receiverCategoryId == null
+        && data.receiverTransactionId == null;
+    }
+
+    function isGroupSettlementLinkComplete(data) {
+      return isSettlementIdValue(data.receiverWalletId)
+        && isSettlementIdValue(data.receiverCategoryId)
+        && isSettlementIdValue(data.receiverTransactionId);
+    }
+
+    // Never a partial link: an income without its wallet or category could not
+    // be reverted by anyone.
+    function hasGroupSettlementLinkShape(data) {
+      return isGroupSettlementLinkEmpty(data)
+        || isGroupSettlementLinkComplete(data);
+    }
+
+    // Bounded by SETTLEMENT_AMOUNT_MAX_CENTS (100,000,000) and
+    // SETTLEMENT_NOTE_MAX_LENGTH (500), shared with the 1:1 settlement schema.
+    function hasGroupSettlementMoney(data) {
+      return data.amountCents is int
+        && data.amountCents > 0
+        && data.amountCents <= 100000000
+        && hasGroupCurrency(data.currency)
+        && data.date is string
+        && data.note is string
+        && data.note.size() <= 500;
+    }
+
+    // Exactly two sorted pair members, the debtor/creditor inside them and the
+    // caller as one of the two: only the pair records or edits the settlement.
+    function hasGroupSettlementPair(data) {
+      return hasSortedPair(data.participantIds)
+        && data.pairId == data.participantIds[0] + '__' + data.participantIds[1]
+        && data.fromUserId in data.participantIds
+        && data.toUserId in data.participantIds
+        && data.fromUserId != data.toUserId
+        && request.auth.uid in data.participantIds;
+    }
+
+    function hasGroupSettlementFields(data) {
+      return isGroupText(data.groupId, 1500)
+        && data.createdAt is string
+        && data.updatedAt is string
+        && data.keys().hasOnly(
+             [
+               'groupId',
+               'participantIds',
+               'pairId',
+               'fromUserId',
+               'toUserId',
+               'amountCents',
+               'currency',
+               'date',
+               'note',
+               'receiverWalletId',
+               'receiverCategoryId',
+               'receiverTransactionId',
+               'createdBy',
+               'createdAt',
+               'updatedAt',
+               'deletedAt'
+             ]
+           );
+    }
+
+    // Read: any active member of the group, exactly like a group expense.
+    function isGroupSettlementMember(data) {
+      return isSignedIn()
+        && request.auth.uid in groupSettlementGroup(data.groupId).memberIds;
+    }
+
+    // Create: the caller writes their own record, is one of the pair and both
+    // sides are active members of the target group.
+    function isGroupSettlementCreateTarget(data, group) {
+      return data.createdBy == request.auth.uid
+        && request.auth.uid in group.memberIds
+        && data.fromUserId in group.memberIds
+        && data.toUserId in group.memberIds;
+    }
+
+    // The creditor owns the linked income, so only they may clear the link and
+    // only while both the stored and the new record are active. A debtor delete
+    // with a linked movement is denied: the creditor must unlink first.
+    function isGroupSettlementSoftDelete(previous, next) {
+      return previous.deletedAt == null
+        && next.deletedAt is string
+        && isGroupSettlementLinkEmpty(next)
+        && (
+          previous.receiverTransactionId == null
+          || request.auth.uid == previous.toUserId
+        )
+        && next.diff(previous).affectedKeys().hasOnly(
+             request.auth.uid == previous.toUserId
+               ? [
+                   'deletedAt',
+                   'updatedAt',
+                   'receiverWalletId',
+                   'receiverCategoryId',
+                   'receiverTransactionId'
+                 ]
+               : ['deletedAt', 'updatedAt']
+           );
+    }
+
+    // A regular edit keeps the record active. The receiver link keys may only
+    // change for the creditor, and once an income exists the debtor can no
+    // longer resize it (the service rejects it with AMOUNT_LOCKED).
+    function isGroupSettlementEdit(previous, next) {
+      return previous.deletedAt == null
+        && next.deletedAt == null
+        && (
+          request.auth.uid == previous.toUserId
+          || (
+            next.receiverWalletId == previous.receiverWalletId
+            && next.receiverCategoryId == previous.receiverCategoryId
+            && next.receiverTransactionId == previous.receiverTransactionId
+          )
+        )
+        && (
+          request.auth.uid == previous.toUserId
+          || previous.receiverTransactionId == null
+          || next.amountCents == previous.amountCents
+        );
     }
 
     match /groupExpenses/{expenseId} {
@@ -1464,6 +1855,8 @@ service cloud.firestore {
         && hasGroupExpenseMoney(request.resource.data)
         && hasGroupExpenseShares(request.resource.data)
         && hasGroupExpenseFields(request.resource.data)
+        && hasGroupExpenseLinks(request.resource.data)
+        && hasGroupExpenseLinkCoherence(request.resource.data)
         && hasGroupExpenseIdentity(request.resource.data)
         && request.resource.data.deletedAt == null;
 
@@ -1476,10 +1869,75 @@ service cloud.firestore {
         && hasGroupExpenseMoney(request.resource.data)
         && hasGroupExpenseShares(request.resource.data)
         && hasGroupExpenseFields(request.resource.data)
+        && hasGroupExpenseLinks(request.resource.data)
         && hasGroupExpenseIdentity(request.resource.data)
         && (
           isGroupExpenseSoftDelete(resource.data, request.resource.data)
-          || isGroupExpenseEdit(resource.data, request.resource.data)
+          || isGroupExpenseLinkedSoftDelete(
+               resource.data,
+               request.resource.data
+             )
+          || (
+            hasGroupExpenseLinkCoherence(request.resource.data)
+            && isGroupExpenseEdit(resource.data, request.resource.data)
+          )
+        );
+
+      allow delete: if false;
+    }
+
+    // Group settlements (TICKET-010 Phase B). Root collection with a `groupId`
+    // field, like `groupExpenses`: the income movement is validated with one
+    // `getAfter` on this known path plus one `get` on the group, and the
+    // settlement id never builds a path from user input outside the service.
+    //
+    // Any member reads the group ledger; only the two pair members create, edit
+    // or delete. Both sides may record a payment (the service derives the
+    // direction), but only the creditor may link a wallet. The group, the pair,
+    // the direction, the currency and the creation stamp are immutable and the
+    // record is never hard-deleted.
+    //
+    // No composite index: `getGroupSettlementsOperation` filters only with
+    // `where('groupId', '==', groupId)` and sorts client-side.
+    match /groupSettlements/{settlementId} {
+      allow get, list: if isGroupSettlementMember(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && isGroupSettlementCreateTarget(
+             request.resource.data,
+             groupSettlementGroup(request.resource.data.groupId)
+           )
+        && hasGroupSettlementPair(request.resource.data)
+        && hasGroupSettlementMoney(request.resource.data)
+        && hasGroupSettlementFields(request.resource.data)
+        && hasGroupSettlementLinkShape(request.resource.data)
+        && request.resource.data.deletedAt == null
+        // Only the creditor ever links the income, so a debtor create is always
+        // social-only.
+        && (
+          request.resource.data.createdBy == request.resource.data.toUserId
+          || isGroupSettlementLinkEmpty(request.resource.data)
+        );
+
+      allow update: if isGroupSettlementMember(resource.data)
+        && resource.data.deletedAt == null
+        && request.resource.data.groupId == resource.data.groupId
+        && request.resource.data.participantIds == resource.data.participantIds
+        && request.resource.data.pairId == resource.data.pairId
+        && request.resource.data.fromUserId == resource.data.fromUserId
+        && request.resource.data.toUserId == resource.data.toUserId
+        && request.resource.data.currency == resource.data.currency
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && hasGroupSettlementPair(request.resource.data)
+        && hasGroupSettlementMoney(request.resource.data)
+        && hasGroupSettlementFields(request.resource.data)
+        && hasGroupSettlementLinkShape(request.resource.data)
+        && request.resource.data.updatedAt is string
+        && (
+          isGroupSettlementSoftDelete(resource.data, request.resource.data)
+          || isGroupSettlementEdit(resource.data, request.resource.data)
         );
 
       allow delete: if false;
@@ -1730,6 +2188,7 @@ service cloud.firestore {
         && (
           !exists(/databases/$(database)/documents/notifications/$(notificationId))
           || isNotificationOwner(resource.data)
+          || isGroupSettlementNotificationActor(resource.data)
           || isSettlementNotificationActor(resource.data)
           || isGroupInviteNotificationActor(resource.data)
           || isGroupJoinNotificationActor(resource.data)
@@ -1766,11 +2225,17 @@ service cloud.firestore {
                       request.resource.data,
                       notificationId
                     )
-                  : isNotificationTargetFor(
-                      getAfter(
-                        /databases/$(database)/documents/settlements/$(request.resource.data.payload.settlementId)
-                      ).data,
-                      request.resource.data
+                  : (
+                      request.resource.data.type == 'group-settlement'
+                        ? isGroupSettlementNotificationTarget(
+                            request.resource.data
+                          )
+                        : isNotificationTargetFor(
+                            getAfter(
+                              /databases/$(database)/documents/settlements/$(request.resource.data.payload.settlementId)
+                            ).data,
+                            request.resource.data
+                          )
                     )
               )
         );

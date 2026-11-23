@@ -4,6 +4,7 @@ import {
   buildTransaction,
   getSignedTransactionAmount,
   getSignedTransactionAmountObj,
+  readStoredGroupExpenseId,
   toTransactionData,
   toWalletBalance,
 } from "../transaction-firestore.utils";
@@ -95,6 +96,23 @@ describe("toTransactionData", () => {
     expect(expense).not.toHaveProperty("settlementId");
   });
 
+  it("persists a group settlement link only on income movements", () => {
+    const linked = toTransactionData(
+      "user-1",
+      { ...validDto, type: "income", groupSettlementId: "  group-settlement-1  " },
+      "now",
+    );
+    const expense = toTransactionData(
+      "user-1",
+      { ...validDto, groupSettlementId: "group-settlement-1" },
+      "now",
+    );
+
+    expect(linked.groupSettlementId).toBe("group-settlement-1");
+    expect(linked).not.toHaveProperty("settlementId");
+    expect(expense).not.toHaveProperty("groupSettlementId");
+  });
+
   it("never mixes the two link keys", () => {
     const income = toTransactionData(
       "user-1",
@@ -109,6 +127,35 @@ describe("toTransactionData", () => {
 
     expect(income).not.toHaveProperty("sharedExpenseId");
     expect(income.settlementId).toBe("settlement-1");
+  });
+
+  it("persists a group expense link only on expense movements", () => {
+    const linked = toTransactionData(
+      "user-1",
+      { ...validDto, groupExpenseId: "  group-expense-1  " },
+      "now",
+    );
+    const income = toTransactionData(
+      "user-1",
+      { ...validDto, type: "income", groupExpenseId: "group-expense-1" },
+      "now",
+    );
+
+    expect(linked.groupExpenseId).toBe("group-expense-1");
+    expect(income).not.toHaveProperty("groupExpenseId");
+    expect(
+      toTransactionData("user-1", { ...validDto, groupExpenseId: "  " }, "now"),
+    ).not.toHaveProperty("groupExpenseId");
+  });
+});
+
+describe("readStoredGroupExpenseId", () => {
+  it("trims the stored link and ignores a blank or missing one", () => {
+    expect(readStoredGroupExpenseId({ groupExpenseId: " group-1 " })).toBe(
+      "group-1",
+    );
+    expect(readStoredGroupExpenseId({ groupExpenseId: "  " })).toBeUndefined();
+    expect(readStoredGroupExpenseId({})).toBeUndefined();
   });
 });
 
@@ -178,6 +225,42 @@ describe("buildTransaction", () => {
 
     expect(income.settlementId).toBe("settlement-1");
     expect(expense).not.toHaveProperty("settlementId");
+  });
+
+  it("keeps the group settlement id only on income movements", () => {
+    const income = buildTransaction(
+      "transaction-1",
+      "user-1",
+      { ...validDto, type: "income", groupSettlementId: "group-settlement-1" },
+      "now",
+    );
+    const expense = buildTransaction(
+      "transaction-1",
+      "user-1",
+      { ...validDto, groupSettlementId: "group-settlement-1" },
+      "now",
+    );
+
+    expect(income.groupSettlementId).toBe("group-settlement-1");
+    expect(expense).not.toHaveProperty("groupSettlementId");
+  });
+
+  it("keeps the group expense id only on expense movements", () => {
+    const expense = buildTransaction(
+      "transaction-1",
+      "user-1",
+      { ...validDto, groupExpenseId: "group-expense-1" },
+      "now",
+    );
+    const income = buildTransaction(
+      "transaction-1",
+      "user-1",
+      { ...validDto, type: "income", groupExpenseId: "group-expense-1" },
+      "now",
+    );
+
+    expect(expense.groupExpenseId).toBe("group-expense-1");
+    expect(income).not.toHaveProperty("groupExpenseId");
   });
 });
 

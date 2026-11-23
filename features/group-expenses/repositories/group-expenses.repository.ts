@@ -22,3 +22,25 @@ export interface IGroupExpensesRepository {
   /** Soft delete: sets `deletedAt` and `updatedAt`, keeps the record. */
   softDeleteExpense(expenseId: string, deletedAt: string): Promise<void>;
 }
+
+/**
+ * Atomic pair "group expense + linked personal movement". Kept apart from the
+ * social-only repository because every call spans the expense, the movement and
+ * one or two of the payer's wallets inside a single `runTransaction`. The group
+ * ledger is never touched: the movement is a personal mirror.
+ */
+export interface IGroupExpenseLinkRepository {
+  createExpenseLink(dto: CreateGroupExpenseDto): Promise<GroupExpense>;
+
+  updateExpenseLink(
+    viewerUid: string,
+    expenseId: string,
+    update: UpdateGroupExpenseDto,
+  ): Promise<GroupExpense>;
+
+  softDeleteExpenseLink(
+    viewerUid: string,
+    expenseId: string,
+    deletedAt: string,
+  ): Promise<void>;
+}

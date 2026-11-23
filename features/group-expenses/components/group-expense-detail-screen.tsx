@@ -62,6 +62,7 @@ export function GroupExpenseDetailScreen() {
     groupName: detail?.group.name ?? "",
     viewerUid: screen.viewerUid,
     members: detail?.members ?? [],
+    linkedMovement: screen.linkedMovement,
     locale,
     tr,
   });

@@ -11,18 +11,27 @@ import { GroupExpenseValidationError } from "../group-expense.errors";
 import { GroupExpensesService } from "../group-expenses.service";
 import {
   FakeGroupExpensesRepository,
+  FakeGroupExpenseLinkRepository,
   buildGroup,
 } from "./group-expenses-service.fakes";
+import { FakeGroupSettlementsRepository } from "./group-settlements-service.fakes";
 
 function createService() {
   const repository = new FakeGroupExpensesRepository();
+  const linkRepository = new FakeGroupExpenseLinkRepository();
   const groupsRepository = new FakeGroupsRepository();
   groupsRepository.seedGroup(buildGroup());
 
   return {
     repository,
+    linkRepository,
     groupsRepository,
-    service: new GroupExpensesService(repository, groupsRepository),
+    service: new GroupExpensesService(
+      repository,
+      groupsRepository,
+      linkRepository,
+      new FakeGroupSettlementsRepository(),
+    ),
   };
 }
 
@@ -45,6 +54,9 @@ describe("GroupExpensesService.createGroupExpense", () => {
       ],
       description: "Dinner",
       date: "2026-11-10",
+      walletId: null,
+      categoryId: null,
+      linkedTransactionId: null,
       createdBy: "user-a",
       createdAt: expect.any(String),
       updatedAt: expect.any(String),

@@ -56,6 +56,16 @@ export interface GroupJoinRequestItem {
   requester: FriendProfile | null;
 }
 
+/**
+ * Owner queue row of Social: one pending request tagged with the group it
+ * belongs to, so `/social/requests` can answer it without opening the detail.
+ */
+export interface OwnerJoinRequestItem {
+  groupId: string;
+  groupName: string;
+  item: GroupJoinRequestItem;
+}
+
 /** A code resolved for a non-member; never carries the group document. */
 export interface GroupJoinLookup {
   code: string;

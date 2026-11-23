@@ -33,6 +33,16 @@ export interface GroupExpenseInput {
   splitMode: string;
   /** Selected participants only: the payer may be excluded (pays for others). */
   participants: SharedExpenseParticipantInput[];
+  /** Optional wallet of the payer; `undefined`/empty keeps the expense social. */
+  walletId?: string;
+  /** Category of the linked movement; required whenever the payer links a wallet. */
+  categoryId?: string;
+  /**
+   * Transient registration toggle read by validation only; never persisted.
+   * The stored link ids (`walletId`/`categoryId`/`linkedTransactionId`) decide
+   * the state when an expense is loaded.
+   */
+  registerInWallet?: boolean;
 }
 
 /** Normalized payload handed to the service: integer cents and exact shares. */
@@ -45,6 +55,10 @@ export interface ValidatedGroupExpense {
   participants: SharedExpenseParticipant[];
   description: string;
   date: string;
+  walletId: string | null;
+  categoryId: string | null;
+  /** Persistence-owned: the form never supplies it, so it is null on create. */
+  linkedTransactionId: string | null;
 }
 
 /**
@@ -59,8 +73,13 @@ export interface ValidatedGroupExpense {
  * `groupId` plus the group `memberIds`, and the shares are read whole with the
  * expense. Money is integer cents and the currency is stored PER EXPENSE; the
  * group `defaultCurrency` is only the initial form value and is never a
- * conversion source. Group expenses never touch personal wallets, categories or
- * linked movements.
+ * conversion source.
+ *
+ * `walletId`, `categoryId` and `linkedTransactionId` are `null` for social-only
+ * expenses; otherwise they describe the single personal mirror movement of the
+ * payer. The link never touches `buildGroupExpenseLedgerEntries`: the group
+ * ledger, the shares and the other members' balances depend only on
+ * `amountCents`, `payerId` and the stored shares.
  */
 export interface GroupExpense {
   id: string;
@@ -72,6 +91,9 @@ export interface GroupExpense {
   participants: SharedExpenseParticipant[];
   description: string;
   date: string;
+  walletId: string | null;
+  categoryId: string | null;
+  linkedTransactionId: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -85,7 +107,9 @@ export type CreateGroupExpenseDto = Omit<GroupExpense, "id"> & {
 
 /**
  * Mutable fields of an expense. `groupId`, `createdBy` and `createdAt` are
- * immutable after creation, so they never appear here.
+ * immutable after creation, so they never appear here. `linkedTransactionId`
+ * is optional because persistence owns it: the social-only path must not
+ * clobber the stored value.
  */
 export interface UpdateGroupExpenseDto {
   payerId: string;
@@ -95,6 +119,9 @@ export interface UpdateGroupExpenseDto {
   participants: SharedExpenseParticipant[];
   description: string;
   date: string;
+  walletId: string | null;
+  categoryId: string | null;
+  linkedTransactionId?: string | null;
   updatedAt: string;
 }
 

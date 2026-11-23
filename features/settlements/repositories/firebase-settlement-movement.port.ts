@@ -32,7 +32,11 @@ function toTransactionDto(
     categoryId: input.categoryId,
     concept: input.concept,
     date: input.date,
-    settlementId: input.settlementId,
+    // A movement carries one settlement link at most: the present one wins.
+    ...(input.settlementId ? { settlementId: input.settlementId } : {}),
+    ...(input.groupSettlementId
+      ? { groupSettlementId: input.groupSettlementId }
+      : {}),
   };
 }
 

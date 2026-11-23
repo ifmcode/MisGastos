@@ -6,11 +6,31 @@ import type { Settlement } from "../types/settlement.types";
 import type { SettlementMovementSnapshot } from "./settlement-movement.port";
 import { mapSettlementDocument } from "./settlements.mapper";
 
+/** Default factory: the 1:1 flow keeps raising its own error class. */
+function defaultSettlementError(code: SettlementLinkErrorCode): Error {
+  return new SettlementOperationError(code);
+}
+
 /** Minimal document read view shared by settlement, movement and wallet reads. */
 export interface SettlementSnapshotView {
   exists(): boolean;
   data(): Record<string, unknown> | undefined;
 }
+
+/**
+ * Codes the shared settlement helpers can raise. Both the 1:1 and the group
+ * flow speak this set, so the caller injects the error class it owns and the
+ * service keeps mapping stable codes instead of a generic failure.
+ */
+export type SettlementLinkErrorCode =
+  | "WALLET_NOT_FOUND"
+  | "WALLET_NOT_OWNED"
+  | "CURRENCY_MISMATCH"
+  | "WALLET_ARCHIVED"
+  | "CATEGORY_REQUIRED"
+  | "AMOUNT_LOCKED";
+
+export type SettlementErrorFactory = (code: SettlementLinkErrorCode) => Error;
 
 export function toSettlementMovementSnapshot(
   snapshot: SettlementSnapshotView,
@@ -28,9 +48,10 @@ export function toSettlementMovementSnapshot(
 export function assertSettlementLinkShape(
   walletId: string | null,
   categoryId: string | null,
+  onError: SettlementErrorFactory = defaultSettlementError,
 ): void {
   if (walletId !== null && categoryId === null) {
-    throw new SettlementOperationError("CATEGORY_REQUIRED");
+    throw onError("CATEGORY_REQUIRED");
   }
 }
 
@@ -58,19 +79,20 @@ export function readSettlementWallet(
   creditorId: string,
   currency: CurrencyCode,
   allowArchived = false,
+  onError: SettlementErrorFactory = defaultSettlementError,
 ): number {
   if (!snapshot.exists()) {
-    throw new SettlementOperationError("WALLET_NOT_FOUND");
+    throw onError("WALLET_NOT_FOUND");
   }
 
   const data = snapshot.data() ?? {};
 
   if (data.ownerId !== creditorId) {
-    throw new SettlementOperationError("WALLET_NOT_OWNED");
+    throw onError("WALLET_NOT_OWNED");
   }
 
   if (data.currency !== currency) {
-    throw new SettlementOperationError("CURRENCY_MISMATCH");
+    throw onError("CURRENCY_MISMATCH");
   }
 
   const archivedAt = data.archivedAt;
@@ -79,7 +101,7 @@ export function readSettlementWallet(
     typeof archivedAt === "string" &&
     archivedAt.trim().length > 0
   ) {
-    throw new SettlementOperationError("WALLET_ARCHIVED");
+    throw onError("WALLET_ARCHIVED");
   }
 
   return toWalletBalance(data);

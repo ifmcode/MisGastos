@@ -5,26 +5,31 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { linkedMovementStyles as styles } from "../styles/shared-expense-linked-movement.styles";
+import type { SharedExpenseLinkScope } from "../types/shared-expense-link.types";
 
 export interface SharedExpenseWalletRegistrationProps {
   /** "Yes" keeps the wallet and category block of the linked movement. */
   enabled: boolean;
   disabled: boolean;
+  /** Copy namespace; the 1:1 form is the default, groups pass their own. */
+  scope?: SharedExpenseLinkScope;
   onChange: (enabled: boolean) => void;
 }
 
 /**
- * Yes/No switch of the wallet registration. It only decides the viewer's
- * personal side: "No" keeps the expense in the shared ledger, so no wallet, no
- * category, no movement and no balance change.
+ * Yes/No switch of the wallet registration, shared by the 1:1 and the group
+ * forms with their own copy. It only decides the viewer's personal side: "No"
+ * keeps the expense in the social ledger, so no wallet, no category, no
+ * movement and no balance change.
  */
 export function SharedExpenseWalletRegistration({
   enabled,
   disabled,
+  scope = "sharedExpenses",
   onChange,
 }: SharedExpenseWalletRegistrationProps) {
   const theme = useFormTheme();
-  const { t } = useScopedTranslation("sharedExpenses");
+  const { t } = useScopedTranslation(scope);
   const optionText = enabled
     ? t("form.walletRegistrationYes")
     : t("form.walletRegistrationNo");

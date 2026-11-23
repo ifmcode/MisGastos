@@ -8,14 +8,12 @@ import { groupsStyles as styles } from "../styles/groups.styles";
 
 export interface GroupDetailActionsProps {
   groupName: string;
-  onEdit: () => void;
   onInvite: () => void;
 }
 
-/** Owner-only header shortcuts: edit the metadata and invite more friends. */
+/** Owner-only header shortcut: invite more friends. */
 export function GroupDetailActions({
   groupName,
-  onEdit,
   onInvite,
 }: GroupDetailActionsProps) {
   const theme = useFormTheme();
@@ -23,24 +21,6 @@ export function GroupDetailActions({
 
   return (
     <View style={styles.headerActions}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t("detail.editAccessibility", { name: groupName })}
-        accessibilityHint={t("detail.editHint")}
-        onPress={onEdit}
-        style={({ pressed }) => [
-          styles.headerAction,
-          { backgroundColor: theme.primarySoft },
-          pressed && styles.pressed,
-        ]}
-      >
-        <Ionicons
-          name="pencil-outline"
-          size={20}
-          color={theme.primary}
-          accessible={false}
-        />
-      </Pressable>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t("detail.inviteAccessibility", {

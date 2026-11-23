@@ -12,6 +12,7 @@ export interface GroupFormState {
   changeName: (name: string) => void;
   changeDescription: (description: string) => void;
   changeCurrency: (currency: CurrencyCode) => void;
+  changeSimplifyDebts: (simplifyDebts: boolean) => void;
   toggleInvitee: (uid: string) => void;
 }
 
@@ -36,6 +37,10 @@ export function useGroupFormValues(
     setValues((current) => ({ ...current, defaultCurrency }));
   }, []);
 
+  const changeSimplifyDebts = useCallback((simplifyDebts: boolean) => {
+    setValues((current) => ({ ...current, simplifyDebts }));
+  }, []);
+
   const toggleInvitee = useCallback((uid: string) => {
     setValues((current) => ({
       ...current,
@@ -48,6 +53,7 @@ export function useGroupFormValues(
     changeName,
     changeDescription,
     changeCurrency,
+    changeSimplifyDebts,
     toggleInvitee,
   };
 }

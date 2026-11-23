@@ -6,6 +6,7 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { linkedMovementStyles as styles } from "../styles/shared-expense-linked-movement.styles";
+import type { SharedExpenseLinkScope } from "../types/shared-expense-link.types";
 import {
   getSharedExpenseCategoryLabel,
   type SharedExpenseCategoryOption,
@@ -15,18 +16,21 @@ export interface SharedExpenseCategoryPickerOptionProps {
   option: SharedExpenseCategoryOption;
   selected: boolean;
   disabled: boolean;
+  /** Copy namespace; the 1:1 form is the default, groups pass their own. */
+  scope?: SharedExpenseLinkScope;
   onSelect: (categoryId: string) => void;
 }
 
-/** One selectable row inside the full linked-movement category popup. */
+/** One selectable row inside the full linked-movement category popup; both forms. */
 export function SharedExpenseCategoryPickerOption({
   option,
   selected,
   disabled,
+  scope = "sharedExpenses",
   onSelect,
 }: SharedExpenseCategoryPickerOptionProps) {
   const theme = useFormTheme();
-  const { t, tr } = useScopedTranslation("sharedExpenses");
+  const { t, tr } = useScopedTranslation(scope);
   const label = getSharedExpenseCategoryLabel(option, tr);
 
   return (

@@ -5,6 +5,7 @@ import type {
   GroupInviteNotificationInput,
   GroupJoinOutcomeNotificationInput,
   GroupJoinRequestNotificationInput,
+  GroupSettlementNotificationInput,
 } from "../../repositories/group-notification.port";
 import type { IGroupsRepository } from "../../repositories/groups.repository";
 import type {
@@ -61,6 +62,7 @@ export class FakeGroupsRepository implements IGroupsRepository {
       description: null,
       defaultCurrency: "EUR",
       joinCode: "ABCD2345",
+      simplifyDebts: true,
       createdAt: NOW,
       updatedAt: NOW,
       ...overrides,
@@ -457,6 +459,7 @@ export class FakeGroupNotificationPort implements IGroupNotificationPort {
   readonly sent: GroupInviteNotificationInput[] = [];
   readonly joinRequests: GroupJoinRequestNotificationInput[] = [];
   readonly joinOutcomes: GroupJoinOutcomeNotificationInput[] = [];
+  readonly settlements: GroupSettlementNotificationInput[] = [];
   failure: Error | null = null;
 
   async notifyGroupInvite(input: GroupInviteNotificationInput): Promise<void> {
@@ -475,6 +478,13 @@ export class FakeGroupNotificationPort implements IGroupNotificationPort {
     input: GroupJoinOutcomeNotificationInput,
   ): Promise<void> {
     this.joinOutcomes.push(input);
+    if (this.failure) throw this.failure;
+  }
+
+  async notifyGroupSettlement(
+    input: GroupSettlementNotificationInput,
+  ): Promise<void> {
+    this.settlements.push(input);
     if (this.failure) throw this.failure;
   }
 }

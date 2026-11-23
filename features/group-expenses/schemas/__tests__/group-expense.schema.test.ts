@@ -40,6 +40,9 @@ describe("validateGroupExpenseInput", () => {
       ],
       description: "Dinner",
       date: "2026-11-10",
+      walletId: null,
+      categoryId: null,
+      linkedTransactionId: null,
     });
   });
 

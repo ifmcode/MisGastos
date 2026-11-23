@@ -1,4 +1,5 @@
 import type { Group, GroupMember } from "@/features/groups/types/group.types";
+import type { Wallet } from "@/features/wallets/types/wallet.types";
 import type { GroupExpense } from "../../types/group-expense.types";
 import type { GroupExpenseFormValues } from "../group-expense-form";
 import { createGroupExpenseFormValues } from "../group-expense-form";
@@ -39,6 +40,7 @@ export function buildGroup(overrides: Partial<Group> = {}): Group {
     description: null,
     defaultCurrency: "EUR",
     joinCode: "ABCD2345",
+    simplifyDebts: true,
     createdAt: "2026-11-01T10:00:00.000Z",
     updatedAt: "2026-11-01T10:00:00.000Z",
     ...overrides,
@@ -77,10 +79,32 @@ export function buildExpense(
     ],
     description: "Cena",
     date: "2026-11-08",
+    walletId: null,
+    categoryId: null,
+    linkedTransactionId: null,
     createdBy: VIEWER,
     createdAt: "2026-11-08T20:00:00.000Z",
     updatedAt: "2026-11-08T20:00:00.000Z",
     deletedAt: null,
+    ...overrides,
+  };
+}
+
+/** Active wallet owned by the viewer; the linked movement writes into it. */
+export function buildWallet(overrides: Partial<Wallet> = {}): Wallet {
+  return {
+    id: "wallet-1",
+    name: "Cuenta principal",
+    currency: "EUR",
+    icon: "bank-outline",
+    color: "#0A7EA4",
+    initialBalance: 0,
+    balance: 100,
+    type: "bank",
+    includeInTotal: true,
+    ownerId: VIEWER,
+    createdAt: "2026-11-01T10:00:00.000Z",
+    updatedAt: "2026-11-01T10:00:00.000Z",
     ...overrides,
   };
 }

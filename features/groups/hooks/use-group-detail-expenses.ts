@@ -16,6 +16,8 @@ export interface UseGroupDetailExpensesOptions {
   /** Already-loaded detail: its members feed the form without a second read. */
   detail: GroupDetail | null;
   preferredCurrency: CurrencyCode;
+  /** Stored profile preference of new expenses (`registerSharedExpensesInWallet`). */
+  registerInWalletByDefault: boolean;
   /** Reloads the group detail after a save. */
   onGroupChanged: () => void;
 }
@@ -24,8 +26,6 @@ export interface GroupDetailExpensesController {
   expenses: GroupExpense[];
   loading: boolean;
   error: string | null;
-  /** False keeps the header from claiming a zero balance (TICKET-010). */
-  hasExpenses: boolean;
   retry: () => void;
   refresh: () => Promise<void>;
   editor: GroupExpenseEditorController;
@@ -37,6 +37,7 @@ export function useGroupDetailExpenses({
   groupId,
   detail,
   preferredCurrency,
+  registerInWalletByDefault,
   onGroupChanged,
 }: UseGroupDetailExpensesOptions): GroupDetailExpensesController {
   const list = useGroupExpenses({ viewerUid, groupId });
@@ -55,6 +56,7 @@ export function useGroupDetailExpenses({
     groups: [],
     lockedDetail: detail,
     preferredCurrency,
+    registerInWalletByDefault,
     onSaved,
   });
 
@@ -62,7 +64,6 @@ export function useGroupDetailExpenses({
     expenses: list.expenses,
     loading: list.loading,
     error: list.error,
-    hasExpenses: list.expenses.length > 0,
     retry: reloadList,
     refresh: list.refresh,
     editor,

@@ -51,8 +51,14 @@ export function toTransactionData(
   const sharedExpenseId = readSharedExpenseId(dto);
   if (sharedExpenseId) data.sharedExpenseId = sharedExpenseId;
 
+  const groupExpenseId = readGroupExpenseId(dto);
+  if (groupExpenseId) data.groupExpenseId = groupExpenseId;
+
   const settlementId = readSettlementId(dto);
   if (settlementId) data.settlementId = settlementId;
+
+  const groupSettlementId = readGroupSettlementId(dto);
+  if (groupSettlementId) data.groupSettlementId = groupSettlementId;
 
   return data;
 }
@@ -71,6 +77,17 @@ function readSharedExpenseId(dto: CreateTransactionDto): string | null {
   return id.length > 0 ? id : null;
 }
 
+/** A group expense link is expense-only for the same reason as the 1:1 one. */
+function readGroupExpenseId(dto: CreateTransactionDto): string | null {
+  if (dto.type !== "expense") return null;
+
+  const id = typeof dto.groupExpenseId === "string"
+    ? dto.groupExpenseId.trim()
+    : "";
+
+  return id.length > 0 ? id : null;
+}
+
 /**
  * A settlement income is the mirror case: the link is only valid on an income,
  * because a settlement records money the creditor received.
@@ -83,6 +100,20 @@ export function readSettlementId(dto: CreateTransactionDto): string | null {
   return id.length > 0 ? id : null;
 }
 
+/** The group settlement mirror: an income-only link, exactly like the 1:1 one. */
+export function readGroupSettlementId(
+  dto: CreateTransactionDto,
+): string | null {
+  if (dto.type !== "income") return null;
+
+  const id =
+    typeof dto.groupSettlementId === "string"
+      ? dto.groupSettlementId.trim()
+      : "";
+
+  return id.length > 0 ? id : null;
+}
+
 export function buildTransaction(
   id: string,
   ownerId: string,
@@ -90,7 +121,9 @@ export function buildTransaction(
   now: string,
 ): Transaction {
   const sharedExpenseId = readSharedExpenseId(dto);
+  const groupExpenseId = readGroupExpenseId(dto);
   const settlementId = readSettlementId(dto);
+  const groupSettlementId = readGroupSettlementId(dto);
 
   return {
     id,
@@ -104,7 +137,9 @@ export function buildTransaction(
     date: dto.date,
     ownerId,
     ...(sharedExpenseId ? { sharedExpenseId } : {}),
+    ...(groupExpenseId ? { groupExpenseId } : {}),
     ...(settlementId ? { settlementId } : {}),
+    ...(groupSettlementId ? { groupSettlementId } : {}),
     createdAt: now,
     updatedAt: now,
     deletedAt: dto.deletedAt ?? null,
@@ -153,6 +188,28 @@ export function readStoredSharedExpenseId(
 ): string | undefined {
   const id =
     typeof data.sharedExpenseId === "string" ? data.sharedExpenseId.trim() : "";
+
+  return id.length > 0 ? id : undefined;
+}
+
+/** Stored `groupExpenseId`, if any; personal movements never have one. */
+export function readStoredGroupExpenseId(
+  data: Record<string, unknown>,
+): string | undefined {
+  const id =
+    typeof data.groupExpenseId === "string" ? data.groupExpenseId.trim() : "";
+
+  return id.length > 0 ? id : undefined;
+}
+
+/** Stored `groupSettlementId`, if any; only a settlement income can have one. */
+export function readStoredGroupSettlementId(
+  data: Record<string, unknown>,
+): string | undefined {
+  const id =
+    typeof data.groupSettlementId === "string"
+      ? data.groupSettlementId.trim()
+      : "";
 
   return id.length > 0 ? id : undefined;
 }

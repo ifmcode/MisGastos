@@ -5,20 +5,28 @@ import { FakeGroupsRepository } from "@/features/groups/services/__tests__/group
 import { GroupExpensesService } from "../group-expenses.service";
 import {
   FakeGroupExpensesRepository,
+  FakeGroupExpenseLinkRepository,
   GROUP_ID,
   buildExpense,
   buildGroup,
 } from "./group-expenses-service.fakes";
+import { FakeGroupSettlementsRepository } from "./group-settlements-service.fakes";
 
 function createService() {
   const repository = new FakeGroupExpensesRepository();
+  const linkRepository = new FakeGroupExpenseLinkRepository();
   const groupsRepository = new FakeGroupsRepository();
   groupsRepository.seedGroup(buildGroup());
 
   return {
     repository,
     groupsRepository,
-    service: new GroupExpensesService(repository, groupsRepository),
+    service: new GroupExpensesService(
+      repository,
+      groupsRepository,
+      linkRepository,
+      new FakeGroupSettlementsRepository(),
+    ),
   };
 }
 

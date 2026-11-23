@@ -4,9 +4,11 @@ import {
   buildGroupInviteNotification,
   buildGroupJoinOutcomeNotification,
   buildGroupJoinRequestNotification,
+  buildGroupSettlementNotification,
   type GroupInviteNotificationInput,
   type GroupJoinOutcomeNotificationInput,
   type GroupJoinRequestNotificationInput,
+  type GroupSettlementNotificationInput,
   type IGroupNotificationPort,
 } from "./group-notification.port";
 
@@ -36,6 +38,14 @@ export class FirebaseGroupNotificationPort implements IGroupNotificationPort {
   ): Promise<void> {
     await this.notifications.createNotification(
       buildGroupJoinOutcomeNotification(input),
+    );
+  }
+
+  async notifyGroupSettlement(
+    input: GroupSettlementNotificationInput,
+  ): Promise<void> {
+    await this.notifications.createNotification(
+      buildGroupSettlementNotification(input),
     );
   }
 }

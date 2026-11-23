@@ -48,6 +48,19 @@ describe("buildUpdateData", () => {
   });
 });
 
+describe("group settlement link", () => {
+  it("writes exactly the provided link key", () => {
+    const data = port.buildCreateData({
+      ...input,
+      settlementId: undefined,
+      groupSettlementId: "group-settlement-1",
+    });
+
+    expect(data.groupSettlementId).toBe("group-settlement-1");
+    expect(data).not.toHaveProperty("settlementId");
+  });
+});
+
 describe("readMovement", () => {
   it("reads a usable income", () => {
     expect(

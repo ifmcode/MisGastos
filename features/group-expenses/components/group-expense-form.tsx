@@ -28,6 +28,7 @@ export function GroupExpenseForm({ editor, onCancel }: GroupExpenseFormProps) {
   const form = useGroupExpenseForm({
     initialValues: editor.initialValues,
     fieldErrors: editor.fieldErrors,
+    wallets: editor.wallets,
     onSubmit: editor.submit,
   });
 

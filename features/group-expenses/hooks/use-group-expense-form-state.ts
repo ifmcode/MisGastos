@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { CurrencyCode } from "@/shared/constants/currencies";
+import type { Wallet } from "@/features/wallets/types/wallet.types";
 import { formatDateInput } from "@/shared/utils/date";
 
 import type { GroupExpenseFieldErrors } from "../schemas/group-expense.schema";
@@ -12,27 +12,29 @@ import {
 } from "../utils/group-expense-form-modes";
 import { refreshGroupSplitValueDefaults } from "../utils/group-expense-split-defaults";
 import {
-  toggleAllGroupExpenseParticipants,
   toggleGroupExpenseParticipant,
 } from "../utils/group-expense-participants";
 import type { GroupExpenseFormValues } from "../utils/group-expense-form";
 import { useGroupExpenseFieldErrors } from "./use-group-expense-field-errors";
+import {
+  useGroupExpenseLinkState,
+  type GroupExpenseLinkState,
+} from "./use-group-expense-link-state";
 
 export interface UseGroupExpenseFormStateOptions {
   initialValues: GroupExpenseFormValues;
   fieldErrors: GroupExpenseFieldErrors;
+  /** Owner wallets, read only to drop a link whose currency no longer matches. */
+  wallets: readonly Wallet[];
 }
 
-export interface GroupExpenseFormState {
+export interface GroupExpenseFormState extends GroupExpenseLinkState {
   values: GroupExpenseFormValues;
   errors: GroupExpenseFieldErrors;
   changeDescription: (value: string) => void;
   changeAmount: (value: string) => void;
-  changeCurrency: (currency: CurrencyCode) => void;
-  changePayer: (payerId: string) => void;
   selectDate: (isoDate: string) => void;
   toggleParticipant: (userId: string) => void;
-  toggleAllParticipants: () => void;
   changeSplitMode: (mode: ExpenseSplitMode) => void;
   changeSplitValue: (userId: string, value: string) => void;
   /** Replaces the local errors with the ones a submit produced. */
@@ -43,10 +45,12 @@ export interface GroupExpenseFormState {
 export function useGroupExpenseFormState({
   initialValues,
   fieldErrors,
+  wallets,
 }: UseGroupExpenseFormStateOptions): GroupExpenseFormState {
   const [values, setValues] = useState<GroupExpenseFormValues>(initialValues);
   const { errors, clearError, setValidationErrors } =
     useGroupExpenseFieldErrors(fieldErrors);
+  const link = useGroupExpenseLinkState({ setValues, wallets, clearError });
 
   function changeDescription(value: string) {
     setValues((current) => ({ ...current, description: value }));
@@ -56,16 +60,6 @@ export function useGroupExpenseFormState({
   function changeAmount(value: string) {
     setValues((current) => updateGroupExpenseAmount(current, value));
     clearError("amount");
-  }
-
-  function changeCurrency(currency: CurrencyCode) {
-    setValues((current) => ({ ...current, currency }));
-    clearError("currency");
-  }
-
-  function changePayer(payerId: string) {
-    setValues((current) => ({ ...current, payerId }));
-    clearError("payerId");
   }
 
   function selectDate(isoDate: string) {
@@ -86,15 +80,6 @@ export function useGroupExpenseFormState({
     clearError("participants");
   }
 
-  function toggleAllParticipants() {
-    setValues((current) =>
-      refreshGroupSplitValueDefaults(
-        toggleAllGroupExpenseParticipants(current),
-      ),
-    );
-    clearError("participants");
-  }
-
   function changeSplitMode(mode: ExpenseSplitMode) {
     setValues((current) => switchGroupExpenseSplitMode(current, mode));
     clearError("splitMode", "participants");
@@ -108,13 +93,11 @@ export function useGroupExpenseFormState({
   return {
     values,
     errors,
+    ...link,
     changeDescription,
     changeAmount,
-    changeCurrency,
-    changePayer,
     selectDate,
     toggleParticipant,
-    toggleAllParticipants,
     changeSplitMode,
     changeSplitValue,
     setValidationErrors,

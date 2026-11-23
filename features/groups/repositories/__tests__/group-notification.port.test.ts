@@ -7,6 +7,7 @@ import {
   buildGroupInviteNotification,
   buildGroupJoinOutcomeNotification,
   buildGroupJoinRequestNotification,
+  buildGroupSettlementNotification,
   toGroupInviteNotificationInput,
 } from "../group-notification.port";
 import { FirebaseGroupNotificationPort } from "../firebase-group-notification.port";
@@ -154,5 +155,87 @@ describe("FirebaseGroupNotificationPort join events", () => {
       "group-join-request",
       "group-join-rejected",
     ]);
+  });
+});
+
+describe("buildGroupSettlementNotification", () => {
+  const settlementInput = {
+    settlementId: "group-settlement-1",
+    groupId: "group-1",
+    groupName: "Viaje",
+    recipientUid: "user-c",
+    actorUid: "user-b",
+    amountCents: 1500,
+    currency: "EUR" as const,
+    notifiedAt: input.notifiedAt,
+  };
+
+  it("writes an idempotent group-settlement event for the counterpart", () => {
+    expect(
+      buildGroupSettlementNotification({
+        ...settlementInput,
+        event: "created",
+      }),
+    ).toEqual({
+      userId: "user-c",
+      type: "group-settlement",
+      payload: {
+        settlementId: "group-settlement-1",
+        groupId: "group-1",
+        groupName: "Viaje",
+        friendUid: "user-b",
+        amountCents: 1500,
+        currency: "EUR",
+      },
+      dedupeKey:
+        "group-settlement:group-settlement-1:created:2026-11-20T10:00:00.000Z",
+      createdAt: input.notifiedAt,
+    });
+  });
+
+  it("gives every event and stamp its own dedupe key", () => {
+    const keys = (["created", "updated", "deleted"] as const).map(
+      (event) =>
+        buildGroupSettlementNotification({ ...settlementInput, event })
+          .dedupeKey,
+    );
+    const reopened = buildGroupSettlementNotification({
+      ...settlementInput,
+      event: "updated",
+      notifiedAt: "2026-11-21T10:00:00.000Z",
+    });
+
+    expect(new Set(keys).size).toBe(3);
+    expect(reopened.dedupeKey).not.toBe(keys[1]);
+  });
+});
+
+describe("FirebaseGroupNotificationPort settlement event", () => {
+  it("delegates the group settlement to the notifications repository", async () => {
+    const writes: NotificationWrite[] = [];
+    const notifications = {
+      createNotification: async (write: NotificationWrite) => {
+        writes.push(write);
+        return null;
+      },
+    } as unknown as INotificationsRepository;
+
+    await new FirebaseGroupNotificationPort(notifications).notifyGroupSettlement({
+      settlementId: "group-settlement-1",
+      groupId: "group-1",
+      groupName: "Viaje",
+      recipientUid: "user-c",
+      actorUid: "user-b",
+      event: "deleted",
+      amountCents: 1500,
+      currency: "EUR",
+      notifiedAt: input.notifiedAt,
+    });
+
+    expect(writes).toHaveLength(1);
+    expect(writes[0]).toMatchObject({
+      userId: "user-c",
+      type: "group-settlement",
+    });
   });
 });

@@ -1,4 +1,9 @@
-import type { GroupJoinRequest } from "../types/group-join.types";
+import type { Group } from "../types/group.types";
+import type {
+  GroupJoinRequest,
+  GroupJoinRequestItem,
+  OwnerJoinRequestItem,
+} from "../types/group-join.types";
 
 export function filterPendingJoinRequests(
   requests: readonly GroupJoinRequest[],
@@ -35,4 +40,45 @@ export function sortJoinRequestsOldestFirst(
   requests: readonly GroupJoinRequest[],
 ): GroupJoinRequest[] {
   return [...requests].sort(compareJoinRequestsOldestFirst);
+}
+
+/**
+ * Cross-group order of the Social owner queue: oldest first, then group id and
+ * request id, so two groups answered in the same second never swap places.
+ */
+export function compareOwnerJoinRequests(
+  left: OwnerJoinRequestItem,
+  right: OwnerJoinRequestItem,
+): number {
+  if (left.item.request.createdAt !== right.item.request.createdAt) {
+    return left.item.request.createdAt < right.item.request.createdAt ? -1 : 1;
+  }
+  if (left.groupId !== right.groupId) {
+    return left.groupId < right.groupId ? -1 : 1;
+  }
+  if (left.item.request.id === right.item.request.id) return 0;
+
+  return left.item.request.id < right.item.request.id ? -1 : 1;
+}
+
+/**
+ * Flattens the per-group queues the owner read into one deterministic list.
+ * Groups missing from the map are skipped; the inputs are never mutated.
+ */
+export function buildOwnerJoinRequests(
+  groups: readonly Pick<Group, "id" | "name">[],
+  itemsByGroup: ReadonlyMap<string, readonly GroupJoinRequestItem[]>,
+): OwnerJoinRequestItem[] {
+  const rows = groups.flatMap((group) => {
+    const items = itemsByGroup.get(group.id);
+    if (!items) return [];
+
+    return items.map((item) => ({
+      groupId: group.id,
+      groupName: group.name,
+      item,
+    }));
+  });
+
+  return rows.sort(compareOwnerJoinRequests);
 }

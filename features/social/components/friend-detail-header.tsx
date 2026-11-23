@@ -8,7 +8,7 @@ import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { friendDetailStyles as styles } from "../styles/friend-detail.styles";
-import { FriendDetailSettleButton } from "./friend-detail-settle-button";
+import { FriendDetailBalances } from "./friend-detail-balances";
 
 export interface FriendDetailHeaderProps {
   header: FriendDetailHeaderData;
@@ -115,36 +115,11 @@ export function FriendDetailHeader({
         </Pressable>
       </View>
 
-      <View style={styles.balances}>
-        {header.balances.length === 0 ? (
-          <ThemedText style={[styles.balanceLine, { color: theme.muted }]}>
-            {t("friends:balance.settled")}
-          </ThemedText>
-        ) : (
-          header.balances.map((line) => {
-            const owesViewer = line.direction === "friend-owes-viewer";
-            const amount = locale.formatCurrency(line.amount, line.currency);
-            const label = owesViewer
-              ? t("friends:balance.owesYou", { amount })
-              : t("friends:balance.youOwe", { amount });
-
-            return (
-              <ThemedText
-                key={line.currency}
-                style={[
-                  styles.balanceLine,
-                  { color: owesViewer ? theme.success : theme.danger },
-                ]}
-              >
-                {label}
-              </ThemedText>
-            );
-          })
-        )}
-      </View>
-      {header.balances.length > 0 ? (
-        <FriendDetailSettleButton name={header.name} onPress={onSettle} />
-      ) : null}
+      <FriendDetailBalances
+        balances={header.balances}
+        name={header.name}
+        onSettle={onSettle}
+      />
     </View>
   );
 }

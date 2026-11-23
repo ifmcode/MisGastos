@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import type { Wallet } from "@/features/wallets/types/wallet.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 import { getTodayIsoDate } from "@/shared/utils/date";
 
@@ -14,6 +15,11 @@ export interface UseGroupExpenseEditorValuesOptions {
   memberIds: readonly string[];
   /** Group default currency of a create. */
   groupCurrency: CurrencyCode;
+  /** Stored preference of new expenses; an edit derives its own toggle. */
+  registerInWalletByDefault: boolean;
+  wallets: readonly Wallet[];
+  walletsLoading: boolean;
+  walletsError: string | null;
 }
 
 export interface GroupExpenseEditorValues {
@@ -29,6 +35,10 @@ export function useGroupExpenseEditorValues({
   groupId,
   memberIds,
   groupCurrency,
+  registerInWalletByDefault,
+  wallets,
+  walletsLoading,
+  walletsError,
 }: UseGroupExpenseEditorValuesOptions): GroupExpenseEditorValues {
   const initialValues = useMemo(
     () =>
@@ -39,8 +49,22 @@ export function useGroupExpenseEditorValues({
         memberIds,
         groupCurrency,
         today: getTodayIsoDate(),
+        wallets,
+        walletsLoading,
+        walletsError,
+        defaultRegisterInWallet: registerInWalletByDefault,
       }),
-    [editingExpense, groupCurrency, groupId, memberIds, viewerUid],
+    [
+      editingExpense,
+      groupCurrency,
+      groupId,
+      memberIds,
+      registerInWalletByDefault,
+      viewerUid,
+      wallets,
+      walletsError,
+      walletsLoading,
+    ],
   );
 
   return {

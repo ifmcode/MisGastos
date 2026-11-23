@@ -16,6 +16,8 @@ import { useGroupExpensesService } from "./use-group-expenses-service";
 export interface UseGroupExpenseEditorSubmitOptions {
   viewerUid: string | undefined;
   editingExpense: GroupExpense | null;
+  /** Reloaded after a save: the wallet balance and the link moved. */
+  onResourcesChanged: () => void;
   onSaved: () => void;
 }
 
@@ -31,6 +33,7 @@ export interface GroupExpenseEditorSubmitState {
 export function useGroupExpenseEditorSubmit({
   viewerUid,
   editingExpense,
+  onResourcesChanged,
   onSaved,
 }: UseGroupExpenseEditorSubmitOptions): GroupExpenseEditorSubmitState {
   const service = useGroupExpensesService();
@@ -67,6 +70,7 @@ export function useGroupExpenseEditorSubmit({
             await service.createGroupExpense(viewerUid, input);
           }
 
+          onResourcesChanged();
           onSaved();
         } catch (error: unknown) {
           if (error instanceof GroupExpenseValidationError) {
@@ -82,7 +86,7 @@ export function useGroupExpenseEditorSubmit({
 
       void persist();
     },
-    [editingExpense, onSaved, service, tr, viewerUid],
+    [editingExpense, onResourcesChanged, onSaved, service, tr, viewerUid],
   );
 
   return { formError, fieldErrors, submitting, resetErrors, submit };

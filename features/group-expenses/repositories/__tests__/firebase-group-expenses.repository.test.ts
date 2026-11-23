@@ -9,7 +9,18 @@ jest.mock("../group-expenses.operations", () => ({
   updateGroupExpenseOperation: jest.fn(async () => "updated"),
 }));
 
+jest.mock("../group-expense-link.operations", () => ({
+  createGroupExpenseLinkOperation: jest.fn(async () => "link-created"),
+  softDeleteGroupExpenseLinkOperation: jest.fn(async () => undefined),
+  updateGroupExpenseLinkOperation: jest.fn(async () => "link-updated"),
+}));
+
 import { FirebaseGroupExpensesRepository } from "../firebase-group-expenses.repository";
+import {
+  createGroupExpenseLinkOperation,
+  softDeleteGroupExpenseLinkOperation,
+  updateGroupExpenseLinkOperation,
+} from "../group-expense-link.operations";
 import {
   createGroupExpenseOperation,
   getGroupExpenseOperation,
@@ -23,7 +34,7 @@ import {
 } from "./group-expense-document.fixtures";
 
 describe("FirebaseGroupExpensesRepository", () => {
-  it("delegates every method to its operation", async () => {
+  it("delegates every social method to its operation", async () => {
     const repository = new FirebaseGroupExpensesRepository();
     const createDto = buildCreateDto();
     const updateDto = buildUpdateDto();
@@ -51,5 +62,37 @@ describe("FirebaseGroupExpensesRepository", () => {
       "expense-1",
       "2026-11-15T10:00:00.000Z",
     );
+  });
+
+  it("delegates every link method to its operation", async () => {
+    const repository = new FirebaseGroupExpensesRepository();
+    const createDto = buildCreateDto();
+    const updateDto = buildUpdateDto();
+
+    await expect(repository.createExpenseLink(createDto)).resolves.toBe(
+      "link-created",
+    );
+    await expect(
+      repository.updateExpenseLink("user-a", "expense-1", updateDto),
+    ).resolves.toBe("link-updated");
+    await expect(
+      repository.softDeleteExpenseLink(
+        "user-a",
+        "expense-1",
+        "2026-11-15T10:00:00.000Z",
+      ),
+    ).resolves.toBeUndefined();
+
+    expect(createGroupExpenseLinkOperation).toHaveBeenCalledWith(createDto);
+    expect(updateGroupExpenseLinkOperation).toHaveBeenCalledWith({
+      viewerUid: "user-a",
+      expenseId: "expense-1",
+      update: updateDto,
+    });
+    expect(softDeleteGroupExpenseLinkOperation).toHaveBeenCalledWith({
+      viewerUid: "user-a",
+      expenseId: "expense-1",
+      deletedAt: "2026-11-15T10:00:00.000Z",
+    });
   });
 });

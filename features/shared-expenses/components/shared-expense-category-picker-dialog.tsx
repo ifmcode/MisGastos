@@ -6,6 +6,7 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { linkedMovementStyles as styles } from "../styles/shared-expense-linked-movement.styles";
+import type { SharedExpenseLinkScope } from "../types/shared-expense-link.types";
 import {
   findSharedExpenseCategoryOption,
   type SharedExpenseCategoryOption,
@@ -17,21 +18,27 @@ export interface SharedExpenseCategoryPickerDialogProps {
   options: readonly SharedExpenseCategoryOption[];
   selectedId: string;
   disabled: boolean;
+  /** Copy namespace; the 1:1 form is the default, groups pass their own. */
+  scope?: SharedExpenseLinkScope;
   onSelect: (categoryId: string) => void;
   onClose: () => void;
 }
 
-/** Full linked-movement category popup; it never creates categories. */
+/**
+ * Full linked-movement category popup, shared by the 1:1 and the group forms;
+ * it never creates categories.
+ */
 export function SharedExpenseCategoryPickerDialog({
   visible,
   options,
   selectedId,
   disabled,
+  scope = "sharedExpenses",
   onSelect,
   onClose,
 }: SharedExpenseCategoryPickerDialogProps) {
   const theme = useFormTheme();
-  const { t } = useScopedTranslation("sharedExpenses");
+  const { t } = useScopedTranslation(scope);
   const selectedOption = findSharedExpenseCategoryOption(options, selectedId);
 
   return (
@@ -94,6 +101,7 @@ export function SharedExpenseCategoryPickerDialog({
                 option={option}
                 selected={selectedOption?.id === option.id}
                 disabled={disabled}
+                scope={scope}
                 onSelect={onSelect}
               />
             ))}

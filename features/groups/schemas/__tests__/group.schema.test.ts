@@ -26,6 +26,7 @@ describe("validateGroupInput", () => {
         name: "Viaje",
         description: "Finde",
         defaultCurrency: "EUR",
+        simplifyDebts: true,
         inviteeIds: ["user-b"],
       },
     });
@@ -126,6 +127,7 @@ describe("validateGroupUpdateInput", () => {
       name: "Renombrado",
       description: null,
       defaultCurrency: "USD",
+      simplifyDebts: false,
     });
 
     expect(result).toEqual({
@@ -134,8 +136,20 @@ describe("validateGroupUpdateInput", () => {
         name: "Renombrado",
         description: null,
         defaultCurrency: "USD",
+        simplifyDebts: false,
       },
     });
+  });
+
+  it("defaults a missing toggle to true, so legacy edits keep simplifying", () => {
+    const result = validateGroupUpdateInput({
+      name: "Renombrado",
+      description: null,
+      defaultCurrency: "USD",
+      simplifyDebts: undefined as unknown as boolean,
+    });
+
+    expect(result.ok && result.value.simplifyDebts).toBe(true);
   });
 
   it("reports every invalid metadata field at once", () => {
@@ -143,6 +157,7 @@ describe("validateGroupUpdateInput", () => {
       name: "",
       description: "a".repeat(201),
       defaultCurrency: "CHF",
+      simplifyDebts: true,
     });
 
     expect(!result.ok && result.error).toEqual([

@@ -1,6 +1,9 @@
 import type { Group } from "@/features/groups/types/group.types";
 
-import type { IGroupExpensesRepository } from "../../repositories/group-expenses.repository";
+import type {
+  IGroupExpensesRepository,
+  IGroupExpenseLinkRepository,
+} from "../../repositories/group-expenses.repository";
 import type {
   CreateGroupExpenseDto,
   GroupExpense,
@@ -20,6 +23,7 @@ export function buildGroup(overrides: Partial<Group> = {}): Group {
     description: null,
     defaultCurrency: "EUR",
     joinCode: "ABCD2345",
+    simplifyDebts: true,
     createdAt: "2026-11-01T10:00:00.000Z",
     updatedAt: "2026-11-01T10:00:00.000Z",
     ...overrides,
@@ -42,6 +46,9 @@ export function buildExpense(
     ],
     description: "Dinner",
     date: "2026-11-10",
+    walletId: null,
+    categoryId: null,
+    linkedTransactionId: null,
     createdBy: "user-a",
     createdAt: NOW,
     updatedAt: NOW,
@@ -123,5 +130,87 @@ export class FakeGroupExpensesRepository implements IGroupExpensesRepository {
     if (!existing) return;
 
     this.expenses.set(expenseId, { ...existing, deletedAt, updatedAt: deletedAt });
+  }
+}
+
+/** Atomic-pair fake: records every call and mirrors the stored expense. */
+export class FakeGroupExpenseLinkRepository
+  implements IGroupExpenseLinkRepository
+{
+  readonly expenses = new Map<string, GroupExpense>();
+  readonly createCalls: CreateGroupExpenseDto[] = [];
+  readonly updateCalls: Array<{
+    viewerUid: string;
+    expenseId: string;
+    update: UpdateGroupExpenseDto;
+  }> = [];
+  readonly deleteCalls: Array<{
+    viewerUid: string;
+    expenseId: string;
+    deletedAt: string;
+  }> = [];
+  failure: Error | null = null;
+
+  seed(expense: GroupExpense): GroupExpense {
+    this.expenses.set(expense.id, expense);
+    return expense;
+  }
+
+  private guard(): void {
+    if (this.failure) throw this.failure;
+  }
+
+  async createExpenseLink(dto: CreateGroupExpenseDto): Promise<GroupExpense> {
+    this.guard();
+    this.createCalls.push(dto);
+
+    const expense: GroupExpense = {
+      id: "expense-link-1",
+      ...dto,
+      linkedTransactionId: "movement-1",
+    };
+    this.expenses.set(expense.id, expense);
+
+    return expense;
+  }
+
+  async updateExpenseLink(
+    viewerUid: string,
+    expenseId: string,
+    update: UpdateGroupExpenseDto,
+  ): Promise<GroupExpense> {
+    this.guard();
+    this.updateCalls.push({ viewerUid, expenseId, update });
+
+    const existing = this.expenses.get(expenseId);
+    if (!existing) throw new GroupExpenseOperationError("EXPENSE_NOT_FOUND");
+
+    const updated: GroupExpense = {
+      ...existing,
+      ...update,
+      linkedTransactionId: update.walletId ? "movement-1" : null,
+    };
+    this.expenses.set(expenseId, updated);
+
+    return updated;
+  }
+
+  async softDeleteExpenseLink(
+    viewerUid: string,
+    expenseId: string,
+    deletedAt: string,
+  ): Promise<void> {
+    this.guard();
+    this.deleteCalls.push({ viewerUid, expenseId, deletedAt });
+
+    const existing = this.expenses.get(expenseId);
+    if (!existing) return;
+
+    this.expenses.set(expenseId, {
+      ...existing,
+      deletedAt,
+      updatedAt: deletedAt,
+      linkedTransactionId: null,
+    });
   }
 }

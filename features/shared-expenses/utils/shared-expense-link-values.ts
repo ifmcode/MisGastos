@@ -87,6 +87,12 @@ export function selectSharedExpenseCurrency(
   return { ...values, currency };
 }
 
+/** The only fields the wallet-currency guard needs; both forms satisfy it. */
+export interface WalletCurrencyValues {
+  walletId: string;
+  currency: CurrencyCode;
+}
+
 /**
  * A movement keeps its wallet currency, so a wallet whose currency differs makes
  * the save fail in the service. Checking it here shows the error before the
@@ -94,7 +100,7 @@ export function selectSharedExpenseCurrency(
  * can tell whether it still exists.
  */
 export function getSharedExpenseWalletCurrencyError(
-  values: SharedExpenseFormValues,
+  values: WalletCurrencyValues,
   wallets: readonly Wallet[],
 ): "CURRENCY_MISMATCH" | null {
   const walletId = values.walletId.trim();

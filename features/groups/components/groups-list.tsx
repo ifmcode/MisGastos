@@ -1,6 +1,7 @@
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import type { ViewerGroupBalance } from "@/features/group-expenses/types/group-balance.types";
 import { EmptyState } from "@/shared/components/molecules/empty-state";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
@@ -11,6 +12,8 @@ import { GroupRow } from "./group-row";
 
 export interface GroupsListProps {
   groups: readonly Group[];
+  /** Viewer nets by group id; a missing entry renders as settled. */
+  balanceSummaries: Map<string, ViewerGroupBalance[]>;
   viewerUid: string;
   /** False while friends load or when there are no accepted friends. */
   canCreate: boolean;
@@ -22,6 +25,7 @@ export interface GroupsListProps {
 /** "Tus grupos" section with its empty state and create action. */
 export function GroupsList({
   groups,
+  balanceSummaries,
   viewerUid,
   canCreate,
   onCreate,
@@ -63,6 +67,7 @@ export function GroupsList({
             key={group.id}
             group={group}
             viewerUid={viewerUid}
+            balances={balanceSummaries.get(group.id) ?? []}
             onOpen={onOpen}
             onEdit={onEdit}
           />

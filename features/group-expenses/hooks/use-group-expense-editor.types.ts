@@ -1,4 +1,6 @@
 import type { Group, GroupDetail } from "@/features/groups/types/group.types";
+import type { Category } from "@/features/categories/types/category.types";
+import type { Wallet } from "@/features/wallets/types/wallet.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 
 import type { GroupExpenseFieldErrors } from "../schemas/group-expense.schema";
@@ -17,6 +19,11 @@ export interface UseGroupExpenseEditorOptions {
   lockedDetail?: GroupDetail | null;
   /** Currency of a create before any group is picked. */
   preferredCurrency: CurrencyCode;
+  /**
+   * Stored profile preference of the account; only new expenses read it, an
+   * edited expense derives its toggle from its own linked wallet or movement.
+   */
+  registerInWalletByDefault?: boolean;
   onSaved: () => void;
 }
 
@@ -40,6 +47,9 @@ export interface GroupExpenseEditorController {
   membersLoading: boolean;
   membersError: string | null;
   retryMembers: () => void;
+  /** Owner wallets and expense categories of the linked movement. */
+  wallets: Wallet[];
+  categories: Category[];
   openCreate: () => void;
   openEdit: (expense: GroupExpense) => void;
   closeForm: () => void;

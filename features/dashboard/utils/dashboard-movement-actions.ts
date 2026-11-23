@@ -7,6 +7,10 @@ export interface DashboardMovementDialogPort {
   openEdit: (transaction: Transaction) => void;
   /** Linked movements live in the social feature, not in the personal detail. */
   openSharedExpense: (expenseId: string) => void;
+  /** A movement mirroring a group expense opens the group record, not the personal one. */
+  openGroupExpense: (expenseId: string) => void;
+  /** A group settlement income opens its group settlement, not the personal one. */
+  openGroupSettlement: (settlementId: string) => void;
   /** The linked settlement income opens its settlement detail too. */
   openSettlement: (settlementId: string) => void;
 }
@@ -37,8 +41,18 @@ export function createDashboardMovementActions(
         return;
       }
 
+      if (transaction.groupSettlementId) {
+        port.openGroupSettlement(transaction.groupSettlementId);
+        return;
+      }
+
       if (transaction.sharedExpenseId) {
         port.openSharedExpense(transaction.sharedExpenseId);
+        return;
+      }
+
+      if (transaction.groupExpenseId) {
+        port.openGroupExpense(transaction.groupExpenseId);
         return;
       }
 

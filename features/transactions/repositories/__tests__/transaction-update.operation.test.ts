@@ -127,4 +127,50 @@ describe("updateTransactionOperation", () => {
     expect(patch.createdAt).toEqual(expect.any(String));
     expect(patch.createdAt).not.toBe("bad");
   });
+
+  it("preserves the stored group expense link on a personal edit", async () => {
+    transactionGet
+      .mockResolvedValueOnce(
+        snapshot(
+          "transaction-1",
+          transactionDocument({ groupExpenseId: "group-expense-1" }),
+        ),
+      )
+      .mockResolvedValueOnce(
+        snapshot("wallet-1", walletDocument({ balance: 74.5 })),
+      );
+    mockGetDoc.mockResolvedValue(snapshot("wallet-1", walletDocument()));
+
+    await run({ ...validDto, amount: 30 });
+
+    expect(transactionUpdate).toHaveBeenCalledWith(
+      { kind: "transaction", id: "transaction-1" },
+      expect.objectContaining({ groupExpenseId: "group-expense-1" }),
+    );
+  });
+
+  it("preserves the stored group settlement link on a personal edit", async () => {
+    transactionGet
+      .mockResolvedValueOnce(
+        snapshot(
+          "transaction-1",
+          transactionDocument({
+            type: "income",
+            groupSettlementId: "group-settlement-1",
+          }),
+        ),
+      )
+      .mockResolvedValueOnce(
+        snapshot("wallet-1", walletDocument({ balance: 74.5 })),
+      );
+    mockGetDoc.mockResolvedValue(snapshot("wallet-1", walletDocument()));
+
+    await run({ ...validDto, type: "income", amount: 30 });
+
+    const patch = transactionUpdate.mock.calls.find(
+      (call) => (call[0] as { kind?: string }).kind === "transaction",
+    )?.[1] as Record<string, unknown>;
+    expect(patch).toMatchObject({ groupSettlementId: "group-settlement-1" });
+    expect(patch).not.toHaveProperty("settlementId");
+  });
 });

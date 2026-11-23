@@ -31,7 +31,11 @@ function toTransactionDto(
     categoryId: input.categoryId,
     concept: input.concept,
     date: input.date,
-    sharedExpenseId: input.sharedExpenseId,
+    // A movement carries one link at most: the present one wins.
+    ...(input.sharedExpenseId
+      ? { sharedExpenseId: input.sharedExpenseId }
+      : {}),
+    ...(input.groupExpenseId ? { groupExpenseId: input.groupExpenseId } : {}),
   };
 }
 

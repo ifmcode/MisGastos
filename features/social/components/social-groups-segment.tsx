@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import type { ViewerGroupBalance } from "@/features/group-expenses/types/group-balance.types";
 import { GroupsList } from "@/features/groups/components/groups-list";
 import type { Group } from "@/features/groups/types/group.types";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
@@ -11,6 +12,8 @@ import { socialStyles as styles } from "../styles/social.styles";
 
 export interface SocialGroupsSegmentProps {
   groups: readonly Group[];
+  /** Viewer nets by group id; empty while they load, which reads as settled. */
+  balanceSummaries: Map<string, ViewerGroupBalance[]>;
   loading: boolean;
   error: string | null;
   viewerUid: string;
@@ -29,6 +32,7 @@ export interface SocialGroupsSegmentProps {
  */
 export function SocialGroupsSegment({
   groups,
+  balanceSummaries,
   loading,
   error,
   viewerUid,
@@ -64,6 +68,7 @@ export function SocialGroupsSegment({
 
       <GroupsList
         groups={groups}
+        balanceSummaries={balanceSummaries}
         viewerUid={viewerUid}
         canCreate={canCreate}
         onCreate={onCreate}

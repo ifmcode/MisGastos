@@ -18,6 +18,7 @@ export function toGroupData(group: Group): Record<string, unknown> {
     description: group.description,
     defaultCurrency: group.defaultCurrency,
     joinCode: group.joinCode,
+    simplifyDebts: group.simplifyDebts,
     createdAt: group.createdAt,
     updatedAt: group.updatedAt,
   };
@@ -31,6 +32,7 @@ export function toGroupUpdateData(
     name: update.name,
     description: update.description,
     defaultCurrency: update.defaultCurrency,
+    simplifyDebts: update.simplifyDebts,
     updatedAt: update.updatedAt,
   };
 }

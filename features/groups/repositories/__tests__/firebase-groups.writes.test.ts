@@ -52,6 +52,7 @@ describe("createGroupWithInvitationsOperation", () => {
       description: null,
       defaultCurrency: "EUR",
       joinCode: result.group.joinCode,
+      simplifyDebts: true,
       createdAt: CREATED_AT,
       updatedAt: CREATED_AT,
     });
@@ -116,6 +117,7 @@ describe("updateGroupOperation", () => {
       name: "Viaje Nuevo",
       description: "Finde",
       defaultCurrency: "USD",
+      simplifyDebts: false,
       updatedAt: "2026-11-21T10:00:00.000Z",
     });
 
@@ -123,6 +125,7 @@ describe("updateGroupOperation", () => {
       id: GROUP_ID,
       name: "Viaje Nuevo",
       memberIds: ["user-a", "user-b"],
+      simplifyDebts: false,
     });
     // The group, its code projection and the one pending invitation.
     expect(mockBatchUpdate).toHaveBeenCalledTimes(3);
@@ -130,6 +133,7 @@ describe("updateGroupOperation", () => {
       name: "Viaje Nuevo",
       description: "Finde",
       defaultCurrency: "USD",
+      simplifyDebts: false,
       updatedAt: "2026-11-21T10:00:00.000Z",
     });
     expect(mockBatchUpdate.mock.calls[1][1]).toEqual({
@@ -149,6 +153,7 @@ describe("updateGroupOperation", () => {
       name: "Viaje",
       description: "Finde",
       defaultCurrency: "EUR",
+      simplifyDebts: true,
       updatedAt: "2026-11-21T10:00:00.000Z",
     });
 
@@ -164,6 +169,7 @@ describe("updateGroupOperation", () => {
         name: "Viaje",
         description: null,
         defaultCurrency: "EUR",
+        simplifyDebts: true,
         updatedAt: CREATED_AT,
       }),
     ).rejects.toMatchObject({ code: "GROUP_NOT_FOUND" });

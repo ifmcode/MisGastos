@@ -1,4 +1,4 @@
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import type { GroupMember } from "@/features/groups/types/group.types";
@@ -16,12 +16,11 @@ export interface GroupExpenseParticipantsFieldProps {
   disabled: boolean;
   errorText: string | null;
   onToggle: (userId: string) => void;
-  onToggleAll: () => void;
 }
 
 /**
- * Multi-select of the participating members. Everyone starts selected, the
- * `Todos` shortcut selects or clears the list and the payer may stay out.
+ * Multi-select of the participating members. Everyone starts selected and the
+ * payer may stay out; each row toggles independently.
  */
 export function GroupExpenseParticipantsField({
   members,
@@ -30,49 +29,15 @@ export function GroupExpenseParticipantsField({
   disabled,
   errorText,
   onToggle,
-  onToggleAll,
 }: GroupExpenseParticipantsFieldProps) {
   const theme = useFormTheme();
   const { t } = useScopedTranslation("groupExpenses");
-  const allSelected =
-    members.length > 0 &&
-    members.every((member) => participantIds.includes(member.uid));
 
   return (
     <View>
-      <View style={styles.participantsHeader}>
-        <ThemedText style={styles.label}>
-          {t("form.participantsLabel")}
-        </ThemedText>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("form.selectAllAccessibility")}
-          accessibilityHint={t("form.selectAllHint")}
-          accessibilityState={{ selected: allSelected, disabled }}
-          disabled={disabled}
-          onPress={onToggleAll}
-          style={({ pressed }) => [
-            styles.selectAllChip,
-            {
-              borderColor: allSelected ? theme.primary : theme.border,
-              backgroundColor: allSelected
-                ? theme.primarySoft
-                : theme.surface,
-            },
-            disabled && styles.actionDisabled,
-            pressed && styles.pressed,
-          ]}
-        >
-          <ThemedText
-            style={[
-              styles.selectAllText,
-              { color: allSelected ? theme.primary : theme.text },
-            ]}
-          >
-            {t("form.selectAll")}
-          </ThemedText>
-        </Pressable>
-      </View>
+      <ThemedText style={styles.label}>
+        {t("form.participantsLabel")}
+      </ThemedText>
 
       <ThemedText style={[styles.helper, { color: theme.muted }]}>
         {t("form.participantsHelper")}

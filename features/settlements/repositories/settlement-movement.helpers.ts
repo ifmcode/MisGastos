@@ -13,8 +13,17 @@ import type {
 import {
   readSettlementWallet,
   toSettlementMovementSnapshot,
+  type SettlementErrorFactory,
+  type SettlementLinkErrorCode,
   type SettlementSnapshotView,
 } from "./settlement-wallet.helpers";
+
+/** Default factory: the 1:1 flow keeps raising its own error class. */
+function defaultSettlementError(
+  code: "WALLET_NOT_OWNED" | SettlementLinkErrorCode,
+): Error {
+  return new SettlementOperationError(code);
+}
 
 export const TRANSACTIONS_COLLECTION = "transactions";
 export const WALLETS_COLLECTION = "wallets";
@@ -95,9 +104,10 @@ export async function revertSettlementMovementWallet(
   currency: CurrencyCode,
   now: string,
   port: ISettlementMovementPort,
+  onError: SettlementErrorFactory = defaultSettlementError,
 ): Promise<void> {
   if (movement.ownerId !== creditorId) {
-    throw new SettlementOperationError("WALLET_NOT_OWNED");
+    throw onError("WALLET_NOT_OWNED");
   }
 
   if (isOrphanedWalletId(movement.walletId)) return;
@@ -105,7 +115,13 @@ export async function revertSettlementMovementWallet(
   const reference = settlementWalletRef(movement.walletId);
   const snapshot = await transaction.get(reference);
   // The wallet may have been archived after the link, so a revert is allowed.
-  const balance = readSettlementWallet(snapshot, creditorId, currency, true);
+  const balance = readSettlementWallet(
+    snapshot,
+    creditorId,
+    currency,
+    true,
+    onError,
+  );
 
   transaction.update(reference, {
     balance: port.revertAmountFromBalance(balance, movement.amountCents),

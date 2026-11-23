@@ -10,7 +10,10 @@ export interface SettlementMovementWriteInput {
   /** Creditor (and wallet) owner; the movement is only ever theirs. */
   ownerId: string;
   walletId: string;
-  settlementId: string;
+  /** 1:1 settlement link; never together with `groupSettlementId`. */
+  settlementId?: string;
+  /** Group settlement link; never together with `settlementId`. */
+  groupSettlementId?: string;
   amountCents: number;
   currency: CurrencyCode;
   categoryId: string;

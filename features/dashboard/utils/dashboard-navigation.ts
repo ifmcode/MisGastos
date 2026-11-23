@@ -10,6 +10,10 @@ export interface DashboardNavigationActions {
   openTransferHistory: () => void;
   /** A linked movement opens its shared expense, never the personal detail. */
   openSharedExpense: (expenseId: string) => void;
+  /** A group-linked movement opens its group expense, never the personal one. */
+  openGroupExpense: (expenseId: string) => void;
+  /** A group settlement income opens its group settlement, never the personal one. */
+  openGroupSettlement: (settlementId: string) => void;
   /** A settlement income opens its settlement detail, never the personal one. */
   openSettlement: (settlementId: string) => void;
 }
@@ -23,6 +27,10 @@ export function createDashboardNavigationActions(
     openTransferHistory: () => router.push("/transfers"),
     openSharedExpense: (expenseId) =>
       router.push(`/social/expenses/${expenseId}` as Href),
+    openGroupExpense: (expenseId) =>
+      router.push(`/social/group-expenses/${expenseId}` as Href),
+    openGroupSettlement: (settlementId) =>
+      router.push(`/social/group-settlements/${settlementId}` as Href),
     openSettlement: (settlementId) =>
       router.push(`/social/settlements/${settlementId}` as Href),
   };

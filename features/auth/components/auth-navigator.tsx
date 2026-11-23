@@ -57,7 +57,15 @@ export function AuthNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="social/groups/[groupId]"
+        name="social/group-settlements/[settlementId]"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="social/groups/[groupId]/index"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="social/groups/[groupId]/settle"
         options={{ headerShown: false }}
       />
       <Stack.Screen

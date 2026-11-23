@@ -4,10 +4,6 @@ import {
   type GroupJoinCodeController,
 } from "./use-group-join-code";
 import {
-  useGroupJoinRequests,
-  type GroupJoinRequestsController,
-} from "./use-group-join-requests";
-import {
   useGroupMemberActions,
   type GroupMemberActionsController,
 } from "./use-group-member-actions";
@@ -16,17 +12,19 @@ export interface UseGroupDetailMembershipOptions {
   viewerUid: string | undefined;
   groupId: string;
   detail: GroupDetail | null;
-  /** Reloads the detail after a member, code or request change. */
+  /** Reloads the detail after a member or code change. */
   onChanged: () => void;
 }
 
 export interface GroupDetailMembershipController {
   memberActions: GroupMemberActionsController;
   joinCode: GroupJoinCodeController;
-  joinRequests: GroupJoinRequestsController;
 }
 
-/** Membership actions, join code and owner queue of one group detail. */
+/**
+ * Membership actions and join code of one group detail. The owner join-request
+ * queue lives in Social since TICKET-070.
+ */
 export function useGroupDetailMembership({
   viewerUid,
   groupId,
@@ -47,12 +45,5 @@ export function useGroupDetailMembership({
     onGenerated: onChanged,
   });
 
-  const joinRequests = useGroupJoinRequests({
-    viewerUid,
-    groupId,
-    requests: detail?.joinRequests ?? [],
-    onChanged,
-  });
-
-  return { memberActions, joinCode, joinRequests };
+  return { memberActions, joinCode };
 }

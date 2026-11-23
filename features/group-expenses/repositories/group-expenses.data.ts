@@ -33,6 +33,9 @@ export function toGroupExpenseData(
     participants: dto.participants.map(toParticipantData),
     description: dto.description,
     date: dto.date,
+    walletId: dto.walletId,
+    categoryId: dto.categoryId,
+    linkedTransactionId: dto.linkedTransactionId,
     createdBy: dto.createdBy,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
@@ -40,11 +43,15 @@ export function toGroupExpenseData(
   };
 }
 
-/** Mutable slice of a group expense: identity and stamps are never sent here. */
+/**
+ * Mutable slice of a group expense. `linkedTransactionId` travels only when the
+ * caller supplies it (the link operations own it); otherwise the stored value
+ * is left untouched.
+ */
 export function toGroupExpenseUpdateData(
   update: UpdateGroupExpenseDto,
 ): Record<string, unknown> {
-  return {
+  const data: Record<string, unknown> = {
     payerId: update.payerId,
     amountCents: update.amountCents,
     currency: update.currency,
@@ -52,6 +59,14 @@ export function toGroupExpenseUpdateData(
     participants: update.participants.map(toParticipantData),
     description: update.description,
     date: update.date,
+    walletId: update.walletId,
+    categoryId: update.categoryId,
     updatedAt: update.updatedAt,
   };
+
+  if (update.linkedTransactionId !== undefined) {
+    data.linkedTransactionId = update.linkedTransactionId;
+  }
+
+  return data;
 }

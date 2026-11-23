@@ -8,7 +8,7 @@
     "rowAccessibility_one": "Pending requests: {{count}} request",
     "rowAccessibility_other": "Pending requests: {{count}} requests",
     "labelZero": "Pending requests",
-    "hint": "Open the list of friend requests and group invitations"
+    "hint": "Open the list of friend requests, group invitations and requests to join your groups"
   },
   "segments": {
     "accessibility": "Social sections",
@@ -39,7 +39,22 @@
     "subtitle_other": "{{count}} pending requests",
     "subtitleEmpty": "Nothing pending right now",
     "emptyTitle": "No pending requests",
-    "emptyMessage": "When you send or receive a friend request, or someone invites you to a group, it shows up here until you accept, reject or cancel it."
+    "emptyMessage": "When you send or receive a friend request, someone invites you to a group or asks to join one of your groups, it shows up here until you accept, reject or cancel it."
+  },
+  "ownerJoinRequests": {
+    "title": "Join requests",
+    "count_one": "{{count}} request",
+    "count_other": "{{count}} requests",
+    "loading": "Loading join requests…",
+    "retryAccessibility": "Retry loading the join requests",
+    "unknownRequester": "Someone",
+    "rowAccessibility": "{{name}} asks to join the group {{group}}",
+    "requestedOn": "Asked to join on {{date}}",
+    "accept": "Accept",
+    "reject": "Reject",
+    "acceptAccessibility": "Accept the request from {{name}} for the group {{group}}",
+    "rejectAccessibility": "Reject the request from {{name}} for the group {{group}}",
+    "busyHint": "Another request is in progress. Wait a moment before continuing."
   },
   "addFriend": {
     "title": "Add friend",

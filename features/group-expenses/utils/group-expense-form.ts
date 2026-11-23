@@ -33,6 +33,16 @@ export interface GroupExpenseFormValues {
   participantIds: string[];
   splitMode: ExpenseSplitMode;
   splitValues: Record<ExpenseSplitMode, SplitValueTexts>;
+  /** Payer-owned wallet of the linked movement; empty keeps the expense social. */
+  walletId: string;
+  /** Expense category of the linked movement; empty leaves it to persistence. */
+  categoryId: string;
+  /**
+   * Transient UI switch of the wallet registration; never persisted. The stored
+   * wallet, category and linked movement are the single source of truth, so the
+   * toggle is derived from them when an expense is loaded.
+   */
+  registerInWallet: boolean;
 }
 
 export interface GroupExpenseFormDefaults {
@@ -42,6 +52,8 @@ export interface GroupExpenseFormDefaults {
   currency: CurrencyCode;
   date: string;
   payerId?: string;
+  /** Stored preference of new expenses; omitted means no wallet registration. */
+  registerInWallet?: boolean;
 }
 
 export function createGroupExpenseFormValues(
@@ -66,6 +78,9 @@ export function createGroupExpenseFormValues(
     participantIds: [...memberIds],
     splitMode: "equal",
     splitValues: emptySplitValues(),
+    walletId: "",
+    categoryId: "",
+    registerInWallet: defaults.registerInWallet ?? false,
   };
 }
 
@@ -74,6 +89,8 @@ export function toGroupExpenseInput(
   values: GroupExpenseFormValues,
 ): GroupExpenseInput {
   const activeValues = values.splitValues[values.splitMode] ?? {};
+  const registersInWallet = values.registerInWallet;
+  const hasWallet = registersInWallet && values.walletId.trim().length > 0;
 
   return {
     groupId: values.groupId,
@@ -87,5 +104,25 @@ export function toGroupExpenseInput(
       userId,
       value: activeValues[userId] ?? "",
     })),
+    // "No" clears both ids, so a stale selection can never reach the schema.
+    walletId: registersInWallet ? values.walletId : "",
+    // Without a wallet the persisted link has no category, whatever the local
+    // state still holds.
+    categoryId: hasWallet ? values.categoryId : "",
+    registerInWallet: registersInWallet,
   };
+}
+
+/**
+ * Only the payer can own the linked movement, so the registration toggle is
+ * visible while the viewer is the payer and disappears when another member pays.
+ */
+export function isGroupExpenseWalletRegistrationVisible(
+  payerId: string,
+  viewerUid: string,
+): boolean {
+  const viewer = viewerUid.trim();
+  const payer = payerId.trim();
+
+  return viewer.length > 0 && payer === viewer;
 }

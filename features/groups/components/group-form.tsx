@@ -81,9 +81,11 @@ export function GroupForm({
               values={form.values}
               errors={fieldErrors}
               disabled={submitting}
+              isEditing={isEditing}
               onChangeName={form.changeName}
               onChangeDescription={form.changeDescription}
               onChangeCurrency={form.changeCurrency}
+              onChangeSimplifyDebts={form.changeSimplifyDebts}
             />
 
             {isEditing ? null : (

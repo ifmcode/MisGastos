@@ -1,6 +1,9 @@
 import { useCallback, useMemo } from "react";
 
+import { useGroupBalanceSummaries } from "@/features/group-expenses/hooks/use-group-balance-summaries";
+import type { ViewerGroupBalance } from "@/features/group-expenses/types/group-balance.types";
 import { useGroupInvitations } from "@/features/groups/hooks/use-group-invitations";
+import { useOwnerJoinRequests } from "@/features/groups/hooks/use-owner-join-requests";
 import { useGroups } from "@/features/groups/hooks/use-groups";
 import type { Group } from "@/features/groups/types/group.types";
 
@@ -10,7 +13,11 @@ export interface UseSocialGroupsOptions {
 
 export interface SocialGroupsController {
   groups: Group[];
+  /** Viewer nets by group id; the map stays empty while they load or fail. */
+  balanceSummaries: Map<string, ViewerGroupBalance[]>;
   invitationsCount: number;
+  /** Pending join requests of the groups the viewer owns. */
+  joinRequestsCount: number;
   loading: boolean;
   refreshing: boolean;
   error: string | null;
@@ -19,38 +26,61 @@ export interface SocialGroupsController {
 }
 
 /**
- * Groups and received invitations of the Social tab. Both live in the groups
- * feature; this hook only composes them so the segment and the pull-to-refresh
- * stay independent from the friends source.
+ * Groups, their viewer balances, received invitations and the owner join-request
+ * queue of the Social tab. All live in the groups feature; this hook only
+ * composes them so the segment and the pull-to-refresh stay independent from the
+ * friends source.
  */
 export function useSocialGroups({
   viewerUid,
 }: UseSocialGroupsOptions): SocialGroupsController {
   const groups = useGroups({ viewerUid });
+  const balances = useGroupBalanceSummaries({ viewerUid });
   const invitations = useGroupInvitations({ viewerUid });
   const { reload: reloadGroups, refresh: refreshGroups } = groups;
-  const {
-    reload: reloadInvitations,
-    refresh: refreshInvitations,
-  } = invitations;
+  const { reload: reloadBalances, refresh: refreshBalances } = balances;
+  const { reload: reloadInvitations, refresh: refreshInvitations } =
+    invitations;
+  const joinRequests = useOwnerJoinRequests({
+    viewerUid,
+    onResponded: refreshGroups,
+  });
+  const { reload: reloadJoinRequests, refresh: refreshJoinRequests } =
+    joinRequests;
 
   const reload = useCallback(() => {
     void reloadGroups();
+    void reloadBalances();
     void reloadInvitations();
-  }, [reloadGroups, reloadInvitations]);
+    void reloadJoinRequests();
+  }, [reloadBalances, reloadGroups, reloadInvitations, reloadJoinRequests]);
 
   const refresh = useCallback(() => {
     void refreshGroups();
+    void refreshBalances();
     void refreshInvitations();
-  }, [refreshGroups, refreshInvitations]);
+    void refreshJoinRequests();
+  }, [
+    refreshBalances,
+    refreshGroups,
+    refreshInvitations,
+    refreshJoinRequests,
+  ]);
 
   return useMemo(
     () => ({
       groups: groups.groups,
+      balanceSummaries: balances.summaries,
       invitationsCount: invitations.count,
-      loading: groups.loading,
-      refreshing: groups.refreshing || invitations.refreshing,
-      error: groups.error ?? invitations.error,
+      joinRequestsCount: joinRequests.count,
+      // The list never waits for the summaries: an empty map renders "En paz".
+      loading: groups.loading || joinRequests.loading,
+      refreshing:
+        groups.refreshing ||
+        balances.refreshing ||
+        invitations.refreshing ||
+        joinRequests.refreshing,
+      error: groups.error ?? balances.error ?? invitations.error ?? joinRequests.error,
       reload,
       refresh,
     }),
@@ -59,9 +89,16 @@ export function useSocialGroups({
       groups.loading,
       groups.refreshing,
       groups.error,
+      balances.summaries,
+      balances.refreshing,
+      balances.error,
       invitations.count,
       invitations.refreshing,
       invitations.error,
+      joinRequests.count,
+      joinRequests.loading,
+      joinRequests.refreshing,
+      joinRequests.error,
       reload,
       refresh,
     ],

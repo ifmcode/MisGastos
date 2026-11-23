@@ -57,19 +57,6 @@ export const friendDetailStyles = StyleSheet.create({
     lineHeight: 20,
     fontWeight: "600",
   },
-  settleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    borderRadius: 12,
-    paddingVertical: 12,
-    minHeight: 48,
-  },
-  settleButtonText: {
-    fontSize: 15,
-    fontWeight: "700",
-  },
 
   // Shared interaction states
   actionDisabled: {

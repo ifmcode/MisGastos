@@ -8,7 +8,7 @@
     "rowAccessibility_one": "Peticiones pendientes: {{count}} solicitud",
     "rowAccessibility_other": "Peticiones pendientes: {{count}} solicitudes",
     "labelZero": "Peticiones pendientes",
-    "hint": "Abre la lista de solicitudes de amistad e invitaciones a grupos"
+    "hint": "Abre la lista de solicitudes de amistad, invitaciones y peticiones para unirse a tus grupos"
   },
   "segments": {
     "accessibility": "Secciones de Social",
@@ -39,7 +39,22 @@
     "subtitle_other": "{{count}} solicitudes pendientes",
     "subtitleEmpty": "Nada pendiente por ahora",
     "emptyTitle": "No hay solicitudes pendientes",
-    "emptyMessage": "Cuando envíes o recibas una solicitud de amistad, o te inviten a un grupo, aparecerá aquí hasta que la aceptes, rechaces o canceles."
+    "emptyMessage": "Cuando envíes o recibas una solicitud de amistad, te inviten a un grupo o alguien pida unirse a un grupo tuyo, aparecerá aquí hasta que la aceptes, rechaces o canceles."
+  },
+  "ownerJoinRequests": {
+    "title": "Solicitudes para unirse",
+    "count_one": "{{count}} solicitud",
+    "count_other": "{{count}} solicitudes",
+    "loading": "Cargando las solicitudes para unirse…",
+    "retryAccessibility": "Reintentar la carga de las solicitudes para unirse",
+    "unknownRequester": "Alguien",
+    "rowAccessibility": "{{name}} pide unirse al grupo {{group}}",
+    "requestedOn": "Solicitó entrar el {{date}}",
+    "accept": "Aceptar",
+    "reject": "Rechazar",
+    "acceptAccessibility": "Aceptar la solicitud de {{name}} para el grupo {{group}}",
+    "rejectAccessibility": "Rechazar la solicitud de {{name}} para el grupo {{group}}",
+    "busyHint": "Hay otra solicitud en curso. Espera un momento antes de continuar."
   },
   "addFriend": {
     "title": "Añadir amigo",

@@ -19,18 +19,37 @@ function onlyPending(
   return items.filter((item) => item.status === "pending");
 }
 
-/** Keeps order, drops accepted/rejected/cancelled and counts both directions. */
+/** Counts from another source never add a negative or fractional request. */
+function normalizeCount(count: number): number {
+  if (!Number.isFinite(count)) return 0;
+
+  return Math.max(0, Math.trunc(count));
+}
+
+/**
+ * Keeps order, drops accepted/rejected/cancelled and counts both directions
+ * plus the owner join-request queue of `/social/requests`.
+ */
 export function getPendingRequests(
   overview: PendingRequestsSource,
+  ownerJoinRequestCount = 0,
 ): PendingRequests {
   const incoming = onlyPending(overview.incoming);
   const outgoing = onlyPending(overview.outgoing);
 
-  return { incoming, outgoing, total: incoming.length + outgoing.length };
+  return {
+    incoming,
+    outgoing,
+    total:
+      incoming.length +
+      outgoing.length +
+      normalizeCount(ownerJoinRequestCount),
+  };
 }
 
 export function countPendingRequests(
   overview: PendingRequestsSource,
+  ownerJoinRequestCount = 0,
 ): number {
-  return getPendingRequests(overview).total;
+  return getPendingRequests(overview, ownerJoinRequestCount).total;
 }

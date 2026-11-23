@@ -42,7 +42,6 @@ export function DashboardScreen() {
   });
 
   const [selectedWalletId, setSelectedWalletId] = useState("");
-
   // Other tabs edit this data; refresh it when the screen regains focus.
   const dashboardRefresh = useDashboardRefresh({
     wallets: walletsState,
@@ -70,6 +69,8 @@ export function DashboardScreen() {
     mutations: transactionsState,
     onWalletsChanged: walletsState.refresh,
     onOpenSharedExpense: navigation.openSharedExpense,
+    onOpenGroupExpense: navigation.openGroupExpense,
+    onOpenGroupSettlement: navigation.openGroupSettlement,
     onOpenSettlement: navigation.openSettlement,
   });
   const greeting = t("greeting", { name: profile?.displayName ?? user?.displayName ?? user?.email ?? t("defaultUser") });

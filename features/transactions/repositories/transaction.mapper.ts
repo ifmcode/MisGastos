@@ -70,7 +70,9 @@ export function mapTransactionDocument(
       : null;
 
   const sharedExpenseId = readSharedExpenseId(data);
+  const groupExpenseId = readGroupExpenseId(data);
   const settlementId = readSettlementId(data);
+  const groupSettlementId = readGroupSettlementId(data);
 
   return {
     id,
@@ -85,7 +87,9 @@ export function mapTransactionDocument(
     date,
     ownerId: storedOwnerId,
     ...(sharedExpenseId ? { sharedExpenseId } : {}),
+    ...(groupExpenseId ? { groupExpenseId } : {}),
     ...(settlementId ? { settlementId } : {}),
+    ...(groupSettlementId ? { groupSettlementId } : {}),
     createdAt,
     updatedAt,
     deletedAt,
@@ -102,6 +106,16 @@ function readSharedExpenseId(data: Record<string, unknown>): string | null {
     : null;
 }
 
+/** A group expense link is expense-only too; anything else is dropped. */
+function readGroupExpenseId(data: Record<string, unknown>): string | null {
+  if (data.type !== "expense") return null;
+
+  return typeof data.groupExpenseId === "string" &&
+    data.groupExpenseId.trim().length > 0
+    ? data.groupExpenseId.trim()
+    : null;
+}
+
 /** A settlement link only belongs to an income; anything else is dropped. */
 function readSettlementId(data: Record<string, unknown>): string | null {
   if (data.type !== "income") return null;
@@ -109,5 +123,15 @@ function readSettlementId(data: Record<string, unknown>): string | null {
   return typeof data.settlementId === "string" &&
     data.settlementId.trim().length > 0
     ? data.settlementId.trim()
+    : null;
+}
+
+/** A group settlement link is income-only too; anything else is dropped. */
+function readGroupSettlementId(data: Record<string, unknown>): string | null {
+  if (data.type !== "income") return null;
+
+  return typeof data.groupSettlementId === "string" &&
+    data.groupSettlementId.trim().length > 0
+    ? data.groupSettlementId.trim()
     : null;
 }

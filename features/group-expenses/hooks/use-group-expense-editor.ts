@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 
 import type { GroupExpense } from "../types/group-expense.types";
 import { useGroupExpenseEditorMembers } from "./use-group-expense-editor-members";
+import { useGroupExpenseEditorResources } from "./use-group-expense-editor-resources";
 import { useGroupExpenseEditorSubmit } from "./use-group-expense-editor-submit";
 import type {
   GroupExpenseEditorController,
@@ -24,6 +25,7 @@ export function useGroupExpenseEditor({
   groups,
   lockedDetail,
   preferredCurrency,
+  registerInWalletByDefault = false,
   onSaved,
 }: UseGroupExpenseEditorOptions): GroupExpenseEditorController {
   const lockedGroupId = lockedDetail?.group.id ?? "";
@@ -34,6 +36,7 @@ export function useGroupExpenseEditor({
   const [selectedGroupId, setSelectedGroupId] = useState(lockedGroupId);
   const [groupPickerVisible, setGroupPickerVisible] = useState(false);
 
+  const resources = useGroupExpenseEditorResources();
   const membersState = useGroupExpenseEditorMembers({
     viewerUid,
     lockedDetail,
@@ -52,6 +55,10 @@ export function useGroupExpenseEditor({
     groupId: selectedGroupId,
     memberIds: membersState.memberIds,
     groupCurrency: group?.defaultCurrency ?? preferredCurrency,
+    registerInWalletByDefault,
+    wallets: resources.wallets,
+    walletsLoading: resources.walletsLoading,
+    walletsError: resources.walletsError,
   });
 
   const handleSaved = useCallback(() => {
@@ -63,6 +70,7 @@ export function useGroupExpenseEditor({
   const submitState = useGroupExpenseEditorSubmit({
     viewerUid,
     editingExpense,
+    onResourcesChanged: resources.refreshResources,
     onSaved: handleSaved,
   });
   const { resetErrors } = submitState;
@@ -125,6 +133,8 @@ export function useGroupExpenseEditor({
     membersLoading: membersState.loading,
     membersError: membersState.error,
     retryMembers: membersState.retry,
+    wallets: resources.wallets,
+    categories: resources.categories,
     openCreate,
     openEdit,
     closeForm,

@@ -102,14 +102,25 @@ export function validateGroupInviteeIds(
   return { ok: true, value: ids };
 }
 
+/**
+ * The toggle is on unless the form explicitly sends `false`. The creation
+ * payload never carries it, so a new group always starts simplifying.
+ */
+function readSimplifyDebts(value: unknown): boolean {
+  return typeof value === "boolean" ? value : true;
+}
+
 function readMetadata(
-  input: GroupUpdateInput,
+  input: GroupInput | GroupUpdateInput,
   issues: GroupValidationIssue[],
 ): ValidatedGroupMetadata {
   return {
     name: readName(input.name, issues),
     description: readDescription(input.description, issues),
     defaultCurrency: readCurrency(input.defaultCurrency, issues),
+    simplifyDebts: readSimplifyDebts(
+      "simplifyDebts" in input ? input.simplifyDebts : true,
+    ),
   };
 }
 

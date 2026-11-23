@@ -45,13 +45,8 @@ export async function loadGroupDetail(
     group.ownerId === viewerUid
       ? await loadGroupInvitationItems(repository, friendsRepository, group)
       : [];
-  // Join requests are owner-only too: `[]` for every other member.
-  const joinRequests =
-    group.ownerId === viewerUid
-      ? await loadGroupJoinRequestItems(repository, friendsRepository, group)
-      : [];
 
-  return { group, members, invitations, joinRequests };
+  return { group, members, invitations };
 }
 
 /** Pending invitations of one group; only the owner ever asks for them. */

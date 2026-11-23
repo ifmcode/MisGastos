@@ -6,6 +6,7 @@ import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { groupExpensesStyles as styles } from "../styles/group-expenses.styles";
+import { getVisibleGroupSplitModes } from "../utils/group-expense-split-modes";
 
 const MODE_LABEL_KEYS: Record<ExpenseSplitMode, string> = {
   equal: "form.splitEqual",
@@ -13,14 +14,6 @@ const MODE_LABEL_KEYS: Record<ExpenseSplitMode, string> = {
   fixed: "form.splitFixed",
   shares: "form.splitShares",
 };
-
-/** The four modes are all valid for a group expense. */
-const SPLIT_MODES: readonly ExpenseSplitMode[] = [
-  "equal",
-  "percentage",
-  "fixed",
-  "shares",
-];
 
 export interface GroupExpenseSplitModeChipsProps {
   mode: ExpenseSplitMode;
@@ -36,10 +29,11 @@ export function GroupExpenseSplitModeChips({
 }: GroupExpenseSplitModeChipsProps) {
   const theme = useFormTheme();
   const { t, tr } = useScopedTranslation("groupExpenses");
+  const modes = getVisibleGroupSplitModes(mode);
 
   return (
     <View style={styles.chipRow}>
-      {SPLIT_MODES.map((option) => {
+      {modes.map((option) => {
         const selected = mode === option;
         const label = tr(MODE_LABEL_KEYS[option]);
 

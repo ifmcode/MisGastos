@@ -5,7 +5,10 @@ import type { Wallet } from "@/features/wallets/types/wallet.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
-import type { SharedExpenseFieldErrors } from "../schemas/shared-expense.schema";
+import type {
+  SharedExpenseLinkFieldErrors,
+  SharedExpenseLinkScope,
+} from "../types/shared-expense-link.types";
 import {
   getSharedExpenseCategoryOptions,
   getSharedExpenseWalletOptions,
@@ -22,17 +25,21 @@ export interface SharedExpenseLinkedMovementProps {
   walletId: string;
   categoryId: string;
   disabled: boolean;
-  errors: SharedExpenseFieldErrors;
+  /** Wallet/category codes; both form schemas satisfy the narrow contract. */
+  errors: SharedExpenseLinkFieldErrors;
+  /** Copy namespace; the 1:1 form is the default, groups pass their own. */
+  scope?: SharedExpenseLinkScope;
   onWalletChange: (walletId: string) => void;
   onCategoryChange: (categoryId: string) => void;
 }
 
 /**
- * Personal movement of the shared expense while the registration toggle is
- * **Yes**: only the payer can own it, so the block renders while the viewer is
- * the payer and disappears when the friend pays or the toggle is off. The
- * wallet is required because the spend must reach Movements; the category
- * appears once a wallet is selected.
+ * Personal movement of a socially shared expense while the registration toggle
+ * is **Yes**, shared by the 1:1 and the group forms with their own copy. Only
+ * the payer can own it, so the block renders while the viewer is the payer and
+ * disappears when someone else pays or the toggle is off. The wallet is
+ * required because the spend must reach Movements; the category appears once a
+ * wallet is selected.
  */
 export function SharedExpenseLinkedMovement({
   wallets,
@@ -44,10 +51,11 @@ export function SharedExpenseLinkedMovement({
   categoryId,
   disabled,
   errors,
+  scope = "sharedExpenses",
   onWalletChange,
   onCategoryChange,
 }: SharedExpenseLinkedMovementProps) {
-  const { t, tr } = useScopedTranslation("sharedExpenses");
+  const { t, tr } = useScopedTranslation(scope);
   const trimmedWalletId = walletId.trim();
   const hasWallet = trimmedWalletId.length > 0;
   const walletOptions = useMemo(
@@ -81,6 +89,7 @@ export function SharedExpenseLinkedMovement({
         disabled={disabled}
         errorText={walletError}
         emptyText={walletEmpty}
+        scope={scope}
         onSelect={onWalletChange}
       />
 
@@ -90,6 +99,7 @@ export function SharedExpenseLinkedMovement({
           selectedId={categoryId}
           disabled={disabled}
           errorText={categoryError}
+          scope={scope}
           onChange={onCategoryChange}
         />
       ) : null}

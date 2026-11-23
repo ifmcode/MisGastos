@@ -96,6 +96,8 @@ describe("updateGroupExpenseOperation", () => {
         participants: updateDto.participants,
         description: "Lunch",
         date: "2026-11-11",
+        walletId: null,
+        categoryId: null,
         updatedAt: "2026-11-11T10:00:00.000Z",
       },
     );

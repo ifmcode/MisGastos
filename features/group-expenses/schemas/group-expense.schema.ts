@@ -55,7 +55,7 @@ export function validateGroupExpenseInput(
   }
 
   const issues: GroupExpenseValidationIssue[] = [];
-  const parsed = parseGroupExpenseFields(input, members, issues);
+  const parsed = parseGroupExpenseFields(input, viewer, members, issues);
 
   if (parsed === null || issues.length > 0) {
     return { ok: false, error: issues };
@@ -89,6 +89,10 @@ export function validateGroupExpenseInput(
       participants: shares.value,
       description: parsed.description,
       date: parsed.date,
+      walletId: parsed.walletId,
+      categoryId: parsed.categoryId,
+      // Only persistence can set the link, so a validated payload never has one.
+      linkedTransactionId: null,
     },
   };
 }

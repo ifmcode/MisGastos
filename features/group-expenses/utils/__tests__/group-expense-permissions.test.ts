@@ -19,6 +19,7 @@ function buildGroup(overrides: Partial<Group> = {}): Group {
     description: null,
     defaultCurrency: "EUR",
     joinCode: "ABCD2345",
+    simplifyDebts: true,
     createdAt: "2026-11-01T10:00:00.000Z",
     updatedAt: "2026-11-01T10:00:00.000Z",
     ...overrides,

@@ -53,6 +53,13 @@ describe("getGroupExpenseErrorCode", () => {
       "GROUP_CHANGED",
       "ALREADY_DELETED",
       "EXPENSE_HAS_FORMER_MEMBERS",
+      "INSUFFICIENT_BALANCE",
+      "WALLET_NOT_FOUND",
+      "WALLET_NOT_OWNED",
+      "CURRENCY_MISMATCH",
+      "CATEGORY_REQUIRED",
+      "LINK_WITHOUT_REGISTRATION",
+      "LINKED_MOVEMENT_FOREIGN",
     ] as const;
 
     for (const code of codes) {

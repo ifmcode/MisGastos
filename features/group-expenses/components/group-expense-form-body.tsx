@@ -1,3 +1,5 @@
+import { SharedExpenseLinkedMovement } from "@/features/shared-expenses/components/shared-expense-linked-movement";
+import { SharedExpenseWalletRegistration } from "@/features/shared-expenses/components/shared-expense-wallet-registration";
 import { FormActions } from "@/shared/components/molecules/form-actions";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
@@ -5,6 +7,7 @@ import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 import type { GroupExpenseEditorController } from "../hooks/use-group-expense-editor";
 import type { GroupExpenseFormController } from "../hooks/use-group-expense-form";
 import type { GroupExpenseValidationCode } from "../schemas/group-expense.schema";
+import { isGroupExpenseWalletRegistrationVisible } from "../utils/group-expense-form";
 import { GroupExpenseFormMainFields } from "./group-expense-form-main-fields";
 import { GroupExpenseGroupField } from "./group-expense-group-field";
 import { GroupExpenseParticipantsField } from "./group-expense-participants-field";
@@ -31,6 +34,12 @@ export function GroupExpenseFormBody({
 }: GroupExpenseFormBodyProps) {
   const { t, tr } = useScopedTranslation("groupExpenses");
   const { values, errors } = form;
+  // Only the payer owns the mirror movement, so another member's expense shows
+  // neither the toggle nor the wallet/category block.
+  const canRegisterInWallet = isGroupExpenseWalletRegistrationVisible(
+    values.payerId,
+    values.viewerUid,
+  );
   const hasFieldError = Object.values(errors).some(Boolean);
   // A server error is specific and must be visible next to the button; a field
   // error already has its inline message, so the notice only reminds the user.
@@ -67,7 +76,6 @@ export function GroupExpenseFormBody({
         disabled={submitting}
         errorText={errorText(errors.participants)}
         onToggle={form.toggleParticipant}
-        onToggleAll={form.toggleAllParticipants}
       />
 
       <GroupExpensePayerSelector
@@ -93,6 +101,32 @@ export function GroupExpenseFormBody({
         onModeChange={form.changeSplitMode}
         onValueChange={form.changeSplitValue}
       />
+
+      {canRegisterInWallet ? (
+        <SharedExpenseWalletRegistration
+          scope="groupExpenses"
+          enabled={values.registerInWallet}
+          disabled={submitting}
+          onChange={form.changeRegisterInWallet}
+        />
+      ) : null}
+
+      {canRegisterInWallet && values.registerInWallet ? (
+        <SharedExpenseLinkedMovement
+          scope="groupExpenses"
+          wallets={editor.wallets}
+          categories={editor.categories}
+          payerId={values.payerId}
+          viewerUid={values.viewerUid}
+          currency={values.currency}
+          walletId={values.walletId}
+          categoryId={values.categoryId}
+          disabled={submitting}
+          errors={errors}
+          onWalletChange={form.changeWallet}
+          onCategoryChange={form.changeCategory}
+        />
+      ) : null}
 
       <ErrorBanner message={notice} />
 

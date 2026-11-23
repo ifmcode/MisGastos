@@ -64,58 +64,6 @@ export const groupJoinStyles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // Owner join-request queue
-  section: {
-    gap: 10,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-    textTransform: "uppercase",
-  },
-  sectionCount: {
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  emptyText: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  requestRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    minHeight: 48,
-  },
-  requestBody: {
-    flex: 1,
-    gap: 2,
-  },
-  requestName: {
-    fontSize: 15,
-    lineHeight: 20,
-  },
-  requestMeta: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  requestActions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-
   // Join route: code form and result cards
   fieldLabel: {
     fontSize: 14,

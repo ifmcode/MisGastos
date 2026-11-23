@@ -88,6 +88,27 @@ describe("FirebaseLinkedMovementPort data builders", () => {
     });
   });
 
+  it("builds a group-expense movement with the group link only", () => {
+    const data = port.buildCreateData({
+      ...writeInput,
+      sharedExpenseId: undefined,
+      groupExpenseId: "group-expense-1",
+    });
+
+    expect(data.groupExpenseId).toBe("group-expense-1");
+    expect(data).not.toHaveProperty("sharedExpenseId");
+  });
+
+  it("writes no link key when the input carries none", () => {
+    const data = port.buildCreateData({
+      ...writeInput,
+      sharedExpenseId: undefined,
+    });
+
+    expect(data).not.toHaveProperty("sharedExpenseId");
+    expect(data).not.toHaveProperty("groupExpenseId");
+  });
+
   it("keeps the creation stamp and owner out of an update patch", () => {
     const data = port.buildUpdateData(writeInput);
 

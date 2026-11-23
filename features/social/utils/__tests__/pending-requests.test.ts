@@ -93,4 +93,40 @@ describe("getPendingRequests", () => {
     ]);
     expect(pending.total).toBe(2);
   });
+
+  it("adds the owner join-request queue to the total", () => {
+    const overview = {
+      incoming: [item("in-1", "incoming")],
+      outgoing: [],
+    };
+
+    const pending = getPendingRequests(overview, 2);
+
+    expect(pending.incoming.map((request) => request.requestId)).toEqual([
+      "in-1",
+    ]);
+    expect(pending.total).toBe(3);
+    expect(countPendingRequests(overview, 2)).toBe(3);
+  });
+
+  it("keeps a zero owner join-request count unchanged", () => {
+    const overview = { incoming: [item("in-1", "incoming")], outgoing: [] };
+
+    expect(getPendingRequests(overview, 0).total).toBe(1);
+    expect(countPendingRequests(overview, 0)).toBe(1);
+  });
+
+  it("clamps a negative owner join-request count to zero", () => {
+    const overview = { incoming: [item("in-1", "incoming")], outgoing: [] };
+
+    expect(getPendingRequests(overview, -4).total).toBe(1);
+    expect(countPendingRequests(overview, -4)).toBe(1);
+  });
+
+  it("truncates a non-integer owner join-request count", () => {
+    const overview = { incoming: [], outgoing: [] };
+
+    expect(getPendingRequests(overview, 2.7).total).toBe(2);
+    expect(countPendingRequests(overview, Number.NaN)).toBe(0);
+  });
 });

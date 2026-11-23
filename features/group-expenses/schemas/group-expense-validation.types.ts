@@ -14,7 +14,9 @@ export type GroupExpenseFormField =
   | "currency"
   | "payerId"
   | "participants"
-  | "splitMode";
+  | "splitMode"
+  | "walletId"
+  | "categoryId";
 
 /** Stable strings; the UI translates them and the service never returns copy. */
 export type GroupExpenseValidationCode =
@@ -35,6 +37,10 @@ export type GroupExpenseValidationCode =
   | "PARTICIPANTS_DUPLICATE"
   | "PARTICIPANT_NOT_MEMBER"
   | "SPLIT_MODE_INVALID"
+  | "WALLET_REQUIRED"
+  | "CATEGORY_REQUIRED"
+  | "LINK_WITHOUT_REGISTRATION"
+  | "CURRENCY_MISMATCH"
   | SplitValueErrorCode
   | SplitErrorCode;
 
@@ -52,6 +58,8 @@ export interface ParsedGroupExpense {
   date: string;
   payerId: string;
   splitMode: ExpenseSplitMode;
+  walletId: string | null;
+  categoryId: string | null;
 }
 
 export type GroupExpenseFieldErrors = Partial<

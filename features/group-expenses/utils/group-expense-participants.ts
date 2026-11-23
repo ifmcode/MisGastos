@@ -41,32 +41,6 @@ export function getGroupExpenseParticipantIds(
   return values.memberIds.filter((memberId) => selected.includes(memberId));
 }
 
-export function areAllGroupExpenseParticipantsSelected(
-  values: GroupExpenseFormValues,
-): boolean {
-  return (
-    values.memberIds.length > 0 &&
-    values.memberIds.every((memberId) =>
-      values.participantIds.includes(memberId),
-    )
-  );
-}
-
-/**
- * Every active member is selected by default on create. `Todos` selects the
- * whole list or clears it; a create must keep at least one participant.
- */
-export function toggleAllGroupExpenseParticipants(
-  values: GroupExpenseFormValues,
-): GroupExpenseFormValues {
-  return {
-    ...values,
-    participantIds: areAllGroupExpenseParticipantsSelected(values)
-      ? []
-      : [...values.memberIds],
-  };
-}
-
 /** A member outside the group is ignored: only active members participate. */
 export function toggleGroupExpenseParticipant(
   values: GroupExpenseFormValues,

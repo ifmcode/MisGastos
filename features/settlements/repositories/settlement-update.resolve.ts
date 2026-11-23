@@ -7,6 +7,7 @@ import type {
 } from "../types/settlement.types";
 import type { SettlementMovementState } from "./settlement-movement.port";
 import type { SettlementWalletEffects } from "./settlement-wallet-effects";
+import type { SettlementErrorFactory } from "./settlement-wallet.helpers";
 
 export interface ResolvedSettlementEdit extends SettlementWalletEffects {
   destinationWalletId: string | null;
@@ -23,6 +24,7 @@ export function assertLinkChangeAllowed(
   stored: Settlement,
   update: UpdateSettlementDto,
   viewerIsCreditor: boolean,
+  onError: SettlementErrorFactory = (code) => new SettlementOperationError(code),
 ): void {
   if (viewerIsCreditor) return;
 
@@ -31,14 +33,14 @@ export function assertLinkChangeAllowed(
     update.receiverCategoryId !== stored.receiverCategoryId;
 
   if (linkChanged) {
-    throw new SettlementOperationError("WALLET_NOT_OWNED");
+    throw onError("WALLET_NOT_OWNED");
   }
 
   if (
     stored.receiverTransactionId !== null &&
     update.amountCents !== stored.amountCents
   ) {
-    throw new SettlementOperationError("AMOUNT_LOCKED");
+    throw onError("AMOUNT_LOCKED");
   }
 }
 

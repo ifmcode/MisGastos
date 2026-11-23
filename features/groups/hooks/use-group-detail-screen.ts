@@ -1,51 +1,28 @@
 import { useCallback, useState } from "react";
 
 import { useFriendsOverview } from "@/features/friends/hooks/use-friends-overview";
-import type { Friend } from "@/features/friends/types/friend.types";
+import { useGroupBalances } from "@/features/group-expenses/hooks/use-group-balances";
+import { useGroupDetailSettlements } from "@/features/group-expenses/hooks/use-group-detail-settlements";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useAuth } from "@/hooks/use-auth";
 import { DEFAULT_CURRENCY } from "@/shared/constants/currencies";
 
-import type { GroupDetail } from "../types/group.types";
+import { getGroupDetailStatus } from "../utils/group-detail-status";
+import type {
+  GroupDetailScreenController,
+  UseGroupDetailScreenOptions,
+} from "./group-detail-screen.types";
 import { useGroupDetail } from "./use-group-detail";
-import {
-  useGroupDetailExpenses,
-  type GroupDetailExpensesController,
-} from "./use-group-detail-expenses";
-import {
-  useGroupDetailMembership,
-  type GroupDetailMembershipController,
-} from "./use-group-detail-membership";
-import { useGroupEditor, type GroupEditorController } from "./use-group-editor";
-import {
-  useGroupInviteMembers,
-  type GroupInviteMembersController,
-} from "./use-group-invite-members";
+import { useGroupDetailExpenses } from "./use-group-detail-expenses";
+import { useGroupDetailMembership } from "./use-group-detail-membership";
+import { useGroupEditor } from "./use-group-editor";
+import { useGroupInviteMembers } from "./use-group-invite-members";
 
-export type GroupDetailStatus = "loading" | "error" | "missing" | "ready";
-
-export interface UseGroupDetailScreenOptions {
-  groupId: string;
-}
-
-export interface GroupDetailScreenController
-  extends GroupDetailMembershipController {
-  status: GroupDetailStatus;
-  detail: GroupDetail | null;
-  viewerUid: string;
-  friends: Friend[];
-  isOwner: boolean;
-  error: string | null;
-  refreshing: boolean;
-  detailsVisible: boolean;
-  editor: GroupEditorController;
-  expenses: GroupDetailExpensesController;
-  invite: GroupInviteMembersController;
-  reload: () => void;
-  refresh: () => void;
-  openDetails: () => void;
-  closeDetails: () => void;
-}
+export type {
+  GroupDetailScreenController,
+  UseGroupDetailScreenOptions,
+} from "./group-detail-screen.types";
+export type { GroupDetailStatus } from "../utils/group-detail-status";
 
 /** Composition root of `/social/groups/[groupId]`. */
 export function useGroupDetailScreen({
@@ -59,26 +36,51 @@ export function useGroupDetailScreen({
   const groupDetail = useGroupDetail({ viewerUid, groupId });
   const { detail, reload } = groupDetail;
   const detailRefresh = groupDetail.refresh;
+  const balances = useGroupBalances({ viewerUid, groupId });
+  const refreshBalances = balances.refresh;
+  const settlements = useGroupDetailSettlements({ viewerUid, groupId });
+  const refreshSettlements = settlements.refresh;
   const [detailsVisible, setDetailsVisible] = useState(false);
   const preferredCurrency = profile?.preferredCurrency ?? DEFAULT_CURRENCY;
+
+  // A saved expense, group setting or membership change can move the balances,
+  // so they refresh silently next to the detail reload.
+  const onGroupChanged = useCallback(() => {
+    reload();
+    void refreshBalances();
+  }, [refreshBalances, reload]);
 
   const expenses = useGroupDetailExpenses({
     viewerUid,
     groupId,
     detail,
     preferredCurrency,
-    onGroupChanged: reload,
+    registerInWalletByDefault:
+      profile?.registerSharedExpensesInWallet ?? false,
+    onGroupChanged,
   });
   const expensesRefresh = expenses.refresh;
 
   const refresh = useCallback(() => {
-    void Promise.all([detailRefresh(), friendsRefresh(), expensesRefresh()]);
-  }, [detailRefresh, expensesRefresh, friendsRefresh]);
+    void Promise.all([
+      detailRefresh(),
+      friendsRefresh(),
+      expensesRefresh(),
+      refreshBalances(),
+      refreshSettlements(),
+    ]);
+  }, [
+    detailRefresh,
+    expensesRefresh,
+    friendsRefresh,
+    refreshBalances,
+    refreshSettlements,
+  ]);
 
   const editor = useGroupEditor({
     viewerUid,
     preferredCurrency,
-    onSaved: reload,
+    onSaved: onGroupChanged,
   });
 
   const invite = useGroupInviteMembers({
@@ -95,21 +97,13 @@ export function useGroupDetailScreen({
     viewerUid,
     groupId,
     detail,
-    onChanged: reload,
+    onChanged: onGroupChanged,
   });
 
   const openDetails = useCallback(() => setDetailsVisible(true), []);
   const closeDetails = useCallback(() => setDetailsVisible(false), []);
 
-  const status: GroupDetailStatus = groupDetail.missing
-    ? "missing"
-    : detail
-      ? "ready"
-      : groupDetail.loading
-        ? "loading"
-        : groupDetail.error
-          ? "error"
-          : "missing";
+  const status = getGroupDetailStatus(groupDetail, detail !== null);
 
   return {
     ...membership,
@@ -119,10 +113,13 @@ export function useGroupDetailScreen({
     friends: friendsOverview.overview.friends,
     isOwner: detail ? detail.group.ownerId === viewerUid : false,
     error: groupDetail.error,
-    refreshing: groupDetail.refreshing || friendsOverview.refreshing,
+    refreshing:
+      groupDetail.refreshing || friendsOverview.refreshing || balances.refreshing,
     detailsVisible,
     editor,
     expenses,
+    balances,
+    settlements,
     invite,
     reload,
     refresh,

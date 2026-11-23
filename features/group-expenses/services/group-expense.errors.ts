@@ -26,7 +26,24 @@ export type GroupExpenseOperationCode =
   | "NOT_EXPENSE_EDITOR"
   | "GROUP_CHANGED"
   | "ALREADY_DELETED"
-  | "EXPENSE_HAS_FORMER_MEMBERS";
+  | "EXPENSE_HAS_FORMER_MEMBERS"
+  | "INSUFFICIENT_BALANCE"
+  | "WALLET_NOT_FOUND"
+  | "WALLET_NOT_OWNED"
+  | "CURRENCY_MISMATCH"
+  | "CATEGORY_REQUIRED"
+  | "LINK_WITHOUT_REGISTRATION"
+  | "LINKED_MOVEMENT_FOREIGN"
+  // Group settlements (TICKET-010 Phase B). Kept in the same union so
+  // `getGroupExpenseErrorCode` maps them and the UI keeps translating codes.
+  | "SETTLEMENT_NOT_FOUND"
+  | "NOT_SETTLEMENT_PARTICIPANT"
+  | "NO_DEBT"
+  | "DIRECTION_MISMATCH"
+  | "AMOUNT_EXCEEDS_DEBT"
+  | "AMOUNT_LOCKED"
+  | "SETTLEMENT_HAS_RECEIVER_MOVEMENT"
+  | "WALLET_ARCHIVED";
 
 export type GroupExpenseErrorCode =
   | GroupExpenseOperationCode

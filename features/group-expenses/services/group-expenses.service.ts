@@ -1,11 +1,16 @@
 import type { IGroupsRepository } from "@/features/groups/repositories/groups.repository";
 
-import type { IGroupExpensesRepository } from "../repositories/group-expenses.repository";
+import type {
+  IGroupExpensesRepository,
+  IGroupExpenseLinkRepository,
+} from "../repositories/group-expenses.repository";
+import type { IGroupSettlementsRepository } from "../repositories/group-settlements.repository";
 import type {
   GroupExpense,
   GroupExpenseInput,
 } from "../types/group-expense.types";
 import { sortGroupExpenses } from "../utils/group-expense-ledger";
+import { GroupBalancesUseCases } from "./group-balances.usecases";
 import {
   assertExpenseEditor,
   assertExpenseHasCurrentMembers,
@@ -20,8 +25,9 @@ import {
 } from "./group-expense-guards";
 import {
   createGroupExpenseRecord,
-  softDeleteGroupExpenseRecord,
+  deleteGroupExpenseRecord,
   updateGroupExpenseRecord,
+  type GroupExpenseWriteDeps,
 } from "./group-expense-write";
 
 /**
@@ -29,15 +35,23 @@ import {
  * editor/permission guards; the repositories only talk to Firestore and the UI
  * translates the stable error codes.
  *
- * No personal wallet, category or linked movement is involved: group expenses
- * never touch personal balances (decided 20/11/2026). Net balances and
- * settlements belong to TICKET-010.
+ * `linkRepository` handles the optional atomic pair "group expense + personal
+ * movement" (TICKET-069) and is only used when the payer links a wallet. The
+ * group ledger, the participant shares and the other members' balances never
+ * depend on it: the movement is a personal mirror.
  */
-export class GroupExpensesService {
+export class GroupExpensesService extends GroupBalancesUseCases {
+  private readonly writeDeps: GroupExpenseWriteDeps;
+
   constructor(
-    private readonly repository: IGroupExpensesRepository,
-    private readonly groupsRepository: IGroupsRepository,
-  ) {}
+    repository: IGroupExpensesRepository,
+    groupsRepository: IGroupsRepository,
+    linkRepository: IGroupExpenseLinkRepository,
+    settlementsRepository: IGroupSettlementsRepository,
+  ) {
+    super(repository, settlementsRepository, groupsRepository);
+    this.writeDeps = { repository, linkRepository };
+  }
 
   /** Every expense of the group, soft-deleted included for the audit trail. */
   async getGroupExpenses(
@@ -85,7 +99,7 @@ export class GroupExpensesService {
     assertPayerIsMember(value.payerId, group);
 
     return createGroupExpenseRecord(
-      this.repository,
+      this.writeDeps,
       value,
       viewer,
       new Date().toISOString(),
@@ -114,9 +128,10 @@ export class GroupExpensesService {
     assertPayerIsMember(value.payerId, group);
 
     return updateGroupExpenseRecord(
-      this.repository,
-      existing.id,
+      this.writeDeps,
+      existing,
       value,
+      viewer,
       new Date().toISOString(),
     );
   }
@@ -137,9 +152,10 @@ export class GroupExpensesService {
 
     if (existing.deletedAt !== null) return;
 
-    return softDeleteGroupExpenseRecord(
-      this.repository,
-      existing.id,
+    return deleteGroupExpenseRecord(
+      this.writeDeps,
+      existing,
+      viewer,
       new Date().toISOString(),
     );
   }

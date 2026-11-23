@@ -15,6 +15,8 @@ export interface GroupFormValues {
   name: string;
   description: string;
   defaultCurrency: CurrencyCode;
+  /** **Simplificar deudas**; the edit form toggles it, creation is always on. */
+  simplifyDebts: boolean;
   inviteeIds: string[];
 }
 
@@ -30,6 +32,7 @@ export function getInitialGroupFormValues(
       name: "",
       description: "",
       defaultCurrency: DEFAULT_CURRENCY,
+      simplifyDebts: true,
       inviteeIds: [],
     };
   }
@@ -38,6 +41,7 @@ export function getInitialGroupFormValues(
     name: group.name,
     description: group.description ?? "",
     defaultCurrency: resolveCurrencyCode(group.defaultCurrency),
+    simplifyDebts: group.simplifyDebts,
     inviteeIds: [],
   };
 }
@@ -74,5 +78,6 @@ export function toGroupUpdateInput(values: GroupFormValues): GroupUpdateInput {
     name: input.name,
     description: input.description,
     defaultCurrency: input.defaultCurrency,
+    simplifyDebts: values.simplifyDebts,
   };
 }

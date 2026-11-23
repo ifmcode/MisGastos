@@ -81,7 +81,8 @@ function readParticipants(
  *
  * Membership of `groupId`, `payerId` and every participant is NOT checked here
  * (it needs a group read): the service owns it and the rules prove the caller.
- * The share sum stays in the schema.
+ * The share sum stays in the schema. The link keys are optional: a legacy
+ * document without them maps to the social-only `null` values.
  */
 export function mapGroupExpenseDocument(
   id: string,
@@ -139,6 +140,11 @@ export function mapGroupExpenseDocument(
     participants,
     description,
     date,
+    // Link keys are read as stored. Their all-or-nothing coherence is enforced
+    // by the rules and the service, so a legacy document still maps.
+    walletId: readTextOrNull(data.walletId),
+    categoryId: readTextOrNull(data.categoryId),
+    linkedTransactionId: readTextOrNull(data.linkedTransactionId),
     createdBy,
     createdAt,
     updatedAt: readText(data.updatedAt),

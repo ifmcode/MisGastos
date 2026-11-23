@@ -15,6 +15,7 @@ import {
   readPayerId,
 } from "./group-expense-participants";
 import { readText } from "./group-expense-text";
+import { readGroupExpenseLink } from "./group-expense-wallet-validation";
 import type {
   GroupExpenseValidationIssue,
   ParsedGroupExpense,
@@ -111,6 +112,7 @@ function readSplitMode(
 /** Collects every field issue of a group expense in display order. */
 export function parseGroupExpenseFields(
   input: GroupExpenseInput,
+  viewerUid: string,
   members: readonly string[],
   issues: GroupExpenseValidationIssue[],
 ): ParsedGroupExpense | null {
@@ -122,6 +124,12 @@ export function parseGroupExpenseFields(
   const splitMode = readSplitMode(input.splitMode, issues);
   readParticipantIds(input, members, issues);
   const payerId = readPayerId(input.payerId, members, issues);
+  const { walletId, categoryId } = readGroupExpenseLink(
+    input,
+    payerId,
+    viewerUid,
+    issues,
+  );
 
   if (
     groupId === null ||
@@ -143,5 +151,7 @@ export function parseGroupExpenseFields(
     currency,
     splitMode,
     payerId,
+    walletId,
+    categoryId,
   };
 }

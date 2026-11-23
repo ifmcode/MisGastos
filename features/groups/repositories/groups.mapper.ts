@@ -48,6 +48,15 @@ function readStatus(value: unknown): GroupInvitationStatus | null {
 }
 
 /**
+ * **Simplificar deudas** is on by default: absent or `null` is a group created
+ * before TICKET-010, and a malformed value also keeps it on instead of dropping
+ * the whole group. Only a stored `false` turns the toggle off.
+ */
+function readSimplifyDebts(value: unknown): boolean {
+  return typeof value === "boolean" ? value : true;
+}
+
+/**
  * Absent/null is a legacy group (no code yet); a present but malformed code
  * maps to null instead of dropping the whole group.
  */
@@ -77,6 +86,7 @@ export function mapGroupDocument(
   const createdAt = readText(data.createdAt);
   const updatedAt = readText(data.updatedAt);
   const joinCode = readJoinCode(data.joinCode);
+  const simplifyDebts = readSimplifyDebts(data.simplifyDebts);
 
   if (groupId.length === 0 || ownerId.length === 0) return null;
   if (!groupIdBelongsToOwner(groupId, ownerId)) return null;
@@ -97,6 +107,7 @@ export function mapGroupDocument(
     description,
     defaultCurrency: currency,
     joinCode,
+    simplifyDebts,
     createdAt,
     updatedAt,
   };

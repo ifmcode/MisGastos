@@ -13,6 +13,8 @@ import {
   getMappedWallet,
   getSignedTransactionAmount,
   readStoredDeletedAt,
+  readStoredGroupExpenseId,
+  readStoredGroupSettlementId,
   readStoredSharedExpenseId,
   toTransactionData,
   toWalletBalance,
@@ -140,13 +142,20 @@ export async function updateTransactionOperation({
     const patch: Record<string, unknown> = {
       ...toTransactionData(ownerId, dto, now),
       createdAt: toIsoTimestamp(transactionData.createdAt) ?? now,
-      // Linked movements are only edited by the shared-expense operations; a
-      // personal edit keeps the link and the soft-delete stamp untouched.
+      // Linked movements are only edited by the shared-expense or group-expense
+      // operations; a personal edit keeps the link and the soft-delete stamp
+      // untouched.
       deletedAt: readStoredDeletedAt(transactionData),
     };
 
     const sharedExpenseId = readStoredSharedExpenseId(transactionData);
     if (sharedExpenseId) patch.sharedExpenseId = sharedExpenseId;
+
+    const groupExpenseId = readStoredGroupExpenseId(transactionData);
+    if (groupExpenseId) patch.groupExpenseId = groupExpenseId;
+
+    const groupSettlementId = readStoredGroupSettlementId(transactionData);
+    if (groupSettlementId) patch.groupSettlementId = groupSettlementId;
 
     if (!(sameWallet && previousIsOrphaned)) {
       patch.walletName = deleteField();

@@ -2,6 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import {
   createGroupExpenseFormValues,
+  isGroupExpenseWalletRegistrationVisible,
   toGroupExpenseInput,
 } from "../group-expense-form";
 import type { GroupExpenseFormValues } from "../group-expense-form";
@@ -35,6 +36,9 @@ describe("createGroupExpenseFormValues", () => {
       payerId: VIEWER,
       participantIds: [VIEWER, "user-b", "user-c"],
       splitMode: "equal",
+      walletId: "",
+      categoryId: "",
+      registerInWallet: false,
     });
     expect(values.splitValues).toEqual({
       equal: {},
@@ -116,6 +120,9 @@ describe("toGroupExpenseInput", () => {
         { userId: "user-b", value: "10.00" },
         { userId: "user-c", value: "20.00" },
       ],
+      walletId: "",
+      categoryId: "",
+      registerInWallet: false,
     });
   });
 
@@ -141,5 +148,81 @@ describe("toGroupExpenseInput", () => {
       { userId: "user-b", value: "" },
       { userId: "user-c", value: "" },
     ]);
+  });
+});
+
+
+describe("wallet registration defaults", () => {
+  it("starts with the stored preference of the account", () => {
+    const values = createGroupExpenseFormValues({
+      viewerUid: VIEWER,
+      groupId: GROUP_ID,
+      memberIds: [VIEWER, "user-b"],
+      currency: "EUR",
+      date: TODAY,
+      registerInWallet: true,
+    });
+
+    expect(values.registerInWallet).toBe(true);
+    expect(values.walletId).toBe("");
+    expect(values.categoryId).toBe("");
+  });
+
+  it("registers the wallet and its category when the toggle is on", () => {
+    const input = toGroupExpenseInput(
+      buildFormValues({
+        registerInWallet: true,
+        walletId: "wallet-1",
+        categoryId: "category-1",
+      }),
+    );
+
+    expect(input.walletId).toBe("wallet-1");
+    expect(input.categoryId).toBe("category-1");
+    expect(input.registerInWallet).toBe(true);
+  });
+
+  it("sends empty ids when the toggle is off", () => {
+    const input = toGroupExpenseInput(
+      buildFormValues({
+        registerInWallet: false,
+        walletId: "wallet-1",
+        categoryId: "category-1",
+      }),
+    );
+
+    expect(input.walletId).toBe("");
+    expect(input.categoryId).toBe("");
+    expect(input.registerInWallet).toBe(false);
+  });
+
+  it("never sends a category without a wallet", () => {
+    const input = toGroupExpenseInput(
+      buildFormValues({
+        registerInWallet: true,
+        walletId: "  ",
+        categoryId: "category-1",
+      }),
+    );
+
+    expect(input.walletId).toBe("  ");
+    expect(input.categoryId).toBe("");
+    expect(input.registerInWallet).toBe(true);
+  });
+});
+
+describe("isGroupExpenseWalletRegistrationVisible", () => {
+  it("shows the toggle only while the viewer is the payer", () => {
+    expect(isGroupExpenseWalletRegistrationVisible(VIEWER, VIEWER)).toBe(true);
+    expect(isGroupExpenseWalletRegistrationVisible("user-b", VIEWER)).toBe(
+      false,
+    );
+  });
+
+  it("trims both ids and hides itself without a viewer", () => {
+    expect(
+      isGroupExpenseWalletRegistrationVisible(` ${VIEWER} `, VIEWER),
+    ).toBe(true);
+    expect(isGroupExpenseWalletRegistrationVisible("", "")).toBe(false);
   });
 });

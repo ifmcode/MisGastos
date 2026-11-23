@@ -4,13 +4,13 @@ import { centsToAmount } from "@/features/friends/utils/friend-balance";
 import type { Friend } from "@/features/friends/types/friend.types";
 import type { SharedExpense } from "@/features/shared-expenses/types/shared-expense.types";
 import { getSharedExpenseParticipantName } from "@/features/shared-expenses/utils/shared-expense-friends";
+import { TimelineRow } from "@/shared/components/molecules/timeline-row";
 import { useAppLocale } from "@/shared/hooks/use-app-locale";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { joinMetaParts } from "@/shared/utils/join-meta";
 
 import type { FriendTimelineEntry } from "../utils/friend-timeline";
 import { getExpenseTimelineEffect } from "../utils/friend-timeline";
-import { FriendTimelineRow } from "./friend-timeline-row";
 
 export interface FriendTimelineExpenseRowProps {
   entry: Extract<FriendTimelineEntry, { kind: "expense" }>;
@@ -72,7 +72,7 @@ export function FriendTimelineExpenseRow({
   ]);
 
   return (
-    <FriendTimelineRow
+    <TimelineRow
       date={expense.date}
       icon="receipt-outline"
       iconColor={theme.primary}

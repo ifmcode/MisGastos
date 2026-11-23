@@ -125,6 +125,7 @@ describe("FirebaseGroupsRepository delegation", () => {
       name: "Viaje",
       description: null,
       defaultCurrency: "EUR" as const,
+      simplifyDebts: true,
       updatedAt: "2026-11-20T10:00:00.000Z",
     };
     const inviteInput = {

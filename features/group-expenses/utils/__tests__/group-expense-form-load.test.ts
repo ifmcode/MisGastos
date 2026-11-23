@@ -3,6 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 import { getGroupExpenseInitialValues } from "../group-expense-form-load";
 import {
   buildMembers,
+  buildWallet,
   GROUP_ID,
   TODAY,
   VIEWER,
@@ -19,6 +20,10 @@ describe("getGroupExpenseInitialValues (create)", () => {
       memberIds,
       groupCurrency: "USD",
       today: TODAY,
+      wallets: [],
+      walletsLoading: false,
+      walletsError: null,
+      defaultRegisterInWallet: false,
     });
 
     expect(values).toMatchObject({
@@ -31,6 +36,9 @@ describe("getGroupExpenseInitialValues (create)", () => {
       splitMode: "equal",
       amount: "",
       description: "",
+      walletId: "",
+      categoryId: "",
+      registerInWallet: false,
     });
   });
 
@@ -42,9 +50,45 @@ describe("getGroupExpenseInitialValues (create)", () => {
       memberIds: ["user-b", "user-c"],
       groupCurrency: "EUR",
       today: TODAY,
+      wallets: [],
+      walletsLoading: false,
+      walletsError: null,
+      defaultRegisterInWallet: false,
     });
 
     expect(values.payerId).toBe("user-b");
     expect(values.participantIds).toEqual(["user-b", "user-c"]);
+  });
+
+  it("defaults the registration toggle from the profile preference", () => {
+    const enabled = getGroupExpenseInitialValues({
+      editingExpense: null,
+      viewerUid: VIEWER,
+      groupId: GROUP_ID,
+      memberIds,
+      groupCurrency: "EUR",
+      today: TODAY,
+      wallets: [buildWallet()],
+      walletsLoading: false,
+      walletsError: null,
+      defaultRegisterInWallet: true,
+    });
+    const disabled = getGroupExpenseInitialValues({
+      editingExpense: null,
+      viewerUid: VIEWER,
+      groupId: GROUP_ID,
+      memberIds,
+      groupCurrency: "EUR",
+      today: TODAY,
+      wallets: [buildWallet()],
+      walletsLoading: false,
+      walletsError: null,
+      defaultRegisterInWallet: false,
+    });
+
+    expect(enabled.registerInWallet).toBe(true);
+    expect(enabled.walletId).toBe("");
+    expect(enabled.categoryId).toBe("");
+    expect(disabled.registerInWallet).toBe(false);
   });
 });

@@ -1,3 +1,5 @@
+import type { Wallet } from "@/features/wallets/types/wallet.types";
+
 import {
   toGroupExpenseFieldErrors,
   validateGroupExpenseInput,
@@ -6,6 +8,7 @@ import {
 import type { GroupExpenseInput } from "../types/group-expense.types";
 import { toGroupExpenseInput } from "../utils/group-expense-form";
 import type { GroupExpenseFormValues } from "../utils/group-expense-form";
+import { getGroupExpenseWalletCurrencyError } from "../utils/group-expense-link-values";
 import {
   useGroupExpenseFormState,
   type GroupExpenseFormState,
@@ -14,6 +17,8 @@ import {
 export interface UseGroupExpenseFormOptions {
   initialValues: GroupExpenseFormValues;
   fieldErrors: GroupExpenseFieldErrors;
+  /** Owner wallets, read only to drop a link whose currency no longer matches. */
+  wallets: readonly Wallet[];
   onSubmit: (input: GroupExpenseInput) => void;
 }
 
@@ -28,9 +33,10 @@ export interface GroupExpenseFormController extends GroupExpenseFormState {
 export function useGroupExpenseForm({
   initialValues,
   fieldErrors,
+  wallets,
   onSubmit,
 }: UseGroupExpenseFormOptions): GroupExpenseFormController {
-  const state = useGroupExpenseFormState({ initialValues, fieldErrors });
+  const state = useGroupExpenseFormState({ initialValues, fieldErrors, wallets });
 
   function submit() {
     const input = toGroupExpenseInput(state.values);
@@ -50,6 +56,18 @@ export function useGroupExpenseForm({
 
     if (!validation.ok) {
       state.setValidationErrors(toGroupExpenseFieldErrors(validation.error));
+      return;
+    }
+
+    // The wallet keeps its own currency; checking it here surfaces the same
+    // rejection the service would return instead of leaving the tap silent.
+    const walletError = getGroupExpenseWalletCurrencyError(
+      state.values,
+      wallets,
+    );
+
+    if (walletError) {
+      state.setValidationErrors({ walletId: walletError });
       return;
     }
 

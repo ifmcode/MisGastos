@@ -17,6 +17,7 @@ const groupData: Record<string, unknown> = {
   description: "Finde",
   defaultCurrency: "EUR",
   joinCode: "ABCD2345",
+  simplifyDebts: true,
   createdAt: "2026-11-20T10:00:00.000Z",
   updatedAt: "2026-11-20T10:00:00.000Z",
 };
@@ -50,9 +51,42 @@ describe("mapGroupDocument", () => {
       description: "Finde",
       defaultCurrency: "EUR",
       joinCode: "ABCD2345",
+      simplifyDebts: true,
       createdAt: "2026-11-20T10:00:00.000Z",
       updatedAt: "2026-11-20T10:00:00.000Z",
     });
+  });
+
+  it("keeps a legacy group without the simplify toggle simplifying", () => {
+    const legacy = { ...groupData };
+    delete legacy.simplifyDebts;
+
+    expect(mapGroupDocument(GROUP_ID, legacy)?.simplifyDebts).toBe(true);
+    expect(
+      mapGroupDocument(GROUP_ID, { ...groupData, simplifyDebts: null })
+        ?.simplifyDebts,
+    ).toBe(true);
+  });
+
+  it("reads a stored false as the toggle off", () => {
+    const group = mapGroupDocument(GROUP_ID, {
+      ...groupData,
+      simplifyDebts: false,
+    });
+
+    expect(group).not.toBeNull();
+    expect(group?.simplifyDebts).toBe(false);
+  });
+
+  it("defaults a malformed toggle to true instead of dropping the group", () => {
+    for (const malformed of ["false", 0, 1, {}]) {
+      const group = mapGroupDocument(GROUP_ID, {
+        ...groupData,
+        simplifyDebts: malformed,
+      });
+
+      expect(group?.simplifyDebts).toBe(true);
+    }
   });
 
   it("keeps an empty description as null", () => {

@@ -2,6 +2,7 @@ import type { AppNotification } from "../types/notification.types";
 
 export type NotificationTarget =
   | { kind: "settlement"; settlementId: string; friendUid: string | null }
+  | { kind: "groupSettlement"; settlementId: string }
   | { kind: "expense"; expenseId: string; friendUid: string | null }
   | { kind: "requests" }
   | { kind: "friend"; friendUid: string }
@@ -49,24 +50,33 @@ export function resolveNotificationTarget(
     return { kind: "requests" };
   }
 
-  if (
-    notification.type === "group-join-request" ||
-    notification.type === "group-join-accepted"
-  ) {
+  if (notification.type === "group-join-request") {
+    // TICKET-070 moved the owner queue to Social.
+    return { kind: "requests" };
+  }
+
+  if (notification.type === "group-join-accepted") {
     const groupId = readPayloadId(notification, "groupId");
     return groupId ? { kind: "group", groupId } : null;
   }
 
   if (notification.type === "group-join-rejected") return { kind: "requests" };
 
+  if (notification.type === "group-settlement") {
+    // TICKET-010: open the settlement detail; the group is only the fallback
+    // parent when an older payload carries no settlement id.
+    const settlementId = readPayloadId(notification, "settlementId");
+    if (settlementId) return { kind: "groupSettlement", settlementId };
+
+    const groupId = readPayloadId(notification, "groupId");
+    return groupId ? { kind: "group", groupId } : null;
+  }
+
   if (notification.type === "friend-request-accepted") {
     return friendUid ? { kind: "friend", friendUid } : null;
   }
 
-  if (
-    notification.type === "group-expense" ||
-    notification.type === "group-settlement"
-  ) {
+  if (notification.type === "group-expense") {
     const expenseId = readExpenseId(notification);
     if (expenseId) return { kind: "expense", expenseId, friendUid };
   }
@@ -98,6 +108,8 @@ export function buildNotificationTargetHref(
         `/social/settlements/${encodeURIComponent(target.settlementId)}`,
         target.friendUid,
       );
+    case "groupSettlement":
+      return `/social/group-settlements/${encodeURIComponent(target.settlementId)}`;
     case "expense":
       return withFriend(
         `/social/expenses/${encodeURIComponent(target.expenseId)}`,

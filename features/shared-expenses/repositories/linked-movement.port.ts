@@ -10,7 +10,10 @@ export interface LinkedMovementWriteInput {
   /** Payer (and wallet) owner; linked movements are only ever the viewer's. */
   ownerId: string;
   walletId: string;
-  sharedExpenseId: string;
+  /** 1:1 shared-expense link; never together with `groupExpenseId`. */
+  sharedExpenseId?: string;
+  /** Group-expense link; never together with `sharedExpenseId`. */
+  groupExpenseId?: string;
   amountCents: number;
   currency: CurrencyCode;
   categoryId: string;

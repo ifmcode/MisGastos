@@ -1,5 +1,32 @@
 {
   "backHint": "Vuelve a la pantalla anterior",
+  "balancesTitle": "Saldos",
+  "balancesHint": "Muestra lo que te deben o debes en cada moneda.",
+  "balancesLoading": "Cargando los saldos del grupo…",
+  "balancesLoadFailed": "No se pudieron cargar los saldos del grupo. Inténtalo de nuevo.",
+  "balancesRetryAccessibility": "Reintentar la carga de los saldos del grupo",
+  "memberIsOwed": "Le deben {{amount}}",
+  "memberOwes": "Debe {{amount}}",
+  "debtRow": "{{from}} debe {{to}} {{amount}}",
+  "debtSettle": "Liquidar",
+  "debtSettleAccessibility": "Liquidar la deuda: {{from}} debe {{amount}} a {{to}}",
+  "debtSettleHint": "Abre el formulario para liquidar total o parcialmente esta deuda.",
+  "balances": {
+    "settle": "Liquidar deudas",
+    "settleAccessibility": "Liquidar las deudas del grupo",
+    "settleHint": "Abre la lista de deudas del grupo para elegir cuál liquidar."
+  },
+  "settleStep": {
+    "title": "Liquidar deudas",
+    "subtitle": "Elige la deuda que quieres liquidar. Solo las deudas en las que participas se pueden accionar.",
+    "listAccessibility": "Deudas del grupo",
+    "direct": "Deudas directas",
+    "simplified": "Deudas simplificadas",
+    "empty": "No hay deudas pendientes en este grupo."
+  },
+  "youAreOwed": "Te deben {{amount}}",
+  "youOwe": "Debes {{amount}}",
+  "summariesLoadFailed": "No se pudieron cargar los saldos de los grupos. Inténtalo de nuevo.",
   "list": {
     "loading": "Cargando tus grupos…",
     "sectionTitle": "Tus grupos",
@@ -57,7 +84,11 @@
     "submitAccessibilityCreate": "Crear el grupo",
     "submitAccessibilitySave": "Guardar los cambios del grupo",
     "cancelAccessibility": "Cancelar y cerrar el formulario",
-    "validationSummary": "Revisa los campos marcados antes de guardar."
+    "validationSummary": "Revisa los campos marcados antes de guardar.",
+    "simplifyDebtsLabel": "Simplificar deudas",
+    "simplifyDebtsHelper": "Sugiere el mínimo de transferencias entre los miembros. Al desactivarlo verás las deudas directas de cada gasto; los saldos no cambian.",
+    "simplifyDebtsAccessibility": "Simplificar las deudas del grupo",
+    "simplifyDebtsHint": "Actívalo para ver las transferencias simplificadas o desactívalo para ver las deudas directas de cada gasto."
   },
   "detail": {
     "title": "Grupo",
@@ -74,7 +105,6 @@
     "settled": "En paz",
     "detailsAccessibility": "Ver los detalles del grupo {{name}}",
     "detailsHint": "Abre la hoja con la descripción, la moneda y los miembros.",
-    "editAccessibility": "Editar el grupo {{name}}",
     "editHint": "Abre el formulario para cambiar el nombre, la descripción y la moneda.",
     "inviteAccessibility": "Invitar amigos al grupo {{name}}",
     "inviteHint": "Abre la lista de amigos que todavía pueden unirse.",
@@ -91,17 +121,7 @@
     "joinCodeShareAccessibility": "Compartir el código del grupo",
     "joinCodeShareHint": "Abre el menú del sistema para enviar el código.",
     "joinCodeShareMessage": "Únete a «{{group}}» en MisGastos con el código {{code}}.",
-    "joinCodeShareFailed": "No se pudo compartir el código. Inténtalo de nuevo.",
-    "joinRequestsTitle": "Solicitudes para unirse",
-    "joinRequestsCount_one": "{{count}} solicitud",
-    "joinRequestsCount_other": "{{count}} solicitudes",
-    "joinRequestsEmpty": "No hay solicitudes pendientes.",
-    "joinRequestsUnknown": "Alguien",
-    "joinAccept": "Aceptar",
-    "joinAcceptAccessibility": "Aceptar la solicitud de {{name}}",
-    "joinReject": "Rechazar",
-    "joinRejectAccessibility": "Rechazar la solicitud de {{name}}",
-    "joinRequestBusyHint": "Hay otra solicitud en curso. Espera un momento antes de continuar."
+    "joinCodeShareFailed": "No se pudo compartir el código. Inténtalo de nuevo."
   },
   "details": {
     "title": "Detalles del grupo",
@@ -112,6 +132,11 @@
     "descriptionEmpty": "Sin descripción",
     "currencyLabel": "Moneda por defecto",
     "membersLabel": "Miembros",
+    "simplifyDebtsLabel": "Deudas simplificadas",
+    "simplifyDebtsOn": "Sí",
+    "simplifyDebtsOff": "No",
+    "editGroup": "Editar grupo",
+    "editGroupAccessibility": "Editar los datos del grupo",
     "ownerBadge": "Propietario",
     "memberBadge": "Miembro",
     "pendingBadge": "Pendiente",

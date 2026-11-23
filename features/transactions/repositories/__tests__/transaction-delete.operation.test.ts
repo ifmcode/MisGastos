@@ -56,6 +56,43 @@ describe("deleteTransactionOperation", () => {
     expect(result.transaction.sharedExpenseId).toBe("expense-1");
   });
 
+  it("keeps the group expense id in the deleted placeholder", async () => {
+    transactionGet
+      .mockResolvedValueOnce(
+        snapshot(
+          "transaction-1",
+          transactionDocument({ groupExpenseId: "group-expense-1" }),
+        ),
+      )
+      .mockResolvedValueOnce(
+        snapshot("wallet-1", walletDocument({ balance: 74.5 })),
+      );
+
+    const result = await deleteTransactionOperation("user-1", "transaction-1");
+
+    expect(result.transaction.groupExpenseId).toBe("group-expense-1");
+  });
+
+  it("keeps the group settlement id in the deleted placeholder", async () => {
+    transactionGet
+      .mockResolvedValueOnce(
+        snapshot(
+          "transaction-1",
+          transactionDocument({
+            type: "income",
+            groupSettlementId: "group-settlement-1",
+          }),
+        ),
+      )
+      .mockResolvedValueOnce(
+        snapshot("wallet-1", walletDocument({ balance: 74.5 })),
+      );
+
+    const result = await deleteTransactionOperation("user-1", "transaction-1");
+
+    expect(result.transaction.groupSettlementId).toBe("group-settlement-1");
+  });
+
   it("reverts an income from the wallet", async () => {
     transactionGet
       .mockResolvedValueOnce(

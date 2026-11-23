@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
+import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 import { formatCurrencyLabel } from "@/shared/utils/currency-label";
 import { joinMetaParts } from "@/shared/utils/join-meta";
 
@@ -14,29 +14,31 @@ import { GroupDetailActions } from "./group-detail-actions";
 export interface GroupDetailHeaderProps {
   detail: GroupDetail;
   isOwner: boolean;
-  /** With active expenses the settled line would claim a zero balance. */
-  hasExpenses: boolean;
+  /**
+   * True when the group has no pending debt. The header then shows **En paz**;
+   * with debts it shows no balance line (the breakdown lives in the section).
+   */
+  settled: boolean;
   onBack: () => void;
   onOpenDetails: () => void;
-  onEdit: () => void;
   onInvite: () => void;
 }
 
 /**
- * Group identity and actions. The name opens the details sheet; the owner also
- * gets the edit and invite shortcuts on the right.
+ * Group identity, actions and the settled state. The name opens the details
+ * sheet (where the owner edits the group); the owner also gets the invite
+ * shortcut on the right.
  */
 export function GroupDetailHeader({
   detail,
   isOwner,
-  hasExpenses,
+  settled,
   onBack,
   onOpenDetails,
-  onEdit,
   onInvite,
 }: GroupDetailHeaderProps) {
   const theme = useFormTheme();
-  const { t } = useTranslation(["groups", "common"]);
+  const { t } = useScopedTranslation(["groups", "common"]);
   const { group, members } = detail;
   const meta = joinMetaParts([
     t("detail.memberCount", { count: members.length }),
@@ -96,7 +98,6 @@ export function GroupDetailHeader({
         {isOwner ? (
           <GroupDetailActions
             groupName={group.name}
-            onEdit={onEdit}
             onInvite={onInvite}
           />
         ) : null}
@@ -106,13 +107,11 @@ export function GroupDetailHeader({
         <ThemedText style={[styles.headerMetaLine, { color: theme.muted }]}>
           {meta}
         </ThemedText>
-        {/* TICKET-010 replaces this placeholder with the real per-currency
-            balances; while the group has expenses, a zero claim would lie. */}
-        {hasExpenses ? null : (
-          <ThemedText style={[styles.headerBalance, { color: theme.success }]}>
+        {settled ? (
+          <ThemedText style={[styles.headerMetaLine, { color: theme.success }]}>
             {t("detail.settled")}
           </ThemedText>
-        )}
+        ) : null}
         {group.description ? (
           <ThemedText style={[styles.headerMetaLine, { color: theme.muted }]}>
             {group.description}

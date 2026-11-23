@@ -68,8 +68,10 @@ export function useSocialScreen(): SocialScreenController {
   });
 
   const pendingCount = useMemo(
-    () => countPendingRequests(overview) + groups.invitationsCount,
-    [overview, groups.invitationsCount],
+    () =>
+      countPendingRequests(overview, groups.joinRequestsCount) +
+      groups.invitationsCount,
+    [overview, groups.invitationsCount, groups.joinRequestsCount],
   );
 
   // One pull-to-refresh flag: friends, groups and received invitations.

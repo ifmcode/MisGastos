@@ -8,6 +8,8 @@ import { roundMoney } from "@/features/wallets/utils/money";
 import { TransactionOperationError } from "../services/transaction.errors";
 import {
   getSignedTransactionAmount,
+  readStoredGroupExpenseId,
+  readStoredGroupSettlementId,
   readStoredSharedExpenseId,
   toWalletBalance,
 } from "./transaction-firestore.utils";
@@ -22,6 +24,8 @@ export async function deleteTransactionOperation(
   const transactionRef = doc(db, "transactions", transactionId);
   const wallets: Wallet[] = [];
   let sharedExpenseId: string | undefined;
+  let groupExpenseId: string | undefined;
+  let groupSettlementId: string | undefined;
 
   await runTransaction(db, async (firestoreTransaction) => {
     const transactionSnapshot = await firestoreTransaction.get(transactionRef);
@@ -37,6 +41,8 @@ export async function deleteTransactionOperation(
 
     const linkedId = readStoredSharedExpenseId(transactionData);
     sharedExpenseId = linkedId;
+    groupExpenseId = readStoredGroupExpenseId(transactionData);
+    groupSettlementId = readStoredGroupSettlementId(transactionData);
 
     const type = transactionData.type;
     const amount =
@@ -108,6 +114,8 @@ export async function deleteTransactionOperation(
       date: "",
       ownerId,
       ...(sharedExpenseId ? { sharedExpenseId } : {}),
+      ...(groupExpenseId ? { groupExpenseId } : {}),
+      ...(groupSettlementId ? { groupSettlementId } : {}),
       createdAt: now,
       updatedAt: now,
       deletedAt: now,

@@ -1,8 +1,6 @@
 import type { FriendProfile } from "@/features/friends/types/friend.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 
-import type { GroupJoinRequestItem } from "./group-join.types";
-
 /** Owner included; mirrored by `firestore.rules` and the group schema. */
 export const GROUP_MAX_MEMBERS = 20;
 
@@ -42,6 +40,12 @@ export interface Group {
   defaultCurrency: CurrencyCode;
   /** Stable shareable code; `null` only for groups created before TICKET-061. */
   joinCode: string | null;
+  /**
+   * **Simplificar deudas** (TICKET-010): the owner setting that switches the
+   * suggested transfers between simplified and direct. Missing on legacy groups
+   * maps to `true`, so they keep simplifying.
+   */
+  simplifyDebts: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -72,17 +76,16 @@ export interface GroupInput {
   inviteeIds: string[];
 }
 
-/** Metadata-only edit; membership never changes through an update. */
-export interface GroupUpdateInput {
-  name: string;
-  description: string | null;
-  defaultCurrency: CurrencyCode;
-}
+/** Metadata-only owner edit; the form always sends the simplify toggle. */
+export interface GroupUpdateInput extends ValidatedGroupMetadata {}
 
+/** Validated metadata shared by creation and update. */
 export interface ValidatedGroupMetadata {
   name: string;
   description: string | null;
   defaultCurrency: CurrencyCode;
+  /** `true` on creation; the owner edits it on update (missing = true). */
+  simplifyDebts: boolean;
 }
 
 export interface ValidatedGroup extends ValidatedGroupMetadata {
@@ -116,8 +119,6 @@ export interface GroupDetail {
   group: Group;
   members: GroupMember[];
   invitations: GroupInvitationItem[];
-  /** Pending join requests; `[]` for anyone who is not the owner. */
-  joinRequests: GroupJoinRequestItem[];
 }
 
 /** Metadata write; the service stamps `updatedAt` before persistence. */

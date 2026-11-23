@@ -18,6 +18,9 @@ describe("mapGroupExpenseDocument", () => {
       ],
       description: "Dinner",
       date: "2026-11-10",
+      walletId: null,
+      categoryId: null,
+      linkedTransactionId: null,
       createdBy: "user-a",
       createdAt: CREATED_AT,
       updatedAt: CREATED_AT,
@@ -89,5 +92,35 @@ describe("mapGroupExpenseDocument", () => {
     );
 
     expect(expense?.updatedAt).toBe("");
+  });
+
+  it("maps a legacy document without link keys to social-only nulls", () => {
+    const legacy = buildDocument();
+    delete legacy.walletId;
+    delete legacy.categoryId;
+    delete legacy.linkedTransactionId;
+
+    expect(mapGroupExpenseDocument("expense-1", legacy)).toMatchObject({
+      walletId: null,
+      categoryId: null,
+      linkedTransactionId: null,
+    });
+  });
+
+  it("reads a linked document without rejecting it", () => {
+    const expense = mapGroupExpenseDocument(
+      "expense-1",
+      buildDocument({
+        walletId: " wallet-1 ",
+        categoryId: " category-1 ",
+        linkedTransactionId: " movement-1 ",
+      }),
+    );
+
+    expect(expense).toMatchObject({
+      walletId: "wallet-1",
+      categoryId: "category-1",
+      linkedTransactionId: "movement-1",
+    });
   });
 });

@@ -22,6 +22,12 @@ export interface SettlementMovementContent {
   categoryId: string;
   note: string;
   date: string;
+  /**
+   * Which record the movement mirrors. The 1:1 flow defaults to the settlement
+   * id; the group flow passes `{ groupSettlementId }` so the stored document
+   * carries exactly one link.
+   */
+  link?: { settlementId?: string; groupSettlementId?: string };
 }
 
 /**
@@ -32,7 +38,7 @@ export interface SettlementMovementContent {
  */
 export function writeSettlementMovement(
   transaction: SettlementTransaction,
-  settlement: Settlement,
+  settlement: Pick<Settlement, "id" | "currency">,
   content: SettlementMovementContent,
   previous: SettlementMovementState | null,
   context: SettlementMovementWriteContext,
@@ -45,7 +51,7 @@ export function writeSettlementMovement(
     movementId: targetRef.id,
     ownerId: creditorId,
     walletId: content.walletId,
-    settlementId: settlement.id,
+    ...(content.link ?? { settlementId: settlement.id }),
     amountCents: content.amountCents,
     currency: settlement.currency,
     categoryId: content.categoryId,

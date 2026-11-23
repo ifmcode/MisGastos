@@ -1,5 +1,32 @@
 {
   "backHint": "Go back to the previous screen",
+  "balancesTitle": "Balances",
+  "balancesHint": "Shows what you are owed or owe in each currency.",
+  "balancesLoading": "Loading the group balances…",
+  "balancesLoadFailed": "Could not load the group balances. Try again.",
+  "balancesRetryAccessibility": "Retry loading the group balances",
+  "memberIsOwed": "Is owed {{amount}}",
+  "memberOwes": "Owes {{amount}}",
+  "debtRow": "{{from}} owes {{to}} {{amount}}",
+  "debtSettle": "Settle",
+  "debtSettleAccessibility": "Settle the debt: {{from}} owes {{amount}} to {{to}}",
+  "debtSettleHint": "Opens the form to settle all or part of this debt.",
+  "balances": {
+    "settle": "Settle debts",
+    "settleAccessibility": "Settle the group debts",
+    "settleHint": "Opens the group debt list to choose which one to settle."
+  },
+  "settleStep": {
+    "title": "Settle debts",
+    "subtitle": "Choose the debt you want to settle. Only the debts you take part in can be settled.",
+    "listAccessibility": "Group debts",
+    "direct": "Direct debts",
+    "simplified": "Simplified debts",
+    "empty": "There are no pending debts in this group."
+  },
+  "youAreOwed": "You are owed {{amount}}",
+  "youOwe": "You owe {{amount}}",
+  "summariesLoadFailed": "Could not load the group balances. Try again.",
   "list": {
     "loading": "Loading your groups…",
     "sectionTitle": "Your groups",
@@ -57,7 +84,11 @@
     "submitAccessibilityCreate": "Create the group",
     "submitAccessibilitySave": "Save the group changes",
     "cancelAccessibility": "Cancel and close the form",
-    "validationSummary": "Review the highlighted fields before saving."
+    "validationSummary": "Review the highlighted fields before saving.",
+    "simplifyDebtsLabel": "Simplify debts",
+    "simplifyDebtsHelper": "Suggests the fewest transfers between members. Turn it off to see the direct debt of each expense; the balances never change.",
+    "simplifyDebtsAccessibility": "Simplify the group debts",
+    "simplifyDebtsHint": "Turn it on to see the simplified transfers or off to see the direct debt of each expense."
   },
   "detail": {
     "title": "Group",
@@ -74,7 +105,6 @@
     "settled": "Settled up",
     "detailsAccessibility": "View the details of the group {{name}}",
     "detailsHint": "Opens the sheet with the description, the currency and the members.",
-    "editAccessibility": "Edit the group {{name}}",
     "editHint": "Opens the form to change the name, the description and the currency.",
     "inviteAccessibility": "Invite friends to the group {{name}}",
     "inviteHint": "Opens the list of friends who can still join.",
@@ -91,17 +121,7 @@
     "joinCodeShareAccessibility": "Share the group code",
     "joinCodeShareHint": "Opens the system share sheet to send the code.",
     "joinCodeShareMessage": "Join «{{group}}» on MisGastos with the code {{code}}.",
-    "joinCodeShareFailed": "Could not share the code. Try again.",
-    "joinRequestsTitle": "Join requests",
-    "joinRequestsCount_one": "{{count}} request",
-    "joinRequestsCount_other": "{{count}} requests",
-    "joinRequestsEmpty": "No pending requests.",
-    "joinRequestsUnknown": "Someone",
-    "joinAccept": "Accept",
-    "joinAcceptAccessibility": "Accept the request from {{name}}",
-    "joinReject": "Reject",
-    "joinRejectAccessibility": "Reject the request from {{name}}",
-    "joinRequestBusyHint": "Another request is in progress. Wait a moment before continuing."
+    "joinCodeShareFailed": "Could not share the code. Try again."
   },
   "details": {
     "title": "Group details",
@@ -112,6 +132,11 @@
     "descriptionEmpty": "No description",
     "currencyLabel": "Default currency",
     "membersLabel": "Members",
+    "simplifyDebtsLabel": "Simplified debts",
+    "simplifyDebtsOn": "Yes",
+    "simplifyDebtsOff": "No",
+    "editGroup": "Edit group",
+    "editGroupAccessibility": "Edit the group details",
     "ownerBadge": "Owner",
     "memberBadge": "Member",
     "pendingBadge": "Pending",

@@ -95,8 +95,39 @@ describe("mapTransactionDocument shared links and soft delete", () => {
   });
 });
 
-describe("mapTransactionDocument settlement links", () => {
-  it("reads a trimmed settlement id on income movements", () => {
+describe("mapTransactionDocument group expense links", () => {
+  it("reads a trimmed group expense id on expenses", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, groupExpenseId: "  group-expense-1  " },
+      "user-1",
+    );
+
+    expect(transaction?.groupExpenseId).toBe("group-expense-1");
+  });
+
+  it("drops the group expense id on income movements", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, type: "income", groupExpenseId: "group-expense-1" },
+      "user-1",
+    );
+
+    expect(transaction && "groupExpenseId" in transaction).toBe(false);
+  });
+
+  it("ignores an empty group expense id", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, groupExpenseId: "   " },
+      "user-1",
+    );
+
+    expect(transaction && "groupExpenseId" in transaction).toBe(false);
+  });
+});
+
+describe("mapTransactionDocument settlement links", () => {  it("reads a trimmed settlement id on income movements", () => {
     const transaction = mapTransactionDocument(
       "tx-1",
       { ...baseData, type: "income", settlementId: "  settlement-1  " },
@@ -124,6 +155,38 @@ describe("mapTransactionDocument settlement links", () => {
     );
 
     expect(transaction && "settlementId" in transaction).toBe(false);
+  });
+});
+
+describe("mapTransactionDocument group settlement links", () => {
+  it("reads a trimmed group settlement id on income movements", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, type: "income", groupSettlementId: "  group-settlement-1  " },
+      "user-1",
+    );
+
+    expect(transaction?.groupSettlementId).toBe("group-settlement-1");
+  });
+
+  it("drops the group settlement id on expense movements", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, groupSettlementId: "group-settlement-1" },
+      "user-1",
+    );
+
+    expect(transaction && "groupSettlementId" in transaction).toBe(false);
+  });
+
+  it("ignores an empty group settlement id", () => {
+    const transaction = mapTransactionDocument(
+      "tx-1",
+      { ...baseData, type: "income", groupSettlementId: "   " },
+      "user-1",
+    );
+
+    expect(transaction && "groupSettlementId" in transaction).toBe(false);
   });
 });
 

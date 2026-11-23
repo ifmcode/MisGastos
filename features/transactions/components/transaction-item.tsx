@@ -40,6 +40,7 @@ export function TransactionItem({
   const theme = useFormTheme();
   const { t } = useTranslation("transactions");
   const { t: tShared } = useTranslation("sharedExpenses");
+  const { t: tGroup } = useTranslation("groupExpenses");
   const { t: tSettlements } = useTranslation("settlements");
   const tr = asTranslate(t);
   const locale = useAppLocale();
@@ -53,7 +54,11 @@ export function TransactionItem({
     transaction.currency,
   );
   const date = locale.formatDate(transaction.date);
-  const isSettlement = Boolean(transaction.settlementId);
+  // A group settlement income is a settlement too: it keeps the settlements
+  // badge and hint, ahead of the shared-expense and group-expense links.
+  const isSettlement = Boolean(
+    transaction.settlementId || transaction.groupSettlementId,
+  );
   const settlementLabel = isSettlement ? tSettlements("badge.label") : undefined;
   const detailLabel = getTransactionDetailLabel(
     transaction,
@@ -64,14 +69,24 @@ export function TransactionItem({
     settlementLabel,
   );
   const isLinked = Boolean(transaction.sharedExpenseId);
-  const badge = settlementLabel ?? (isLinked ? tShared("badge.label") : undefined);
+  const isGroupLinked = Boolean(transaction.groupExpenseId);
+  // The group link is exclusive of the 1:1 one; settlements keep their priority.
+  const linkedBadge = isLinked
+    ? tShared("badge.label")
+    : isGroupLinked
+      ? tGroup("badge.label")
+      : undefined;
+  const linkedHint = isLinked
+    ? tShared("badge.hint")
+    : isGroupLinked
+      ? tGroup("badge.hint")
+      : null;
+  const badge = settlementLabel ?? linkedBadge;
   const hint =
     accessibilityHint ??
     (isSettlement
       ? tSettlements("badge.hint")
-      : isLinked
-        ? tShared("badge.hint")
-        : t(OPEN_TRANSACTION_DETAIL_HINT_KEY));
+      : linkedHint ?? t(OPEN_TRANSACTION_DETAIL_HINT_KEY));
   const summary = tr(detailLabel.key, {
     ...detailLabel.values,
     type: tr(detailLabel.values.typeKey),

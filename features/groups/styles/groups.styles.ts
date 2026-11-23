@@ -105,11 +105,6 @@ export const groupsStyles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-  rowBalance: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: "600",
-  },
 
   // Group detail header
   header: {
@@ -153,11 +148,6 @@ export const groupsStyles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-  headerBalance: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: "600",
-  },
 
   // Forms (create/edit and invite)
   formContainer: {
@@ -194,6 +184,27 @@ export const groupsStyles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     marginTop: 6,
+  },
+
+  // Simplify-debts switch (edit form)
+  switchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 18,
+    minHeight: 44,
+  },
+  switchBody: {
+    flex: 1,
+    gap: 2,
+  },
+  switchLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  switchHelper: {
+    fontSize: 13,
+    lineHeight: 18,
   },
 
   // Invitee multi-select
@@ -261,6 +272,19 @@ export const groupsStyles = StyleSheet.create({
   infoValue: {
     fontSize: 15,
     lineHeight: 21,
+  },
+  editGroupButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    minHeight: 44,
+  },
+  editGroupButtonText: {
+    fontSize: 14,
+    fontWeight: "700",
   },
   memberRow: {
     flexDirection: "row",

@@ -7,6 +7,7 @@ const update = {
   name: "Viaje Nuevo",
   description: "Finde",
   defaultCurrency: "USD" as const,
+  simplifyDebts: false,
 };
 
 describe("GroupsService.updateGroup", () => {
@@ -16,7 +17,11 @@ describe("GroupsService.updateGroup", () => {
 
     const updated = await service.updateGroup("user-a", group.id, update);
 
-    expect(updated).toMatchObject({ name: "Viaje Nuevo", defaultCurrency: "USD" });
+    expect(updated).toMatchObject({
+      name: "Viaje Nuevo",
+      defaultCurrency: "USD",
+      simplifyDebts: false,
+    });
     expect(repository.updateInputs[0]).toMatchObject({
       groupId: group.id,
       update: { ...update, updatedAt: expect.any(String) },
