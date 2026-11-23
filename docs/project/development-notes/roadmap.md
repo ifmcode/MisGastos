@@ -16,12 +16,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Current Focus
 - **Milestone:** M3 - Social and platform
 - **Phase:** 6 - Groups
-- **Current ticket:** TICKET-069 - Optional personal movement for a group expense paid by the viewer
+- **Current ticket:** TICKET-011 - Group history
 - **Status:** ⏳ Pending
-- **Last completed:** TICKET-067 - Social pending requests as a top-right header icon with a badge (22/11/2026)
+- **Last completed:** TICKET-072 - Group detail social parity (23/11/2026)
 - **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-070 (Phase 6.1), TICKET-010, TICKET-011 and TICKET-068
-- **Next:** TICKET-069
+- **Queued:** TICKET-068
+- **Next:** TICKET-011
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -153,7 +153,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] TICKET-008: create groups, friend invitations, group detail and member management (consumes the Social → Tus grupos shell from TICKET-041) ✅ 20/11/2026
 - [x] TICKET-061: group join code and join requests (deferred from TICKET-008) ✅ 20/11/2026
 - [x] Full TICKET-009: group expenses with participant selection, payer outside the participants, per-expense currency, permissions, group detail list and detail route ✅ 21/11/2026
-- [ ] TICKET-010: group balances and settlements (reuse the TICKET-046 direct-settlement model, the receiver wallet movement and notification events)
+- [x] TICKET-010: group balances and settlements (reuse the TICKET-046 direct-settlement model, the receiver wallet movement and notification events) ✅ 23/11/2026
 - [ ] TICKET-011: group history
 - [ ] TICKET-068: group membership lifecycle (leave, balance-safe removal and ownership transfer)
 - Constraint from the Phase 4 spike: shared expenses and settlements are append-only ledger entries folded by a shared pure function, so offline group movements work without a rewrite
@@ -167,9 +167,15 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [x] TICKET-066: single category picker button with mandatory selection ✅ 22/11/2026
 - [x] TICKET-067: Social pending requests as a top-right header icon with a badge ✅ 22/11/2026
 
-### 6.1 Group wallet link and request placement (QUEUED)
-- [ ] TICKET-069: optional personal movement for a group expense paid by the viewer, with the same wallet/category and atomic link as the 1:1 flow
-- [ ] TICKET-070: manage the owner's group join requests from Social instead of the group detail
+### 6.1 Group wallet link and request placement (COMPLETED)
+- [x] TICKET-069: optional personal movement for a group expense paid by the viewer, with the same wallet/category and atomic link as the 1:1 flow ✅ 22/11/2026
+- [x] TICKET-070: manage the owner's group join requests from Social instead of the group detail ✅ 23/11/2026
+
+### 6.2 Group expense form simplification (COMPLETED)
+- [x] TICKET-071: no **Todos** shortcut and only **Igual**/**Importe** in the group-expense form, keeping legacy modes editable ✅ 23/11/2026
+
+### 6.3 Group detail parity (COMPLETED)
+- [x] TICKET-072: edit action and simplified-debts state in the details sheet, one linear expense+settlement timeline, and the debt list behind **Liquidar deudas** ✅ 23/11/2026
 
 ## Phase 7: Offline-first implementation (QUEUED)
 - [ ] Full TICKET-023 (design accepted in Phase 4)

@@ -31,6 +31,14 @@
 > now shared by the dashboard bell and the Social header. Both render one
 > `theme.danger` badge with a `99+` cap, and the removed `SocialPendingRow` banner no
 > longer exists.
+> TICKET-069 (22/11/2026) adds no new molecule: the six linked-movement molecules in
+> `features/shared-expenses/components` (registration switch, wallet and category
+> fields, category picker dialog and option) accept an optional copy `scope`
+> (`sharedExpenses` by default, `groupExpenses` for the group-expense form), so the
+> 1:1 and group forms share one implementation with their own copy.
+> TICKET-072 (23/11/2026) extracts `TimelineRow` (the friend/group linear history
+> row) and `SettleButton` (the debt action used by the friend header and the group
+> balances); no palette is added and copy stays in each feature namespace.
 
 ## Decisions
 
@@ -54,6 +62,8 @@
 | Currency chips | wallet form currency selector and the TICKET-006 profile currency selector | **Extract (TICKET-006)** | `shared/components/molecules/currency-chip-selector.tsx` |
 | Compact currency field | shared-expense form inline chips and the wallet form currency selector | **Extract (TICKET-056)** | `shared/components/molecules/currency-field.tsx` + `currency-picker-dialog.tsx` |
 | Header icon with count badge | `notifications-bell.tsx` and the deleted `social-pending-row.tsx`, with two different badge colours and only one `99+` cap | **Extract (TICKET-067)** | `shared/components/molecules/icon-badge-button.tsx` |
+| Linear history row | `friend-timeline-row.tsx` and the group expense/settlement rows, with the same date gutter, icon tile and amount column | **Extract (TICKET-072)** | `shared/components/molecules/timeline-row.tsx` |
+| Settle-debt action | `friend-detail-settle-button.tsx` and the group balances action | **Extract (TICKET-072)** | `shared/components/molecules/settle-button.tsx` |
 | Info banner | `transfer-form-info-banner.tsx` only | **Keep** | Single consumer; its bordered/neutral layout differs from the error banner |
 | Text fields | movement concept, wallet name/description, category name | **Keep wrappers** | Validation codes and copy stay in each feature; only the styles moved to `form-field.styles.ts` |
 | Screen headers | wallets, transactions, categories, transfer history, dashboard | **Keep** | Each header owns different actions (add filter, back, greeting) and copy |

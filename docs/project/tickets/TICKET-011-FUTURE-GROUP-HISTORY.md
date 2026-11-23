@@ -13,6 +13,7 @@ Provide an activity feed per group so members can review shared expenses, settle
 - [ ] Show a chronological activity feed for each group
 - [ ] Include expense creation, expense edits, expense deletions and settlements
 - [ ] Include member joined, member left, member removed, ownership transfer, group metadata edits and the **Simplificar deudas** setting change
+- [ ] Include the settlements recorded by TICKET-010 (the records already exist; this ticket adds their feed entries)
 - [ ] Include actor, date, amount and a short description for each entry; membership changes identify the affected member
 - [ ] Show the current user's involvement where relevant
 - [ ] Support loading, empty and error states
@@ -38,6 +39,11 @@ Provide an activity feed per group so members can review shared expenses, settle
 - The group detail should refresh the feed after a mutation and on focus; a member who leaves loses read access because the rules stay member-only.
 - Consider pagination if a group can accumulate hundreds of events.
 - Decision record: `session-notes/2026-11-20-group-expenses-and-membership-decisions.md`.
+- **Sources shipped by TICKET-010 (23/11/2026):** settlements live in the root
+  `groupSettlements` collection with a `groupId` and the **Simplificar deudas**
+  flag is `groups/{groupId}.simplifyDebts`. The feed can read those records
+  directly and starts recording setting changes from this ticket onwards; the
+  pre-TICKET-011 changes were not captured.
 
 ## Dependencies
 - TICKET-009 Shared Expenses

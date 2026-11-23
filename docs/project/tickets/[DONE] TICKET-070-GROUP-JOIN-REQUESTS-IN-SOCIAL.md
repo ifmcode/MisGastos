@@ -1,8 +1,8 @@
-# TICKET-070 - Group Join Requests in Social
+# [DONE] TICKET-070 - Group Join Requests in Social
 
 **Type:** UX / Refactor  
 **Priority:** Medium  
-**Status:** ⏳ Pending  
+**Status:** ✅ Done (23/11/2026)  
 **Related:** TICKET-041, TICKET-047, TICKET-061  
 **Sprint:** Post-MVP / Phase 6
 
@@ -14,23 +14,69 @@ existing notifications; the owner manages every pending join request from one
 place instead of opening each group.
 
 ## Requirements
-- [ ] `/social/requests` shows an owner-only **Solicitudes para unirse** section with every pending join request across the owner's groups
-- [ ] Each row shows the group name, the requester name/email (safe fallback), the request date, **Aceptar**/**Rechazar** and a per-row busy state
-- [ ] The Social pending counter includes pending join requests owned by the viewer
-- [ ] Remove the section from the group detail (`GroupJoinRequestsSection`, its hook and its copy)
-- [ ] The `group-join-request` notification opens `/social/requests` instead of the group detail
-- [ ] Accept/reject keeps the TICKET-061 transaction: revalidate owner, `pending`, non-membership and the 20-member cap; show the error inline
-- [ ] Keep loading, error with retry, empty state and pull-to-refresh independent from the friend-request and group-invitation sections
-- [ ] Non-owners never see the section or the counter contribution
-- [ ] Add tests for the cross-group aggregation, the pending counter and the screen hook
+- [x] `/social/requests` shows an owner-only **Solicitudes para unirse** section with every pending join request across the owner's groups
+- [x] Each row shows the group name, the requester name/email (safe fallback), the request date, **Aceptar**/**Rechazar** and a per-row busy state
+- [x] The Social pending counter includes pending join requests owned by the viewer
+- [x] Remove the section from the group detail (`GroupJoinRequestsSection`, its hook and its copy)
+- [x] The `group-join-request` notification opens `/social/requests` instead of the group detail
+- [x] Accept/reject keeps the TICKET-061 transaction: revalidate owner, `pending`, non-membership and the 20-member cap; show the error inline
+- [x] Keep loading, error with retry, empty state and pull-to-refresh independent from the friend-request and group-invitation sections
+- [x] Non-owners never see the section or the counter contribution
+- [x] Add tests for the cross-group aggregation, the pending counter and the screen hook
 
 ## Acceptance Criteria
-- [ ] The owner sees every pending join request of every owned group in Social with the correct group and requester
-- [ ] Accepting adds the requester to that group and removes the row from the queue; rejecting removes it without adding the member
-- [ ] The group detail no longer shows a join-request section
-- [ ] The notification for a join request opens Social, where the request can be answered
-- [ ] A non-owner never sees the owner queue
-- [ ] A full group or a request resolved elsewhere shows a clear inline error instead of a silent failure
+- [x] The owner sees every pending join request of every owned group in Social with the correct group and requester
+- [x] Accepting adds the requester to that group and removes the row from the queue; rejecting removes it without adding the member
+- [x] The group detail no longer shows a join-request section
+- [x] The notification for a join request opens Social, where the request can be answered
+- [x] A non-owner never sees the owner queue
+- [x] A full group or a request resolved elsewhere shows a clear inline error instead of a silent failure
+
+## Implemented
+
+### Data and service
+- `OwnerJoinRequestItem { groupId, groupName, item: GroupJoinRequestItem }` and the
+  pure `buildOwnerJoinRequests(groups, itemsByGroup)` (oldest first, ties by
+  group, then request id). It skips groups without entries and never mutates the
+  inputs.
+- `GroupsService.getOwnerJoinRequests(viewerUid)` replaces the unused per-group
+  `getJoinRequests`: it reads the viewer's groups, keeps the owned ones, fans out
+  the existing pending + non-member + profile loader over them (max 20,
+  accepted V1 read budget, no denormalized `ownerId` and no composite index) and
+  returns the aggregated queue. A non-owner gets `[]`.
+- `GroupDetail` no longer exposes `joinRequests`; `loadGroupDetail` stopped
+  loading the queue. The response and edit transaction (`respondToJoinRequest`)
+  is unchanged.
+
+### UI
+- `features/social` renders the new `OwnerJoinRequestsSection` first in
+  `/social/requests`, with an inline loader for the first load, an inline error
+  with retry, a background/action `ErrorBanner`, the group name, requester
+  name/email, request date and **Aceptar**/**Rechazar**. The section renders
+  nothing when the owner has no pending request, so no empty "0 solicitudes"
+  block exists.
+- `useOwnerJoinRequests` + `useOwnerJoinRequestActions` own the fan-out state,
+  focus refresh and single-flight decision (the answered row disappears and the
+  groups overview refreshes). The group-detail section, row, hook, copy and
+  queue-only styles were deleted; `GroupJoinActionButton` is reused.
+- `countPendingRequests`/`getPendingRequests` accept the owner queue as an
+  optional third source (finite, truncated, non-negative) and stay the single
+  source for the Social badge; `useSocialScreen` and `useRequestsScreen` count
+  friend requests + received invitations + owned pending join requests.
+- The `group-join-request` notification target moved to `/social/requests`;
+  `group-join-accepted` still opens the group detail.
+
+### Verification
+- `npx tsc --noEmit` and `npx expo lint` clean.
+- `npm run check:copy` passed (315 TSX files).
+- `npx jest --coverage`: **346 suites / 2171 tests**, coverage **98.97 %
+  statements / 94.76 % branches / 98.61 % functions / 99.52 % lines**.
+- New tests cover the pure aggregation (empty map, flattening, ordering, ties,
+  no mutation), the service (two owned groups, foreign group excluded,
+  non-owner, filtering, profiles, `SIGN_IN_REQUIRED`, `GroupDetail` without
+  `joinRequests`), the counter third source and the notification target.
+- Manual device validation (owner with and without requests, several groups,
+  invitation mixed in, light/dark, screen reader) is pending.
 
 ## Technical Notes
 - **No composite index (V1):** `groupJoinRequests` has no denormalized
