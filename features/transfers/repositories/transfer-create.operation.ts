@@ -5,6 +5,8 @@ import {
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { readClientDocumentId } from "@/shared/utils/client-id";
+import { INITIAL_REVISION, nextRevision } from "@/shared/utils/revision";
 import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 
@@ -84,6 +86,7 @@ export async function createTransferOperation(
         ...fromWalletData,
         balance: nextBalances.fromBalance,
         updatedAt: now,
+        revision: nextRevision(fromWalletData),
       },
       ownerId,
     );
@@ -93,6 +96,7 @@ export async function createTransferOperation(
         ...toWalletData,
         balance: nextBalances.toBalance,
         updatedAt: now,
+        revision: nextRevision(toWalletData),
       },
       ownerId,
     );
@@ -101,22 +105,34 @@ export async function createTransferOperation(
     if (updatedFromWallet) updatedWallets.push(updatedFromWallet);
     if (updatedToWallet) updatedWallets.push(updatedToWallet);
 
-    const transferRef = doc(transfersRef);
+    const providedId = readClientDocumentId(dto.id);
+    const transferRef = providedId
+      ? doc(db, "transfers", providedId)
+      : doc(transfersRef);
     createdId = transferRef.id;
 
     firestoreTransaction.set(transferRef, toTransferData(ownerId, dto, now));
     firestoreTransaction.update(fromWalletRef, {
       balance: nextBalances.fromBalance,
       updatedAt: now,
+      revision: nextRevision(fromWalletData),
     });
     firestoreTransaction.update(toWalletRef, {
       balance: nextBalances.toBalance,
       updatedAt: now,
+      revision: nextRevision(toWalletData),
     });
   });
 
   return {
-    transfer: buildTransfer(createdId, ownerId, dto, now, now),
+    transfer: buildTransfer(
+      createdId,
+      ownerId,
+      dto,
+      now,
+      now,
+      INITIAL_REVISION,
+    ),
     wallets: updatedWallets,
   };
 }

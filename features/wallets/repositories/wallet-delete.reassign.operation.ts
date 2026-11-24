@@ -1,6 +1,7 @@
 import { deleteField, doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { nextRevision } from "@/shared/utils/revision";
 
 import { WalletOperationError } from "../services/wallet.errors";
 import { Wallet } from "../types/wallet.types";
@@ -13,6 +14,7 @@ import { WalletMovements } from "./wallet-movements";
 import {
   assertBatchSize,
   getSignedAmount,
+  isSoftDeletedMovement,
   readAmount,
   readBalance,
   readString,
@@ -53,11 +55,14 @@ export async function reassignWalletMovementsAndDelete(
 
     for (const document of movements.transactions) {
       const data = document.data() as Record<string, unknown>;
-      net = roundMoney(net + getSignedAmount(data));
+      if (!isSoftDeletedMovement(data)) {
+        net = roundMoney(net + getSignedAmount(data));
+      }
       transaction.update(document.ref, {
         walletId: target.id,
         walletName: deleteField(),
         updatedAt: now,
+        revision: nextRevision(data),
       });
       writes += 1;
     }
@@ -69,7 +74,10 @@ export async function reassignWalletMovementsAndDelete(
       const isFrom = fromWalletId === wallet.id;
       const isTo = toWalletId === wallet.id;
       const counterpart = isFrom ? toWalletId : fromWalletId;
-      const patch: Record<string, unknown> = { updatedAt: now };
+      const patch: Record<string, unknown> = {
+        updatedAt: now,
+        revision: nextRevision(data),
+      };
 
       if (counterpart === target.id) {
         if (isFrom) {
@@ -101,13 +109,20 @@ export async function reassignWalletMovementsAndDelete(
 
     assertBatchSize(writes);
 
+    const targetRevision = nextRevision(targetData);
     transaction.update(targetRef, {
       balance: nextBalance,
       updatedAt: now,
+      revision: targetRevision,
     });
     transaction.delete(doc(db, "wallets", wallet.id));
 
-    updatedTarget = { ...target, balance: nextBalance, updatedAt: now };
+    updatedTarget = {
+      ...target,
+      balance: nextBalance,
+      updatedAt: now,
+      revision: targetRevision,
+    };
   });
 
   if (!updatedTarget) {

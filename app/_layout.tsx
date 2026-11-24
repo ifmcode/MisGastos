@@ -9,6 +9,7 @@ import { AuthProvider } from '@/features/auth/providers/auth-provider';
 import { FriendsPublicProfileSync } from '@/features/friends/components/friends-public-profile-sync';
 import { NotificationBannerHost } from '@/features/notifications/components/notification-banner-host';
 import { ProfileProvider } from '@/features/profile/providers/profile-provider';
+import { OfflineBannerHost } from '@/features/sync/components/offline-banner-host';
 import { DefaultWalletSeed } from '@/features/wallets/components/default-wallet-seed';
 import { useAppColorScheme } from '@/shared/hooks/use-app-color-scheme';
 import { useAppTheme } from '@/shared/hooks/use-app-theme';
@@ -39,10 +40,11 @@ export default function RootLayout() {
           <ProfileProvider>
             <FriendsPublicProfileSync />
             <DefaultWalletSeed />
-            {/* The banner is a sibling of the navigator so it overlays every route. */}
+            {/* The banners are siblings of the navigator so they overlay every route. */}
             <View style={styles.root}>
               <RootNavigator />
               <NotificationBannerHost />
+              <OfflineBannerHost />
             </View>
           </ProfileProvider>
         </AuthProvider>

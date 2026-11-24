@@ -1,21 +1,28 @@
 import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { nextRevision, readStoredRevision } from "@/shared/utils/revision";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 import { roundMoney } from "@/features/wallets/utils/money";
 
 import { TransactionOperationError } from "../services/transaction.errors";
+import { Transaction } from "../types/transaction.types";
 import { getSignedTransactionAmount } from "../utils/transaction-balance";
+import { toWalletBalance } from "./transaction-firestore.utils";
+import { buildDeletedTransactionResult } from "./transaction-delete.result";
 import {
-  readStoredGroupExpenseId,
-  readStoredGroupSettlementId,
-  readStoredSharedExpenseId,
-  toWalletBalance,
-} from "./transaction-firestore.utils";
+  hasStoredMovementLink,
+  readStoredDeletedAt,
+} from "./transaction-stored.utils";
 import { TransactionMutationResult } from "./transaction.repository";
 
-/** Deletes a transaction and reverts its signed amount from the wallet. */
+/**
+ * Soft-deletes a personal transaction and reverts its signed amount from the
+ * wallet exactly once: an already deleted movement returns without touching the
+ * balance again. Linked movements are rejected because their owning feature
+ * operation owns the revert.
+ */
 export async function deleteTransactionOperation(
   ownerId: string,
   transactionId: string,
@@ -23,9 +30,7 @@ export async function deleteTransactionOperation(
   const now = new Date().toISOString();
   const transactionRef = doc(db, "transactions", transactionId);
   const wallets: Wallet[] = [];
-  let sharedExpenseId: string | undefined;
-  let groupExpenseId: string | undefined;
-  let groupSettlementId: string | undefined;
+  let deleted: Transaction | null = null;
 
   await runTransaction(db, async (firestoreTransaction) => {
     const transactionSnapshot = await firestoreTransaction.get(transactionRef);
@@ -39,10 +44,27 @@ export async function deleteTransactionOperation(
       throw new TransactionOperationError("TRANSACTION_NOT_FOUND");
     }
 
-    const linkedId = readStoredSharedExpenseId(transactionData);
-    sharedExpenseId = linkedId;
-    groupExpenseId = readStoredGroupExpenseId(transactionData);
-    groupSettlementId = readStoredGroupSettlementId(transactionData);
+    const storedRevision = readStoredRevision(transactionData);
+    const storedDeletedAt = readStoredDeletedAt(transactionData);
+
+    // Idempotent: the first delete already reverted the balance.
+    if (storedDeletedAt !== null) {
+      deleted = buildDeletedTransactionResult(
+        transactionId,
+        ownerId,
+        transactionData,
+        now,
+        storedRevision,
+        storedDeletedAt,
+      );
+      return;
+    }
+
+    if (hasStoredMovementLink(transactionData)) {
+      throw new TransactionOperationError("TRANSACTION_INVALID");
+    }
+
+    const revision = storedRevision + 1;
 
     const type = transactionData.type;
     const amount =
@@ -68,58 +90,53 @@ export async function deleteTransactionOperation(
       throw new TransactionOperationError("TRANSACTION_INVALID");
     }
 
-    const walletRef = doc(db, "wallets", walletId);
-
-    // Movements orphaned by a permanent wallet deletion have no wallet
-    // document to adjust; deleting them only removes the history entry.
-    if (isOrphanedWalletId(walletId)) {
-      firestoreTransaction.delete(transactionRef);
-      return;
-    }
-
-    const walletSnapshot = await firestoreTransaction.get(walletRef);
-    if (!walletSnapshot.exists()) {
-      throw new TransactionOperationError("WALLET_NOT_FOUND");
-    }
-
-    const walletData = walletSnapshot.data() as Record<string, unknown>;
-    if (walletData.ownerId !== ownerId) {
-      throw new TransactionOperationError("WALLET_NOT_OWNED");
-    }
-    if (currency && walletData.currency !== currency) {
-      throw new TransactionOperationError("CURRENCY_MISMATCH");
-    }
-
-    const currentBalance = toWalletBalance(walletData);
-    const nextBalance = roundMoney(
-      currentBalance - getSignedTransactionAmount({ type, amount }),
-    );
-
-    firestoreTransaction.update(walletRef, {
-      balance: nextBalance,
+    const patch: Record<string, unknown> = {
+      deletedAt: now,
       updatedAt: now,
-    });
-    firestoreTransaction.delete(transactionRef);
+      revision,
+    };
+
+    // Movements orphaned by a permanent wallet deletion have no wallet document
+    // to adjust; deleting them only stamps the history entry.
+    if (!isOrphanedWalletId(walletId)) {
+      const walletRef = doc(db, "wallets", walletId);
+      const walletSnapshot = await firestoreTransaction.get(walletRef);
+      if (!walletSnapshot.exists()) {
+        throw new TransactionOperationError("WALLET_NOT_FOUND");
+      }
+
+      const walletData = walletSnapshot.data() as Record<string, unknown>;
+      if (walletData.ownerId !== ownerId) {
+        throw new TransactionOperationError("WALLET_NOT_OWNED");
+      }
+      if (currency && walletData.currency !== currency) {
+        throw new TransactionOperationError("CURRENCY_MISMATCH");
+      }
+
+      const currentBalance = toWalletBalance(walletData);
+      const nextBalance = roundMoney(
+        currentBalance - getSignedTransactionAmount({ type, amount }),
+      );
+
+      firestoreTransaction.update(walletRef, {
+        balance: nextBalance,
+        updatedAt: now,
+        revision: nextRevision(walletData),
+      });
+    }
+
+    firestoreTransaction.update(transactionRef, patch);
+    deleted = buildDeletedTransactionResult(
+      transactionId,
+      ownerId,
+      transactionData,
+      now,
+      revision,
+      now,
+    );
   });
 
-  return {
-    transaction: {
-      id: transactionId,
-      type: "expense",
-      amount: 0,
-      currency: "EUR",
-      walletId: "",
-      categoryId: "unknown",
-      concept: "",
-      date: "",
-      ownerId,
-      ...(sharedExpenseId ? { sharedExpenseId } : {}),
-      ...(groupExpenseId ? { groupExpenseId } : {}),
-      ...(groupSettlementId ? { groupSettlementId } : {}),
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: now,
-    },
-    wallets,
-  };
+  if (!deleted) throw new TransactionOperationError("TRANSACTION_NOT_FOUND");
+
+  return { transaction: deleted, wallets };
 }

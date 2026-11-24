@@ -4,10 +4,13 @@ import {
   deleteField,
   doc,
   getDoc,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { readClientDocumentId } from "@/shared/utils/client-id";
+import { nextRevision } from "@/shared/utils/revision";
 
 import { WalletOperationError } from "../services/wallet.errors";
 import {
@@ -40,6 +43,12 @@ export async function createWalletDocument(
 ): Promise<Wallet> {
   const now = new Date().toISOString();
   const data = buildWalletDocumentData(ownerId, dto, now);
+  const providedId = readClientDocumentId(dto.id);
+
+  if (providedId) {
+    await setDoc(doc(db, WALLET_COLLECTION, providedId), data);
+    return { id: providedId, ...data };
+  }
 
   const walletsRef = collection(db, WALLET_COLLECTION);
   const reference = await addDoc(walletsRef, data);
@@ -56,7 +65,10 @@ export async function updateWalletDocument(
   if (!existing) throw new WalletOperationError("WALLET_NOT_FOUND");
 
   const now = new Date().toISOString();
-  const data: Record<string, unknown> = { updatedAt: now };
+  const data: Record<string, unknown> = {
+    updatedAt: now,
+    revision: nextRevision(existing),
+  };
 
   if (dto.name !== undefined) data.name = dto.name;
   if (dto.icon !== undefined) data.icon = dto.icon;
@@ -95,6 +107,7 @@ export async function setWalletArchivedDocument(
   await updateDoc(doc(db, WALLET_COLLECTION, walletId), {
     archivedAt: archivedAt ?? deleteField(),
     updatedAt: now,
+    revision: nextRevision(existing),
   });
 
   const updated = await loadOwnedWallet(ownerId, walletId);

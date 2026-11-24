@@ -101,4 +101,39 @@ describe("FirebaseTransferRepository.createTransfer", () => {
 
     expect(payload).not.toHaveProperty("notes");
   });
+
+  it("writes the initial revision and bumps both wallet revisions", async () => {
+    mockWalletSnapshots({ revision: 2 }, { revision: 5 });
+
+    const result = await new FirebaseTransferRepository().createTransfer(
+      "user-1",
+      validDto,
+    );
+
+    expect(transactionSet.mock.calls[0]?.[1]).toHaveProperty("revision", 0);
+    expect(transactionUpdate).toHaveBeenCalledWith(
+      fromWalletRef,
+      expect.objectContaining({ revision: 3 }),
+    );
+    expect(transactionUpdate).toHaveBeenCalledWith(
+      toWalletRef,
+      expect.objectContaining({ revision: 6 }),
+    );
+    expect(result.transfer.revision).toBe(0);
+  });
+
+  it("writes the transfer under the provided client id", async () => {
+    mockWalletSnapshots();
+
+    const result = await new FirebaseTransferRepository().createTransfer(
+      "user-1",
+      { ...validDto, id: "  client-transfer  " },
+    );
+
+    expect(transactionSet).toHaveBeenCalledWith(
+      { kind: "transfer", id: "client-transfer" },
+      expect.objectContaining({ ownerId: "user-1" }),
+    );
+    expect(result.transfer.id).toBe("client-transfer");
+  });
 });

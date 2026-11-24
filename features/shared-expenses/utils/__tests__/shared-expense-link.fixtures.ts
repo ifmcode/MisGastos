@@ -18,6 +18,7 @@ export function buildLinkWallet(overrides: Partial<Wallet> = {}): Wallet {
     type: "bank",
     includeInTotal: true,
     ownerId: "user-a",
+    revision: 0,
     createdAt: "2026-11-01T10:00:00.000Z",
     updatedAt: "2026-11-01T10:00:00.000Z",
     ...overrides,

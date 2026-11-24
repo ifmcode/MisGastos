@@ -1,6 +1,7 @@
 import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { nextRevision } from "@/shared/utils/revision";
 
 import { SharedExpenseOperationError } from "../services/shared-expense.errors";
 import { FirebaseLinkedMovementPort } from "./firebase-linked-movement.port";
@@ -60,6 +61,7 @@ export async function softDeleteSharedExpenseLinkOperation(
       transaction.update(movementRef(active.id), {
         deletedAt,
         updatedAt: deletedAt,
+        revision: nextRevision(active),
       });
     }
 

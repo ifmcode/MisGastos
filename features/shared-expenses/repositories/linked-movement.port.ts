@@ -38,6 +38,8 @@ export interface LinkedMovementState {
   currency: string;
   deletedAt: string | null;
   createdAt: string | null;
+  /** Stored optimistic-concurrency counter; updates write it plus one. */
+  revision: number;
 }
 
 /**

@@ -13,14 +13,39 @@ contract. Change both in the same ticket.
 | Collection | Owner field | Delete | Mutability |
 |---|---|---|---|
 | `users` | `uid` field (not doc id) | hard | `uid` immutable |
-| `wallets` | `ownerId` | hard (archive first) | `ownerId` immutable |
-| `transactions` | `ownerId` | hard today | `ownerId` immutable |
-| `categories` | `ownerId` | hard, blocked while used | `ownerId`, `type` immutable |
-| `transfers` | `ownerId` | **never** (soft `deletedAt`) | `ownerId`, `createdAt` immutable |
+| `wallets` | `ownerId` | hard (archive first) | `ownerId` immutable, `revision` +1 |
+| `transactions` | `ownerId` | **never** (soft `deletedAt`) | `ownerId` immutable, `revision` +1 |
+| `categories` | `ownerId` | hard, blocked while used by an active movement | `ownerId`, `type` immutable, `revision` +1 |
+| `transfers` | `ownerId` | **never** (soft `deletedAt`) | `ownerId`, `createdAt` immutable, `revision` +1 |
+| `appliedMutations` | `ownerId` | **never** | append-only idempotency marker |
 
 Rules helpers: `isSignedIn()` and `isWalletOwner(data)` (actually an owner check
 reused by every collection). Reuse them; do not inline `request.auth.uid`
 comparisons in new matches unless the helper does not fit.
+
+## Revision contract (offline-first)
+
+`wallets`, `transactions`, `transfers` and `categories` carry a `revision`
+optimistic-concurrency counter:
+
+- a create writes `0` (`isInitialRevision` also accepts a legacy create that
+  omits the field);
+- every update writes the stored value `+1` (`isRevisionBump`);
+- a legacy or malformed stored value counts as `0`, so its first update writes
+  `1` and a damaged document stays recoverable.
+
+Bump the revision in the same write that touches `updatedAt`, inside the
+transaction, using `nextRevision(storedData)` from
+`shared/utils/revision.ts`. A write that forgets it is rejected by the rules, so
+audit every update path when adding one. Transactions are never hard-deleted:
+`deletedAt` + `revision + 1` is the delete, and only the owning shared/group
+operation may revert and close a linked movement.
+
+`appliedMutations/{ownerId}__{clientMutationId}` is the exactly-once marker
+(`ownerId`, `clientMutationId`, `entityType`, `entityId`, `revisionAfter`,
+`appliedAt`): owner-only reads/create, a `get` on a missing marker resolves as
+not-found, and it is never updated or deleted. The sync executor writes it in
+the same transaction as the data change (TICKET-023 Phase 5).
 
 ## Rules pattern for a new collection
 

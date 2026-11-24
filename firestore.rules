@@ -10,6 +10,29 @@ service cloud.firestore {
       return isSignedIn() && data.ownerId == request.auth.uid;
     }
 
+    // Revision contract of wallets, transactions, transfers and categories: a
+    // create writes 0 and every update writes the stored value plus one. A
+    // legacy document may omit `revision`, so it counts as 0 and its first
+    // update writes 1; a malformed stored value is treated the same way so a
+    // damaged document stays recoverable instead of frozen.
+    function isRevisionBump(stored, next) {
+      return next is int
+        && next >= 1
+        && next == (
+             (('revision' in stored)
+               && stored.revision is int
+               && stored.revision >= 0)
+               ? stored.revision + 1
+               : 1
+           );
+    }
+
+    // Creates start the sequence. A legacy client or bridge may omit the field;
+    // any other base value is a forged history and is rejected.
+    function isInitialRevision(data) {
+      return !('revision' in data) || data.revision == 0;
+    }
+
     // Friend pairs use a deterministic id: both uids sorted lexicographically
     // and joined with "__". Every request and friendship of a pair lives in that
     // single document, so no lookup query or composite index is required.
@@ -1218,10 +1241,12 @@ service cloud.firestore {
     match /wallets/{walletId} {
       allow read, delete: if isWalletOwner(resource.data);
 
-      allow create: if isWalletOwner(request.resource.data);
+      allow create: if isWalletOwner(request.resource.data)
+        && isInitialRevision(request.resource.data);
 
       allow update: if isWalletOwner(resource.data)
-        && isWalletOwner(request.resource.data);
+        && isWalletOwner(request.resource.data)
+        && isRevisionBump(resource.data, request.resource.data);
     }
 
     match /transactions/{transactionId} {
@@ -1232,6 +1257,7 @@ service cloud.firestore {
       // income of the creditor of the referenced settlement.
       allow create: if isSignedIn()
         && request.resource.data.ownerId == request.auth.uid
+        && isInitialRevision(request.resource.data)
         && hasNoDoubleLink(request.resource.data)
         && (
           !('sharedExpenseId' in request.resource.data)
@@ -1255,6 +1281,7 @@ service cloud.firestore {
       // where the source record and the movement change currency together.
       allow update: if isWalletOwner(resource.data)
         && request.resource.data.ownerId == resource.data.ownerId
+        && isRevisionBump(resource.data, request.resource.data)
         && keepsSharedExpenseLink(resource.data, request.resource.data)
         && keepsGroupExpenseLink(resource.data, request.resource.data)
         && keepsSettlementLink(resource.data, request.resource.data)
@@ -1341,14 +1368,12 @@ service cloud.firestore {
           )
         );
 
-      // Linked movements are only ever soft-deleted by their operations; a hard
-      // delete would leave the shared expense, the group expense, the settlement
-      // or the group settlement pointing nowhere.
-      allow delete: if isWalletOwner(resource.data)
-        && !('sharedExpenseId' in resource.data)
-        && !('groupExpenseId' in resource.data)
-        && !('settlementId' in resource.data)
-        && !('groupSettlementId' in resource.data);
+      // Transactions are never hard-deleted: a delete is a soft delete (an
+      // update that stamps `deletedAt` and bumps the revision), and a linked
+      // movement is only reverted and closed by the shared-expense, group-expense
+      // or settlement operation that owns it. A physical delete would also drop
+      // the document the wallet balance was reverted from.
+      allow delete: if false;
     }
 
     // User-defined categories. The type is fixed after creation so historical
@@ -1357,11 +1382,13 @@ service cloud.firestore {
       allow read: if isWalletOwner(resource.data);
 
       allow create: if isSignedIn()
-        && request.resource.data.ownerId == request.auth.uid;
+        && request.resource.data.ownerId == request.auth.uid
+        && isInitialRevision(request.resource.data);
 
       allow update: if isWalletOwner(resource.data)
         && isWalletOwner(request.resource.data)
-        && request.resource.data.type == resource.data.type;
+        && request.resource.data.type == resource.data.type
+        && isRevisionBump(resource.data, request.resource.data);
 
       allow delete: if isWalletOwner(resource.data);
     }
@@ -1372,11 +1399,63 @@ service cloud.firestore {
       allow read: if isWalletOwner(resource.data);
 
       allow create: if isSignedIn()
-        && request.resource.data.ownerId == request.auth.uid;
+        && request.resource.data.ownerId == request.auth.uid
+        && isInitialRevision(request.resource.data);
 
       allow update: if isWalletOwner(resource.data)
         && request.resource.data.ownerId == resource.data.ownerId
-        && request.resource.data.createdAt == resource.data.createdAt;
+        && request.resource.data.createdAt == resource.data.createdAt
+        && isRevisionBump(resource.data, request.resource.data);
+    }
+
+    // Idempotency markers of the offline sync queue (TICKET-023, Phase 5). The
+    // marker and the data change commit atomically, so a replayed mutation sees
+    // its marker and is skipped. The client writes no marker in this slice; the
+    // rules exist so `appliedMutations` can never be rewritten or deleted once
+    // the executor lands.
+    //
+    // The id is deterministic: `ownerId + '__' + clientMutationId`, which makes
+    // the write idempotent without a query or an index (a plain `get` by id).
+    match /appliedMutations/{markerId} {
+      // A `get` on a missing marker must resolve to "not found" instead of
+      // permission-denied, so the executor can decide whether a mutation was
+      // already applied. Same existence-oracle trade-off as friendRequests: a
+      // signed-in caller can learn whether a marker exists, but a missing
+      // document holds no data. Existing markers stay owner-only.
+      allow get: if isSignedIn()
+        && (
+          !exists(/databases/$(database)/documents/appliedMutations/$(markerId))
+          || resource.data.ownerId == request.auth.uid
+        );
+
+      allow list: if isWalletOwner(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.keys().hasOnly(
+             [
+               'ownerId',
+               'clientMutationId',
+               'entityType',
+               'entityId',
+               'revisionAfter',
+               'appliedAt'
+             ]
+           )
+        && request.resource.data.clientMutationId is string
+        && request.resource.data.clientMutationId.size() > 0
+        && request.resource.data.clientMutationId.size() <= 200
+        && markerId == request.resource.data.ownerId + '__' + request.resource.data.clientMutationId
+        && request.resource.data.entityType in
+             ['wallet', 'transaction', 'transfer', 'category']
+        && request.resource.data.entityId is string
+        && request.resource.data.entityId.size() > 0
+        && request.resource.data.revisionAfter is int
+        && request.resource.data.revisionAfter >= 0
+        && request.resource.data.appliedAt is string;
+
+      // A marker is append-only: the data change it proves is never undone.
+      allow update, delete: if false;
     }
 
     // Public identity shared with other signed-in users: display name plus the

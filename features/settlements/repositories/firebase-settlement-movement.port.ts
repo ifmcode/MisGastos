@@ -6,6 +6,7 @@ import {
 } from "@/features/transactions/utils/transaction-balance";
 import { centsToAmount } from "@/features/shared-expenses/utils/expense-amount";
 import { roundMoney } from "@/features/wallets/utils/money";
+import { INITIAL_REVISION, readStoredRevision } from "@/shared/utils/revision";
 
 import type {
   ISettlementMovementPort,
@@ -49,6 +50,7 @@ export class FirebaseSettlementMovementPort implements ISettlementMovementPort {
       input.ownerId,
       toTransactionDto(input),
       input.updatedAt,
+      INITIAL_REVISION,
     );
   }
 
@@ -56,9 +58,11 @@ export class FirebaseSettlementMovementPort implements ISettlementMovementPort {
     input: SettlementMovementWriteInput,
   ): Record<string, unknown> {
     const data = this.buildCreateData(input);
-    // Creation stamp and owner are immutable; an update never rewrites them.
+    // Creation stamp, owner and revision are set by the write helper: an update
+    // must write the stored revision plus one, never the initial one.
     delete data.createdAt;
     delete data.ownerId;
+    delete data.revision;
 
     return data;
   }
@@ -89,6 +93,7 @@ export class FirebaseSettlementMovementPort implements ISettlementMovementPort {
       currency: readText(data.currency),
       deletedAt: deletedAt.length > 0 ? deletedAt : null,
       createdAt: createdAt.length > 0 ? createdAt : null,
+      revision: readStoredRevision(data),
     };
   }
 

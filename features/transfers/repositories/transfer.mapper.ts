@@ -6,6 +6,7 @@ import {
   toIsoDateValue,
   toIsoTimestamp,
 } from "@/shared/utils/date";
+import { readStoredRevision } from "@/shared/utils/revision";
 
 import { Transfer } from "../types/transfer.types";
 
@@ -76,6 +77,7 @@ export function mapTransferDocument(
     date,
     ...(notes ? { notes } : {}),
     ownerId: storedOwnerId,
+    revision: readStoredRevision(data),
     createdAt,
     updatedAt,
     ...(deletedAt ? { deletedAt } : {}),

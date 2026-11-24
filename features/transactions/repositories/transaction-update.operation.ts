@@ -4,24 +4,23 @@ import { db } from "@/lib/firebase";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 import { roundMoney } from "@/features/wallets/utils/money";
+import { toIsoTimestamp } from "@/shared/utils/date";
+import { nextRevision } from "@/shared/utils/revision";
 
 import { TransactionOperationError } from "../services/transaction.errors";
-import { UpdateTransactionDto } from "../types/transaction.types";
-import {
-  applyTransactionUpdateToBalance,
-  getSignedTransactionAmount,
-} from "../utils/transaction-balance";
-import { toIsoTimestamp } from "@/shared/utils/date";
+import { Transaction, UpdateTransactionDto } from "../types/transaction.types";
 import {
   buildTransaction,
   getMappedWallet,
+  toTransactionData,
+} from "./transaction-firestore.utils";
+import {
   readStoredDeletedAt,
   readStoredGroupExpenseId,
   readStoredGroupSettlementId,
   readStoredSharedExpenseId,
-  toTransactionData,
-  toWalletBalance,
-} from "./transaction-firestore.utils";
+} from "./transaction-stored.utils";
+import { applyTransactionWalletAdjustment } from "./transaction-update.wallets";
 import { TransactionMutationResult } from "./transaction.repository";
 
 export interface UpdateTransactionOperationOptions {
@@ -43,6 +42,8 @@ export async function updateTransactionOperation({
   const transactionRef = doc(db, "transactions", transactionId);
   const newWalletRef = doc(db, "wallets", dto.walletId);
 
+  let updatedTransaction: Transaction | null = null;
+
   await runTransaction(db, async (firestoreTransaction) => {
     const transactionSnapshot = await firestoreTransaction.get(transactionRef);
     if (!transactionSnapshot.exists()) {
@@ -52,6 +53,12 @@ export async function updateTransactionOperation({
     const transactionData =
       transactionSnapshot.data() as Record<string, unknown>;
     if (transactionData.ownerId !== ownerId) {
+      throw new TransactionOperationError("TRANSACTION_NOT_FOUND");
+    }
+
+    // A soft-deleted movement already reverted its amount; editing it would
+    // apply the money again while it stays out of the history.
+    if (readStoredDeletedAt(transactionData) !== null) {
       throw new TransactionOperationError("TRANSACTION_NOT_FOUND");
     }
 
@@ -75,80 +82,26 @@ export async function updateTransactionOperation({
       throw new TransactionOperationError("TRANSACTION_INVALID");
     }
 
-    const previousIsOrphaned = isOrphanedWalletId(previousWalletId);
-    const sameWallet = previousWalletId === dto.walletId;
+    await applyTransactionWalletAdjustment(
+      firestoreTransaction,
+      ownerId,
+      now,
+      { type: previousType, amount: previousAmount, walletId: previousWalletId },
+      {
+        type: dto.type,
+        amount: dto.amount,
+        walletId: dto.walletId,
+        currency: dto.currency,
+      },
+    );
 
-    if (!(sameWallet && previousIsOrphaned)) {
-      const walletSnapshot = await firestoreTransaction.get(newWalletRef);
-      if (!walletSnapshot.exists()) {
-        throw new TransactionOperationError("WALLET_NOT_FOUND");
-      }
-
-      const walletData = walletSnapshot.data() as Record<string, unknown>;
-      if (walletData.ownerId !== ownerId) {
-        throw new TransactionOperationError("WALLET_NOT_OWNED");
-      }
-      if (walletData.currency !== dto.currency) {
-        throw new TransactionOperationError("CURRENCY_MISMATCH");
-      }
-
-      if (sameWallet) {
-        const nextBalance = applyTransactionUpdateToBalance(
-          toWalletBalance(walletData),
-          { type: previousType, amount: previousAmount },
-          { type: dto.type, amount: dto.amount },
-        );
-
-        firestoreTransaction.update(newWalletRef, {
-          balance: nextBalance,
-          updatedAt: now,
-        });
-      } else {
-        if (!previousIsOrphaned) {
-          const previousWalletRef = doc(db, "wallets", previousWalletId);
-          const previousWalletSnapshot =
-            await firestoreTransaction.get(previousWalletRef);
-          if (!previousWalletSnapshot.exists()) {
-            throw new TransactionOperationError("WALLET_NOT_FOUND");
-          }
-          const previousWalletData =
-            previousWalletSnapshot.data() as Record<string, unknown>;
-          if (previousWalletData.ownerId !== ownerId) {
-            throw new TransactionOperationError("WALLET_NOT_OWNED");
-          }
-
-          const currentPreviousBalance = toWalletBalance(previousWalletData);
-          const nextPreviousBalance = roundMoney(
-            currentPreviousBalance -
-              getSignedTransactionAmount({
-                type: previousType,
-                amount: previousAmount,
-              }),
-          );
-          firestoreTransaction.update(previousWalletRef, {
-            balance: nextPreviousBalance,
-            updatedAt: now,
-          });
-        }
-
-        const currentNewBalance = toWalletBalance(walletData);
-        const nextNewBalance = roundMoney(
-          currentNewBalance +
-            getSignedTransactionAmount({ type: dto.type, amount: dto.amount }),
-        );
-        firestoreTransaction.update(newWalletRef, {
-          balance: nextNewBalance,
-          updatedAt: now,
-        });
-      }
-    }
+    const revision = nextRevision(transactionData);
 
     const patch: Record<string, unknown> = {
-      ...toTransactionData(ownerId, dto, now),
+      ...toTransactionData(ownerId, dto, now, revision),
       createdAt: toIsoTimestamp(transactionData.createdAt) ?? now,
-      // Linked movements are only edited by the shared-expense or group-expense
-      // operations; a personal edit keeps the link and the soft-delete stamp
-      // untouched.
+      // A personal edit keeps the stored soft-delete stamp untouched. It is
+      // always null here because a deleted movement is rejected above.
       deletedAt: readStoredDeletedAt(transactionData),
     };
 
@@ -161,18 +114,29 @@ export async function updateTransactionOperation({
     const groupSettlementId = readStoredGroupSettlementId(transactionData);
     if (groupSettlementId) patch.groupSettlementId = groupSettlementId;
 
-    if (!(sameWallet && previousIsOrphaned)) {
+    if (!(previousWalletId === dto.walletId && isOrphanedWalletId(previousWalletId))) {
       patch.walletName = deleteField();
     }
 
     firestoreTransaction.update(transactionRef, patch);
+    updatedTransaction = buildTransaction(
+      transactionId,
+      ownerId,
+      dto,
+      now,
+      revision,
+    );
   });
+
+  if (!updatedTransaction) {
+    throw new TransactionOperationError("TRANSACTION_NOT_FOUND");
+  }
 
   const updatedWallet = await getMappedWallet(newWalletRef, ownerId);
   const wallets: Wallet[] = updatedWallet ? [updatedWallet] : [];
 
   return {
-    transaction: buildTransaction(transactionId, ownerId, dto, now),
+    transaction: updatedTransaction,
     wallets,
   };
 }

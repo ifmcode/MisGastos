@@ -176,7 +176,7 @@ describe("updateGroupExpenseLinkOperation - failures", () => {
 
     expect(transactionUpdate).toHaveBeenCalledWith(
       { kind: "wallet", id: WALLET_ID },
-      { balance: 100, updatedAt: NOW },
+      { balance: 100, updatedAt: NOW, revision: 1 },
     );
     expect(transactionUpdate).toHaveBeenCalledWith(
       { kind: "transaction", id: "movement-1" },

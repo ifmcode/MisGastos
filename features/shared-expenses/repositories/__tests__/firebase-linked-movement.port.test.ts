@@ -57,7 +57,17 @@ describe("FirebaseLinkedMovementPort.readMovement", () => {
       currency: "EUR",
       createdAt: "2026-11-16T10:00:00.000Z",
       deletedAt: "2026-11-16T12:00:00.000Z",
+      revision: 0,
     });
+  });
+
+  it("reads the stored revision so an update can bump it", () => {
+    const movement = port.readMovement("movement-1", {
+      exists: true,
+      data: { walletId: "wallet-1", amount: 10, revision: 6 },
+    });
+
+    expect(movement?.revision).toBe(6);
   });
 
   it("defaults a blank creation and delete stamp to null", () => {
@@ -82,6 +92,7 @@ describe("FirebaseLinkedMovementPort data builders", () => {
       date: "2026-11-16",
       ownerId: "user-a",
       sharedExpenseId: "expense-1",
+      revision: 0,
       createdAt: "2026-11-16T11:00:00.000Z",
       updatedAt: "2026-11-16T11:00:00.000Z",
       deletedAt: null,
@@ -114,6 +125,8 @@ describe("FirebaseLinkedMovementPort data builders", () => {
 
     expect(data).not.toHaveProperty("createdAt");
     expect(data).not.toHaveProperty("ownerId");
+    // The stored revision plus one is written by the movement helper.
+    expect(data).not.toHaveProperty("revision");
     expect(data).toMatchObject({ amount: 10, deletedAt: null });
   });
 });

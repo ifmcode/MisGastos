@@ -5,6 +5,7 @@ import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 import { roundMoney } from "@/features/wallets/utils/money";
+import { nextRevision } from "@/shared/utils/revision";
 
 import { TransferOperationError } from "../services/transfer.errors";
 import { Transfer } from "../types/transfer.types";
@@ -60,14 +61,21 @@ export async function deleteTransferOperation(
       const fromBalance = roundMoney(
         toWalletBalance(fromWalletData) + previous.amount,
       );
+      const fromRevision = nextRevision(fromWalletData);
       firestoreTransaction.update(fromWalletRef, {
         balance: fromBalance,
         updatedAt: now,
+        revision: fromRevision,
       });
 
       const updatedFromWallet = mapWalletDocument(
         previous.fromWalletId,
-        { ...fromWalletData, balance: fromBalance, updatedAt: now },
+        {
+          ...fromWalletData,
+          balance: fromBalance,
+          updatedAt: now,
+          revision: fromRevision,
+        },
         ownerId,
       );
       if (updatedFromWallet) updatedWallets.push(updatedFromWallet);
@@ -88,25 +96,39 @@ export async function deleteTransferOperation(
       const toBalance = roundMoney(
         toWalletBalance(toWalletData) - previous.amount,
       );
+      const toRevision = nextRevision(toWalletData);
       firestoreTransaction.update(toWalletRef, {
         balance: toBalance,
         updatedAt: now,
+        revision: toRevision,
       });
 
       const updatedToWallet = mapWalletDocument(
         previous.toWalletId,
-        { ...toWalletData, balance: toBalance, updatedAt: now },
+        {
+          ...toWalletData,
+          balance: toBalance,
+          updatedAt: now,
+          revision: toRevision,
+        },
         ownerId,
       );
       if (updatedToWallet) updatedWallets.push(updatedToWallet);
     }
 
+    const revision = nextRevision(previous);
     firestoreTransaction.update(transferRef, {
       deletedAt: now,
       updatedAt: now,
+      revision,
     });
 
-    deletedTransfer = { ...previous, deletedAt: now, updatedAt: now };
+    deletedTransfer = {
+      ...previous,
+      deletedAt: now,
+      updatedAt: now,
+      revision,
+    };
   });
 
   if (!deletedTransfer) {

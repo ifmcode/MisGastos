@@ -8,6 +8,8 @@ export interface Category extends BaseEntity {
   color: string;
   type: CategoryType;
   ownerId: string;
+  /** Optimistic-concurrency counter: creates write 0, updates add one. */
+  revision: number;
   /**
    * Manual display order chosen by the owner. Ascending, lower first.
    * Optional for documents created before ordering existed; those fall back
@@ -26,9 +28,11 @@ export interface CreateCategoryDto {
   icon: string;
   color: string;
   type: CategoryType;
+  /** Client-generated id so an offline create can be referenced before sync. */
+  id?: string;
 }
 
-export type UpdateCategoryDto = Omit<CreateCategoryDto, "type">;
+export type UpdateCategoryDto = Omit<CreateCategoryDto, "type" | "id">;
 
 /** Raw values handled by the category form. */
 export interface CategoryFormValues {

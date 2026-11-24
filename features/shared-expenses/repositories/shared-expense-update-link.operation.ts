@@ -1,6 +1,7 @@
 import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { nextRevision } from "@/shared/utils/revision";
 
 import { SharedExpenseOperationError } from "../services/shared-expense.errors";
 import type {
@@ -87,6 +88,7 @@ export async function updateSharedExpenseLinkOperation(
         transaction.update(movementRef(active.id), {
           deletedAt: now,
           updatedAt: now,
+          revision: nextRevision(active),
         });
       }
     } else {

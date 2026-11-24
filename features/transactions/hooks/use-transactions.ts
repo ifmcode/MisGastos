@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useAsyncCollection } from "@/shared/hooks/use-async-collection";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
+import { readCachedTransactions } from "../repositories/local-transaction.cache";
 import {
   TransactionInput,
   TransactionValidationErrors,
@@ -81,6 +82,7 @@ export function useTransactions({
     ownerId,
     load: loadTransactions,
     describeError: describeLoadError,
+    readCached: readCachedTransactions,
   });
 
   const mutations = useTransactionMutations({ ownerId, setTransactions });

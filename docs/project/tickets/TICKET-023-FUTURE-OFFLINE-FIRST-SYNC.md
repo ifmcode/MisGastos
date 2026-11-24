@@ -3,7 +3,7 @@
 **Type:** Epic / Architecture  
 **Priority:** High  
 **Status:** 🚧 In progress  
-**Design spike:** ✅ Accepted (14/11/2026) — implementation started 24/11/2026 (foundations only)  
+**Design spike:** ✅ Accepted (14/11/2026) — implementation started 24/11/2026 (foundations and write prerequisites)  
 **Related:** PM-023; TICKET-002, TICKET-003, TICKET-007, TICKET-009, TICKET-010  
 **Sprint:** Platform / Post-MVP  
 
@@ -36,8 +36,9 @@ Make the app usable without an internet connection. The user must be able to cre
 
 ## Progress (24/11/2026)
 
-First implementation slice: **prerequisites 3-5 of ADR §11 only** (the technical
-base). No requirement or acceptance criterion above is closed by it, and the epic
+### First slice — prerequisites 3-5 of ADR §11 (technical base)
+
+No requirement or acceptance criterion above is closed by it, and the epic
 stays `🚧 In progress`.
 
 **Delivered:** the new `shared/lib/local-db/` layer (26 source modules plus
@@ -68,19 +69,97 @@ pending-delta calculation.
 `npx expo install` fails with the corporate certificate. Nothing imports it at runtime
 yet, so no rebuild is needed until Phase 3 wires it.
 
-**Not delivered (every epic checkbox stays open):** client-generated ids,
-`revision`/`deletedAt`/`appliedMutations` and rules, local read cache, offline write
-queue, sync engine, conflicts and offline social.
-
 **Verification:** `npx tsc --noEmit`, `npx expo lint` and `npm run check:copy` clean;
 `npm run test:coverage` → 397 suites / 2645 tests, global 98.95 % statements,
 94.96 % branches, 98.72 % functions, 99.54 % lines. No `firestore.rules` or index
 change, so nothing to deploy and nothing to validate on a device yet.
 
-**Next slice:** client-generated ids plus `revision`/`deletedAt`/`appliedMutations`
-and the corresponding rules (prerequisites 1-2).
-
 **Detail:** [`session-notes/2026-11-24-offline-local-db-foundations.md`](../development-notes/session-notes/2026-11-24-offline-local-db-foundations.md)
+
+### Second slice — prerequisites 1-2 of ADR §11 (24/11/2026)
+
+Every epic checkbox still stays open; this slice only prepares the write protocol.
+
+**Delivered:** `shared/utils/revision.ts` (`INITIAL_REVISION = 0`,
+`readStoredRevision` with a legacy default of 0 and `nextRevision`) and
+`shared/utils/client-id.ts`; `revision: number` on `Wallet`, `Transaction`,
+`Transfer` and `Category` with the mappers defaulting legacy documents to 0; every
+create writes 0 and every update writes stored + 1 (personal operations, linked
+movements, settlements, group expenses/settlements, wallet reassignment/orphan,
+category reorder and seeding). The four create DTOs accept an optional client `id`,
+so Phase 4 can fix the document id before the local write. Transactions moved to
+soft delete (`deletedAt` + revision +1 + exactly-once balance revert): the personal
+delete is idempotent, rejects linked movements with `TRANSACTION_INVALID` and
+rejects editing a deleted movement with `TRANSACTION_NOT_FOUND`; the movements list
+already filtered `deletedAt`. `wallet-movements` excludes soft-deleted movements from
+the usage count and the reassignment net, and `category-usage` counts only active
+movements. Rules: `isRevisionBump`/`isInitialRevision` on the four collections,
+`transactions` hard delete denied, and an owner-only, append-only
+`appliedMutations/{ownerId}__{clientMutationId}` contract (the executor writes it in
+Phase 5). An independent review returned `changes requested`; the blocker (editing a
+soft-deleted movement re-applied its amount) and the majors (wallet-deletion
+predicate, negative stored revision, returned entity revision) were fixed.
+
+**Verification:** `npx tsc --noEmit`, `npx expo lint` and `npm run check:copy` clean
+(343 TSX files); `npx jest` → 401 suites / 2687 tests; `npm run test:coverage` →
+98.94 % statements, 95.01 % branches, 98.74 % functions, 99.53 % lines; the rules
+compile in dry-run.
+
+**Pending:** deploy the new rules and validate the flows on a device. No index
+change.
+
+**Detail:** [`session-notes/2026-11-24-offline-revision-and-soft-delete.md`](../development-notes/session-notes/2026-11-24-offline-revision-and-soft-delete.md)
+
+### Third slice — local read cache and offline banner (24/11/2026)
+
+Every epic checkbox stays open; this slice only makes the last online read
+readable without a connection.
+
+**Delivered:** schema v2 (`migrations/migration-002.ts`) with the four movement
+link ids, the transfer wallet display names, the `cacheMeta` table and a rebuild
+of `categories` so `sortOrder` is nullable (v1 declared it `NOT NULL`, which only
+fails on a device because `InMemoryDatabase` does not enforce it); the cache
+infrastructure (`cache-mirror.ts` with protected rows, `cache-meta.repository.ts`,
+`local-row.readers.ts`, `local-db.runtime.ts` as the memoized port and the only
+`expo-sqlite` importer through a dynamic `import()`, and `offline-first.flag.ts`
+reading `EXPO_PUBLIC_OFFLINE_FIRST`); and three files per personal feature
+(`local-<entity>.mapper.ts`, `local-<entity>.cache.ts`,
+`cached-<entity>.repository.ts`) for wallets, categories, movements and
+transfers. `use-async-collection` paints the cached list first and replaces it
+with the remote result, keeps cached data when the remote read fails and keeps
+today's behaviour on a cold cache; the four hooks and service factories wire it
+only when the flag is on. Movement and transfer mutations mirror their record
+after create/update/delete and the cached reads filter `deletedAt`, so a deleted
+record never reappears; wallet and category mutations are not mirrored (phase 4).
+New `features/sync/` adds the three-state network status, the offset helpers and
+the global bottom `OfflineBanner` (`Sin conexión · Mostrando datos guardados`),
+rendered in `app/_layout.tsx` as a sibling of the navigator.
+`@react-native-community/netinfo@12.0.1` was added with `npm install`.
+
+**Review:** the read-only `reviewer` returned `changes requested` with one blocker
+(`categories.sortOrder` written as `NULL` into a `NOT NULL` column), two majors
+(soft-deleted records served by the cache, cache not updated after a mutation) and
+minor findings. All were fixed and re-verified; the accepted nits are the brittle
+`TAB_BAR_HEIGHT`/`TAB_ROUTES` coupling and the cached list not being marked stale
+(phase 7).
+
+**Verification:** `npx tsc --noEmit`, `npx expo lint` and `npm run check:copy`
+clean (346 TSX); `npx jest` → 426 suites / 2832 tests; `npm run test:coverage` →
+98.90 % statements, 95.00 % branches, 98.64 % functions, 99.48 % lines
+(`shared/lib/local-db` 97.57 / 97.34 / 97.66 / 97.76 and `features/sync/utils`
+100 %; `local-db.runtime.ts` stays partial because the dynamic `expo-sqlite` path
+cannot run in Jest). No `firestore.rules` or index change.
+
+**Pending:** a native rebuild before enabling the flag (first runtime use of
+`expo-sqlite` and `netinfo`), `EXPO_PUBLIC_OFFLINE_FIRST=true` plus a bundler
+restart (the value is inlined), and device validation of airplane mode after one
+online load, app kill/relaunch offline, reconnect, the strip on tabs vs pushed
+routes and dark mode.
+
+**Detail:** [`session-notes/2026-11-24-offline-read-cache-and-banner.md`](../development-notes/session-notes/2026-11-24-offline-read-cache-and-banner.md)
+
+**Next slice:** offline write queue for expenses, incomes and transfers with
+local balance derivation (ADR phase 4).
 
 ## Design Spike (14/11/2026)
 
@@ -126,8 +205,8 @@ implementation phases below are delivered.
 | # | Phase | Roadmap |
 |---|---|---|
 | 1 | Architecture spike and ADR | ✅ Phase 4 (this session) |
-| 2 | Local DB foundations, client ids, `revision`/`deletedAt`/`appliedMutations` + rules | Phase 7 |
-| 3 | Local read cache for personal data | Phase 7 |
+| 2 | Local DB foundations, client ids, `revision`/`deletedAt`/`appliedMutations` + rules | Phase 7 ✅ 24/11/2026 |
+| 3 | Local read cache for personal data | Phase 7 ✅ 24/11/2026 |
 | 4 | Offline write queue for expenses, incomes and transfers | Phase 7 |
 | 5 | Sync engine, retry, exactly-once and conflicts | Phase 7 |
 | 6 | Offline group/friend movements | Phase 7 (after TICKET-009/010) |

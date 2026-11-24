@@ -1,6 +1,7 @@
 import { runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { nextRevision } from "@/shared/utils/revision";
 import { addGroupActivity } from "@/features/groups/repositories/group-activity.writes";
 
 import { GroupExpenseOperationError } from "../services/group-expense.errors";
@@ -95,6 +96,7 @@ export async function createGroupSettlementOperation(
       transaction.update(settlementWalletRef(walletId), {
         balance: port.applyAmountToBalance(balance, dto.amountCents),
         updatedAt: now,
+        revision: nextRevision(walletSnapshot?.data()),
       });
     }
   });

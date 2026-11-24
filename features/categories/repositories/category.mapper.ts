@@ -1,3 +1,5 @@
+import { readStoredRevision } from "@/shared/utils/revision";
+
 import { Category } from "../types/category.types";
 import {
   CATEGORY_COLORS,
@@ -86,6 +88,7 @@ export function mapCategoryDocument(
     color,
     type: data.type,
     ownerId: storedOwnerId,
+    revision: readStoredRevision(data),
     createdAt,
     updatedAt,
     ...(sortOrder !== undefined ? { sortOrder } : {}),

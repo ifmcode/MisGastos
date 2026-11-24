@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useAsyncCollection } from "@/shared/hooks/use-async-collection";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
+import { readCachedCategories } from "../repositories/local-category.cache";
 import { getCategoryErrorCode } from "../services/category.errors";
 import { Category } from "../types/category.types";
 import { useCategoryService } from "./use-category-service";
@@ -40,6 +41,7 @@ export function useCategories(): UseCategoriesResult {
       ownerId: user?.uid,
       load: loadCategories,
       describeError: describeLoadError,
+      readCached: readCachedCategories,
     });
 
   const addCategory = useCallback(

@@ -1,4 +1,5 @@
 import { CurrencyCode } from "@/shared/constants/currencies";
+import { INITIAL_REVISION } from "@/shared/utils/revision";
 
 import { CreateWalletDto, WalletType } from "../types/wallet.types";
 import { roundMoney } from "../utils/money";
@@ -14,6 +15,7 @@ export interface WalletDocumentData {
   type: WalletType;
   includeInTotal: boolean;
   ownerId: string;
+  revision: number;
   createdAt: string;
   updatedAt: string;
   description?: string;
@@ -40,6 +42,7 @@ export function buildWalletDocumentData(
     type: dto.type,
     includeInTotal: dto.includeInTotal,
     ownerId,
+    revision: INITIAL_REVISION,
     createdAt: now,
     updatedAt: now,
     ...(dto.description ? { description: dto.description } : {}),

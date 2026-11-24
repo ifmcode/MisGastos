@@ -2,6 +2,7 @@ import {
   movementRef,
   newMovementRef,
 } from "@/features/shared-expenses/repositories/shared-expense-movement-ref";
+import { nextRevision } from "@/shared/utils/revision";
 
 import type {
   GroupExpense,
@@ -44,6 +45,7 @@ export function writeGroupMovement(
       ...port.buildUpdateData(input),
       createdAt: previous.createdAt ?? now,
       deletedAt: null,
+      revision: nextRevision(previous),
     });
   } else {
     transaction.set(targetRef, port.buildCreateData(input));

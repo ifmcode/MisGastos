@@ -68,4 +68,20 @@ describe("toWalletUsage", () => {
       hasMovements: true,
     });
   });
+
+  it("ignores soft-deleted transactions because they were already reverted", () => {
+    const active = movement("transaction", "tx-1", {});
+    const deleted = movement("transaction", "tx-2", {
+      deletedAt: "2026-11-20T10:00:00.000Z",
+    });
+    const blank = movement("transaction", "tx-3", { deletedAt: "   " });
+
+    expect(
+      toWalletUsage({ transactions: [active, deleted, blank], transfers: [] }),
+    ).toEqual({
+      transactionCount: 2,
+      transferCount: 0,
+      hasMovements: true,
+    });
+  });
 });

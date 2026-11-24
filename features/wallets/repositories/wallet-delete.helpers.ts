@@ -25,6 +25,16 @@ export function readBalance(data: Record<string, unknown>): number {
   return readAmount(data.initialBalance);
 }
 
+/**
+ * A soft-deleted movement was already reverted from its wallet, so it must not
+ * contribute to the reassigned net or to the usage count again.
+ */
+export function isSoftDeletedMovement(data: Record<string, unknown>): boolean {
+  const deletedAt = data.deletedAt;
+
+  return typeof deletedAt === "string" && deletedAt.trim().length > 0;
+}
+
 export function getSignedAmount(data: Record<string, unknown>): number {
   const amount = readAmount(data.amount);
 

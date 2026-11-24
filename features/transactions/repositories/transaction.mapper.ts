@@ -7,6 +7,7 @@ import {
   toIsoDateValue,
   toIsoTimestamp,
 } from "@/shared/utils/date";
+import { readStoredRevision } from "@/shared/utils/revision";
 import { isTransactionType } from "../utils/transaction-options";
 
 const EPOCH_ISO = new Date(0).toISOString();
@@ -86,6 +87,7 @@ export function mapTransactionDocument(
     ...(notes ? { notes } : {}),
     date,
     ownerId: storedOwnerId,
+    revision: readStoredRevision(data),
     ...(sharedExpenseId ? { sharedExpenseId } : {}),
     ...(groupExpenseId ? { groupExpenseId } : {}),
     ...(settlementId ? { settlementId } : {}),

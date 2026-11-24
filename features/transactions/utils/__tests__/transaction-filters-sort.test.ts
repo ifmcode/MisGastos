@@ -19,6 +19,7 @@ function buildTransaction(overrides: Partial<Transaction> = {}): Transaction {
     concept: "Cena",
     date: "2026-10-30",
     ownerId: "user-1",
+    revision: 0,
     createdAt: "2026-10-30T20:00:00.000Z",
     updatedAt: "2026-10-30T20:00:00.000Z",
     deletedAt: null,

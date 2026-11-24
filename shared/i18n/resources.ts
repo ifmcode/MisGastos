@@ -22,6 +22,8 @@ import sharedExpensesEn from "@/features/shared-expenses/locales/en.json";
 import sharedExpensesEs from "@/features/shared-expenses/locales/es.json";
 import socialEn from "@/features/social/locales/en.json";
 import socialEs from "@/features/social/locales/es.json";
+import syncEn from "@/features/sync/locales/en.json";
+import syncEs from "@/features/sync/locales/es.json";
 import transactionsEn from "@/features/transactions/locales/en.json";
 import transactionsEs from "@/features/transactions/locales/es.json";
 import transfersEn from "@/features/transfers/locales/en.json";
@@ -54,6 +56,7 @@ export const NAMESPACES = [
   "sharedExpenses",
   "groupExpenses",
   "social",
+  "sync",
 ] as const;
 
 export type AppNamespace = (typeof NAMESPACES)[number];
@@ -79,6 +82,7 @@ export const resources = {
     sharedExpenses: sharedExpensesEs,
     groupExpenses: groupExpensesEs,
     social: socialEs,
+    sync: syncEs,
   },
   en: {
     common: commonEn,
@@ -99,5 +103,6 @@ export const resources = {
     sharedExpenses: sharedExpensesEn,
     groupExpenses: groupExpensesEn,
     social: socialEn,
+    sync: syncEn,
   },
 } as const;

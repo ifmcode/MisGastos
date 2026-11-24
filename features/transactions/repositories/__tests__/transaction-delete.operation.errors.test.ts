@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import {
-  transactionDelete,
   transactionGet,
   transactionDocument,
   setupTransactionRepositoryMocks,
   snapshot,
   walletDocument,
+  transactionUpdate,
 } from "./transaction-repository.test-helpers";
 import { deleteTransactionOperation } from "../transaction-delete.operation";
 
@@ -72,7 +72,7 @@ describe("deleteTransactionOperation errors", () => {
     await expect(
       deleteTransactionOperation("user-1", "transaction-1"),
     ).rejects.toMatchObject({ code: "CURRENCY_MISMATCH" });
-    expect(transactionDelete).not.toHaveBeenCalled();
+    expect(transactionUpdate).not.toHaveBeenCalled();
   });
 
   it("skips the currency check for legacy movements without currency", async () => {
@@ -86,6 +86,6 @@ describe("deleteTransactionOperation errors", () => {
 
     await deleteTransactionOperation("user-1", "transaction-1");
 
-    expect(transactionDelete).toHaveBeenCalled();
+    expect(transactionUpdate).toHaveBeenCalledTimes(2);
   });
 });

@@ -16,6 +16,8 @@ export interface Transaction extends BaseEntity {
   /** Calendar date stored as YYYY-MM-DD to avoid timezone shifts. */
   date: string;
   ownerId: string;
+  /** Optimistic-concurrency counter: creates write 0, updates add one. */
+  revision: number;
   /** Linked `sharedExpenses` record. Only expense movements can carry one. */
   sharedExpenseId?: string;
   /** Linked `groupExpenses` record. Only expense movements can carry one. */
@@ -47,6 +49,8 @@ export interface CreateTransactionDto {
   groupSettlementId?: string;
   /** Optional soft-delete stamp; new movements default to `null`. */
   deletedAt?: string | null;
+  /** Client-generated id so an offline create can be referenced before sync. */
+  id?: string;
 }
 
 export type UpdateTransactionDto = CreateTransactionDto;

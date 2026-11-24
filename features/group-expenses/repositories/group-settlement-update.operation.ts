@@ -113,7 +113,7 @@ export async function updateGroupSettlementOperation(
         );
       } else {
         linkedId = null;
-        softDeleteSettlementMovement(transaction, previousStored?.id ?? null, now);
+        softDeleteSettlementMovement(transaction, previousStored, now);
       }
     }
 

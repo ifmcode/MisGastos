@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useAsyncCollection } from "@/shared/hooks/use-async-collection";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
+import { readCachedTransfers } from "../repositories/local-transfer.cache";
 import {
   TransferInput,
   TransferValidationErrors,
@@ -65,6 +66,7 @@ export function useTransfers(): UseTransfersResult {
     ownerId,
     load: loadTransfers,
     describeError: describeLoadError,
+    readCached: readCachedTransfers,
   });
 
   const mutations = useTransferMutations({ ownerId, setTransfers });

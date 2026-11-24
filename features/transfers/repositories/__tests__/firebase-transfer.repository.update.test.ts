@@ -19,12 +19,14 @@ beforeEach(setupTransferRepositoryMocks);
 describe("FirebaseTransferRepository.updateTransfer", () => {
   it("reverts the old transfer and applies the new one atomically", async () => {
     transactionGet
-      .mockResolvedValueOnce(snapshot("transfer-1", transferDocument()))
       .mockResolvedValueOnce(
-        snapshot("wallet-1", walletDocument({ balance: 100 })),
+        snapshot("transfer-1", transferDocument({ revision: 4 })),
       )
       .mockResolvedValueOnce(
-        snapshot("wallet-2", walletDocument({ balance: 50 })),
+        snapshot("wallet-1", walletDocument({ balance: 100, revision: 2 })),
+      )
+      .mockResolvedValueOnce(
+        snapshot("wallet-2", walletDocument({ balance: 50, revision: 7 })),
       );
 
     const repository = new FirebaseTransferRepository();
@@ -41,11 +43,19 @@ describe("FirebaseTransferRepository.updateTransfer", () => {
 
     expect(transactionUpdate).toHaveBeenCalledWith(
       fromWalletRef,
-      expect.objectContaining({ balance: 85.5, updatedAt: expect.any(String) }),
+      expect.objectContaining({
+        balance: 85.5,
+        updatedAt: expect.any(String),
+        revision: 3,
+      }),
     );
     expect(transactionUpdate).toHaveBeenCalledWith(
       toWalletRef,
-      expect.objectContaining({ balance: 64.5, updatedAt: expect.any(String) }),
+      expect.objectContaining({
+        balance: 64.5,
+        updatedAt: expect.any(String),
+        revision: 8,
+      }),
     );
     expect(transactionUpdate).toHaveBeenCalledWith(
       { kind: "transfer", id: "transfer-1" },
@@ -56,6 +66,7 @@ describe("FirebaseTransferRepository.updateTransfer", () => {
         notes: "Nuevo concepto",
         createdAt: "2026-10-29T10:00:00.000Z",
         updatedAt: expect.any(String),
+        revision: 5,
       }),
     );
 
@@ -65,6 +76,7 @@ describe("FirebaseTransferRepository.updateTransfer", () => {
       notes: "Nuevo concepto",
       createdAt: "2026-10-29T10:00:00.000Z",
       ownerId: "user-1",
+      revision: 5,
     });
     expect(result.wallets.map((wallet) => wallet.balance)).toEqual([
       85.5, 64.5,

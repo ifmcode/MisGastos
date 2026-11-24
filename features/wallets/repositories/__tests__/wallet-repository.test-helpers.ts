@@ -12,6 +12,7 @@ export const mockGetDoc = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 export const mockGetDocs = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 export const mockLimit = jest.fn<(...args: unknown[]) => unknown>();
 export const mockQuery = jest.fn<(...args: unknown[]) => unknown>();
+export const mockSetDoc = jest.fn<(...args: unknown[]) => Promise<void>>();
 export const mockUpdateDoc = jest.fn<(...args: unknown[]) => Promise<void>>();
 export const mockWhere = jest.fn<(...args: unknown[]) => unknown>();
 export const mockBatchUpdate = jest.fn<(...args: unknown[]) => void>();
@@ -49,6 +50,7 @@ jest.mock("firebase/firestore", () => ({
     database: unknown,
     callback: (transaction: unknown) => Promise<unknown>,
   ) => mockRunTransaction(database, callback),
+  setDoc: (...args: unknown[]) => mockSetDoc(...args),
   updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
   where: (...args: unknown[]) => mockWhere(...args),
   writeBatch: () => mockWriteBatch(),

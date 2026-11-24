@@ -223,6 +223,7 @@ export class FakeSharedExpenseCategoryRepository
       icon: dto.icon,
       color: dto.color,
       type: dto.type,
+      revision: 0,
       createdAt: "2026-11-16T10:00:00.000Z",
       updatedAt: "2026-11-16T10:00:00.000Z",
     };

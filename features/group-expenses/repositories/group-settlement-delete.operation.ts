@@ -1,6 +1,7 @@
 import { runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { nextRevision } from "@/shared/utils/revision";
 import type { NotificationWrite } from "@/features/notifications/types/notification.types";
 import { addGroupActivity } from "@/features/groups/repositories/group-activity.writes";
 import { FirebaseSettlementMovementPort } from "@/features/settlements/repositories/firebase-settlement-movement.port";
@@ -77,6 +78,7 @@ export async function softDeleteGroupSettlementOperation(
       transaction.update(settlementMovementRef(previousStored.id), {
         deletedAt,
         updatedAt: deletedAt,
+        revision: nextRevision(previousStored),
       });
     }
 

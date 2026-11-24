@@ -1,3 +1,5 @@
+import { nextRevision } from "@/shared/utils/revision";
+
 import type { Settlement } from "../types/settlement.types";
 import type {
   ISettlementMovementPort,
@@ -66,6 +68,7 @@ export function writeSettlementMovement(
       ...port.buildUpdateData(data),
       createdAt: previous.createdAt ?? now,
       deletedAt: null,
+      revision: nextRevision(previous),
     });
   } else {
     transaction.set(targetRef, port.buildCreateData(data));
@@ -74,16 +77,20 @@ export function writeSettlementMovement(
   return targetRef.id;
 }
 
-/** Soft-deletes the single income movement of the settlement, if any. */
+/**
+ * Soft-deletes the single income movement of the settlement, if any. An already
+ * deleted movement is left untouched so a repeated save never bumps it again.
+ */
 export function softDeleteSettlementMovement(
   transaction: Pick<SettlementTransaction, "update">,
-  movementId: string | null,
+  movement: SettlementMovementState | null,
   now: string,
 ): void {
-  if (!movementId) return;
+  if (!movement || movement.deletedAt !== null) return;
 
-  transaction.update(settlementMovementRef(movementId), {
+  transaction.update(settlementMovementRef(movement.id), {
     deletedAt: now,
     updatedAt: now,
+    revision: nextRevision(movement),
   });
 }

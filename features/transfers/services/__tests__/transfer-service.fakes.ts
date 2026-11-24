@@ -128,6 +128,7 @@ export class FakeTransferRepository implements ITransferRepository {
       ...dto,
       id: `transfer-${this.createCalls.length}`,
       ownerId,
+      revision: 0,
       createdAt: "2026-10-29T10:00:00.000Z",
       updatedAt: "2026-10-29T10:00:00.000Z",
     };
@@ -148,6 +149,7 @@ export class FakeTransferRepository implements ITransferRepository {
         ...dto,
         id: transferId,
         ownerId,
+        revision: (this.transferById?.revision ?? 0) + 1,
         createdAt:
           this.transferById?.createdAt ?? "2026-10-29T10:00:00.000Z",
         updatedAt: "2026-10-29T11:00:00.000Z",
@@ -175,6 +177,7 @@ export class FakeTransferRepository implements ITransferRepository {
           currency: "EUR",
           date: "",
           ownerId,
+          revision: 0,
           createdAt: "2026-10-29T10:00:00.000Z",
           updatedAt: "2026-10-29T10:00:00.000Z",
         }),

@@ -21,7 +21,12 @@ jest.mock("../wallet-delete.reassign.operation", () => ({
 }));
 
 const loadMovements = jest.mocked(loadWalletMovements);
-const movements = { transactions: [{} as never], transfers: [] };
+const movements = {
+  transactions: [
+    { data: () => ({ type: "expense", amount: 10 }) } as never,
+  ],
+  transfers: [],
+};
 
 function mockWalletDocuments(
   documents: Record<string, Record<string, unknown> | null> = {},

@@ -56,10 +56,7 @@ export class FakeWalletRepository implements IWalletRepository {
     );
   }
 
-  async createWallet(
-    ownerId: string,
-    dto: CreateWalletDto,
-  ): Promise<Wallet> {
+  async createWallet(ownerId: string, dto: CreateWalletDto): Promise<Wallet> {
     this.createCalls.push({ ownerId, dto });
     if (this.failure) throw this.failure;
 
@@ -68,6 +65,7 @@ export class FakeWalletRepository implements IWalletRepository {
       id: `wallet-${this.createCalls.length}`,
       balance: dto.initialBalance,
       ownerId,
+      revision: 0,
       createdAt: "2026-10-28T10:00:00.000Z",
       updatedAt: "2026-10-28T10:00:00.000Z",
     };

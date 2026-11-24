@@ -9,9 +9,20 @@ import {
   WalletDeletionResult,
 } from "../types/wallet.types";
 import { mapWalletDocument } from "./wallet.mapper";
+import { isSoftDeletedMovement } from "./wallet-delete.helpers";
 import { orphanWalletMovementsAndDelete } from "./wallet-delete.orphan.operation";
 import { reassignWalletMovementsAndDelete } from "./wallet-delete.reassign.operation";
-import { loadWalletMovements } from "./wallet-movements";
+import { loadWalletMovements, type WalletMovements } from "./wallet-movements";
+
+/** True when at least one movement still affects the wallet balance. */
+function hasActiveMovements(movements: WalletMovements): boolean {
+  if (movements.transfers.length > 0) return true;
+
+  return movements.transactions.some(
+    (document) =>
+      !isSoftDeletedMovement(document.data() as Record<string, unknown>),
+  );
+}
 
 const WALLET_COLLECTION = "wallets";
 
@@ -41,15 +52,18 @@ export async function deleteWalletDocument(
   if (!wallet) throw new WalletOperationError("WALLET_NOT_FOUND");
 
   const movements = await loadWalletMovements(ownerId, walletId);
-  const hasMovements =
+  const hasDocuments =
     movements.transactions.length + movements.transfers.length > 0;
 
-  if (!hasMovements) {
+  if (!hasDocuments) {
     await deleteDoc(doc(db, WALLET_COLLECTION, walletId));
     return { deletedWalletId: walletId };
   }
 
-  if (options.mode === "keep") {
+  // Only active movements need a reassignment target. Soft-deleted ones were
+  // already reverted, so they are re-pointed with the orphan batch without
+  // asking the user for a wallet (same predicate as the usage guard).
+  if (options.mode === "keep" || !hasActiveMovements(movements)) {
     await orphanWalletMovementsAndDelete(wallet, movements);
     return { deletedWalletId: walletId };
   }

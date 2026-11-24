@@ -1,6 +1,7 @@
 import { runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { nextRevision } from "@/shared/utils/revision";
 import {
   createNotificationDocumentId,
   toNotificationData,
@@ -95,6 +96,7 @@ export async function createSettlementOperation(
       transaction.update(settlementWalletRef(walletId), {
         balance: port.applyAmountToBalance(balance, dto.amountCents),
         updatedAt: now,
+        revision: nextRevision(walletSnapshot?.data()),
       });
     }
 

@@ -123,4 +123,38 @@ describe("createTransactionOperation", () => {
     ).rejects.toMatchObject({ code: "CURRENCY_MISMATCH" });
     expect(transactionSet).not.toHaveBeenCalled();
   });
+
+  it("writes the initial revision and bumps the wallet revision", async () => {
+    transactionGet.mockResolvedValueOnce(
+      snapshot("wallet-1", walletDocument({ balance: 100, revision: 6 })),
+    );
+    mockCreatedWallet();
+
+    const result = await createTransactionOperation("user-1", validDto);
+
+    expect(transactionSet.mock.calls[0]?.[1]).toHaveProperty("revision", 0);
+    expect(transactionUpdate).toHaveBeenCalledWith(
+      walletRef,
+      expect.objectContaining({ revision: 7 }),
+    );
+    expect(result.transaction.revision).toBe(0);
+  });
+
+  it("writes the movement under the provided client id", async () => {
+    transactionGet.mockResolvedValueOnce(
+      snapshot("wallet-1", walletDocument()),
+    );
+    mockCreatedWallet();
+
+    const result = await createTransactionOperation("user-1", {
+      ...validDto,
+      id: "  client-transaction  ",
+    });
+
+    expect(transactionSet).toHaveBeenCalledWith(
+      { kind: "transaction", id: "client-transaction" },
+      expect.objectContaining({ ownerId: "user-1" }),
+    );
+    expect(result.transaction.id).toBe("client-transaction");
+  });
 });

@@ -41,6 +41,7 @@ describe("seedDefaultWalletDocument", () => {
         type: "cash",
         includeInTotal: true,
         ownerId: "user-1",
+        revision: 0,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       }),

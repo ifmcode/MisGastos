@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import {
   buildTransaction,
-  readStoredGroupExpenseId,
   toTransactionData,
   toWalletBalance,
 } from "../transaction-firestore.utils";
+import { readStoredGroupExpenseId } from "../transaction-stored.utils";
 import {
   setupTransactionRepositoryMocks,
   validDto,
@@ -40,10 +40,15 @@ describe("toTransactionData", () => {
       notes: "Compra semanal",
       date: "2026-11-12",
       ownerId: "user-1",
+      revision: 0,
       createdAt: "now",
       updatedAt: "now",
       deletedAt: null,
     });
+  });
+
+  it("persists an explicit revision for an update patch", () => {
+    expect(toTransactionData("user-1", validDto, "now", 4).revision).toBe(4);
   });
 
   it("keeps an explicit soft-delete stamp from the DTO", () => {
@@ -171,6 +176,7 @@ describe("buildTransaction", () => {
         notes: "Compra semanal",
         date: "2026-11-12",
         ownerId: "user-1",
+        revision: 0,
         createdAt: "now",
         updatedAt: "now",
         deletedAt: null,

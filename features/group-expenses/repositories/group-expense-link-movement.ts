@@ -1,4 +1,5 @@
 import type { CurrencyCode } from "@/shared/constants/currencies";
+import { nextRevision } from "@/shared/utils/revision";
 import type {
   ILinkedMovementPort,
   LinkedMovementState,
@@ -77,6 +78,7 @@ export async function revertMovementWallet(
   transaction.update(reference, {
     balance: port.revertAmountFromBalance(balance, movement.amountCents),
     updatedAt: now,
+    revision: nextRevision(snapshot.data()),
   });
 }
 
@@ -141,7 +143,11 @@ export async function syncMovementWallet(
     );
   }
 
-  transaction.update(destinationRef, { balance: nextBalance, updatedAt: now });
+  transaction.update(destinationRef, {
+    balance: nextBalance,
+    updatedAt: now,
+    revision: nextRevision(destination.data()),
+  });
 
   return writeGroupMovement(transaction, stored, update, context);
 }

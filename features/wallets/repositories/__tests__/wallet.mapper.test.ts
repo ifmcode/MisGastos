@@ -30,10 +30,19 @@ describe("mapWalletDocument", () => {
       type: "cash",
       includeInTotal: false,
       ownerId: "owner-from-document",
+      revision: 0,
       createdAt: "2026-10-28T10:00:00.000Z",
       updatedAt: "2026-10-28T11:00:00.000Z",
       description: "Gastos diarios",
     });
+  });
+
+  it("reads the stored revision and defaults a legacy document to zero", () => {
+    expect(
+      mapWalletDocument("wallet-1", { ...baseData, revision: 3 }, "user-1")
+        ?.revision,
+    ).toBe(3);
+    expect(mapWalletDocument("wallet-1", baseData, "user-1")?.revision).toBe(0);
   });
 
   it("rejects documents without a name, valid currency or valid type", () => {

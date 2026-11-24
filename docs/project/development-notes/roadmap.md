@@ -20,7 +20,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Status:** 🚧 In progress
 - **Last completed:** TICKET-073 - Group activity in the group detail (24/11/2026)
 - **Queued:** Phase 8 tickets (TICKET-012, TICKET-016, TICKET-015, TICKET-013, TICKET-017, TICKET-019, TICKET-040)
-- **Next:** continue TICKET-023 with client-generated ids, `revision`/`deletedAt`/`appliedMutations` and their rules
+- **Next:** continue TICKET-023 with the offline write queue for expenses, incomes and transfers (local balance derivation)
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -181,8 +181,8 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ## Phase 7: Offline-first implementation (IN PROGRESS)
 - [ ] Full TICKET-023 (design accepted in Phase 4)
-  - [ ] Foundations: local SQLite DB, client-generated ids, `revision`/`deletedAt`/`appliedMutations` and rules — partially delivered 24/11/2026 (local DB foundations done; client ids and `revision`/`deletedAt`/`appliedMutations` + rules pending)
-  - [ ] Local read cache for personal data and offline banner
+  - [x] Foundations: local SQLite DB, client-generated ids, `revision`/`deletedAt`/`appliedMutations` and rules ✅ 24/11/2026
+  - [x] Local read cache for personal data and offline banner ✅ 24/11/2026
   - [ ] Offline write queue for expenses, incomes and transfers with local balance derivation
   - [ ] Sync engine, retry/backoff, exactly-once and conflict UI
   - [ ] Offline group/friend movements (after Phase 6)

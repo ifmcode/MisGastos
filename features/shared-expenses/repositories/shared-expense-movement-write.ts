@@ -1,3 +1,5 @@
+import { nextRevision } from "@/shared/utils/revision";
+
 import type {
   SharedExpense,
   UpdateSharedExpenseDto,
@@ -40,6 +42,7 @@ export function writeMovement(
       ...port.buildUpdateData(input),
       createdAt: previous.createdAt ?? now,
       deletedAt: null,
+      revision: nextRevision(previous),
     });
   } else {
     transaction.set(targetRef, port.buildCreateData(input));

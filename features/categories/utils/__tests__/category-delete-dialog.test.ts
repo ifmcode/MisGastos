@@ -11,6 +11,7 @@ function buildCategory(overrides: Partial<Category>): Category {
     color: "#0A7EA4",
     type: "expense",
     ownerId: "user-1",
+    revision: 0,
     createdAt: "2026-10-20T10:00:00.000Z",
     updatedAt: "2026-10-20T10:00:00.000Z",
     ...overrides,

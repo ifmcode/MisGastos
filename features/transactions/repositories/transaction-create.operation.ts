@@ -1,6 +1,8 @@
 import { collection, doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { readClientDocumentId } from "@/shared/utils/client-id";
+import { INITIAL_REVISION, nextRevision } from "@/shared/utils/revision";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { roundMoney } from "@/features/wallets/utils/money";
 
@@ -49,16 +51,20 @@ export async function createTransactionOperation(
         getSignedTransactionAmount({ type: dto.type, amount: dto.amount }),
     );
 
-    const transactionRef = doc(transactionsRef);
+    const providedId = readClientDocumentId(dto.id);
+    const transactionRef = providedId
+      ? doc(db, "transactions", providedId)
+      : doc(transactionsRef);
     createdId = transactionRef.id;
 
     firestoreTransaction.set(
       transactionRef,
-      toTransactionData(ownerId, dto, now),
+      toTransactionData(ownerId, dto, now, INITIAL_REVISION),
     );
     firestoreTransaction.update(walletRef, {
       balance: nextBalance,
       updatedAt: now,
+      revision: nextRevision(walletData),
     });
   });
 
@@ -66,7 +72,13 @@ export async function createTransactionOperation(
   const wallets: Wallet[] = updatedWallet ? [updatedWallet] : [];
 
   return {
-    transaction: buildTransaction(createdId, ownerId, dto, now),
+    transaction: buildTransaction(
+      createdId,
+      ownerId,
+      dto,
+      now,
+      INITIAL_REVISION,
+    ),
     wallets,
   };
 }

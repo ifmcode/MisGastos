@@ -68,6 +68,7 @@ describe("createGroupExpenseLinkOperation", () => {
     expect(transactionUpdate).toHaveBeenCalledWith(walletRef(WALLET_ID), {
       balance: 90,
       updatedAt: NOW,
+      revision: 1,
     });
     expect(transactionSet).toHaveBeenCalledWith(
       activityRef("activity-new"),

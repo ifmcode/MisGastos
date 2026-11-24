@@ -18,12 +18,14 @@ beforeEach(setupTransferRepositoryMocks);
 describe("FirebaseTransferRepository.deleteTransfer", () => {
   it("marks the transfer as deleted and reverts both balances", async () => {
     transactionGet
-      .mockResolvedValueOnce(snapshot("transfer-1", transferDocument()))
       .mockResolvedValueOnce(
-        snapshot("wallet-1", walletDocument({ balance: 74.5 })),
+        snapshot("transfer-1", transferDocument({ revision: 2 })),
       )
       .mockResolvedValueOnce(
-        snapshot("wallet-2", walletDocument({ balance: 125.5 })),
+        snapshot("wallet-1", walletDocument({ balance: 74.5, revision: 1 })),
+      )
+      .mockResolvedValueOnce(
+        snapshot("wallet-2", walletDocument({ balance: 125.5, revision: 9 })),
       );
 
     const repository = new FirebaseTransferRepository();
@@ -31,21 +33,31 @@ describe("FirebaseTransferRepository.deleteTransfer", () => {
 
     expect(transactionUpdate).toHaveBeenCalledWith(
       fromWalletRef,
-      expect.objectContaining({ balance: 100, updatedAt: expect.any(String) }),
+      expect.objectContaining({
+        balance: 100,
+        updatedAt: expect.any(String),
+        revision: 2,
+      }),
     );
     expect(transactionUpdate).toHaveBeenCalledWith(
       toWalletRef,
-      expect.objectContaining({ balance: 100, updatedAt: expect.any(String) }),
+      expect.objectContaining({
+        balance: 100,
+        updatedAt: expect.any(String),
+        revision: 10,
+      }),
     );
     expect(transactionUpdate).toHaveBeenCalledWith(
       { kind: "transfer", id: "transfer-1" },
       expect.objectContaining({
         deletedAt: expect.any(String),
         updatedAt: expect.any(String),
+        revision: 3,
       }),
     );
 
     expect(result.transfer.deletedAt).toEqual(expect.any(String));
+    expect(result.transfer.revision).toBe(3);
     expect(result.wallets.map((wallet) => wallet.balance)).toEqual([100, 100]);
   });
 

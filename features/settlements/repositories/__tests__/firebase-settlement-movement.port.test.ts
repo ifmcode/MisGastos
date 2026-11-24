@@ -31,6 +31,7 @@ describe("buildCreateData", () => {
       date: "2026-11-10",
       ownerId: "user-b",
       settlementId: "settlement-1",
+      revision: 0,
       createdAt: "2026-11-16T10:00:00.000Z",
       updatedAt: "2026-11-16T10:00:00.000Z",
       deletedAt: null,
@@ -44,6 +45,8 @@ describe("buildUpdateData", () => {
 
     expect(data).not.toHaveProperty("createdAt");
     expect(data).not.toHaveProperty("ownerId");
+    // The stored revision plus one is written by the movement helper.
+    expect(data).not.toHaveProperty("revision");
     expect(data).toMatchObject({ amount: 12.5, settlementId: "settlement-1" });
   });
 });
@@ -83,7 +86,17 @@ describe("readMovement", () => {
       currency: "EUR",
       deletedAt: null,
       createdAt: "2026-11-10T20:00:00.000Z",
+      revision: 0,
     });
+  });
+
+  it("reads the stored revision so an update can bump it", () => {
+    const state = port.readMovement("movement-1", {
+      exists: true,
+      data: { walletId: "wallet-1", amount: 10, revision: 3 },
+    });
+
+    expect(state?.revision).toBe(3);
   });
 
   it("keeps a soft-delete stamp and normalizes empty values", () => {

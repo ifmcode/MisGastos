@@ -37,7 +37,11 @@ describe("updateTransactionOperation", () => {
 
     expect(transactionUpdate).toHaveBeenCalledWith(
       { kind: "wallet", id: "wallet-1" },
-      expect.objectContaining({ balance: 70, updatedAt: expect.any(String) }),
+      expect.objectContaining({
+        balance: 70,
+        updatedAt: expect.any(String),
+        revision: 1,
+      }),
     );
     expect(transactionUpdate).toHaveBeenCalledWith(
       { kind: "transaction", id: "transaction-1" },
@@ -46,10 +50,38 @@ describe("updateTransactionOperation", () => {
         notes: "Nuevo",
         createdAt: "2026-11-12T10:00:00.000Z",
         walletName: { kind: "delete-field" },
+        revision: 1,
       }),
     );
-    expect(result.transaction).toMatchObject({ amount: 30, notes: "Nuevo" });
+    expect(result.transaction).toMatchObject({
+      amount: 30,
+      notes: "Nuevo",
+      revision: 1,
+    });
     expect(result.wallets.map((wallet) => wallet.balance)).toEqual([70]);
+  });
+
+  it("writes the stored revision plus one", async () => {
+    transactionGet
+      .mockResolvedValueOnce(
+        snapshot("transaction-1", transactionDocument({ revision: 6 })),
+      )
+      .mockResolvedValueOnce(
+        snapshot("wallet-1", walletDocument({ balance: 74.5, revision: 2 })),
+      );
+    mockGetDoc.mockResolvedValue(snapshot("wallet-1", walletDocument()));
+
+    const result = await run({ ...validDto, amount: 30 });
+
+    const patch = transactionUpdate.mock.calls.find(
+      (call) => (call[0] as { kind?: string }).kind === "transaction",
+    )?.[1] as Record<string, unknown>;
+    expect(patch.revision).toBe(7);
+    expect(transactionUpdate).toHaveBeenCalledWith(
+      { kind: "wallet", id: "wallet-1" },
+      expect.objectContaining({ revision: 3 }),
+    );
+    expect(result.transaction.revision).toBe(7);
   });
 
   it("moves a movement between wallets", async () => {
@@ -172,5 +204,19 @@ describe("updateTransactionOperation", () => {
     )?.[1] as Record<string, unknown>;
     expect(patch).toMatchObject({ groupSettlementId: "group-settlement-1" });
     expect(patch).not.toHaveProperty("settlementId");
+  });
+
+  it("rejects editing a soft-deleted movement without touching the wallet", async () => {
+    transactionGet.mockResolvedValueOnce(
+      snapshot(
+        "transaction-1",
+        transactionDocument({ deletedAt: "2026-11-20T10:00:00.000Z" }),
+      ),
+    );
+
+    await expect(run({ ...validDto, amount: 30 })).rejects.toMatchObject({
+      code: "TRANSACTION_NOT_FOUND",
+    });
+    expect(transactionUpdate).not.toHaveBeenCalled();
   });
 });

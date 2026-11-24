@@ -20,6 +20,7 @@ function buildWallet(id: string, archivedAt?: string): Wallet {
     type: "bank",
     includeInTotal: true,
     ownerId: "user-1",
+    revision: 0,
     createdAt: "2026-10-28T10:00:00.000Z",
     updatedAt: "2026-10-28T10:00:00.000Z",
     ...(archivedAt ? { archivedAt } : {}),

@@ -15,7 +15,18 @@ export type LocalTableName =
   | "outbox"
   | "outboxSeq"
   | "conflicts"
-  | "syncState";
+  | "syncState"
+  | "cacheMeta";
+
+/**
+ * Personal collections mirrored into the local read cache. Shared/social data
+ * is intentionally absent: phase 3 only caches what the personal screens list.
+ */
+export type LocalCacheCollection =
+  | "wallets"
+  | "categories"
+  | "transactions"
+  | "transfers";
 
 /** Sync status carried by every record table (see ADR §4). */
 export type LocalRecordSyncStatus =

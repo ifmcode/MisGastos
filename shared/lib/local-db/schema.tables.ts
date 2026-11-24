@@ -1,10 +1,11 @@
 /**
- * Local schema version 1 (ADR 2026-11-14 §4). ISO dates are TEXT, booleans and
- * counters are INTEGER, money is REAL only as a storage type: every calculation
- * still goes through `roundMoney` and the signed balance helpers.
+ * Local schema version 2 (ADR 2026-11-14 §4 plus the phase-3 read cache). ISO
+ * dates are TEXT, booleans and counters are INTEGER, money is REAL only as a
+ * storage type: every calculation still goes through `roundMoney` and the
+ * signed balance helpers.
  *
- * Columns are defined once here; `schema.keys.ts` owns the key metadata and
- * `schema.ts` is the public surface.
+ * This is the current shape a fresh install reaches after running every
+ * migration. Version 1 is frozen in `migrations/migration-001.statements.ts`.
  */
 export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
   `CREATE TABLE IF NOT EXISTS wallets (
@@ -33,7 +34,7 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     type TEXT NOT NULL,
     color TEXT NOT NULL,
     icon TEXT NOT NULL,
-    sortOrder INTEGER NOT NULL DEFAULT 0,
+    sortOrder INTEGER,
     legacyId TEXT,
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL,
@@ -53,6 +54,10 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     concept TEXT,
     date TEXT NOT NULL,
     notes TEXT,
+    sharedExpenseId TEXT,
+    groupExpenseId TEXT,
+    settlementId TEXT,
+    groupSettlementId TEXT,
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL,
     deletedAt TEXT,
@@ -64,6 +69,8 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     ownerId TEXT NOT NULL,
     fromWalletId TEXT NOT NULL,
     toWalletId TEXT NOT NULL,
+    fromWalletName TEXT,
+    toWalletName TEXT,
     amount REAL NOT NULL DEFAULT 0,
     currency TEXT NOT NULL,
     date TEXT NOT NULL,
@@ -116,6 +123,12 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     lastPushAt TEXT,
     lastFullSyncAt TEXT,
     lastErrorCode TEXT
+  )`,
+  `CREATE TABLE IF NOT EXISTS cacheMeta (
+    ownerId TEXT NOT NULL,
+    collection TEXT NOT NULL,
+    fetchedAt TEXT NOT NULL,
+    PRIMARY KEY (ownerId, collection)
   )`,
 ];
 

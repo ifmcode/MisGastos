@@ -26,10 +26,21 @@ describe("mapTransferDocument", () => {
         date: "2026-10-29",
         notes: "Ahorro mensual",
         ownerId: "owner-from-document",
+        revision: 0,
         createdAt: "2026-10-29T10:00:00.000Z",
         updatedAt: "2026-10-29T11:00:00.000Z",
       },
     );
+  });
+
+  it("reads the stored revision and defaults a legacy document to zero", () => {
+    expect(
+      mapTransferDocument("transfer-1", { ...baseData, revision: 2 }, "user-1")
+        ?.revision,
+    ).toBe(2);
+    expect(
+      mapTransferDocument("transfer-1", baseData, "user-1")?.revision,
+    ).toBe(0);
   });
 
   it("maps the stored names of orphaned wallets", () => {

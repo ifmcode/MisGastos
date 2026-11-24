@@ -7,6 +7,8 @@ export const LOCAL_DB_ERROR_CODES = {
   MIGRATION_FAILED: "LOCAL_DB_MIGRATION_FAILED",
   /** The stored schema is newer than this binary knows how to read. */
   SCHEMA_NEWER: "LOCAL_DB_SCHEMA_NEWER",
+  /** Opening the native database failed; `getLocalDatabase` resolves null. */
+  OPEN_FAILED: "LOCAL_DB_OPEN_FAILED",
   /** A transaction was opened while another one was still active. */
   NESTED_TRANSACTION: "LOCAL_DB_NESTED_TRANSACTION",
   /** A unique key (other than the primary key) already exists. */

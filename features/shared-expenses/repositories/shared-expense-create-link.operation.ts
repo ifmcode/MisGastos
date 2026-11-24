@@ -1,6 +1,7 @@
 import { collection, doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { nextRevision } from "@/shared/utils/revision";
 
 import { SharedExpenseOperationError } from "../services/shared-expense.errors";
 import type {
@@ -67,7 +68,11 @@ export async function createSharedExpenseLinkOperation(
         updatedAt: now,
       }),
     );
-    transaction.update(wallet, { balance: nextBalance, updatedAt: now });
+    transaction.update(wallet, {
+      balance: nextBalance,
+      updatedAt: now,
+      revision: nextRevision(walletSnapshot.data()),
+    });
 
     created = mapSharedExpenseDocument(expense.id, expenseData);
   });

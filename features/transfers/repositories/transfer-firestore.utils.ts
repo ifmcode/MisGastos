@@ -1,6 +1,7 @@
 import { doc, Transaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { INITIAL_REVISION } from "@/shared/utils/revision";
 import { roundMoney } from "@/features/wallets/utils/money";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 
@@ -33,6 +34,7 @@ export function toTransferData(
     currency: dto.currency,
     date: dto.date,
     ownerId,
+    revision: INITIAL_REVISION,
     createdAt: now,
     updatedAt: now,
   };
@@ -51,6 +53,7 @@ export function buildTransfer(
   dto: CreateTransferDto,
   createdAt: string,
   updatedAt: string,
+  revision: number = INITIAL_REVISION,
 ): Transfer {
   return {
     id,
@@ -61,6 +64,7 @@ export function buildTransfer(
     date: dto.date,
     ...(dto.notes?.trim() ? { notes: dto.notes.trim() } : {}),
     ownerId,
+    revision,
     createdAt,
     updatedAt,
   };

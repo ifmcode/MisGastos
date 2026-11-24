@@ -1,0 +1,6 @@
+{
+  "offlineBanner": {
+    "label": "No connection · Showing saved data",
+    "accessibility": "The device has no internet connection. The app is showing the data saved on this device."
+  }
+}

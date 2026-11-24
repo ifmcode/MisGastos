@@ -13,6 +13,8 @@ export interface Wallet extends BaseEntity {
   type: WalletType;
   includeInTotal: boolean;
   ownerId: string;
+  /** Optimistic-concurrency counter: creates write 0, updates add one. */
+  revision: number;
   description?: string;
   /** Soft-delete marker. Archived wallets keep their history but leave selectors. */
   archivedAt?: string;
@@ -27,6 +29,8 @@ export interface CreateWalletDto {
   type: WalletType;
   includeInTotal: boolean;
   description?: string;
+  /** Client-generated id so an offline create can be referenced before sync. */
+  id?: string;
 }
 
 /**

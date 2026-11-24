@@ -1,6 +1,7 @@
 import { doc, writeBatch } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { nextRevision } from "@/shared/utils/revision";
 
 import { Wallet } from "../types/wallet.types";
 import {
@@ -21,17 +22,22 @@ export async function orphanWalletMovementsAndDelete(
   let writes = 1;
 
   for (const document of movements.transactions) {
+    const data = document.data() as Record<string, unknown>;
     batch.update(document.ref, {
       walletId: ORPHANED_WALLET_ID,
       walletName: deletedName,
       updatedAt: now,
+      revision: nextRevision(data),
     });
     writes += 1;
   }
 
   for (const document of movements.transfers) {
     const data = document.data() as Record<string, unknown>;
-    const patch: Record<string, unknown> = { updatedAt: now };
+    const patch: Record<string, unknown> = {
+      updatedAt: now,
+      revision: nextRevision(data),
+    };
 
     if (readString(data, "fromWalletId") === wallet.id) {
       patch.fromWalletId = ORPHANED_WALLET_ID;

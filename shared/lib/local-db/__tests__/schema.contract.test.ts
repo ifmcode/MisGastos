@@ -1,13 +1,14 @@
 import { describe, expect, it } from "@jest/globals";
 
 import type { LocalTableName } from "../local-db.types";
+import { MIGRATION_001 } from "../migrations/migration-001";
 import {
   LOCAL_DB_PRIMARY_KEYS,
   LOCAL_DB_UNIQUE_KEYS,
-  SCHEMA_V1_STATEMENTS,
+  SCHEMA_CURRENT_STATEMENTS,
 } from "../schema";
 
-/** ADR §4 contract: every column the sync engine relies on. */
+/** ADR §4 contract plus the phase-3 read-cache columns. */
 const REQUIRED_COLUMNS: Record<LocalTableName, readonly string[]> = {
   wallets: [
     "id", "ownerId", "name", "currency", "type", "icon", "color",
@@ -22,13 +23,14 @@ const REQUIRED_COLUMNS: Record<LocalTableName, readonly string[]> = {
   ],
   transactions: [
     "id", "ownerId", "type", "amount", "currency", "walletId", "walletName",
-    "categoryId", "concept", "date", "notes", "createdAt", "updatedAt",
-    "deletedAt", "revision", "syncStatus",
+    "categoryId", "concept", "date", "notes", "sharedExpenseId",
+    "groupExpenseId", "settlementId", "groupSettlementId", "createdAt",
+    "updatedAt", "deletedAt", "revision", "syncStatus",
   ],
   transfers: [
-    "id", "ownerId", "fromWalletId", "toWalletId", "amount", "currency",
-    "date", "notes", "createdAt", "updatedAt", "deletedAt", "revision",
-    "syncStatus",
+    "id", "ownerId", "fromWalletId", "toWalletId", "fromWalletName",
+    "toWalletName", "amount", "currency", "date", "notes", "createdAt",
+    "updatedAt", "deletedAt", "revision", "syncStatus",
   ],
   outbox: [
     "clientMutationId", "ownerId", "seq", "entityType", "entityId",
@@ -45,6 +47,7 @@ const REQUIRED_COLUMNS: Record<LocalTableName, readonly string[]> = {
   syncState: [
     "ownerId", "lastPullAt", "lastPushAt", "lastFullSyncAt", "lastErrorCode",
   ],
+  cacheMeta: ["ownerId", "collection", "fetchedAt"],
 };
 
 const REQUIRED_INDEXES = [
@@ -56,7 +59,7 @@ const REQUIRED_INDEXES = [
 ];
 
 function tableStatement(table: LocalTableName): string {
-  const statement = SCHEMA_V1_STATEMENTS.find((entry) =>
+  const statement = SCHEMA_CURRENT_STATEMENTS.find((entry) =>
     entry.includes(`CREATE TABLE IF NOT EXISTS ${table} (`),
   );
 
@@ -64,7 +67,7 @@ function tableStatement(table: LocalTableName): string {
   return statement;
 }
 
-describe("schema v1 contract", () => {
+describe("current schema contract", () => {
   it.each(
     Object.entries(REQUIRED_COLUMNS) as ReadonlyArray<
       [LocalTableName, readonly string[]]
@@ -79,7 +82,7 @@ describe("schema v1 contract", () => {
     }
   });
 
-  it("declares the outbox unique key and its primary key", () => {
+  it("declares the outbox unique key and its primary keys", () => {
     expect(tableStatement("outbox")).toContain(
       "UNIQUE (ownerId, entityType, entityId)",
     );
@@ -89,11 +92,29 @@ describe("schema v1 contract", () => {
     expect(LOCAL_DB_PRIMARY_KEYS.outbox).toEqual(["clientMutationId"]);
     expect(LOCAL_DB_PRIMARY_KEYS.outboxSeq).toEqual(["ownerId"]);
     expect(LOCAL_DB_PRIMARY_KEYS.syncState).toEqual(["ownerId"]);
+    expect(LOCAL_DB_PRIMARY_KEYS.cacheMeta).toEqual(["ownerId", "collection"]);
   });
 
   it.each(REQUIRED_INDEXES)("creates the index %s", (index) => {
     expect(
-      SCHEMA_V1_STATEMENTS.some((statement) => statement.includes(index)),
+      SCHEMA_CURRENT_STATEMENTS.some((statement) =>
+        statement.includes(index),
+      ),
     ).toBe(true);
+  });
+
+  it("allows a null category sortOrder in the current schema", () => {
+    const statement = tableStatement("categories");
+
+    expect(statement).toMatch(/\bsortOrder\s+INTEGER\s*,/);
+    expect(statement).not.toMatch(/\bsortOrder\s+INTEGER\s+NOT NULL/);
+  });
+
+  it("keeps the v1 snapshot frozen before the read-cache additions", () => {
+    const statements = MIGRATION_001.statements.join("\n");
+
+    expect(statements).not.toContain("sharedExpenseId");
+    expect(statements).not.toContain("fromWalletName");
+    expect(statements).not.toContain("cacheMeta");
   });
 });

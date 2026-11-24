@@ -2,6 +2,7 @@ import { collection, doc } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import type { CurrencyCode } from "@/shared/constants/currencies";
+import { nextRevision } from "@/shared/utils/revision";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 
 import { SettlementOperationError } from "../services/settlement.errors";
@@ -126,6 +127,7 @@ export async function revertSettlementMovementWallet(
   transaction.update(reference, {
     balance: port.revertAmountFromBalance(balance, movement.amountCents),
     updatedAt: now,
+    revision: nextRevision(snapshot.data()),
   });
 }
 

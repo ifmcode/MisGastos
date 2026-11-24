@@ -13,6 +13,12 @@ export interface UseAsyncCollectionOptions<T> {
   ownerId: string | undefined;
   load: (ownerId: string) => Promise<T[]>;
   describeError: (error: unknown) => string;
+  /**
+   * Local read cache. When it returns a list, the initial load shows it first
+   * and then replaces it with the remote result; a cold cache (null) keeps the
+   * usual loading/error behaviour. Pull-to-refresh stays remote-only.
+   */
+  readCached?: (ownerId: string) => Promise<T[] | null>;
 }
 
 export interface AsyncCollection<T> {
@@ -30,11 +36,26 @@ export function useAsyncCollection<T>({
   ownerId,
   load,
   describeError,
+  readCached,
 }: UseAsyncCollectionOptions<T>): AsyncCollection<T> {
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const readCachedSafely = useCallback(
+    async (currentOwnerId: string): Promise<T[] | null> => {
+      if (!readCached) return null;
+
+      try {
+        return await readCached(currentOwnerId);
+      } catch {
+        // A cache miss or failure must never break the remote load.
+        return null;
+      }
+    },
+    [readCached],
+  );
 
   const loadItems = useCallback(
     async (mode: LoadMode) => {
@@ -48,25 +69,38 @@ export function useAsyncCollection<T>({
 
       if (mode === "refresh") {
         setRefreshing(true);
-      } else {
-        setLoading(true);
+        setError(null);
+
+        try {
+          setItems(await load(ownerId));
+        } catch (loadError: unknown) {
+          setError(describeError(loadError));
+        } finally {
+          setRefreshing(false);
+        }
+
+        return;
       }
 
+      setLoading(true);
       setError(null);
+
+      const cached = await readCachedSafely(ownerId);
+      if (cached !== null) {
+        setItems(cached);
+        setLoading(false);
+      }
 
       try {
         setItems(await load(ownerId));
       } catch (loadError: unknown) {
-        setError(describeError(loadError));
+        // With a cached list the screen stays useful on a network failure.
+        if (cached === null) setError(describeError(loadError));
       } finally {
-        if (mode === "refresh") {
-          setRefreshing(false);
-        } else {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     },
-    [ownerId, load, describeError],
+    [ownerId, load, describeError, readCachedSafely],
   );
 
   useEffect(() => {

@@ -32,9 +32,11 @@ describe("updateWalletDocument", () => {
 
   it("patches the provided fields and deletes an empty description", async () => {
     mockGetDoc
-      .mockResolvedValueOnce(snapshot("wallet-1", walletDocument()))
       .mockResolvedValueOnce(
-        snapshot("wallet-1", walletDocument({ name: "Nueva" })),
+        snapshot("wallet-1", walletDocument({ revision: 2 })),
+      )
+      .mockResolvedValueOnce(
+        snapshot("wallet-1", walletDocument({ name: "Nueva", revision: 3 })),
       );
 
     const wallet = await updateWalletDocument("user-1", "wallet-1", {
@@ -59,9 +61,26 @@ describe("updateWalletDocument", () => {
         initialBalance: 50.56,
         balance: 50.56,
         updatedAt: expect.any(String),
+        revision: 3,
       }),
     );
     expect(wallet.name).toBe("Nueva");
+    expect(wallet.revision).toBe(3);
+  });
+
+  it("bumps a legacy wallet without stored revision to one", async () => {
+    mockGetDoc
+      .mockResolvedValueOnce(snapshot("wallet-1", walletDocument()))
+      .mockResolvedValueOnce(
+        snapshot("wallet-1", walletDocument({ name: "Nueva", revision: 1 })),
+      );
+
+    await updateWalletDocument("user-1", "wallet-1", { name: "Nueva" });
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith(
+      { kind: "wallets", id: "wallet-1" },
+      expect.objectContaining({ revision: 1 }),
+    );
   });
 
   it("keeps a trimmed description and rejects a vanished wallet", async () => {
@@ -101,6 +120,7 @@ describe("setWalletArchivedDocument", () => {
       { kind: "wallets", id: "wallet-1" },
       expect.objectContaining({
         archivedAt: "2026-11-12T10:00:00.000Z",
+        revision: 1,
       }),
     );
     expect(archived.archivedAt).toBe("2026-11-12T10:00:00.000Z");

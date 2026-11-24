@@ -13,6 +13,7 @@ export const LOCAL_DB_PRIMARY_KEYS: Record<
   outboxSeq: ["ownerId"],
   conflicts: ["id"],
   syncState: ["ownerId"],
+  cacheMeta: ["ownerId", "collection"],
 };
 
 /**

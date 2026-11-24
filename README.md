@@ -67,7 +67,7 @@ simplicidad de uso.
 | Lenguaje | TypeScript 6.0 en modo estricto |
 | UI | NativeWind 4 (Tailwind CSS) · React Navigation · Reanimated · Gesture Handler |
 | Backend | Firebase Authentication + Cloud Firestore |
-| Persistencia local | AsyncStorage (preferencias) · `expo-sqlite` (base local de la capa offline-first, aún sin conectar a la UI) |
+| Persistencia local | AsyncStorage (preferencias) · `expo-sqlite` (caché de lectura personal y aviso sin conexión, detrás de `EXPO_PUBLIC_OFFLINE_FIRST`, apagado por defecto) · ids de cliente, `revision` y borrado lógico de movimientos en Firestore |
 | Testing | Jest 30 + ts-jest |
 | Calidad | ESLint 9 + eslint-config-expo |
 
@@ -76,7 +76,8 @@ simplicidad de uso.
 ```text
 MisGastos/
 ├── app/                    # Rutas y layouts de Expo Router
-├── features/               # Módulos por dominio (auth, profile, wallets, transactions, transfers, dashboard, categories, friends, groups, social, shared-expenses, group-expenses…)
+├── features/               # Módulos por dominio (auth, profile, wallets, transactions, transfers, dashboard, categories, friends, groups, social, shared-expenses, group-expenses, sync…)
+│   ├── sync/               # Estado de red y aviso sin conexión de la capa offline
 │   └── <feature>/
 │       ├── components/     # UI específica del dominio
 │       ├── hooks/          # Orquestación y estado de UI
@@ -229,9 +230,9 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
-Estado actual (24/11/2026): **397 suites / 2645 tests**; la cobertura acotada a la
-lógica de negocio está en **98,95 % de sentencias, 94,96 % de ramas, 98,72 % de
-funciones y 99,54 % de líneas**, y `npm run check:copy` audita **343 archivos TSX**.
+Estado actual (24/11/2026): **426 suites / 2832 tests**; la cobertura acotada a la
+lógica de negocio está en **98,90 % de sentencias, 95,00 % de ramas, 98,64 % de
+funciones y 99,48 % de líneas**, y `npm run check:copy` audita **346 archivos TSX**.
 
 ## 🗺️ Roadmap
 
@@ -272,7 +273,7 @@ funciones y 99,54 % de líneas**, y `npm run check:copy` audita **343 archivos T
 - [x] Registrar opcionalmente el gasto de grupo en una cartera personal del pagador (TICKET-069) ✅ 22/11/2026
 - [x] Gestionar las solicitudes para unirse a grupos desde Social (TICKET-070) ✅ 23/11/2026
 - [x] Simplificar el formulario de gasto de grupo: sin **Todos** y solo **Igual**/**Importe**, manteniendo editables los modos antiguos (TICKET-071) ✅ 23/11/2026
-- [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización). Fase 7 **en curso**: base local `shared/lib/local-db` entregada el 24/11/2026 (DatabasePort, esquema y migraciones, outbox con estados y `sync-state`); pendientes los ids de cliente, `revision`/`deletedAt`/`appliedMutations` con reglas, la caché de lectura, la cola de escritura, el motor de sincronización y los conflictos
+- [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización). Fase 7 **en curso**: base local `shared/lib/local-db` entregada el 24/11/2026 (DatabasePort, esquema y migraciones, outbox con estados y `sync-state`), prerrequisitos de escritura entregados el 24/11/2026 (ids de cliente opcionales, `revision` en carteras/movimientos/transferencias/categorías, borrado lógico de movimientos y reglas de `appliedMutations`) y caché de lectura personal con aviso sin conexión entregada el 24/11/2026 (carteras, categorías, movimientos y transferencias en SQLite detrás de `EXPO_PUBLIC_OFFLINE_FIRST`, y una franja inferior **Sin conexión · Mostrando datos guardados**); pendientes la cola de escritura, el motor de sincronización, los conflictos, la purga local al cerrar sesión y el despliegue de las reglas
 - [x] Especialización del flujo de desarrollo con agentes y skills de OpenCode
 - [ ] Librería de componentes con Storybook
 - [ ] Exportar los datos de la cuenta en JSON versionado, por cartera o completa y sin datos compartidos ni de grupo
@@ -323,6 +324,8 @@ Consulta el roadmap completo en
 - [Historial de grupo y ciclo de vida de la membresía (TICKET-011 y TICKET-068, 23/11/2026)](docs/project/development-notes/session-notes/2026-11-23-group-history-and-membership-lifecycle.md): subcolección `groups/{groupId}/activity` de solo miembros y solo escritura aditiva, doce eventos con payload estructurado escritos en la misma transacción, paginación por cursor con **Cargar más**, ruta `/social/groups/[groupId]/history` (integrada después en el detalle por TICKET-073), `createdBy` inmutable, guardia de saldo cero con **Liquidar**, salida/expulsión/transferencia de propiedad, propagación de `groupCodes` y ciclo de invitaciones tras la transferencia.
 - [Actividad del grupo dentro del detalle (TICKET-073, 24/11/2026)](docs/project/development-notes/session-notes/2026-11-24-group-activity-in-detail.md): una sola sección **Actividad del grupo** con los gastos y liquidaciones activos una vez y los eventos de edición, borrado, miembros, transferencia y ajustes; sin duplicar creaciones, orden por `createdAt` con la fecha de negocio en el meta, **Cargar más**, y la ruta `/social/groups/[groupId]/history` con su botón **Ver historial** eliminados.
 - [Base local offline-first (TICKET-023, primera entrega, 24/11/2026)](docs/project/development-notes/session-notes/2026-11-24-offline-local-db-foundations.md): `DatabasePort` orientado a filas, esquema v1 con `outboxSeq` y transacciones exclusivas, migraciones con `PRAGMA user_version` en la misma transacción, adaptador en memoria con la semántica de SQLite, outbox (coalescing por estado, `seq` monótono, ventana de reintento y `reclaimInterrupted`) y `syncState`; sin cambios de reglas y sin conectar todavía a la interfaz.
+- [Revision, borrado lógico e ids de cliente (TICKET-023, segunda entrega, 24/11/2026)](docs/project/development-notes/session-notes/2026-11-24-offline-revision-and-soft-delete.md): `revision` con create 0 y update +1 (legado 0), ids de cliente opcionales en los DTO de creación, borrado lógico de movimientos con reversión exacta del saldo, exclusión de los movimientos borrados en el uso de cartera y en el bloqueo de categorías, y reglas de `revision`, `deletedAt` y `appliedMutations` con despliegue pendiente.
+- [Caché de lectura offline y aviso sin conexión (TICKET-023, tercera entrega, 24/11/2026)](docs/project/development-notes/session-notes/2026-11-24-offline-read-cache-and-banner.md): esquema v2 con los ids de enlace, `cacheMeta` y `sortOrder` opcional; espejo que nunca pisa filas pendientes; mappers y lecturas con caché por feature detrás de `EXPO_PUBLIC_OFFLINE_FIRST`; caché primero y refresco remoto en `use-async-collection`; filtro de `deletedAt` en las lecturas y espejo tras crear/editar/borrar movimientos y transferencias; franja inferior global **Sin conexión** con `features/sync`; reconstrucción nativa y validación en dispositivo pendientes.
 - [Decisiones de gastos de grupo y membresía (20/11/2026)](docs/project/development-notes/session-notes/2026-11-20-group-expenses-and-membership-decisions.md): saldo neto pagado − cuota, selección de participantes, simplificación de deudas con ajuste por grupo, permisos de edición, salida con deuda saldada y transferencia de propiedad.
 - [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)

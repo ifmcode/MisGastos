@@ -9,6 +9,7 @@ import {
 import { db } from "@/lib/firebase";
 
 import { WalletUsage } from "../types/wallet.types";
+import { isSoftDeletedMovement } from "./wallet-delete.helpers";
 
 export interface WalletMovements {
   transactions: QueryDocumentSnapshot[];
@@ -61,7 +62,12 @@ export async function loadWalletMovements(
 }
 
 export function toWalletUsage(movements: WalletMovements): WalletUsage {
-  const transactionCount = movements.transactions.length;
+  // Soft-deleted movements were already reverted, so they no longer count as
+  // usage; keeping them in the document keeps the history references valid.
+  const transactionCount = movements.transactions.filter(
+    (document) =>
+      !isSoftDeletedMovement(document.data() as Record<string, unknown>),
+  ).length;
   const transferCount = movements.transfers.length;
 
   return {

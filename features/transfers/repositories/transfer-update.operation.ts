@@ -1,11 +1,9 @@
 import { deleteField, doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper";
-import { Wallet } from "@/features/wallets/types/wallet.types";
-import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
-import { roundMoney } from "@/features/wallets/utils/money";
 import { toIsoTimestamp } from "@/shared/utils/date";
+import { nextRevision } from "@/shared/utils/revision";
+import { Wallet } from "@/features/wallets/types/wallet.types";
 
 import { TransferOperationError } from "../services/transfer.errors";
 import { Transfer, UpdateTransferDto } from "../types/transfer.types";
@@ -15,8 +13,8 @@ import {
   buildTransfer,
   loadTransferWallets,
   toTransferData,
-  toWalletBalance,
 } from "./transfer-firestore.utils";
+import { applyTransferBalanceUpdates } from "./transfer-update.balances";
 import { TransferMutationResult } from "./transfer.repository";
 
 export interface UpdateTransferOperationOptions {
@@ -103,48 +101,20 @@ export async function updateTransferOperation({
     addBalanceAdjustment(adjustments, dto.fromWalletId, -dto.amount);
     addBalanceAdjustment(adjustments, dto.toWalletId, dto.amount);
 
-    const finalBalances = new Map<string, number>();
-    for (const [walletId, walletData] of walletDataById) {
-      finalBalances.set(
-        walletId,
-        roundMoney(
-          toWalletBalance(walletData) + (adjustments.get(walletId) ?? 0),
-        ),
-      );
-    }
+    updatedWallets = applyTransferBalanceUpdates({
+      transaction: firestoreTransaction,
+      ownerId,
+      now,
+      walletIds,
+      walletDataById,
+      adjustments,
+      fromWalletId: dto.fromWalletId,
+    });
 
-    if (
-      !isOrphanedWalletId(dto.fromWalletId) &&
-      (finalBalances.get(dto.fromWalletId) ?? 0) < 0
-    ) {
-      throw new TransferOperationError("INSUFFICIENT_FUNDS");
-    }
-
-    updatedWallets = [];
-
-    for (const walletId of walletIds) {
-      const adjustment = adjustments.get(walletId) ?? 0;
-      if (adjustment === 0) continue;
-
-      const walletData = walletDataById.get(walletId);
-      if (!walletData) continue;
-
-      const balance = finalBalances.get(walletId) ?? 0;
-      const wallet = mapWalletDocument(
-        walletId,
-        { ...walletData, balance, updatedAt: now },
-        ownerId,
-      );
-
-      if (wallet) updatedWallets.push(wallet);
-      firestoreTransaction.update(doc(db, "wallets", walletId), {
-        balance,
-        updatedAt: now,
-      });
-    }
-
+    const revision = nextRevision(previous);
     firestoreTransaction.update(transferRef, {
       ...toTransferData(ownerId, dto, now),
+      revision,
       fromWalletName: deleteField(),
       toWalletName: deleteField(),
       createdAt: previousCreatedAt,
@@ -156,6 +126,7 @@ export async function updateTransferOperation({
       dto,
       previousCreatedAt,
       now,
+      revision,
     );
   });
 

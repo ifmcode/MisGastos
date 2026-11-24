@@ -41,8 +41,11 @@ helpers instead of writing new arithmetic.
    without the other.
 3. Edit = revert previous effect + apply new effect, in the same transaction.
    Avoid recomputing from a full history.
-4. Delete reverts the stored effect exactly once. Transfers use soft delete so the
-   revert cannot be repeated; the record is never hard-deleted.
+4. Delete reverts the stored effect exactly once. Transfers and transactions use
+   soft delete (`deletedAt`) so the revert cannot be repeated; the record is never
+   hard-deleted. A soft-deleted movement no longer counts as wallet usage, no
+   longer blocks deleting its category, and must not be edited (its amount was
+   already reverted).
 5. Archived wallets (`archivedAt`) leave selectors, totals and transfers but keep
    their history and names. `includeInTotal: false` wallets keep their real
    balance but do not contribute to the dashboard total.

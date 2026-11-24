@@ -25,9 +25,23 @@ describe("mapCategoryDocument", () => {
       type: "expense",
       legacyId: "food",
       ownerId: "owner-from-document",
+      revision: 0,
       createdAt: "2026-10-30T10:00:00.000Z",
       updatedAt: "2026-10-30T11:00:00.000Z",
     });
+  });
+
+  it("reads the stored revision and defaults a legacy document to zero", () => {
+    expect(
+      mapCategoryDocument(
+        "category-1",
+        { ...baseData, revision: 4 },
+        "user-1",
+      )?.revision,
+    ).toBe(4);
+    expect(
+      mapCategoryDocument("category-1", baseData, "user-1")?.revision,
+    ).toBe(0);
   });
 
   it("falls back for unknown icons and invalid colors", () => {

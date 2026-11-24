@@ -49,10 +49,12 @@ describe("softDeleteGroupExpenseLinkOperation", () => {
     expect(transactionUpdate).toHaveBeenCalledWith(walletRef(WALLET_ID), {
       balance: 100,
       updatedAt: NOW,
+      revision: 1,
     });
     expect(transactionUpdate).toHaveBeenCalledWith(movementRef("movement-1"), {
       deletedAt: NOW,
       updatedAt: NOW,
+      revision: 1,
     });
     expect(transactionUpdate).toHaveBeenCalledWith(expenseRef(EXPENSE_ID), {
       deletedAt: NOW,

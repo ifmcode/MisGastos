@@ -38,11 +38,17 @@ const source = {
   type: "bank",
   includeInTotal: true,
   ownerId: "user-1",
+  revision: 0,
   createdAt: "2026-10-28T10:00:00.000Z",
   updatedAt: "2026-10-28T10:00:00.000Z",
 } as const;
 const target = { ...source, id: "wallet-2" };
-const movements = { transactions: [{} as never], transfers: [] };
+const movements = {
+  transactions: [
+    { data: () => ({ type: "expense", amount: 10 }) } as never,
+  ],
+  transfers: [],
+};
 
 function mockWalletDocuments(
   documents: Record<string, Record<string, unknown> | null> = {},
@@ -104,5 +110,26 @@ describe("deleteWalletDocument", () => {
       deletedWalletId: "wallet-1",
       targetWallet: target,
     });
+  });
+
+  it("orphans soft-deleted movements without requiring a target", async () => {
+    mockWalletDocuments();
+    const softDeleted = {
+      transactions: [
+        {
+          data: () => ({ type: "expense", amount: 10, deletedAt: "2026-11-20" }),
+        } as never,
+      ],
+      transfers: [],
+    };
+    loadMovements.mockResolvedValue(softDeleted);
+
+    const result = await deleteWalletDocument("user-1", "wallet-1", {
+      mode: "reassign",
+    });
+
+    expect(orphan).toHaveBeenCalledWith(source, softDeleted);
+    expect(reassign).not.toHaveBeenCalled();
+    expect(result).toEqual({ deletedWalletId: "wallet-1" });
   });
 });

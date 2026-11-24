@@ -56,7 +56,7 @@ describe("reassignWalletMovementsAndDelete", () => {
 
     expect(mockTransactionUpdate).toHaveBeenCalledWith(
       { kind: "wallets", id: "wallet-2" },
-      { balance: 125, updatedAt: expect.any(String) },
+      expect.objectContaining({ balance: 125, updatedAt: expect.any(String) }),
     );
     expect(mockTransactionUpdate).toHaveBeenCalledWith(
       { kind: "transaction", id: "tx-in" },
@@ -97,8 +97,39 @@ describe("reassignWalletMovementsAndDelete", () => {
     expect(result.balance).toBe(125);
   });
 
-  it("orphans the side whose counterpart is the target wallet", async () => {
+  it("moves a soft-deleted transaction without counting it in the net", async () => {
     const movements = {
+      transactions: [
+        movement("transaction", "tx-active", {
+          walletId: "wallet-1",
+          type: "expense",
+          amount: 25,
+        }),
+        movement("transaction", "tx-deleted", {
+          walletId: "wallet-1",
+          type: "expense",
+          amount: 40,
+          deletedAt: "2026-11-20T10:00:00.000Z",
+        }),
+      ],
+      transfers: [],
+    };
+
+    const result = await reassignWalletMovementsAndDelete(
+      "user-1",
+      sourceWallet,
+      targetWallet,
+      movements,
+    );
+
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(
+      { kind: "transaction", id: "tx-deleted" },
+      expect.objectContaining({ walletId: "wallet-2", revision: 1 }),
+    );
+    expect(result.balance).toBe(75);
+  });
+
+  it("orphans the side whose counterpart is the target wallet", async () => {    const movements = {
       transactions: [],
       transfers: [
         movement("transfer", "tr-to", {

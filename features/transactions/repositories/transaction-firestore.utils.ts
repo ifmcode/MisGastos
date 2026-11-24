@@ -3,8 +3,15 @@ import { DocumentReference, getDoc } from "firebase/firestore";
 import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { roundMoney } from "@/features/wallets/utils/money";
+import { INITIAL_REVISION } from "@/shared/utils/revision";
 
 import { CreateTransactionDto, Transaction } from "../types/transaction.types";
+import {
+  readGroupExpenseId,
+  readGroupSettlementId,
+  readSettlementId,
+  readSharedExpenseId,
+} from "./transaction-link-readers";
 
 export function toWalletBalance(data: Record<string, unknown>): number {
   const balance = data.balance;
@@ -24,6 +31,7 @@ export function toTransactionData(
   ownerId: string,
   dto: CreateTransactionDto,
   now: string,
+  revision: number = INITIAL_REVISION,
 ): Record<string, unknown> {
   const data: Record<string, unknown> = {
     type: dto.type,
@@ -34,6 +42,7 @@ export function toTransactionData(
     concept: dto.concept.trim(),
     date: dto.date,
     ownerId,
+    revision,
     createdAt: now,
     updatedAt: now,
     deletedAt: dto.deletedAt ?? null,
@@ -59,62 +68,12 @@ export function toTransactionData(
   return data;
 }
 
-/**
- * Linked ids only exist on expenses: income movements never carry one, so the
- * mapper drops the value instead of rejecting the whole record.
- */
-function readSharedExpenseId(dto: CreateTransactionDto): string | null {
-  if (dto.type !== "expense") return null;
-
-  const id = typeof dto.sharedExpenseId === "string"
-    ? dto.sharedExpenseId.trim()
-    : "";
-
-  return id.length > 0 ? id : null;
-}
-
-/** A group expense link is expense-only for the same reason as the 1:1 one. */
-function readGroupExpenseId(dto: CreateTransactionDto): string | null {
-  if (dto.type !== "expense") return null;
-
-  const id = typeof dto.groupExpenseId === "string"
-    ? dto.groupExpenseId.trim()
-    : "";
-
-  return id.length > 0 ? id : null;
-}
-
-/**
- * A settlement income is the mirror case: the link is only valid on an income,
- * because a settlement records money the creditor received.
- */
-export function readSettlementId(dto: CreateTransactionDto): string | null {
-  if (dto.type !== "income") return null;
-
-  const id = typeof dto.settlementId === "string" ? dto.settlementId.trim() : "";
-
-  return id.length > 0 ? id : null;
-}
-
-/** The group settlement mirror: an income-only link, exactly like the 1:1 one. */
-export function readGroupSettlementId(
-  dto: CreateTransactionDto,
-): string | null {
-  if (dto.type !== "income") return null;
-
-  const id =
-    typeof dto.groupSettlementId === "string"
-      ? dto.groupSettlementId.trim()
-      : "";
-
-  return id.length > 0 ? id : null;
-}
-
 export function buildTransaction(
   id: string,
   ownerId: string,
   dto: CreateTransactionDto,
   now: string,
+  revision: number = INITIAL_REVISION,
 ): Transaction {
   const sharedExpenseId = readSharedExpenseId(dto);
   const groupExpenseId = readGroupExpenseId(dto);
@@ -132,6 +91,7 @@ export function buildTransaction(
     ...(dto.notes?.trim() ? { notes: dto.notes.trim() } : {}),
     date: dto.date,
     ownerId,
+    revision,
     ...(sharedExpenseId ? { sharedExpenseId } : {}),
     ...(groupExpenseId ? { groupExpenseId } : {}),
     ...(settlementId ? { settlementId } : {}),
@@ -140,50 +100,6 @@ export function buildTransaction(
     updatedAt: now,
     deletedAt: dto.deletedAt ?? null,
   };
-}
-
-/**
- * Soft-delete stamp of a stored movement. A non-empty value keeps the record
- * out of the movements list, so it is never normalized away.
- */
-export function readStoredDeletedAt(
-  data: Record<string, unknown>,
-): string | null {
-  return typeof data.deletedAt === "string" && data.deletedAt.trim().length > 0
-    ? data.deletedAt.trim()
-    : null;
-}
-
-/** Stored `sharedExpenseId`, if any; personal movements never have one. */
-export function readStoredSharedExpenseId(
-  data: Record<string, unknown>,
-): string | undefined {
-  const id =
-    typeof data.sharedExpenseId === "string" ? data.sharedExpenseId.trim() : "";
-
-  return id.length > 0 ? id : undefined;
-}
-
-/** Stored `groupExpenseId`, if any; personal movements never have one. */
-export function readStoredGroupExpenseId(
-  data: Record<string, unknown>,
-): string | undefined {
-  const id =
-    typeof data.groupExpenseId === "string" ? data.groupExpenseId.trim() : "";
-
-  return id.length > 0 ? id : undefined;
-}
-
-/** Stored `groupSettlementId`, if any; only a settlement income can have one. */
-export function readStoredGroupSettlementId(
-  data: Record<string, unknown>,
-): string | undefined {
-  const id =
-    typeof data.groupSettlementId === "string"
-      ? data.groupSettlementId.trim()
-      : "";
-
-  return id.length > 0 ? id : undefined;
 }
 
 /** Reads and maps the wallet after a write so callers can refresh their state. */

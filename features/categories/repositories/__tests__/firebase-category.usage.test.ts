@@ -50,6 +50,7 @@ describe("FirebaseCategoryRepository.seedDefaultCategories", () => {
       id: "user-1__food",
       legacyId: "food",
       ownerId: "user-1",
+      revision: 0,
     });
   });
 });
@@ -70,6 +71,28 @@ describe("FirebaseCategoryRepository.countTransactionsUsingCategory", () => {
       .countTransactionsUsingCategory("user-1", "category-1", "food");
 
     expect(mockWhere).toHaveBeenCalledWith("ownerId", "==", "user-1");
+    expect(count).toBe(2);
+  });
+
+  it("ignores soft-deleted movements so a category can be deleted", async () => {
+    mockGetDocs.mockResolvedValue({
+      docs: [
+        {
+          data: () => ({
+            categoryId: "category-1",
+            deletedAt: "2026-11-20T10:00:00.000Z",
+          }),
+        },
+        {
+          data: () => ({ categoryId: "food", deletedAt: null }),
+        },
+        { data: () => ({ categoryId: "food" }) },
+      ],
+    });
+
+    const count = await new FirebaseCategoryRepository()
+      .countTransactionsUsingCategory("user-1", "category-1", "food");
+
     expect(count).toBe(2);
   });
 

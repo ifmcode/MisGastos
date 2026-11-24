@@ -29,6 +29,7 @@ function buildWallet(overrides: Partial<Wallet> = {}): Wallet {
     type: "bank",
     includeInTotal: true,
     ownerId: "user-1",
+    revision: 0,
     createdAt: "2026-10-29T10:00:00.000Z",
     updatedAt: "2026-10-29T10:00:00.000Z",
     ...overrides,
@@ -43,6 +44,7 @@ const previous: Transfer = {
   currency: "EUR",
   date: "2026-10-29",
   ownerId: "user-1",
+  revision: 0,
   createdAt: "2026-10-29T10:00:00.000Z",
   updatedAt: "2026-10-29T10:00:00.000Z",
 };

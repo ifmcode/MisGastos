@@ -151,7 +151,47 @@ describe("FirebaseCategoryRepository writes", () => {
       id: "category-2",
       ownerId: "user-1",
       sortOrder: 5,
+      revision: 0,
     });
+  });
+
+  it("writes a category under the provided client id", async () => {
+    mockSetDoc.mockResolvedValue(undefined);
+    mockGetDocs.mockResolvedValue({ docs: [] });
+
+    const category = await new FirebaseCategoryRepository().createCategory(
+      "user-1",
+      {
+        name: "Restaurantes",
+        icon: "fast-food-outline",
+        color: "#EF6C00",
+        type: "expense",
+        id: "  client-category  ",
+      },
+    );
+
+    expect(mockSetDoc).toHaveBeenCalledWith(
+      { id: "client-category" },
+      expect.objectContaining({ ownerId: "user-1", revision: 0 }),
+    );
+    expect(mockAddDoc).not.toHaveBeenCalled();
+    expect(category.id).toBe("client-category");
+  });
+
+  it("falls back to a generated id for a blank provided id", async () => {
+    mockAddDoc.mockResolvedValue({ id: "category-1" });
+    mockGetDocs.mockResolvedValue({ docs: [] });
+
+    await new FirebaseCategoryRepository().createCategory("user-1", {
+      name: "Restaurantes",
+      icon: "fast-food-outline",
+      color: "#EF6C00",
+      type: "expense",
+      id: "   ",
+    });
+
+    expect(mockSetDoc).not.toHaveBeenCalled();
+    expect(mockAddDoc).toHaveBeenCalled();
   });
 
   it("starts a new category at position zero when there are none", async () => {
@@ -174,7 +214,12 @@ describe("FirebaseCategoryRepository writes", () => {
   it("updates editable fields without writing the type", async () => {
     mockUpdateDoc.mockResolvedValue(undefined);
     mockGetDocs.mockResolvedValue({
-      docs: [categoryDoc("category-1", { name: "Restaurantes" })],
+      docs: [
+        categoryDoc("category-1", {
+          name: "Restaurantes",
+          revision: 2,
+        }),
+      ],
     });
 
     const category = await new FirebaseCategoryRepository().updateCategory(
@@ -190,14 +235,11 @@ describe("FirebaseCategoryRepository writes", () => {
         icon: "cafe-outline",
         color: "#00838F",
         updatedAt: expect.any(String),
+        revision: 3,
       }),
     );
     expect(mockUpdateDoc.mock.calls[0]?.[1]).not.toHaveProperty("type");
-    expect(category).toMatchObject({
-      id: "category-1",
-      color: "#00838F",
-      type: "expense",
-    });
+    expect(category.revision).toBe(3);
   });
 
   it("deletes the category document", async () => {
@@ -211,20 +253,54 @@ describe("FirebaseCategoryRepository writes", () => {
     expect(mockDeleteDoc).toHaveBeenCalledWith({ id: "category-1" });
   });
 
-  it("persists the reordered positions in one batch", async () => {
+  it("persists the reordered positions in one batch and bumps each revision", async () => {
+    mockGetDocs.mockResolvedValue({
+      docs: [
+        categoryDoc("category-1", { revision: 2 }),
+        categoryDoc("category-2"),
+      ],
+    });
+
     await new FirebaseCategoryRepository().updateCategoryOrders("user-1", [
       { id: "category-1", sortOrder: 0 },
       { id: "category-2", sortOrder: 1 },
     ]);
 
     expect(mockWriteBatch).toHaveBeenCalledTimes(1);
+    expect(mockGetDocs).toHaveBeenCalledTimes(1);
     expect(mockBatchUpdate).toHaveBeenCalledWith(
       { id: "category-1" },
-      expect.objectContaining({ sortOrder: 0, updatedAt: expect.any(String) }),
+      expect.objectContaining({
+        sortOrder: 0,
+        updatedAt: expect.any(String),
+        revision: 3,
+      }),
     );
     expect(mockBatchUpdate).toHaveBeenCalledWith(
       { id: "category-2" },
-      expect.objectContaining({ sortOrder: 1, updatedAt: expect.any(String) }),
+      expect.objectContaining({
+        sortOrder: 1,
+        updatedAt: expect.any(String),
+        revision: 1,
+      }),
+    );
+    expect(mockBatchCommit).toHaveBeenCalledTimes(1);
+  });
+
+  it("skips reorder entries without a stored category", async () => {
+    mockGetDocs.mockResolvedValue({
+      docs: [categoryDoc("category-1", { revision: 2 })],
+    });
+
+    await new FirebaseCategoryRepository().updateCategoryOrders("user-1", [
+      { id: "category-1", sortOrder: 0 },
+      { id: "category-missing", sortOrder: 1 },
+    ]);
+
+    expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
+    expect(mockBatchUpdate).toHaveBeenCalledWith(
+      { id: "category-1" },
+      expect.objectContaining({ revision: 3 }),
     );
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
@@ -290,6 +366,7 @@ describe("FirebaseCategoryRepository.ensureCategory", () => {
         color: "#0A7EA4",
         type: "expense",
         ownerId: "user-1",
+        revision: 0,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       }),
@@ -297,6 +374,7 @@ describe("FirebaseCategoryRepository.ensureCategory", () => {
     expect(category).toMatchObject({
       id: "user-1__shared-expense",
       ownerId: "user-1",
+      revision: 0,
     });
   });
 

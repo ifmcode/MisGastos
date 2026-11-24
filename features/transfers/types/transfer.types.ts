@@ -13,6 +13,8 @@ export interface Transfer extends BaseEntity {
   date: string;
   notes?: string;
   ownerId: string;
+  /** Optimistic-concurrency counter: creates write 0, updates add one. */
+  revision: number;
   /** Soft-delete marker. Deleted transfers are kept for audit purposes. */
   deletedAt?: string;
 }
@@ -24,6 +26,8 @@ export interface CreateTransferDto {
   currency: CurrencyCode;
   date: string;
   notes?: string;
+  /** Client-generated id so an offline create can be referenced before sync. */
+  id?: string;
 }
 
 export type UpdateTransferDto = CreateTransferDto;

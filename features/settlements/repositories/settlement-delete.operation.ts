@@ -1,6 +1,7 @@
 import { runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { nextRevision } from "@/shared/utils/revision";
 import {
   createNotificationDocumentId,
   toNotificationData,
@@ -81,6 +82,7 @@ export async function softDeleteSettlementOperation(
       transaction.update(settlementMovementRef(previousStored.id), {
         deletedAt,
         updatedAt: deletedAt,
+        revision: nextRevision(previousStored),
       });
     }
 

@@ -1,6 +1,7 @@
 import { collection, doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { nextRevision } from "@/shared/utils/revision";
 import { FirebaseLinkedMovementPort } from "@/features/shared-expenses/repositories/firebase-linked-movement.port";
 import type { ILinkedMovementPort } from "@/features/shared-expenses/repositories/linked-movement.port";
 import {
@@ -78,7 +79,11 @@ export async function createGroupExpenseLinkOperation(
         updatedAt: now,
       }),
     );
-    transaction.update(wallet, { balance: nextBalance, updatedAt: now });
+    transaction.update(wallet, {
+      balance: nextBalance,
+      updatedAt: now,
+      revision: nextRevision(walletSnapshot.data()),
+    });
     addGroupActivity(transaction, {
       type: "expense-created",
       groupId: dto.groupId,

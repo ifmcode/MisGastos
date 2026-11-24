@@ -17,6 +17,14 @@ const baseData: Record<string, unknown> = {
 };
 
 describe("mapTransactionDocument wallet names", () => {
+  it("reads the stored revision and defaults a legacy document to zero", () => {
+    expect(
+      mapTransactionDocument("tx-1", { ...baseData, revision: 5 }, "user-1")
+        ?.revision,
+    ).toBe(5);
+    expect(mapTransactionDocument("tx-1", baseData, "user-1")?.revision).toBe(0);
+  });
+
   it("maps the stored name of an orphaned wallet", () => {
     const transaction = mapTransactionDocument(
       "tx-1",

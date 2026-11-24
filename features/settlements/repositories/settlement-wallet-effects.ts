@@ -1,4 +1,5 @@
 import type { CurrencyCode } from "@/shared/constants/currencies";
+import { nextRevision } from "@/shared/utils/revision";
 
 import type { ISettlementMovementPort } from "./settlement-movement.port";
 import {
@@ -51,6 +52,7 @@ export async function applySettlementWalletEffects(
 ): Promise<void> {
   const ids = collectWalletIds(effects);
   const balances = new Map<string, number>();
+  const revisions = new Map<string, number>();
 
   for (const walletId of ids) {
     const snapshot = await transaction.get(settlementWalletRef(walletId));
@@ -66,6 +68,7 @@ export async function applySettlementWalletEffects(
         onError,
       ),
     );
+    revisions.set(walletId, nextRevision(snapshot.data()));
   }
 
   for (const walletId of ids) {
@@ -82,6 +85,7 @@ export async function applySettlementWalletEffects(
     transaction.update(settlementWalletRef(walletId), {
       balance: next,
       updatedAt: now,
+      revision: revisions.get(walletId) ?? 1,
     });
   }
 }
