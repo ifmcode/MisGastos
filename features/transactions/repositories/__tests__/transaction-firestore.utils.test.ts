@@ -2,8 +2,6 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 
 import {
   buildTransaction,
-  getSignedTransactionAmount,
-  getSignedTransactionAmountObj,
   readStoredGroupExpenseId,
   toTransactionData,
   toWalletBalance,
@@ -261,20 +259,5 @@ describe("buildTransaction", () => {
 
     expect(expense.groupExpenseId).toBe("group-expense-1");
     expect(income).not.toHaveProperty("groupExpenseId");
-  });
-});
-
-describe("getSignedTransactionAmount", () => {
-  it("accepts a dto or a type and amount pair", () => {
-    expect(getSignedTransactionAmount(validDto)).toBe(-25.5);
-    expect(getSignedTransactionAmount("income", 10)).toBe(10);
-    expect(getSignedTransactionAmount("expense", 10)).toBe(-10);
-    expect(getSignedTransactionAmount("income")).toBe(0);
-  });
-
-  it("normalizes the signed object amount", () => {
-    expect(getSignedTransactionAmountObj({ type: "income", amount: 12.345 })).toBe(
-      12.35,
-    );
   });
 });

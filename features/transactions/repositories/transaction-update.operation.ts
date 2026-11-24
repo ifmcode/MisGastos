@@ -7,11 +7,14 @@ import { roundMoney } from "@/features/wallets/utils/money";
 
 import { TransactionOperationError } from "../services/transaction.errors";
 import { UpdateTransactionDto } from "../types/transaction.types";
+import {
+  applyTransactionUpdateToBalance,
+  getSignedTransactionAmount,
+} from "../utils/transaction-balance";
 import { toIsoTimestamp } from "@/shared/utils/date";
 import {
   buildTransaction,
   getMappedWallet,
-  getSignedTransactionAmount,
   readStoredDeletedAt,
   readStoredGroupExpenseId,
   readStoredGroupSettlementId,
@@ -90,13 +93,10 @@ export async function updateTransactionOperation({
       }
 
       if (sameWallet) {
-        const currentBalance = toWalletBalance(walletData);
-        const revertedBalance = roundMoney(
-          currentBalance -
-            getSignedTransactionAmount(previousType, previousAmount),
-        );
-        const nextBalance = roundMoney(
-          revertedBalance + getSignedTransactionAmount(dto),
+        const nextBalance = applyTransactionUpdateToBalance(
+          toWalletBalance(walletData),
+          { type: previousType, amount: previousAmount },
+          { type: dto.type, amount: dto.amount },
         );
 
         firestoreTransaction.update(newWalletRef, {
@@ -120,7 +120,10 @@ export async function updateTransactionOperation({
           const currentPreviousBalance = toWalletBalance(previousWalletData);
           const nextPreviousBalance = roundMoney(
             currentPreviousBalance -
-              getSignedTransactionAmount(previousType, previousAmount),
+              getSignedTransactionAmount({
+                type: previousType,
+                amount: previousAmount,
+              }),
           );
           firestoreTransaction.update(previousWalletRef, {
             balance: nextPreviousBalance,
@@ -130,7 +133,8 @@ export async function updateTransactionOperation({
 
         const currentNewBalance = toWalletBalance(walletData);
         const nextNewBalance = roundMoney(
-          currentNewBalance + getSignedTransactionAmount(dto),
+          currentNewBalance +
+            getSignedTransactionAmount({ type: dto.type, amount: dto.amount }),
         );
         firestoreTransaction.update(newWalletRef, {
           balance: nextNewBalance,

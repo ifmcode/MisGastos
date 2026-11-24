@@ -1,0 +1,68 @@
+import type { LocalDatabaseTransaction } from "./database.port";
+import type { OutboxMutation, OutboxMutationInput } from "./local-db.types";
+
+export type MarkOutboxFailedInput = {
+  errorCode: string;
+  attempts: number;
+  nextAttemptAt: string | null;
+  now: string;
+};
+
+export type MarkOutboxConflictInput = {
+  errorCode: string;
+  now: string;
+};
+
+/**
+ * One ordered queue per account. Every state change is guarded by the outbox
+ * state machine; repositories never expose user-facing sentences.
+ *
+ * Every write accepts an optional trailing `tx`: pass it to join the
+ * transaction of the use case (record + balance + outbox row commit together);
+ * omit it and the repository owns the transaction.
+ */
+export interface IOutboxRepository {
+  /** Inserts or coalesces the mutation for `(owner, entityType, entityId)`. */
+  enqueue(
+    input: OutboxMutationInput,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation>;
+  /** Every queued mutation, `seq` ascending. */
+  listByOwner(ownerId: string): Promise<OutboxMutation[]>;
+  /** `pending` and `failed` rows, `seq` ascending. */
+  listPending(ownerId: string): Promise<OutboxMutation[]>;
+  countPending(ownerId: string): Promise<number>;
+  countConflicts(ownerId: string): Promise<number>;
+  markSyncing(
+    ownerId: string,
+    clientMutationId: string,
+    now: string,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation>;
+  markFailed(
+    ownerId: string,
+    clientMutationId: string,
+    input: MarkOutboxFailedInput,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation>;
+  markConflict(
+    ownerId: string,
+    clientMutationId: string,
+    input: MarkOutboxConflictInput,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation>;
+  /** Deletes the row after a successful push. */
+  remove(
+    ownerId: string,
+    clientMutationId: string,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<void>;
+  /** Requeues rows left `syncing` by a crash; returns the requeued rows. */
+  reclaimInterrupted(
+    ownerId: string,
+    now: string,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation[]>;
+  /** Head of the queue when it may be pushed at `now`. */
+  getNext(ownerId: string, now: string): Promise<OutboxMutation | null>;
+}

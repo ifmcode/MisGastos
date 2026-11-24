@@ -3,7 +3,7 @@
 **Type:** Epic / Architecture  
 **Priority:** High  
 **Status:** 🚧 In progress  
-**Design spike:** ✅ Accepted (14/11/2026) — implementation queued in roadmap Phase 7  
+**Design spike:** ✅ Accepted (14/11/2026) — implementation started 24/11/2026 (foundations only)  
 **Related:** PM-023; TICKET-002, TICKET-003, TICKET-007, TICKET-009, TICKET-010  
 **Sprint:** Platform / Post-MVP  
 
@@ -33,6 +33,54 @@ Make the app usable without an internet connection. The user must be able to cre
 - [ ] The app remains usable when Firebase is temporarily unavailable
 - [ ] Logging out removes local access to the previous account's data
 - [ ] Existing online behaviour and balance rules do not regress
+
+## Progress (24/11/2026)
+
+First implementation slice: **prerequisites 3-5 of ADR §11 only** (the technical
+base). No requirement or acceptance criterion above is closed by it, and the epic
+stays `🚧 In progress`.
+
+**Delivered:** the new `shared/lib/local-db/` layer (26 source modules plus
+`__tests__/`) with a row-oriented `DatabasePort` and a `LocalDatabaseTransaction` so
+every write can join one transaction (record + balance + outbox row in Phase 4); the
+version 1 schema (`wallets`, `categories`, `transactions`, `transfers`, `outbox`,
+`conflicts`, `syncState`) with the ADR indexes; append-only migrations applied inside
+one transaction with `PRAGMA user_version`, rejecting a newer database with
+`LOCAL_DB_SCHEMA_NEWER`; an `expo-sqlite` adapter (the only module importing the
+native package) and an in-memory adapter for Jest; the outbox repository, its state
+machine, coalescing matrix, `seq` ordering, retry window and `reclaimInterrupted`; and
+`syncState` bookkeeping. The duplicate `getSignedTransactionAmount` helpers were
+removed from `transaction-firestore.utils.ts`, leaving
+`features/transactions/utils/transaction-balance.ts` as the single implementation used
+by the create/update/delete operations.
+
+**Schema decisions:** the queue counter lives in a new `outboxSeq(ownerId, nextSeq)`
+row because an autoincrement column cannot keep `seq` monotonic once the queue is
+drained, and `outbox` gained an `operation` column that ADR §4 omitted and coalescing
+requires.
+
+**Deviation:** the signed-amount helper stays in `features/transactions/utils` (not in
+`shared/` as ADR §11.3 planned) because it imports `roundMoney` from
+`features/wallets/utils/money`; it moves in the Phase 4 slice that introduces the
+pending-delta calculation.
+
+**Dependency:** `expo-sqlite@~58.0.15` added with `npm install` because
+`npx expo install` fails with the corporate certificate. Nothing imports it at runtime
+yet, so no rebuild is needed until Phase 3 wires it.
+
+**Not delivered (every epic checkbox stays open):** client-generated ids,
+`revision`/`deletedAt`/`appliedMutations` and rules, local read cache, offline write
+queue, sync engine, conflicts and offline social.
+
+**Verification:** `npx tsc --noEmit`, `npx expo lint` and `npm run check:copy` clean;
+`npm run test:coverage` → 397 suites / 2645 tests, global 98.95 % statements,
+94.96 % branches, 98.72 % functions, 99.54 % lines. No `firestore.rules` or index
+change, so nothing to deploy and nothing to validate on a device yet.
+
+**Next slice:** client-generated ids plus `revision`/`deletedAt`/`appliedMutations`
+and the corresponding rules (prerequisites 1-2).
+
+**Detail:** [`session-notes/2026-11-24-offline-local-db-foundations.md`](../development-notes/session-notes/2026-11-24-offline-local-db-foundations.md)
 
 ## Design Spike (14/11/2026)
 

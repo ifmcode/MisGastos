@@ -9,10 +9,10 @@ import {
   CreateTransactionDto,
   Transaction,
 } from "../types/transaction.types";
+import { getSignedTransactionAmount } from "../utils/transaction-balance";
 import {
   buildTransaction,
   getMappedWallet,
-  getSignedTransactionAmountObj,
   toTransactionData,
   toWalletBalance,
 } from "./transaction-firestore.utils";
@@ -45,7 +45,8 @@ export async function createTransactionOperation(
 
     const currentBalance = toWalletBalance(walletData);
     const nextBalance = roundMoney(
-      currentBalance + getSignedTransactionAmountObj(dto),
+      currentBalance +
+        getSignedTransactionAmount({ type: dto.type, amount: dto.amount }),
     );
 
     const transactionRef = doc(transactionsRef);

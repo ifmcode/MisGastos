@@ -4,11 +4,7 @@ import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { roundMoney } from "@/features/wallets/utils/money";
 
-import {
-  CreateTransactionDto,
-  Transaction,
-  TransactionType,
-} from "../types/transaction.types";
+import { CreateTransactionDto, Transaction } from "../types/transaction.types";
 
 export function toWalletBalance(data: Record<string, unknown>): number {
   const balance = data.balance;
@@ -146,30 +142,6 @@ export function buildTransaction(
   };
 }
 
-export function getSignedTransactionAmount(
-  type: TransactionType | CreateTransactionDto,
-  amount?: number,
-): number {
-  if (typeof type === "object") {
-    return getSignedTransactionAmountObj(type);
-  }
-
-  return getSignedTransactionAmountObj({
-    type: type as "expense" | "income",
-    amount: amount ?? 0,
-  });
-}
-
-export function getSignedTransactionAmountObj({
-  type,
-  amount,
-}: {
-  type: "expense" | "income";
-  amount: number;
-}): number {
-  return roundMoney(type === "income" ? amount : -amount);
-}
-
 /**
  * Soft-delete stamp of a stored movement. A non-empty value keeps the record
  * out of the movements list, so it is never normalized away.
@@ -214,7 +186,8 @@ export function readStoredGroupSettlementId(
   return id.length > 0 ? id : undefined;
 }
 
-/** Reads and maps the wallet after a write so callers can refresh their state. */export async function getMappedWallet(
+/** Reads and maps the wallet after a write so callers can refresh their state. */
+export async function getMappedWallet(
   walletRef: DocumentReference,
   ownerId: string,
 ): Promise<Wallet | null> {

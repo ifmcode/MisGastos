@@ -1,7 +1,7 @@
 # Roadmap - MisGastos
 
 > Development guide: V1 scope, phase order, ticket order and the current ticket.
-> **Last reviewed:** 22/11/2026
+> **Last reviewed:** 24/11/2026
 
 ## Scope of this file
 - This file answers **what to build next and in which order**, plus the rules for doing it.
@@ -14,14 +14,13 @@
 A personal finance manager (wallets, movements, transfers and dashboard) merged with Splitwise-style shared finances (friends, groups, shared expenses, balances and settlements). **V1.0 is everything defined in this roadmap**; the MVP was the first milestone, not the release.
 
 ## Current Focus
-- **Milestone:** M3 - Social and platform
-- **Phase:** 6 - Groups
-- **Current ticket:** TICKET-011 - Group history
-- **Status:** ⏳ Pending
-- **Last completed:** TICKET-072 - Group detail social parity (23/11/2026)
-- **Carried over:** TICKET-023 epic is 🚧 In progress — phases 2-7 run in roadmap Phase 7
-- **Queued:** TICKET-068
-- **Next:** TICKET-011
+- **Milestone:** M4 - Offline and retention
+- **Phase:** 7 - Offline-first implementation
+- **Current ticket:** TICKET-023 - Offline-first implementation (full epic)
+- **Status:** 🚧 In progress
+- **Last completed:** TICKET-073 - Group activity in the group detail (24/11/2026)
+- **Queued:** Phase 8 tickets (TICKET-012, TICKET-016, TICKET-015, TICKET-013, TICKET-017, TICKET-019, TICKET-040)
+- **Next:** continue TICKET-023 with client-generated ids, `revision`/`deletedAt`/`appliedMutations` and their rules
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -29,7 +28,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 |---|---|---|---|
 | **M1 - Core personal finance (MVP)** | Auth, wallets, movements, transfers, dashboard and history | 0, 2 | ✅ Done |
 | **M2 - Personal finance complete** | UX follow-up, i18n and shared components | 3 | ✅ Done |
-| **M3 - Social and platform** | Architecture spike, friends, shared expenses, balances, groups and group history | 4-6 | 🚧 In progress |
+| **M3 - Social and platform** | Architecture spike, friends, shared expenses, balances, groups and group history | 4-6 | ✅ Done |
 | **M4 - Offline and retention** | Offline-first implementation, budgets, statistics, search, export and final polish | 7-8 | ⏳ Pending |
 
 **V1.0 ships when M1-M4 are complete.** Phase 1 (foundation) is a completed cross-cutting quality track; its coverage gate stays enforced. Anything outside these phases is post-V1.
@@ -43,8 +42,8 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 | 3 | Personal finance complete | ✅ Done |
 | 4 | Architecture and workflow spike | ✅ Done |
 | 5 | Social vertical slice | ✅ Done |
-| 6 | Groups | 🚧 In progress |
-| 7 | Offline-first implementation | ⏳ Queued |
+| 6 | Groups | ✅ Done |
+| 7 | Offline-first implementation | 🚧 In progress |
 | 8 | Retention and final polish | ⏳ Queued |
 
 > Subphase numbers group related work; they are not a strict execution order. **Current Focus** is the execution order.
@@ -149,13 +148,13 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ### 5.4 Initial onboarding
 - [x] TICKET-057: default main wallet on account creation ✅ 20/11/2026
 
-## Phase 6: Groups (IN PROGRESS)
+## Phase 6: Groups (COMPLETED)
 - [x] TICKET-008: create groups, friend invitations, group detail and member management (consumes the Social → Tus grupos shell from TICKET-041) ✅ 20/11/2026
 - [x] TICKET-061: group join code and join requests (deferred from TICKET-008) ✅ 20/11/2026
 - [x] Full TICKET-009: group expenses with participant selection, payer outside the participants, per-expense currency, permissions, group detail list and detail route ✅ 21/11/2026
 - [x] TICKET-010: group balances and settlements (reuse the TICKET-046 direct-settlement model, the receiver wallet movement and notification events) ✅ 23/11/2026
-- [ ] TICKET-011: group history
-- [ ] TICKET-068: group membership lifecycle (leave, balance-safe removal and ownership transfer)
+- [x] TICKET-011: group history ✅ 23/11/2026
+- [x] TICKET-068: group membership lifecycle (leave, balance-safe removal and ownership transfer) ✅ 23/11/2026
 - Constraint from the Phase 4 spike: shared expenses and settlements are append-only ledger entries folded by a shared pure function, so offline group movements work without a rewrite
 
 ### 6.0 Settlement and form polish (QUEUED)
@@ -177,9 +176,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ### 6.3 Group detail parity (COMPLETED)
 - [x] TICKET-072: edit action and simplified-debts state in the details sheet, one linear expense+settlement timeline, and the debt list behind **Liquidar deudas** ✅ 23/11/2026
 
-## Phase 7: Offline-first implementation (QUEUED)
+### 6.4 Group activity in the detail (COMPLETED)
+- [x] TICKET-073: merge the group activity into the group detail as **Actividad del grupo** and remove the separate history route of TICKET-011 ✅ 24/11/2026
+
+## Phase 7: Offline-first implementation (IN PROGRESS)
 - [ ] Full TICKET-023 (design accepted in Phase 4)
-  - [ ] Foundations: local SQLite DB, client-generated ids, `revision`/`deletedAt`/`appliedMutations` and rules
+  - [ ] Foundations: local SQLite DB, client-generated ids, `revision`/`deletedAt`/`appliedMutations` and rules — partially delivered 24/11/2026 (local DB foundations done; client ids and `revision`/`deletedAt`/`appliedMutations` + rules pending)
   - [ ] Local read cache for personal data and offline banner
   - [ ] Offline write queue for expenses, incomes and transfers with local balance derivation
   - [ ] Sync engine, retry/backoff, exactly-once and conflict UI

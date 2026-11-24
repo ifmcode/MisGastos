@@ -6,8 +6,8 @@ import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 import { roundMoney } from "@/features/wallets/utils/money";
 
 import { TransactionOperationError } from "../services/transaction.errors";
+import { getSignedTransactionAmount } from "../utils/transaction-balance";
 import {
-  getSignedTransactionAmount,
   readStoredGroupExpenseId,
   readStoredGroupSettlementId,
   readStoredSharedExpenseId,
@@ -92,7 +92,7 @@ export async function deleteTransactionOperation(
 
     const currentBalance = toWalletBalance(walletData);
     const nextBalance = roundMoney(
-      currentBalance - getSignedTransactionAmount(type, amount),
+      currentBalance - getSignedTransactionAmount({ type, amount }),
     );
 
     firestoreTransaction.update(walletRef, {
