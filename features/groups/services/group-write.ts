@@ -5,7 +5,6 @@ import type {
 } from "../types/group.types";
 import { filterPendingInvitations } from "../utils/group-list";
 import type { GroupWriteDeps } from "./group-deps";
-import { GroupOperationError } from "./group.errors";
 import {
   assertGroupNotFull,
   assertGroupOwner,
@@ -31,24 +30,10 @@ export async function updateGroupRecord(
   assertGroupOwner(group, viewerUid);
   const value = validateGroupUpdateOrThrow(input);
 
-  return repository.updateGroup(group.id, {
+  return repository.updateGroup(viewerUid, group.id, {
     ...value,
     updatedAt: new Date().toISOString(),
   });
-}
-
-export async function removeGroupMemberRecord(
-  repository: GroupWriteDeps["repository"],
-  viewerUid: string,
-  groupId: string,
-  memberId: string,
-): Promise<Group> {
-  const group = await requireGroup(repository, groupId);
-  assertGroupOwner(group, viewerUid);
-  const target = typeof memberId === "string" ? memberId.trim() : "";
-  if (target.length === 0) throw new GroupOperationError("MEMBER_NOT_FOUND");
-
-  return repository.removeMember(group.id, target, new Date().toISOString());
 }
 
 export async function inviteGroupMembers(
@@ -62,7 +47,7 @@ export async function inviteGroupMembers(
   const ids = validateInviteesOrThrow(inviteeIds, viewerUid);
   // One read: every pending invitation of the group reserves a seat.
   const pending = filterPendingInvitations(
-    await deps.repository.getGroupInvitations(group.ownerId, group.id),
+    await deps.repository.getGroupInvitations(group.id),
   );
   // No seat at all: fail before reading the friend list. The exact
   // members + pending + new fit is checked in `inviteMembersToGroup`.
@@ -102,9 +87,10 @@ export async function cancelGroupInvitation(
   invitationId: string,
 ): Promise<GroupInvitation> {
   const invitation = await requireGroupInvitation(repository, invitationId);
-  if (invitation.inviterId !== viewerUid) {
-    throw new GroupOperationError("NOT_GROUP_OWNER");
-  }
+  // Only the current group owner cancels: after a transfer the invitation may
+  // still name the previous owner, who must not keep that power.
+  const group = await requireGroup(repository, invitation.groupId);
+  assertGroupOwner(group, viewerUid);
   assertInvitationPending(invitation);
 
   return repository.cancelInvitation(invitation.id, new Date().toISOString());

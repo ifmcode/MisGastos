@@ -5,7 +5,14 @@ import type {
   GroupInvitation,
   GroupMetadataUpdate,
   InviteMembersInput,
+  LeaveGroupInput,
+  RemoveGroupMemberInput,
+  TransferGroupOwnershipInput,
 } from "../types/group.types";
+import type {
+  GroupActivityPage,
+  GroupActivityQuery,
+} from "../types/group-activity.types";
 import type {
   CreateGroupJoinRequestInput,
   EnsureGroupJoinCodeInput,
@@ -14,6 +21,7 @@ import type {
   RespondToGroupJoinRequestInput,
 } from "../types/group-join.types";
 import { acceptGroupInvitationOperation } from "./group-accept.operation";
+import { getGroupActivityOperation } from "./group-activity.operations";
 import { createGroupWithInvitationsOperation } from "./group-create.operation";
 import {
   createGroupJoinRequestOperation,
@@ -29,10 +37,10 @@ import {
   inviteMembersOperation,
   updateGroupInvitationStatusOperation,
 } from "./group-invitation.operations";
-import {
-  removeGroupMemberOperation,
-  updateGroupOperation,
-} from "./group-update.operations";
+import { removeGroupMemberOperation } from "./group-member-remove.operation";
+import { leaveGroupOperation } from "./group-member-leave.operation";
+import { transferGroupOwnershipOperation } from "./group-owner-transfer.operation";
+import { updateGroupOperation } from "./group-update.operations";
 import type { IGroupsRepository } from "./groups.repository";
 import {
   getGroupInvitationOperation,
@@ -43,9 +51,7 @@ import {
 } from "./groups.operations";
 
 export class FirebaseGroupsRepository implements IGroupsRepository {
-  createGroupWithInvitations(
-    input: CreateGroupWithInvitationsInput,
-  ): Promise<CreateGroupWithInvitationsResult> {
+  createGroupWithInvitations(input: CreateGroupWithInvitationsInput): Promise<CreateGroupWithInvitationsResult> {
     return createGroupWithInvitationsOperation(input);
   }
 
@@ -57,29 +63,32 @@ export class FirebaseGroupsRepository implements IGroupsRepository {
     return getGroupOperation(groupId);
   }
 
-  updateGroup(groupId: string, update: GroupMetadataUpdate): Promise<Group> {
-    return updateGroupOperation(groupId, update);
+  updateGroup(viewerUid: string, groupId: string, update: GroupMetadataUpdate): Promise<Group> {
+    return updateGroupOperation(viewerUid, groupId, update);
   }
 
-  removeMember(
-    groupId: string,
-    memberId: string,
-    updatedAt: string,
-  ): Promise<Group> {
-    return removeGroupMemberOperation(groupId, memberId, updatedAt);
+  removeMember(input: RemoveGroupMemberInput): Promise<Group> {
+    return removeGroupMemberOperation(input);
   }
 
-  getGroupInvitation(
-    invitationId: string,
-  ): Promise<GroupInvitation | null> {
+  leaveGroup(input: LeaveGroupInput): Promise<Group> {
+    return leaveGroupOperation(input);
+  }
+
+  transferOwnership(input: TransferGroupOwnershipInput): Promise<Group> {
+    return transferGroupOwnershipOperation(input);
+  }
+
+  getGroupActivity(groupId: string, query?: GroupActivityQuery): Promise<GroupActivityPage> {
+    return getGroupActivityOperation(groupId, query);
+  }
+
+  getGroupInvitation(invitationId: string): Promise<GroupInvitation | null> {
     return getGroupInvitationOperation(invitationId);
   }
 
-  getGroupInvitations(
-    inviterId: string,
-    groupId: string,
-  ): Promise<GroupInvitation[]> {
-    return getGroupInvitationsOperation(inviterId, groupId);
+  getGroupInvitations(groupId: string): Promise<GroupInvitation[]> {
+    return getGroupInvitationsOperation(groupId);
   }
 
   getPendingInvitations(inviteeId: string): Promise<GroupInvitation[]> {
@@ -94,15 +103,8 @@ export class FirebaseGroupsRepository implements IGroupsRepository {
     return acceptGroupInvitationOperation(viewerUid, invitationId);
   }
 
-  rejectInvitation(
-    invitationId: string,
-    updatedAt: string,
-  ): Promise<GroupInvitation> {
-    return updateGroupInvitationStatusOperation(
-      invitationId,
-      "rejected",
-      updatedAt,
-    );
+  rejectInvitation(invitationId: string, updatedAt: string): Promise<GroupInvitation> {
+    return updateGroupInvitationStatusOperation(invitationId, "rejected", updatedAt);
   }
 
   cancelInvitation(

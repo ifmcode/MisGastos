@@ -56,7 +56,7 @@ export async function loadGroupInvitationItems(
   group: Group,
 ): Promise<GroupInvitationItem[]> {
   const invitations = getGroupPendingInvitations(
-    await repository.getGroupInvitations(group.ownerId, group.id),
+    await repository.getGroupInvitations(group.id),
     group.id,
   );
   const profiles = await loadProfilesByUid(

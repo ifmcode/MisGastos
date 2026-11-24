@@ -2,6 +2,7 @@ import { runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import type { NotificationWrite } from "@/features/notifications/types/notification.types";
+import { addGroupActivity } from "@/features/groups/repositories/group-activity.writes";
 import { FirebaseSettlementMovementPort } from "@/features/settlements/repositories/firebase-settlement-movement.port";
 import type { ISettlementMovementPort } from "@/features/settlements/repositories/settlement-movement.port";
 import {
@@ -93,6 +94,18 @@ export async function softDeleteGroupSettlementOperation(
     }
 
     transaction.update(reference, patch);
+    addGroupActivity(transaction, {
+      type: "settlement-deleted",
+      groupId: stored.groupId,
+      actorId: viewerUid,
+      settlementId,
+      fromUserId: stored.fromUserId,
+      toUserId: stored.toUserId,
+      amountCents: stored.amountCents,
+      currency: stored.currency,
+      description: stored.note,
+      createdAt: deletedAt,
+    });
     reverted = true;
   });
 

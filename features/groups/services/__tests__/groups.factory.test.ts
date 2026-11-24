@@ -20,6 +20,31 @@ jest.mock(
   }),
 );
 
+jest.mock(
+  "@/features/group-expenses/repositories/firebase-group-expenses.repository",
+  () => ({
+    FirebaseGroupExpensesRepository: jest.fn(() => ({
+      kind: "group-expenses-repository",
+    })),
+  }),
+);
+
+jest.mock(
+  "@/features/group-expenses/repositories/firebase-group-settlements.repository",
+  () => ({
+    FirebaseGroupSettlementsRepository: jest.fn(() => ({
+      kind: "group-settlements-repository",
+    })),
+  }),
+);
+
+jest.mock(
+  "@/features/group-expenses/repositories/firebase-group-balance.port",
+  () => ({
+    FirebaseGroupBalancePort: jest.fn(() => ({ kind: "group-balance-port" })),
+  }),
+);
+
 import { getGroupsService } from "../groups.factory";
 
 describe("getGroupsService", () => {

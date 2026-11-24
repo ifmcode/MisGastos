@@ -47,6 +47,10 @@ export function movementRef(id = MOVEMENT_ID) {
   return { kind: "transaction", id };
 }
 
+export function activityRef(id = "activity-1") {
+  return { kind: "activity", id };
+}
+
 export function walletRef(id = WALLET_ID) {
   return { kind: "wallet", id };
 }
@@ -105,9 +109,10 @@ export function setupLinkOperationMocks() {
     if (args.length === 1) {
       const path = (args[0] as { path?: string }).path ?? "";
 
-      return path === "groupExpenses"
-        ? expenseRef("group-expense-new")
-        : movementRef("movement-new");
+      if (path === "groups") return activityRef("activity-new");
+      if (path === "groupExpenses") return expenseRef("group-expense-new");
+
+      return movementRef("movement-new");
     }
 
     const [, name, id] = args as [unknown, string, string];

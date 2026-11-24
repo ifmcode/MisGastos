@@ -5,8 +5,11 @@ jest.mock("../group-expenses.operations", () => ({
   createGroupExpenseOperation: jest.fn(async () => "created"),
   getGroupExpenseOperation: jest.fn(async () => "read"),
   getGroupExpensesOperation: jest.fn(async () => ["listed"]),
-  softDeleteGroupExpenseOperation: jest.fn(async () => undefined),
   updateGroupExpenseOperation: jest.fn(async () => "updated"),
+}));
+
+jest.mock("../group-expense-delete.operation", () => ({
+  softDeleteGroupExpenseOperation: jest.fn(async () => undefined),
 }));
 
 jest.mock("../group-expense-link.operations", () => ({
@@ -16,6 +19,7 @@ jest.mock("../group-expense-link.operations", () => ({
 }));
 
 import { FirebaseGroupExpensesRepository } from "../firebase-group-expenses.repository";
+import { softDeleteGroupExpenseOperation } from "../group-expense-delete.operation";
 import {
   createGroupExpenseLinkOperation,
   softDeleteGroupExpenseLinkOperation,
@@ -25,7 +29,6 @@ import {
   createGroupExpenseOperation,
   getGroupExpenseOperation,
   getGroupExpensesOperation,
-  softDeleteGroupExpenseOperation,
   updateGroupExpenseOperation,
 } from "../group-expenses.operations";
 import {
@@ -45,10 +48,14 @@ describe("FirebaseGroupExpensesRepository", () => {
     ]);
     await expect(repository.createExpense(createDto)).resolves.toBe("created");
     await expect(
-      repository.updateExpense("expense-1", updateDto),
+      repository.updateExpense("expense-1", updateDto, "user-a"),
     ).resolves.toBe("updated");
     await expect(
-      repository.softDeleteExpense("expense-1", "2026-11-15T10:00:00.000Z"),
+      repository.softDeleteExpense(
+        "expense-1",
+        "2026-11-15T10:00:00.000Z",
+        "user-a",
+      ),
     ).resolves.toBeUndefined();
 
     expect(getGroupExpenseOperation).toHaveBeenCalledWith("expense-1");
@@ -57,10 +64,12 @@ describe("FirebaseGroupExpensesRepository", () => {
     expect(updateGroupExpenseOperation).toHaveBeenCalledWith(
       "expense-1",
       updateDto,
+      "user-a",
     );
     expect(softDeleteGroupExpenseOperation).toHaveBeenCalledWith(
       "expense-1",
       "2026-11-15T10:00:00.000Z",
+      "user-a",
     );
   });
 

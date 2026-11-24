@@ -13,14 +13,19 @@ export interface IGroupExpensesRepository {
 
   createExpense(dto: CreateGroupExpenseDto): Promise<GroupExpense>;
 
-  /** Only mutable fields; `groupId`, `createdBy` and `createdAt` never change. */
+  /** Only mutable fields; the actor feeds the `expense-updated` history event. */
   updateExpense(
     expenseId: string,
     update: UpdateGroupExpenseDto,
+    viewerUid: string,
   ): Promise<GroupExpense>;
 
   /** Soft delete: sets `deletedAt` and `updatedAt`, keeps the record. */
-  softDeleteExpense(expenseId: string, deletedAt: string): Promise<void>;
+  softDeleteExpense(
+    expenseId: string,
+    deletedAt: string,
+    viewerUid: string,
+  ): Promise<void>;
 }
 
 /**

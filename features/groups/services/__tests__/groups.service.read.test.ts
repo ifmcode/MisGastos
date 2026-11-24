@@ -149,6 +149,55 @@ describe("GroupsService invitations reads", () => {
     expect(items.some((item) => item.invitee?.uid === "user-c")).toBe(true);
   });
 
+  it("lets the new owner list an invitation opened by the previous owner", async () => {
+    const { repository, friends, service } = createGroupsHarness();
+    const group = repository.seedGroup({
+      id: "user-a__group-1",
+      ownerId: "user-b",
+      createdBy: "user-a",
+      memberIds: ["user-b"],
+    });
+    repository.seedInvitation({
+      groupId: group.id,
+      inviterId: "user-a",
+      inviteeId: "user-c",
+    });
+    friends.seedProfile("user-c", "Caro", "user-c@example.com");
+
+    const items = await service.getGroupInvitations("user-b", group.id);
+
+    expect(items).toHaveLength(1);
+    expect(items[0].invitation).toMatchObject({
+      inviterId: "user-a",
+      inviteeId: "user-c",
+    });
+  });
+
+  it("resolves a received invitation whose inviter is not the id prefix", async () => {
+    const { repository, friends, service } = createGroupsHarness();
+    const group = repository.seedGroup({
+      id: "user-a__group-1",
+      ownerId: "user-b",
+      createdBy: "user-a",
+      memberIds: ["user-b"],
+    });
+    repository.seedInvitation({
+      groupId: group.id,
+      inviterId: "user-a",
+      inviteeId: "user-c",
+    });
+    friends.seedProfile("user-a", "Ana", "user-a@example.com");
+
+    const items = await service.getPendingInvitations("user-c");
+
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      groupId: group.id,
+      inviterId: "user-a",
+      inviter: { uid: "user-a", displayName: "Ana" },
+    });
+  });
+
   it("rejects the invitations list for a non-owner", async () => {
     const { repository, service } = createGroupsHarness();
     const group = repository.seedGroup({ memberIds: ["user-a", "user-b"] });

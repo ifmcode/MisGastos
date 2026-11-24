@@ -46,6 +46,7 @@ describe("mapGroupDocument", () => {
     ).toEqual({
       id: GROUP_ID,
       ownerId: "user-a",
+      createdBy: "user-a",
       memberIds: ["user-a", "user-b"],
       name: "Viaje",
       description: "Finde",
@@ -133,6 +134,43 @@ describe("mapGroupDocument", () => {
     expect(mapGroupDocument("user-a__", groupData)).toBeNull();
   });
 
+  it("keeps a transferred group by validating the prefix against createdBy", () => {
+    const transferred = {
+      ...groupData,
+      ownerId: "user-b",
+      createdBy: "user-a",
+      memberIds: ["user-b", "user-a"],
+    };
+
+    expect(mapGroupDocument(GROUP_ID, transferred)).toMatchObject({
+      ownerId: "user-b",
+      createdBy: "user-a",
+      memberIds: ["user-b", "user-a"],
+    });
+  });
+
+  it("drops a group whose prefix belongs to neither creator nor owner", () => {
+    expect(
+      mapGroupDocument(GROUP_ID, { ...groupData, createdBy: "user-b" }),
+    ).toBeNull();
+    expect(
+      mapGroupDocument(GROUP_ID, { ...groupData, createdBy: "" }),
+    ).toBeNull();
+    expect(
+      mapGroupDocument(GROUP_ID, { ...groupData, createdBy: 42 }),
+    ).toBeNull();
+  });
+
+  it("falls back to ownerId only when createdBy is absent", () => {
+    const legacy = { ...groupData };
+    delete legacy.createdBy;
+
+    expect(mapGroupDocument(GROUP_ID, legacy)?.createdBy).toBe("user-a");
+    expect(
+      mapGroupDocument(GROUP_ID, { ...groupData, createdBy: null })?.createdBy,
+    ).toBe("user-a");
+  });
+
   it("drops a document the rules would not accept", () => {
     const invalid: Array<Record<string, unknown>> = [
       { ...groupData, ownerId: "" },
@@ -180,12 +218,30 @@ describe("mapGroupInvitationDocument", () => {
     });
   });
 
+  it("accepts an invitation opened by a transferred owner", () => {
+    // After TICKET-068 the id prefix belongs to the immutable creator, so the
+    // inviter may be a different uid; the document id still matches group+invitee.
+    const invitation = mapGroupInvitationDocument(`${GROUP_ID}__user-c`, {
+      ...invitationData,
+      inviterId: "user-b",
+      pairId: "user-b__user-c",
+      inviteeId: "user-c",
+    });
+
+    expect(invitation).toMatchObject({
+      id: `${GROUP_ID}__user-c`,
+      inviterId: "user-b",
+      inviteeId: "user-c",
+      pairId: "user-b__user-c",
+    });
+  });
+
   it("drops a forged group, id, pair or status", () => {
     const forgedGroup = "user-b__group-1";
     const invalid: Array<[string, Record<string, unknown>]> = [
       [INVITATION_ID, { ...invitationData, groupId: forgedGroup }],
-      [`${forgedGroup}__user-b`, { ...invitationData, groupId: forgedGroup }],
       [`${GROUP_ID}__user-x`, invitationData],
+      [INVITATION_ID, { ...invitationData, inviterId: "" }],
       [INVITATION_ID, { ...invitationData, pairId: "user-a__user-c" }],
       [INVITATION_ID, { ...invitationData, pairId: "user-b__user-a" }],
       [INVITATION_ID, { ...invitationData, status: "expired" }],

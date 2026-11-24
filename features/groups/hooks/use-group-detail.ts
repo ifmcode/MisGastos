@@ -3,18 +3,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
-import { getGroupErrorCode, type GroupErrorCode } from "../services/group.errors";
+import { getGroupErrorCode } from "../services/group.errors";
 import type { GroupDetail } from "../types/group.types";
+import { MISSING_GROUP_CODES } from "../utils/group-error-codes";
 import { useGroupsService } from "./use-groups-service";
 
-type LoadMode = "initial" | "refresh";
+export { MISSING_GROUP_CODES } from "../utils/group-error-codes";
 
-/** Errors that mean the group is not readable by this viewer. */
-export const MISSING_GROUP_CODES: readonly GroupErrorCode[] = [
-  "GROUP_NOT_FOUND",
-  "NOT_GROUP_MEMBER",
-  "PERMISSION_DENIED",
-];
+type LoadMode = "initial" | "refresh";
 
 export interface UseGroupDetailOptions {
   viewerUid: string | undefined;

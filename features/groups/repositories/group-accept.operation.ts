@@ -12,6 +12,7 @@ import {
   mapGroupDocument,
   mapGroupInvitationDocument,
 } from "./groups.mapper";
+import { addGroupActivity } from "./group-activity.writes";
 import { groupInvitationRef, groupRef } from "./groups.operations";
 
 /**
@@ -71,6 +72,13 @@ export async function acceptGroupInvitationOperation(
       updatedAt,
     });
     transaction.update(groupRef(current.id), { memberIds, updatedAt });
+    addGroupActivity(transaction, {
+      type: "member-joined",
+      groupId: current.id,
+      actorId: viewerUid,
+      targetUserId: viewerUid,
+      createdAt: updatedAt,
+    });
 
     group = { ...current, memberIds, updatedAt };
   });

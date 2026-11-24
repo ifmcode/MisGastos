@@ -97,20 +97,32 @@ export function calculateGroupBalances(
   };
 }
 
-/** The viewer's nets per currency, zero lines dropped (empty = settled). */
-export function getViewerGroupBalance(
-  balances: GroupBalances,
-  viewerUid: string,
+/**
+ * The member's non-zero nets per currency, zero lines dropped (empty =
+ * settled). Shared by the group balance view and TICKET-068's guard, so both
+ * read the same engine output.
+ */
+export function getMemberNetBalances(
+  currencies: readonly GroupCurrencyBalances[],
+  memberId: string,
 ): ViewerGroupBalance[] {
-  const viewer = typeof viewerUid === "string" ? viewerUid.trim() : "";
-  if (viewer.length === 0) return [];
+  const member = typeof memberId === "string" ? memberId.trim() : "";
+  if (member.length === 0) return [];
 
-  return balances.currencies.flatMap((currencyBalances) =>
+  return currencies.flatMap((currencyBalances) =>
     currencyBalances.balances
-      .filter((balance) => balance.userId === viewer && balance.netCents !== 0)
+      .filter((balance) => balance.userId === member && balance.netCents !== 0)
       .map((balance) => ({
         currency: currencyBalances.currency,
         netCents: balance.netCents,
       })),
   );
+}
+
+/** The viewer's nets per currency, zero lines dropped (empty = settled). */
+export function getViewerGroupBalance(
+  balances: GroupBalances,
+  viewerUid: string,
+): ViewerGroupBalance[] {
+  return getMemberNetBalances(balances.currencies, viewerUid);
 }

@@ -7,14 +7,14 @@ import type {
 } from "../types/group-settlement.types";
 import { createGroupSettlementOperation } from "./group-settlement-create.operation";
 import { softDeleteGroupSettlementOperation } from "./group-settlement-delete.operation";
-import { updateGroupSettlementOperation } from "./group-settlement-update.operation";
-import {
+import { updateGroupSettlementOperation } from "./group-settlement-update.operation";import {
   getGroupSettlementOperation,
   getGroupSettlementsOperation,
 } from "./group-settlements.operations";
 import type {
   GroupSettlementNotificationBuilder,
   IGroupSettlementsRepository,
+  UpdateGroupSettlementOperationOptions,
 } from "./group-settlements.repository";
 
 /** Firestore implementation: no business rule lives here. */

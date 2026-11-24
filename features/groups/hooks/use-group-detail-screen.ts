@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 import { useFriendsOverview } from "@/features/friends/hooks/use-friends-overview";
 import { useGroupBalances } from "@/features/group-expenses/hooks/use-group-balances";
@@ -12,9 +12,11 @@ import type {
   GroupDetailScreenController,
   UseGroupDetailScreenOptions,
 } from "./group-detail-screen.types";
+import { useGroupActivityFeed } from "./use-group-activity-feed";
 import { useGroupDetail } from "./use-group-detail";
 import { useGroupDetailExpenses } from "./use-group-detail-expenses";
 import { useGroupDetailMembership } from "./use-group-detail-membership";
+import { useGroupDetailSheetController } from "./use-group-detail-sheet-controller";
 import { useGroupEditor } from "./use-group-editor";
 import { useGroupInviteMembers } from "./use-group-invite-members";
 
@@ -27,6 +29,8 @@ export type { GroupDetailStatus } from "../utils/group-detail-status";
 /** Composition root of `/social/groups/[groupId]`. */
 export function useGroupDetailScreen({
   groupId,
+  onLeft,
+  onOpenSettle,
 }: UseGroupDetailScreenOptions): GroupDetailScreenController {
   const { user } = useAuth();
   const viewerUid = user?.uid;
@@ -40,15 +44,18 @@ export function useGroupDetailScreen({
   const refreshBalances = balances.refresh;
   const settlements = useGroupDetailSettlements({ viewerUid, groupId });
   const refreshSettlements = settlements.refresh;
-  const [detailsVisible, setDetailsVisible] = useState(false);
+  const activity = useGroupActivityFeed({ viewerUid, groupId });
+  const reloadActivity = activity.reload;
+  const refreshActivity = activity.refresh;
   const preferredCurrency = profile?.preferredCurrency ?? DEFAULT_CURRENCY;
+  const sheet = useGroupDetailSheetController({ onLeft, onOpenSettle });
 
-  // A saved expense, group setting or membership change can move the balances,
-  // so they refresh silently next to the detail reload.
+  // A mutation can move the balances and append activity: reload both silently.
   const onGroupChanged = useCallback(() => {
     reload();
     void refreshBalances();
-  }, [refreshBalances, reload]);
+    reloadActivity();
+  }, [refreshBalances, reload, reloadActivity]);
 
   const expenses = useGroupDetailExpenses({
     viewerUid,
@@ -61,6 +68,13 @@ export function useGroupDetailScreen({
   });
   const expensesRefresh = expenses.refresh;
 
+  // A transfer changes the timeline roles, so reload expenses and settlements.
+  const onMembershipChanged = useCallback(() => {
+    onGroupChanged();
+    void expensesRefresh();
+    void refreshSettlements();
+  }, [expensesRefresh, onGroupChanged, refreshSettlements]);
+
   const refresh = useCallback(() => {
     void Promise.all([
       detailRefresh(),
@@ -68,11 +82,13 @@ export function useGroupDetailScreen({
       expensesRefresh(),
       refreshBalances(),
       refreshSettlements(),
+      refreshActivity(),
     ]);
   }, [
     detailRefresh,
     expensesRefresh,
     friendsRefresh,
+    refreshActivity,
     refreshBalances,
     refreshSettlements,
   ]);
@@ -97,11 +113,11 @@ export function useGroupDetailScreen({
     viewerUid,
     groupId,
     detail,
-    onChanged: onGroupChanged,
+    balances: balances.balances,
+    onChanged: onMembershipChanged,
+    onLeft: sheet.handleLeft,
+    onOpenSettle: sheet.openSettleFromDialog,
   });
-
-  const openDetails = useCallback(() => setDetailsVisible(true), []);
-  const closeDetails = useCallback(() => setDetailsVisible(false), []);
 
   const status = getGroupDetailStatus(groupDetail, detail !== null);
 
@@ -114,16 +130,20 @@ export function useGroupDetailScreen({
     isOwner: detail ? detail.group.ownerId === viewerUid : false,
     error: groupDetail.error,
     refreshing:
-      groupDetail.refreshing || friendsOverview.refreshing || balances.refreshing,
-    detailsVisible,
+      groupDetail.refreshing ||
+      friendsOverview.refreshing ||
+      balances.refreshing ||
+      activity.refreshing,
+    detailsVisible: sheet.detailsVisible,
     editor,
     expenses,
     balances,
     settlements,
+    activity,
     invite,
     reload,
     refresh,
-    openDetails,
-    closeDetails,
+    openDetails: sheet.openDetails,
+    closeDetails: sheet.closeDetails,
   };
 }

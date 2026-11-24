@@ -5,17 +5,19 @@ import {
   GENERATED_EXPENSE_ID,
   documentSnapshot,
   missingSnapshot,
+  mockBatchCommit,
+  mockBatchSet,
   mockDoc,
-  mockGetDoc,
-  mockSetDoc,
-  mockUpdateDoc,
+  mockTransactionGet,
+  mockTransactionSet,
+  mockTransactionUpdate,
   setupGroupExpensesRepositoryMocks,
 } from "./group-expenses-repository.test-helpers";
 import {
   createGroupExpenseOperation,
-  softDeleteGroupExpenseOperation,
   updateGroupExpenseOperation,
 } from "../group-expenses.operations";
+import { softDeleteGroupExpenseOperation } from "../group-expense-delete.operation";
 import {
   buildCreateDto,
   buildDocument,
@@ -31,15 +33,34 @@ const createdRef = {
   id: GENERATED_EXPENSE_ID,
   path: `groupExpenses/${GENERATED_EXPENSE_ID}`,
 };
+const activity = { kind: "activity", id: "activity-1" };
 
 describe("createGroupExpenseOperation", () => {
-  it("generates the id and stores the full document", async () => {
-    mockSetDoc.mockResolvedValue(undefined);
-
+  it("writes the document and its history event in one batch", async () => {
     const expense = await createGroupExpenseOperation(createDto);
 
     expect(mockDoc).toHaveBeenCalledWith({ path: "collection" });
-    expect(mockSetDoc).toHaveBeenCalledWith(createdRef, buildDocument());
+    expect(mockBatchSet).toHaveBeenCalledWith(createdRef, buildDocument());
+    expect(mockBatchSet).toHaveBeenCalledWith(activity, {
+      type: "expense-created",
+      groupId: "user-a__group-1",
+      actorId: "user-a",
+      targetUserId: null,
+      targetName: null,
+      expenseId: GENERATED_EXPENSE_ID,
+      settlementId: null,
+      fromUserId: null,
+      toUserId: null,
+      amountCents: 1000,
+      currency: "EUR",
+      description: "Dinner",
+      changedFields: [],
+      simplifyDebts: null,
+      previousOwnerId: null,
+      newOwnerId: null,
+      createdAt: "2026-11-10T20:00:00.000Z",
+    });
+    expect(mockBatchCommit).toHaveBeenCalledTimes(1);
     expect(expense).toMatchObject({
       id: GENERATED_EXPENSE_ID,
       groupId: "user-a__group-1",
@@ -48,8 +69,6 @@ describe("createGroupExpenseOperation", () => {
   });
 
   it("copies the optional split metadata present on a row", async () => {
-    mockSetDoc.mockResolvedValue(undefined);
-
     await createGroupExpenseOperation({
       ...createDto,
       splitMode: "shares",
@@ -59,7 +78,7 @@ describe("createGroupExpenseOperation", () => {
       ],
     });
 
-    expect(mockSetDoc).toHaveBeenCalledWith(createdRef, {
+    expect(mockBatchSet).toHaveBeenCalledWith(createdRef, {
       ...buildDocument({ splitMode: "shares" }),
       participants: [
         { userId: "user-a", shareCents: 400, weight: 2, percentageBps: 4000 },
@@ -69,8 +88,6 @@ describe("createGroupExpenseOperation", () => {
   });
 
   it("fails when the written payload cannot be mapped", async () => {
-    mockSetDoc.mockResolvedValue(undefined);
-
     await expect(
       createGroupExpenseOperation({ ...createDto, amountCents: 0 }),
     ).rejects.toMatchObject({ code: "EXPENSE_NOT_FOUND" });
@@ -78,15 +95,18 @@ describe("createGroupExpenseOperation", () => {
 });
 
 describe("updateGroupExpenseOperation", () => {
-  it("writes only mutable fields and returns the stored document", async () => {
-    mockUpdateDoc.mockResolvedValue(undefined);
-    mockGetDoc.mockResolvedValue(
-      documentSnapshot("expense-1", buildDocument({ ...updateDto })),
+  it("updates the mutable fields and appends the edit event atomically", async () => {
+    mockTransactionGet.mockResolvedValue(
+      documentSnapshot("expense-1", buildDocument()),
     );
 
-    const expense = await updateGroupExpenseOperation("expense-1", updateDto);
+    const expense = await updateGroupExpenseOperation(
+      "expense-1",
+      updateDto,
+      "user-a",
+    );
 
-    expect(mockUpdateDoc).toHaveBeenCalledWith(
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(
       { id: "expense-1", path: "groupExpenses/expense-1" },
       {
         payerId: "user-b",
@@ -101,34 +121,87 @@ describe("updateGroupExpenseOperation", () => {
         updatedAt: "2026-11-11T10:00:00.000Z",
       },
     );
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      activity,
+      expect.objectContaining({
+        type: "expense-updated",
+        actorId: "user-a",
+        expenseId: "expense-1",
+        amountCents: 2000,
+        description: "Lunch",
+      }),
+    );
     expect(expense).toMatchObject({ id: "expense-1", amountCents: 2000 });
   });
 
-  it("fails when the updated document cannot be read back", async () => {
-    mockUpdateDoc.mockResolvedValue(undefined);
-    mockGetDoc.mockResolvedValue(missingSnapshot());
+  it("fails when the stored document is missing", async () => {
+    mockTransactionGet.mockResolvedValue(missingSnapshot());
 
     await expect(
-      updateGroupExpenseOperation("expense-1", updateDto),
+      updateGroupExpenseOperation("expense-1", updateDto, "user-a"),
     ).rejects.toMatchObject({ code: "EXPENSE_NOT_FOUND" });
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
   });
 });
 
 describe("softDeleteGroupExpenseOperation", () => {
-  it("stamps deletedAt and updatedAt without deleting the record", async () => {
-    mockUpdateDoc.mockResolvedValue(undefined);
+  it("stamps the deletion and appends the delete event", async () => {
+    mockTransactionGet.mockResolvedValue(
+      documentSnapshot("expense-1", buildDocument()),
+    );
 
     await softDeleteGroupExpenseOperation(
       "expense-1",
       "2026-11-11T10:00:00.000Z",
+      "user-a",
     );
 
-    expect(mockUpdateDoc).toHaveBeenCalledWith(
+    expect(mockTransactionUpdate).toHaveBeenCalledWith(
       { id: "expense-1", path: "groupExpenses/expense-1" },
       {
         deletedAt: "2026-11-11T10:00:00.000Z",
         updatedAt: "2026-11-11T10:00:00.000Z",
       },
     );
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      activity,
+      expect.objectContaining({
+        type: "expense-deleted",
+        actorId: "user-a",
+        amountCents: 1000,
+        description: "Dinner",
+        createdAt: "2026-11-11T10:00:00.000Z",
+      }),
+    );
+  });
+
+  it("writes nothing when the expense is already deleted", async () => {
+    mockTransactionGet.mockResolvedValue(
+      documentSnapshot(
+        "expense-1",
+        buildDocument({ deletedAt: "2026-11-10T20:00:00.000Z" }),
+      ),
+    );
+
+    await softDeleteGroupExpenseOperation(
+      "expense-1",
+      "2026-11-11T10:00:00.000Z",
+      "user-a",
+    );
+
+    expect(mockTransactionUpdate).not.toHaveBeenCalled();
+    expect(mockTransactionSet).not.toHaveBeenCalled();
+  });
+
+  it("fails for a missing expense", async () => {
+    mockTransactionGet.mockResolvedValue(missingSnapshot());
+
+    await expect(
+      softDeleteGroupExpenseOperation(
+        "expense-1",
+        "2026-11-11T10:00:00.000Z",
+        "user-a",
+      ),
+    ).rejects.toMatchObject({ code: "EXPENSE_NOT_FOUND" });
   });
 });

@@ -2,17 +2,16 @@ import { useCallback } from "react";
 import { RefreshControl, ScrollView } from "react-native";
 
 import { GroupBalancesSection } from "@/features/group-expenses/components/group-balances-section";
-import { GroupTimeline } from "@/features/group-expenses/components/group-timeline";
 import type { GroupBalancesController } from "@/features/group-expenses/hooks/use-group-balances";
 import type { GroupDetailSettlementsController } from "@/features/group-expenses/hooks/use-group-detail-settlements";
-import type { GroupExpense } from "@/features/group-expenses/types/group-expense.types";
-import type { GroupSettlement } from "@/features/group-expenses/types/group-settlement.types";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
+import type { GroupActivityFeedController } from "../hooks/use-group-activity-feed";
 import type { GroupDetailExpensesController } from "../hooks/use-group-detail-expenses";
 import { groupsStyles as styles } from "../styles/groups.styles";
 import type { GroupDetail } from "../types/group.types";
+import { GroupActivitySection } from "./group-activity-section";
 import { GroupDetailHeader } from "./group-detail-header";
 
 export interface GroupDetailContentProps {
@@ -24,17 +23,21 @@ export interface GroupDetailContentProps {
   balances: GroupBalancesController;
   settlements: GroupDetailSettlementsController;
   expenses: GroupDetailExpensesController;
+  activity: GroupActivityFeedController;
   onRefresh: () => void;
   onBack: () => void;
   onOpenDetails: () => void;
   onInvite: () => void;
-  onOpenExpense: (expense: GroupExpense) => void;
+  onOpenExpense: (expenseId: string) => void;
   /** Opens the settle route without a pair; the route asks which debt. */
   onOpenSettle: () => void;
-  onOpenSettlement: (settlement: GroupSettlement) => void;
+  onOpenSettlement: (settlementId: string) => void;
 }
 
-/** Scrollable body of the group detail: header, balances and one timeline. */
+/**
+ * Scrollable body of the group detail: header, balances and the merged activity
+ * register of active records plus events.
+ */
 export function GroupDetailContent({
   detail,
   viewerUid,
@@ -44,6 +47,7 @@ export function GroupDetailContent({
   balances,
   settlements,
   expenses,
+  activity,
   onRefresh,
   onBack,
   onOpenDetails,
@@ -55,10 +59,11 @@ export function GroupDetailContent({
   const theme = useFormTheme();
   const settled =
     balances.balances !== null && balances.balances.debts.length === 0;
-  const retryTimeline = useCallback(() => {
+  const retryActivity = useCallback(() => {
     expenses.retry();
     settlements.retry();
-  }, [expenses, settlements]);
+    activity.reload();
+  }, [activity, expenses, settlements]);
 
   return (
     <ScrollView
@@ -94,14 +99,18 @@ export function GroupDetailContent({
         onOpenSettle={onOpenSettle}
       />
 
-      <GroupTimeline
+      <GroupActivitySection
         expenses={expenses.expenses}
         settlements={settlements.settlements}
+        activities={activity.items}
         members={detail.members}
         viewerUid={viewerUid}
-        loading={expenses.loading || settlements.loading}
-        error={expenses.error ?? settlements.error}
-        onRetry={retryTimeline}
+        loading={expenses.loading || settlements.loading || activity.loading}
+        error={expenses.error ?? settlements.error ?? activity.error}
+        onRetry={retryActivity}
+        hasMore={activity.hasMore}
+        loadingMore={activity.loadingMore}
+        onLoadMore={activity.loadMore}
         onOpenExpense={onOpenExpense}
         onOpenSettlement={onOpenSettlement}
       />

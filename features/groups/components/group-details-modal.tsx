@@ -2,7 +2,6 @@ import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
-import { ConfirmDialog } from "@/shared/components/molecules/confirm-dialog";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { FormHeader } from "@/shared/components/molecules/form-header";
 import { PageSheetFormModal } from "@/shared/components/molecules/page-sheet-form-modal";
@@ -13,10 +12,12 @@ import type { GroupMemberActionsController } from "../hooks/use-group-member-act
 import type { GroupJoinCodeController } from "../hooks/use-group-join-code";
 import { groupsStyles as styles } from "../styles/groups.styles";
 import type { GroupDetail } from "../types/group.types";
+import { GroupDetailsConfirmDialogs } from "./group-details-confirm-dialogs";
 import { GroupDetailsEditButton } from "./group-details-edit-button";
 import { GroupDetailsInfo } from "./group-details-info";
+import { GroupDetailsLeaveButton } from "./group-details-leave-button";
+import { GroupDetailsMembers } from "./group-details-members";
 import { GroupJoinCodeCard } from "./group-join-code-card";
-import { GroupMemberRow } from "./group-member-row";
 import { GroupPendingInvitationRow } from "./group-pending-invitation-row";
 
 export interface GroupDetailsModalProps {
@@ -45,8 +46,7 @@ export function GroupDetailsModal({
   const busy = memberActions.pendingId !== null;
   const members = detail?.members ?? [];
   const invitations = isOwner ? (detail?.invitations ?? []) : [];
-  const removeConfirm = memberActions.removeConfirm;
-  const cancelConfirm = memberActions.cancelConfirm;
+  const leaving = memberActions.pendingAction === "leave";
 
   return (
     <PageSheetFormModal visible={visible} onRequestClose={onClose}>
@@ -82,21 +82,25 @@ export function GroupDetailsModal({
             onShare={joinCode.share}
           />
 
-          <View style={styles.section}>
-            <ThemedText style={[styles.sectionTitle, { color: theme.muted }]}>
-              {t("details.membersLabel")}
+          <GroupDetailsMembers
+            members={members}
+            isOwner={isOwner}
+            busy={busy}
+            memberActions={memberActions}
+          />
+
+          {memberActions.canLeave ? (
+            <GroupDetailsLeaveButton
+              groupName={detail?.group.name ?? ""}
+              busy={busy}
+              leaving={leaving}
+              onPress={memberActions.requestLeave}
+            />
+          ) : (
+            <ThemedText style={[styles.ownerLeaveHint, { color: theme.muted }]}>
+              {t("details.ownerLeaveHint")}
             </ThemedText>
-            {members.map((member) => (
-              <GroupMemberRow
-                key={member.uid}
-                member={member}
-                canRemove={isOwner && member.role !== "owner"}
-                busy={busy}
-                removing={memberActions.pendingId === member.uid}
-                onRemove={memberActions.requestRemove}
-              />
-            ))}
-          </View>
+          )}
 
           {invitations.length > 0 ? (
             <View style={styles.section}>
@@ -110,7 +114,10 @@ export function GroupDetailsModal({
                   key={item.invitation.id}
                   item={item}
                   busy={busy}
-                  canceling={memberActions.pendingId === item.invitation.id}
+                  canceling={
+                    memberActions.pendingId === item.invitation.id &&
+                    memberActions.pendingAction === "cancel-invitation"
+                  }
                   onCancel={memberActions.requestCancelInvitation}
                 />
               ))}
@@ -120,23 +127,12 @@ export function GroupDetailsModal({
           <ErrorBanner message={memberActions.error} />
         </ScrollView>
 
-        <ConfirmDialog
-          visible={removeConfirm.visible}
-          title={removeConfirm.title}
-          message={removeConfirm.message}
-          confirmLabel={removeConfirm.confirmLabel}
-          cancelLabel={removeConfirm.cancelLabel}
-          onConfirm={removeConfirm.confirm}
-          onCancel={removeConfirm.close}
-        />
-        <ConfirmDialog
-          visible={cancelConfirm.visible}
-          title={cancelConfirm.title}
-          message={cancelConfirm.message}
-          confirmLabel={cancelConfirm.confirmLabel}
-          cancelLabel={cancelConfirm.cancelLabel}
-          onConfirm={cancelConfirm.confirm}
-          onCancel={cancelConfirm.close}
+        <GroupDetailsConfirmDialogs
+          removeConfirm={memberActions.removeConfirm}
+          cancelConfirm={memberActions.cancelConfirm}
+          leaveConfirm={memberActions.leaveConfirm}
+          transferConfirm={memberActions.transferConfirm}
+          blockedDialog={memberActions.blockedDialog}
         />
       </SafeAreaView>
     </PageSheetFormModal>

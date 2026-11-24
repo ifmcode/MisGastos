@@ -28,15 +28,10 @@ export function GroupDetailScreen() {
   const router = useRouter();
   const { t } = useTranslation(["groups", "common", "groupExpenses"]);
   const params = useLocalSearchParams<{ groupId?: string | string[] }>();
-  const screen = useGroupDetailScreen({ groupId: readGroupId(params.groupId) });
-  const { detail, editor, invite, expenses, balances, settlements } = screen;
-  const navigation = useGroupDetailNavigation({
-    groupId: detail?.group.id ?? "",
-  });
-  // Loading and full errors have no group header yet, so they keep a back action.
-  const showRouteHeader =
-    screen.status === "loading" || screen.status === "error";
+  const groupId = readGroupId(params.groupId);
 
+  // Leaving the group, the missing state and the back header all return to the
+  // previous screen, which is Social when the detail was pushed from the tab.
   const leave = useCallback(() => {
     if (router.canGoBack()) {
       router.back();
@@ -45,6 +40,18 @@ export function GroupDetailScreen() {
 
     router.replace("/(tabs)/social" as Href);
   }, [router]);
+
+  const navigation = useGroupDetailNavigation({ groupId });
+  const screen = useGroupDetailScreen({
+    groupId,
+    onLeft: leave,
+    onOpenSettle: navigation.openSettle,
+  });
+  const { detail, editor, invite, expenses, balances, settlements, activity } =
+    screen;
+  // Loading and full errors have no group header yet, so they keep a back action.
+  const showRouteHeader =
+    screen.status === "loading" || screen.status === "error";
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + 16 }]}>
@@ -74,6 +81,7 @@ export function GroupDetailScreen() {
           balances={balances}
           settlements={settlements}
           expenses={expenses}
+          activity={activity}
           onRefresh={screen.refresh}
           onBack={leave}
           onOpenDetails={screen.openDetails}

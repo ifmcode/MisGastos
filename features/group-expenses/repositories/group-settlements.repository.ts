@@ -14,6 +14,14 @@ export type GroupSettlementNotificationBuilder = (
   settlement: GroupSettlement,
 ) => NotificationWrite;
 
+/** Options of an edit; the repository exposes them as one argument. */
+export interface UpdateGroupSettlementOperationOptions {
+  viewerUid: string;
+  settlementId: string;
+  update: UpdateGroupSettlementDto;
+  notification: NotificationWrite;
+}
+
 /**
  * Group settlement persistence (TICKET-010 Phase B). The service owns the
  * membership, direction and debt guards; this seam only talks to Firestore and

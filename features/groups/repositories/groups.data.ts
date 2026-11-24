@@ -13,6 +13,7 @@ export const GROUP_JOIN_REQUESTS_COLLECTION = "groupJoinRequests";
 export function toGroupData(group: Group): Record<string, unknown> {
   return {
     ownerId: group.ownerId,
+    createdBy: group.createdBy,
     memberIds: group.memberIds,
     name: group.name,
     description: group.description,
@@ -54,13 +55,21 @@ export function toGroupInvitationData(
 
 /**
  * Re-open a rejected/cancelled (or accepted-then-removed) invitation. The rules
- * only allow `status` + `updatedAt` in that transition, so the group name is
+ * allow `status`/`updatedAt` plus, when the opener is a new owner after a
+ * transfer, `inviterId`/`pairId` in that same transition. The group name is
  * refreshed by its own pending -> pending write when it drifted.
  */
 export function toGroupInvitationReopenData(
   updatedAt: string,
+  inviter?: { inviterId: string; pairId: string },
 ): Record<string, unknown> {
-  return { status: "pending", updatedAt };
+  const data: Record<string, unknown> = { status: "pending", updatedAt };
+  if (inviter) {
+    data.inviterId = inviter.inviterId;
+    data.pairId = inviter.pairId;
+  }
+
+  return data;
 }
 
 /** Pending -> pending rename propagation allowed by the rules. */
@@ -85,6 +94,15 @@ export function toGroupCodeRenameData(
   groupName: string,
 ): Record<string, unknown> {
   return { groupName };
+}
+
+/**
+ * TICKET-068 transfer propagation: the projection follows the current owner so
+ * a promoted owner can rename the group and receive join requests. The name and
+ * the code itself are untouched.
+ */
+export function toGroupCodeOwnerData(ownerId: string): Record<string, unknown> {
+  return { ownerId };
 }
 
 export function toGroupJoinRequestData(

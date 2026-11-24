@@ -61,6 +61,73 @@ describe("GroupsService.acceptInvitation", () => {
   });
 });
 
+describe("GroupsService invitation lifecycle after a transfer", () => {
+  it("accepts a pending invitation whose inviter is the previous owner", async () => {
+    const { repository, friends, service } = createGroupsHarness();
+    const group = repository.seedGroup({
+      id: "user-a__group-1",
+      ownerId: "user-b",
+      createdBy: "user-a",
+      memberIds: ["user-b"],
+    });
+    const invitation = repository.seedInvitation({
+      groupId: group.id,
+      inviterId: "user-a",
+      inviteeId: "user-c",
+    });
+    seedFriend(friends, "user-c");
+
+    const accepted = await service.acceptInvitation("user-c", invitation.id);
+
+    expect(repository.accepted).toEqual([
+      { viewerUid: "user-c", invitationId: invitation.id },
+    ]);
+    expect(accepted.memberIds).toEqual(["user-b", "user-c"]);
+  });
+
+  it("lets the new owner cancel an invitation opened by the previous owner", async () => {
+    const { repository, service } = createGroupsHarness();
+    const group = repository.seedGroup({
+      id: "user-a__group-1",
+      ownerId: "user-b",
+      createdBy: "user-a",
+      memberIds: ["user-b"],
+    });
+    const invitation = repository.seedInvitation({
+      groupId: group.id,
+      inviterId: "user-a",
+      inviteeId: "user-c",
+    });
+
+    const cancelled = await service.cancelInvitation("user-b", invitation.id);
+
+    expect(cancelled.status).toBe("cancelled");
+    expect(repository.invitedCalls).toEqual([`cancelled:${invitation.id}`]);
+  });
+
+  it("no longer lets the previous owner cancel or read that invitation", async () => {
+    const { repository, service } = createGroupsHarness();
+    const group = repository.seedGroup({
+      id: "user-a__group-1",
+      ownerId: "user-b",
+      createdBy: "user-a",
+      memberIds: ["user-b"],
+    });
+    const invitation = repository.seedInvitation({
+      groupId: group.id,
+      inviterId: "user-a",
+      inviteeId: "user-c",
+    });
+
+    await expect(
+      service.cancelInvitation("user-a", invitation.id),
+    ).rejects.toMatchObject({ code: "NOT_GROUP_OWNER" });
+    await expect(
+      service.getGroupInvitations("user-a", group.id),
+    ).rejects.toMatchObject({ code: "NOT_GROUP_OWNER" });
+  });
+});
+
 describe("GroupsService.rejectInvitation and cancelInvitation", () => {
   it("lets the invitee reject a pending invitation", async () => {
     const { repository, service } = createGroupsHarness();

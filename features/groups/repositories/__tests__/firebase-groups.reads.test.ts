@@ -74,26 +74,32 @@ describe("FirebaseGroupsRepository group reads", () => {
     ).resolves.toBeNull();
   });
 
-  it("lists the owner invitations of one group", async () => {
-    const otherGroupId = "user-a__group-2";
+  it("lists every invitation of one group, whoever opened it", async () => {
     mockGetDocs.mockResolvedValue(
       querySnapshot([
         { id: INVITATION_ID, data: () => INVITATION_DOCUMENT },
         {
-          id: `${otherGroupId}__user-b`,
-          data: () => ({ ...INVITATION_DOCUMENT, groupId: otherGroupId }),
+          // Opened by the previous owner before a transfer: the mapper must keep
+          // it even though the id prefix belongs to the creator, not the inviter.
+          id: `${GROUP_ID}__user-c`,
+          data: () => ({
+            ...INVITATION_DOCUMENT,
+            inviterId: "user-b",
+            inviteeId: "user-c",
+            pairId: "user-b__user-c",
+          }),
         },
         { id: "broken", data: () => ({}) },
       ]),
     );
 
-    const invitations = await repository().getGroupInvitations(
-      "user-a",
-      GROUP_ID,
-    );
+    const invitations = await repository().getGroupInvitations(GROUP_ID);
 
-    expect(mockWhere).toHaveBeenCalledWith("inviterId", "==", "user-a");
-    expect(invitations.map((item) => item.id)).toEqual([INVITATION_ID]);
+    expect(mockWhere).toHaveBeenCalledWith("groupId", "==", GROUP_ID);
+    expect(invitations.map((item) => item.id)).toEqual([
+      INVITATION_ID,
+      `${GROUP_ID}__user-c`,
+    ]);
   });
 
   it("lists only pending received invitations, newest first", async () => {

@@ -155,7 +155,33 @@
     "cancelInvitationDialogTitle": "Cancel invitation",
     "cancelInvitationDialogMessage": "{{name}} will no longer be able to join the group with this invitation.",
     "cancelInvitationDialogConfirm": "Cancel invitation",
-    "cancelInvitationDialogCancel": "Keep it"
+    "cancelInvitationDialogCancel": "Keep it",
+    "leaveGroup": "Leave group",
+    "leaveAccessibility": "Leave the group {{name}}",
+    "leaveHint": "Opens the confirmation to stop being part of the group.",
+    "leavingHint": "Leaving the group…",
+    "leaveDialogTitle": "Leave group",
+    "leaveDialogMessage": "You will no longer see the expenses of «{{group}}». This action cannot be undone.",
+    "leaveDialogConfirm": "Leave",
+    "leaveDialogCancel": "Cancel",
+    "ownerLeaveHint": "To leave the group, transfer ownership to another member first.",
+    "transferOwnership": "Transfer ownership",
+    "transferAccessibility": "Transfer the group ownership to {{name}}",
+    "transferHint": "Asks for confirmation and makes this person the group owner.",
+    "transferringHint": "Transferring ownership…",
+    "transferDialogTitle": "Transfer ownership",
+    "transferDialogMessage": "{{name}} will become the owner: they will be able to edit the group, invite and remove members. You will remain a member of the group.",
+    "transferDialogConfirm": "Transfer",
+    "transferDialogCancel": "Cancel",
+    "blockedBalanceTitle": "Outstanding balance",
+    "blockedBalanceIntro": "Settle these balances before removing {{name}} from the group:",
+    "blockedBalanceMemberOwes": "{{name}} owes the group {{amount}}",
+    "blockedBalanceGroupOwes": "The group owes {{name}} {{amount}}",
+    "blockedLeaveIntro": "Settle these balances before leaving the group:",
+    "blockedLeaveOwes": "You owe the group {{amount}}",
+    "blockedLeaveGroupOwes": "The group owes you {{amount}}",
+    "blockedBalanceConfirm": "Settle",
+    "blockedBalanceCancel": "Close"
   },
   "invite": {
     "title": "Invite friends",
@@ -227,6 +253,87 @@
     "anotherCodeAccessibility": "Try another group code",
     "anotherCodeHint": "Goes back to the code field to enter a new one."
   },
+  "history": {
+    "title": "Group activity",
+    "loading": "Loading the group activity…",
+    "loadFailed": "Could not load the group activity. Try again.",
+    "retryAccessibility": "Retry loading the group activity",
+    "emptyTitle": "No activity yet",
+    "emptyMessage": "Expenses, payments and group changes will appear here.",
+    "loadMore": "Load more",
+    "loadingMore": "Loading…",
+    "loadMoreAccessibility": "Load more group activity",
+    "loadMoreHint": "Appends the next group activity entries.",
+    "unknownMember": "Unknown member",
+    "viewerName": "you",
+    "settlementPair": "From {{from}} to {{to}}",
+    "settingOn": "On",
+    "settingOff": "Off",
+    "changedFields": {
+      "name": "Name",
+      "description": "Description",
+      "defaultCurrency": "Default currency"
+    },
+    "row": {
+      "openExpenseHint": "Opens the group expense detail.",
+      "openSettlementHint": "Opens the group payment detail."
+    },
+    "types": {
+      "expense-created": {
+        "actor": "{{actor}} added an expense",
+        "viewer": "You added an expense"
+      },
+      "expense-updated": {
+        "actor": "{{actor}} edited an expense",
+        "viewer": "You edited an expense"
+      },
+      "expense-deleted": {
+        "actor": "{{actor}} deleted an expense",
+        "viewer": "You deleted an expense"
+      },
+      "settlement-created": {
+        "actor": "{{actor}} recorded a payment",
+        "viewer": "You recorded a payment"
+      },
+      "settlement-updated": {
+        "actor": "{{actor}} edited a payment",
+        "viewer": "You edited a payment"
+      },
+      "settlement-deleted": {
+        "actor": "{{actor}} deleted a payment",
+        "viewer": "You deleted a payment"
+      },
+      "member-joined": {
+        "actor": "{{name}} joined the group",
+        "viewer": "You joined the group",
+        "added": "{{actor}} added {{name}} to the group",
+        "addedViewer": "You added {{name}} to the group",
+        "addedViewerTarget": "{{actor}} added you to the group"
+      },
+      "member-left": {
+        "actor": "{{name}} left the group",
+        "viewer": "You left the group"
+      },
+      "member-removed": {
+        "actor": "{{actor}} removed {{target}} from the group",
+        "viewer": "You removed {{target}} from the group",
+        "viewerTarget": "{{actor}} removed you from the group"
+      },
+      "owner-transferred": {
+        "actor": "{{actor}} transferred ownership to {{target}}",
+        "viewer": "You transferred ownership to {{target}}",
+        "viewerTarget": "{{actor}} transferred ownership to you"
+      },
+      "group-updated": {
+        "actor": "{{actor}} updated the group",
+        "viewer": "You updated the group"
+      },
+      "simplify-debts-changed": {
+        "actor": "{{actor}} changed Simplify debts",
+        "viewer": "You changed Simplify debts"
+      }
+    }
+  },
   "errors": {
     "NAME_REQUIRED": "Write a name for the group.",
     "NAME_TOO_LONG": "The name cannot exceed 60 characters.",
@@ -250,6 +357,8 @@
     "NO_INVITEES": "Choose at least one friend.",
     "MEMBER_NOT_FOUND": "That member is no longer in the group.",
     "CANNOT_REMOVE_OWNER": "The owner cannot leave the group.",
+    "BALANCE_NOT_SETTLED": "There are unsettled balances. Settle them before continuing.",
+    "INVALID_OWNERSHIP_TARGET": "That person cannot become the owner of the group.",
     "DUPLICATE_INVITEE": "That person already has an invitation.",
     "INVALID_JOIN_CODE": "That code is not valid or does not match any group.",
     "JOIN_REQUEST_NOT_FOUND": "The request no longer exists.",

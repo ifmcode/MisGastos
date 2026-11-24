@@ -229,7 +229,7 @@ describe("deleteGroupExpenseRecord", () => {
 
     expect(deps.linkRepository.deleteCalls).toEqual([]);
     expect(deps.repository.deleteCalls).toEqual([
-      { expenseId: "expense-1", deletedAt: NOW },
+      { expenseId: "expense-1", deletedAt: NOW, viewerUid: "user-a" },
     ]);
   });
 

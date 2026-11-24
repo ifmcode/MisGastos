@@ -5,6 +5,7 @@ import {
   NOW,
   VIEWER,
   WALLET_ID,
+  activityRef,
   expenseRef,
   movementDocument,
   movementRef,
@@ -94,7 +95,16 @@ describe("updateGroupExpenseLinkOperation - link cleared", () => {
       categoryId: null,
       linkedTransactionId: null,
     });
-    expect(transactionSet).not.toHaveBeenCalled();
+    // No movement is set; only the `expense-updated` history event is appended.
+    expect(
+      transactionSet.mock.calls.some(
+        (call) => (call[0] as { kind?: string }).kind === "transaction",
+      ),
+    ).toBe(false);
+    expect(transactionSet).toHaveBeenCalledWith(
+      activityRef("activity-new"),
+      expect.objectContaining({ type: "expense-updated" }),
+    );
   });
 
   it("reverts a currency change with no compatible wallet and saves social-only", async () => {

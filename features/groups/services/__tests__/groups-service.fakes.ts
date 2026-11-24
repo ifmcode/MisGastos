@@ -15,7 +15,19 @@ import type {
   GroupInvitation,
   GroupMetadataUpdate,
   InviteMembersInput,
+  LeaveGroupInput,
+  RemoveGroupMemberInput,
+  TransferGroupOwnershipInput,
 } from "../../types/group.types";
+import type {
+  GroupMemberNet,
+  IGroupBalancePort,
+} from "../../services/group-balance.port";
+import type {
+  GroupActivity,
+  GroupActivityPage,
+  GroupActivityQuery,
+} from "../../types/group-activity.types";
 import type {
   CreateGroupJoinRequestInput,
   EnsureGroupJoinCodeInput,
@@ -36,9 +48,20 @@ export class FakeGroupsRepository implements IGroupsRepository {
   readonly joinRequests = new Map<string, GroupJoinRequest>();
   readonly createInputs: CreateGroupWithInvitationsInput[] = [];
   readonly inviteInputs: InviteMembersInput[] = [];
-  readonly updateInputs: Array<{ groupId: string; update: GroupMetadataUpdate }> =
-    [];
+  readonly updateInputs: Array<{
+    viewerUid: string;
+    groupId: string;
+    update: GroupMetadataUpdate;
+  }> = [];
   readonly removedMembers: Array<{ groupId: string; memberId: string }> = [];
+  readonly removedInputs: RemoveGroupMemberInput[] = [];
+  readonly leftGroups: Array<{ groupId: string; memberId: string }> = [];
+  readonly leaveInputs: LeaveGroupInput[] = [];
+  readonly transfers: TransferGroupOwnershipInput[] = [];
+  readonly activityQueries: Array<{
+    groupId: string;
+    query: GroupActivityQuery | undefined;
+  }> = [];
   readonly accepted: Array<{ viewerUid: string; invitationId: string }> = [];
   readonly invitedCalls: string[] = [];
   readonly joinRequestInputs: CreateGroupJoinRequestInput[] = [];
@@ -46,6 +69,8 @@ export class FakeGroupsRepository implements IGroupsRepository {
   readonly ensureInputs: EnsureGroupJoinCodeInput[] = [];
   /** Group ids whose read must fail with permission-denied. */
   readonly denied: string[] = [];
+  /** Seeded history per group, newest first. */
+  readonly activity = new Map<string, GroupActivity[]>();
   failure: Error | null = null;
   private nextGroupId = 1;
 
@@ -57,6 +82,7 @@ export class FakeGroupsRepository implements IGroupsRepository {
     const group: Group = {
       id,
       ownerId,
+      createdBy: overrides.createdBy ?? ownerId,
       memberIds: [ownerId],
       name: "Viaje",
       description: null,
@@ -178,11 +204,12 @@ export class FakeGroupsRepository implements IGroupsRepository {
   }
 
   async updateGroup(
+    viewerUid: string,
     groupId: string,
     update: GroupMetadataUpdate,
   ): Promise<Group> {
     this.guard();
-    this.updateInputs.push({ groupId, update });
+    this.updateInputs.push({ viewerUid, groupId, update });
 
     const group = this.groups.get(groupId);
     if (!group) throw new Error("group not found");
@@ -193,20 +220,79 @@ export class FakeGroupsRepository implements IGroupsRepository {
     return updated;
   }
 
-  async removeMember(
-    groupId: string,
-    memberId: string,
-    updatedAt: string,
-  ): Promise<Group> {
+  async removeMember(input: RemoveGroupMemberInput): Promise<Group> {
     this.guard();
-    this.removedMembers.push({ groupId, memberId });
+    this.removedMembers.push({
+      groupId: input.groupId,
+      memberId: input.memberId,
+    });
+    this.removedInputs.push(input);
 
-    const group = this.groups.get(groupId);
+    const group = this.groups.get(input.groupId);
     if (!group) throw new Error("group not found");
 
-    const memberIds = group.memberIds.filter((uid) => uid !== memberId);
-    const updated = { ...group, memberIds, updatedAt };
-    this.groups.set(groupId, updated);
+    const memberIds = group.memberIds.filter((uid) => uid !== input.memberId);
+    const updated = { ...group, memberIds, updatedAt: input.updatedAt };
+    this.groups.set(input.groupId, updated);
+
+    return updated;
+  }
+
+  async getGroupActivity(
+    groupId: string,
+    query?: GroupActivityQuery,
+  ): Promise<GroupActivityPage> {
+    this.guard();
+    this.activityQueries.push({ groupId, query });
+
+    const items = this.activity.get(groupId) ?? [];
+    const limit = query?.limit ?? 20;
+    const page = items.slice(0, limit);
+    const hasMore = items.length > limit;
+    const last = page[page.length - 1];
+
+    return {
+      items: page,
+      hasMore,
+      nextCursor: hasMore && last ? { createdAt: last.createdAt, id: last.id } : null,
+    };
+  }
+
+  async leaveGroup(input: LeaveGroupInput): Promise<Group> {
+    this.guard();
+    this.leftGroups.push({ groupId: input.groupId, memberId: input.memberId });
+    this.leaveInputs.push(input);
+
+    const group = this.groups.get(input.groupId);
+    if (!group) throw new Error("group not found");
+
+    const memberIds = group.memberIds.filter((uid) => uid !== input.memberId);
+    const updated = { ...group, memberIds, updatedAt: input.updatedAt };
+    this.groups.set(input.groupId, updated);
+
+    return updated;
+  }
+
+  async transferOwnership(
+    input: TransferGroupOwnershipInput,
+  ): Promise<Group> {
+    this.guard();
+    this.transfers.push(input);
+
+    const group = this.groups.get(input.groupId);
+    if (!group) throw new Error("group not found");
+
+    const memberIds = [
+      input.newOwnerId,
+      ...group.memberIds.filter((uid) => uid !== input.newOwnerId),
+    ];
+    const updated = {
+      ...group,
+      ownerId: input.newOwnerId,
+      memberIds,
+      updatedAt: input.updatedAt,
+    };
+    this.groups.set(input.groupId, updated);
 
     return updated;
   }
@@ -219,14 +305,11 @@ export class FakeGroupsRepository implements IGroupsRepository {
     return this.invitations.get(invitationId) ?? null;
   }
 
-  async getGroupInvitations(
-    inviterId: string,
-    groupId: string,
-  ): Promise<GroupInvitation[]> {
+  async getGroupInvitations(groupId: string): Promise<GroupInvitation[]> {
     this.guard();
 
     return [...this.invitations.values()].filter(
-      (item) => item.inviterId === inviterId && item.groupId === groupId,
+      (item) => item.groupId === groupId,
     );
   }
 
@@ -486,5 +569,26 @@ export class FakeGroupNotificationPort implements IGroupNotificationPort {
   ): Promise<void> {
     this.settlements.push(input);
     if (this.failure) throw this.failure;
+  }
+}
+
+/** Ledger port fake: settled by default, per-member non-zero nets on demand. */
+export class FakeGroupBalancePort implements IGroupBalancePort {
+  readonly calls: Array<{ groupId: string; memberId: string }> = [];
+  private readonly nets = new Map<string, GroupMemberNet[]>();
+  failure: Error | null = null;
+
+  setNets(groupId: string, memberId: string, nets: GroupMemberNet[]): void {
+    this.nets.set(`${groupId}:${memberId}`, nets);
+  }
+
+  async getMemberNets(
+    groupId: string,
+    memberId: string,
+  ): Promise<GroupMemberNet[]> {
+    this.calls.push({ groupId, memberId });
+    if (this.failure) throw this.failure;
+
+    return this.nets.get(`${groupId}:${memberId}`) ?? [];
   }
 }

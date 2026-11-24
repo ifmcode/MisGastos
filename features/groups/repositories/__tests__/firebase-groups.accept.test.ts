@@ -11,6 +11,7 @@ import {
   mockDoc,
   mockGetDoc,
   mockTransactionGet,
+  mockTransactionSet,
   mockTransactionUpdate,
   setupGroupsRepositoryMocks,
 } from "./groups-repository.test-helpers";
@@ -47,6 +48,15 @@ describe("acceptGroupInvitationOperation", () => {
     expect(mockTransactionUpdate.mock.calls[1][1]).toMatchObject({
       memberIds: ["user-a", "user-b"],
     });
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      { kind: "activity", id: "activity-1" },
+      expect.objectContaining({
+        type: "member-joined",
+        groupId: GROUP_ID,
+        actorId: "user-b",
+        targetUserId: "user-b",
+      }),
+    );
   });
 
   it("rejects a caller that is not the invitee", async () => {

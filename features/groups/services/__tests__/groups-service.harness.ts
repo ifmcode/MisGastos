@@ -2,18 +2,20 @@ import { FakeFriendsRepository } from "@/features/friends/services/__tests__/fri
 
 import { GroupsService } from "../groups.service";
 import {
+  FakeGroupBalancePort,
   FakeGroupNotificationPort,
   FakeGroupsRepository,
 } from "./groups-service.fakes";
 
-/** One service wired to fakes, with the three collaborators exposed. */
+/** One service wired to fakes, with the collaborators exposed. */
 export function createGroupsHarness() {
   const repository = new FakeGroupsRepository();
   const friends = new FakeFriendsRepository();
   const notifications = new FakeGroupNotificationPort();
-  const service = new GroupsService(repository, friends, notifications);
+  const balances = new FakeGroupBalancePort();
+  const service = new GroupsService(repository, friends, notifications, balances);
 
-  return { repository, friends, notifications, service };
+  return { repository, friends, notifications, balances, service };
 }
 
 export function seedFriend(

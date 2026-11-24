@@ -15,6 +15,7 @@ function group(overrides: Partial<Group> = {}): Group {
   return {
     id: "group-1",
     ownerId: "user-a",
+    createdBy: "user-a",
     memberIds: ["user-a", "user-b"],
     name: "Viaje",
     description: null,

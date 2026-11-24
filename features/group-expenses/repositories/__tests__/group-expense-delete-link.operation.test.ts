@@ -5,6 +5,7 @@ import {
   NOW,
   VIEWER,
   WALLET_ID,
+  activityRef,
   expenseRef,
   missingSnapshot,
   movementDocument,
@@ -12,6 +13,7 @@ import {
   setupLinkOperationMocks,
   snapshot,
   transactionGet,
+  transactionSet,
   transactionUpdate,
   walletDocument,
   walletRef,
@@ -157,6 +159,25 @@ describe("softDeleteGroupExpenseLinkOperation", () => {
       categoryId: null,
       linkedTransactionId: null,
     });
+    expect(transactionSet).toHaveBeenCalledWith(
+      activityRef("activity-new"),
+      expect.objectContaining({
+        type: "expense-deleted",
+        actorId: VIEWER,
+        expenseId: EXPENSE_ID,
+      }),
+    );
+  });
+
+  it("writes no history event when the expense is already deleted", async () => {
+    transactionGet.mockResolvedValueOnce(
+      snapshot(EXPENSE_ID, storedLinkedExpense({ deletedAt: NOW })),
+    );
+
+    await softDeleteGroupExpenseLinkOperation(options);
+
+    expect(transactionUpdate).not.toHaveBeenCalled();
+    expect(transactionSet).not.toHaveBeenCalled();
   });
 
   it("closes a wallet-only legacy expense without reading a movement", async () => {

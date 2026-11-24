@@ -19,9 +19,11 @@ export interface TimelineRowProps {
   /** Optional right-aligned effect, already translated and formatted. */
   amount?: string;
   amountColor?: string;
-  accessibilityLabel: string;
-  accessibilityHint: string;
-  onPress: () => void;
+  /** Required by the pressable variant; a read-only row needs no action copy. */
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+  /** Absent for read-only rows: they render a plain View without button role. */
+  onPress?: () => void;
 }
 
 /** Intl appends a period to some short months ("nov."); the mockup has none. */
@@ -32,7 +34,9 @@ function stripTrailingPeriod(value: string): string {
 /**
  * One movement of a linear history: date gutter, icon tile, title, optional
  * meta and optional right-side amount. It has no card border and no chevron, so
- * consecutive rows read as a single register.
+ * consecutive rows read as a single register. Without `onPress` the row is a
+ * plain View, so feed entries that open nothing keep the same visual language
+ * without pretending to be buttons.
  */
 export function TimelineRow({
   date,
@@ -52,14 +56,8 @@ export function TimelineRow({
   const month = stripTrailingPeriod(locale.formatDate(date, { month: "short" }));
   const day = locale.formatDate(date, { day: "numeric" });
 
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      accessibilityHint={accessibilityHint}
-      onPress={onPress}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
-    >
+  const content = (
+    <>
       <View
         style={styles.gutter}
         accessibilityElementsHidden
@@ -105,6 +103,22 @@ export function TimelineRow({
           </ThemedText>
         </View>
       ) : null}
+    </>
+  );
+
+  if (!onPress) {
+    return <View style={styles.row}>{content}</View>;
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      onPress={onPress}
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+    >
+      {content}
     </Pressable>
   );
 }

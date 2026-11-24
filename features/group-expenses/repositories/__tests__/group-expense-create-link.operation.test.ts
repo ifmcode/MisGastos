@@ -5,6 +5,7 @@ import {
   NOW,
   VIEWER,
   WALLET_ID,
+  activityRef,
   expenseRef,
   missingSnapshot,
   mockRunTransaction,
@@ -68,6 +69,15 @@ describe("createGroupExpenseLinkOperation", () => {
       balance: 90,
       updatedAt: NOW,
     });
+    expect(transactionSet).toHaveBeenCalledWith(
+      activityRef("activity-new"),
+      expect.objectContaining({
+        type: "expense-created",
+        actorId: VIEWER,
+        expenseId: "group-expense-new",
+        amountCents: 1000,
+      }),
+    );
     expect(expense).toMatchObject({
       id: "group-expense-new",
       walletId: WALLET_ID,
@@ -131,7 +141,7 @@ describe("createGroupExpenseLinkOperation", () => {
     await expect(
       createGroupExpenseLinkOperation({ ...linkedDto, amountCents: 0 }),
     ).rejects.toMatchObject({ code: "EXPENSE_NOT_FOUND" });
-    expect(transactionSet).toHaveBeenCalledTimes(2);
+    expect(transactionSet).toHaveBeenCalledTimes(3);
   });
 
   it("never writes the expense id into a shared-expense key", async () => {

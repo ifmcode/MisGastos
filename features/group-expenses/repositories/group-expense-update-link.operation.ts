@@ -4,6 +4,7 @@ import { db } from "@/lib/firebase";
 import { FirebaseLinkedMovementPort } from "@/features/shared-expenses/repositories/firebase-linked-movement.port";
 import type { ILinkedMovementPort } from "@/features/shared-expenses/repositories/linked-movement.port";
 import { movementRef } from "@/features/shared-expenses/repositories/shared-expense-movement-ref";
+import { addGroupActivity } from "@/features/groups/repositories/group-activity.writes";
 
 import { GroupExpenseOperationError } from "../services/group-expense.errors";
 import type {
@@ -105,6 +106,16 @@ export async function updateGroupExpenseLinkOperation(
     };
 
     transaction.update(expenseRef, patch);
+    addGroupActivity(transaction, {
+      type: "expense-updated",
+      groupId: stored.groupId,
+      actorId: viewerUid,
+      expenseId,
+      amountCents: update.amountCents,
+      currency: update.currency,
+      description: update.description,
+      createdAt: now,
+    });
     // Map the post-write document shape, never the domain object: the mapper
     // only understands stored keys.
     result = mapGroupExpenseDocument(expenseId, {

@@ -5,7 +5,14 @@ import type {
   GroupInvitation,
   GroupMetadataUpdate,
   InviteMembersInput,
+  LeaveGroupInput,
+  RemoveGroupMemberInput,
+  TransferGroupOwnershipInput,
 } from "../types/group.types";
+import type {
+  GroupActivityPage,
+  GroupActivityQuery,
+} from "../types/group-activity.types";
 import type {
   CreateGroupJoinRequestInput,
   EnsureGroupJoinCodeInput,
@@ -32,22 +39,31 @@ export interface IGroupsRepository {
   getGroup(groupId: string): Promise<Group | null>;
 
   /** Metadata edit; a rename also refreshes pending invitation names. */
-  updateGroup(groupId: string, update: GroupMetadataUpdate): Promise<Group>;
-
-  /** Owner removal of one member in a transaction. */
-  removeMember(
+  updateGroup(
+    viewerUid: string,
     groupId: string,
-    memberId: string,
-    updatedAt: string,
+    update: GroupMetadataUpdate,
   ): Promise<Group>;
+
+  /** Owner removal of one member in a transaction, with its history event. */
+  removeMember(input: RemoveGroupMemberInput): Promise<Group>;
+
+  /** A non-owner leaves by themselves, with the `member-left` event. */
+  leaveGroup(input: LeaveGroupInput): Promise<Group>;
+
+  /** Owner promotes one active member and reorders `memberIds`. */
+  transferOwnership(input: TransferGroupOwnershipInput): Promise<Group>;
+
+  /** Member-only history, newest first with the id as tiebreaker. */
+  getGroupActivity(
+    groupId: string,
+    query?: GroupActivityQuery,
+  ): Promise<GroupActivityPage>;
 
   getGroupInvitation(invitationId: string): Promise<GroupInvitation | null>;
 
-  /** Invitations the owner sent for one group; queried by `inviterId`. */
-  getGroupInvitations(
-    inviterId: string,
-    groupId: string,
-  ): Promise<GroupInvitation[]>;
+  /** Every invitation of one group, independent of who opened it. */
+  getGroupInvitations(groupId: string): Promise<GroupInvitation[]>;
 
   /** Received invitations, pending only, newest first. */
   getPendingInvitations(inviteeId: string): Promise<GroupInvitation[]>;

@@ -6,6 +6,7 @@ import {
   OTHER_WALLET_ID,
   VIEWER,
   WALLET_ID,
+  activityRef,
   expenseRef,
   movementDocument,
   movementRef,
@@ -201,7 +202,16 @@ describe("updateGroupExpenseLinkOperation - same wallet sync", () => {
 
     await run({ amountCents: 1200, walletId: WALLET_ID });
 
-    expect(transactionSet).not.toHaveBeenCalled();
+    // No movement is created, but the edit still appends its history event.
+    expect(
+      transactionSet.mock.calls.some(
+        (call) => (call[0] as { kind?: string }).kind === "transaction",
+      ),
+    ).toBe(false);
+    expect(transactionSet).toHaveBeenCalledWith(
+      activityRef("activity-new"),
+      expect.objectContaining({ type: "expense-updated", amountCents: 1200 }),
+    );
     expect(lastUpdateOf(movementRef("movement-1"))).toMatchObject({
       amount: 12,
       deletedAt: null,

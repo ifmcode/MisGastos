@@ -1,7 +1,7 @@
 import { runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import type { NotificationWrite } from "@/features/notifications/types/notification.types";
+import { addGroupActivity } from "@/features/groups/repositories/group-activity.writes";
 import { FirebaseSettlementMovementPort } from "@/features/settlements/repositories/firebase-settlement-movement.port";
 import type { ISettlementMovementPort } from "@/features/settlements/repositories/settlement-movement.port";
 import {
@@ -19,10 +19,7 @@ import {
 import { applySettlementWalletEffects } from "@/features/settlements/repositories/settlement-wallet-effects";
 
 import { GroupExpenseOperationError } from "../services/group-expense.errors";
-import type {
-  GroupSettlement,
-  UpdateGroupSettlementDto,
-} from "../types/group-settlement.types";
+import type { GroupSettlement } from "../types/group-settlement.types";
 import {
   assertGroupSettlementLinkShape,
   groupSettlementError,
@@ -32,13 +29,7 @@ import { writeGroupSettlementNotification } from "./group-settlement-notificatio
 import { toGroupSettlementUpdateData } from "./group-settlements.data";
 import { mapGroupSettlementDocument } from "./group-settlements.mapper";
 import { groupSettlementRef } from "./group-settlements.operations";
-
-export interface UpdateGroupSettlementOperationOptions {
-  viewerUid: string;
-  settlementId: string;
-  update: UpdateGroupSettlementDto;
-  notification: NotificationWrite;
-}
+import type { UpdateGroupSettlementOperationOptions } from "./group-settlements.repository";
 
 /**
  * Syncs every mutable field of a group settlement with its single income
@@ -134,6 +125,18 @@ export async function updateGroupSettlementOperation(
     });
 
     transaction.update(reference, patch);
+    addGroupActivity(transaction, {
+      type: "settlement-updated",
+      groupId: stored.groupId,
+      actorId: viewerUid,
+      settlementId,
+      fromUserId: stored.fromUserId,
+      toUserId: stored.toUserId,
+      amountCents: update.amountCents,
+      currency: stored.currency,
+      description: update.note,
+      createdAt: now,
+    });
     result = mapGroupSettlementDocument(settlementId, { ...stored, ...patch });
   });
 

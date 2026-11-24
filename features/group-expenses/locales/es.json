@@ -1,9 +1,6 @@
 {
-  "sectionTitle": "Gastos del grupo",
   "loading": "Cargando los gastos del grupo…",
   "retryAccessibility": "Reintentar la carga de los gastos del grupo",
-  "emptyTitle": "Todavía no hay gastos en este grupo",
-  "emptyMessage": "Añade el primer gasto compartido y repártelo entre los miembros.",
   "viewerName": "Tú",
   "memberFallback": "Miembro",
   "row": {

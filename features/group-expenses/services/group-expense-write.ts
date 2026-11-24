@@ -81,6 +81,7 @@ export async function updateGroupExpenseRecord(
     return deps.repository.updateExpense(
       existing.id,
       buildUpdateGroupExpenseDto({ ...value, ...link }, now),
+      viewerUid,
     );
   }
 
@@ -102,7 +103,7 @@ export async function deleteGroupExpenseRecord(
   deletedAt: string,
 ): Promise<void> {
   if (!isGroupExpenseLinked(existing)) {
-    return deps.repository.softDeleteExpense(existing.id, deletedAt);
+    return deps.repository.softDeleteExpense(existing.id, deletedAt, viewerUid);
   }
 
   if (existing.payerId !== viewerUid) {

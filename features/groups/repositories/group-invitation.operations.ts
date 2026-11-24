@@ -24,16 +24,14 @@ import {
 /**
  * Invites accepted friends that are not members. An existing pending document
  * is returned untouched, and a rejected/cancelled/accepted one is re-opened
- * instead of duplicated, because the id is deterministic. Writes are
- * sequential: re-opening needs two legal transitions (status, then the name).
+ * instead of duplicated, because the id is deterministic. Re-opening after an
+ * ownership transfer also rewrites `inviterId`/`pairId` to the current owner, so
+ * the pending invitation and its friendship belong to whoever invites now.
  */
 export async function inviteMembersOperation(
   input: InviteMembersInput,
 ): Promise<GroupInvitation[]> {
-  const existing = await getGroupInvitationsOperation(
-    input.inviterId,
-    input.groupId,
-  );
+  const existing = await getGroupInvitationsOperation(input.groupId);
   const byInvitee = new Map(existing.map((item) => [item.inviteeId, item]));
   const results: GroupInvitation[] = [];
 
@@ -53,9 +51,13 @@ export async function inviteMembersOperation(
         continue;
       }
 
+      const inviterChanged = current.inviterId !== input.inviterId;
       await updateDoc(
         reference,
-        toGroupInvitationReopenData(input.updatedAt),
+        toGroupInvitationReopenData(
+          input.updatedAt,
+          inviterChanged ? { inviterId: input.inviterId, pairId } : undefined,
+        ),
       );
 
       if (current.groupName !== input.groupName) {
@@ -68,6 +70,8 @@ export async function inviteMembersOperation(
       results.push({
         ...current,
         groupName: input.groupName,
+        inviterId: input.inviterId,
+        pairId: inviterChanged ? pairId : current.pairId,
         status: "pending",
         updatedAt: input.updatedAt,
       });

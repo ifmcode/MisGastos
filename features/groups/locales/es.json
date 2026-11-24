@@ -155,7 +155,33 @@
     "cancelInvitationDialogTitle": "Cancelar invitación",
     "cancelInvitationDialogMessage": "{{name}} ya no podrá unirse al grupo con esta invitación.",
     "cancelInvitationDialogConfirm": "Cancelar invitación",
-    "cancelInvitationDialogCancel": "Mantener"
+    "cancelInvitationDialogCancel": "Mantener",
+    "leaveGroup": "Salir del grupo",
+    "leaveAccessibility": "Salir del grupo {{name}}",
+    "leaveHint": "Abre la confirmación para dejar de formar parte del grupo.",
+    "leavingHint": "Saliendo del grupo…",
+    "leaveDialogTitle": "Salir del grupo",
+    "leaveDialogMessage": "Dejarás de ver los gastos de «{{group}}». Esta acción no se puede deshacer.",
+    "leaveDialogConfirm": "Salir",
+    "leaveDialogCancel": "Cancelar",
+    "ownerLeaveHint": "Para salir del grupo, transfiere primero la propiedad a otro miembro.",
+    "transferOwnership": "Traspasar propiedad",
+    "transferAccessibility": "Traspasar la propiedad del grupo a {{name}}",
+    "transferHint": "Pide confirmación y convierte a esta persona en propietaria del grupo.",
+    "transferringHint": "Traspasando la propiedad…",
+    "transferDialogTitle": "Traspasar propiedad",
+    "transferDialogMessage": "{{name}} pasará a ser el propietario: podrá editar el grupo, invitar y quitar miembros. Tú seguirás siendo miembro del grupo.",
+    "transferDialogConfirm": "Traspasar",
+    "transferDialogCancel": "Cancelar",
+    "blockedBalanceTitle": "Saldo pendiente",
+    "blockedBalanceIntro": "Liquida estos saldos antes de quitar a {{name}} del grupo:",
+    "blockedBalanceMemberOwes": "{{name}} debe {{amount}} al grupo",
+    "blockedBalanceGroupOwes": "El grupo debe {{amount}} a {{name}}",
+    "blockedLeaveIntro": "Liquida estos saldos antes de salir del grupo:",
+    "blockedLeaveOwes": "Debes {{amount}} al grupo",
+    "blockedLeaveGroupOwes": "El grupo te debe {{amount}}",
+    "blockedBalanceConfirm": "Liquidar",
+    "blockedBalanceCancel": "Cerrar"
   },
   "invite": {
     "title": "Invitar amigos",
@@ -227,6 +253,87 @@
     "anotherCodeAccessibility": "Probar con otro código de grupo",
     "anotherCodeHint": "Vuelve al campo del código para introducir uno nuevo."
   },
+  "history": {
+    "title": "Actividad del grupo",
+    "loading": "Cargando la actividad del grupo…",
+    "loadFailed": "No se pudo cargar la actividad del grupo. Inténtalo de nuevo.",
+    "retryAccessibility": "Reintentar la carga de la actividad del grupo",
+    "emptyTitle": "Todavía no hay actividad",
+    "emptyMessage": "Los gastos, los pagos y los cambios del grupo aparecerán aquí.",
+    "loadMore": "Cargar más",
+    "loadingMore": "Cargando…",
+    "loadMoreAccessibility": "Cargar más actividad del grupo",
+    "loadMoreHint": "Añade las siguientes entradas de la actividad del grupo.",
+    "unknownMember": "Miembro desconocido",
+    "viewerName": "ti",
+    "settlementPair": "De {{from}} a {{to}}",
+    "settingOn": "Activado",
+    "settingOff": "Desactivado",
+    "changedFields": {
+      "name": "Nombre",
+      "description": "Descripción",
+      "defaultCurrency": "Moneda por defecto"
+    },
+    "row": {
+      "openExpenseHint": "Abre el detalle del gasto en el grupo.",
+      "openSettlementHint": "Abre el detalle del pago del grupo."
+    },
+    "types": {
+      "expense-created": {
+        "actor": "{{actor}} añadió un gasto",
+        "viewer": "Añadiste un gasto"
+      },
+      "expense-updated": {
+        "actor": "{{actor}} editó un gasto",
+        "viewer": "Editaste un gasto"
+      },
+      "expense-deleted": {
+        "actor": "{{actor}} eliminó un gasto",
+        "viewer": "Eliminaste un gasto"
+      },
+      "settlement-created": {
+        "actor": "{{actor}} registró un pago",
+        "viewer": "Registraste un pago"
+      },
+      "settlement-updated": {
+        "actor": "{{actor}} editó un pago",
+        "viewer": "Editaste un pago"
+      },
+      "settlement-deleted": {
+        "actor": "{{actor}} eliminó un pago",
+        "viewer": "Eliminaste un pago"
+      },
+      "member-joined": {
+        "actor": "{{name}} se unió al grupo",
+        "viewer": "Te uniste al grupo",
+        "added": "{{actor}} añadió a {{name}} al grupo",
+        "addedViewer": "Añadiste a {{name}} al grupo",
+        "addedViewerTarget": "{{actor}} te añadió al grupo"
+      },
+      "member-left": {
+        "actor": "{{name}} salió del grupo",
+        "viewer": "Saliste del grupo"
+      },
+      "member-removed": {
+        "actor": "{{actor}} quitó a {{target}} del grupo",
+        "viewer": "Quitaste a {{target}} del grupo",
+        "viewerTarget": "{{actor}} te quitó del grupo"
+      },
+      "owner-transferred": {
+        "actor": "{{actor}} transfirió la propiedad a {{target}}",
+        "viewer": "Transfiriste la propiedad a {{target}}",
+        "viewerTarget": "{{actor}} te transfirió la propiedad"
+      },
+      "group-updated": {
+        "actor": "{{actor}} actualizó el grupo",
+        "viewer": "Actualizaste el grupo"
+      },
+      "simplify-debts-changed": {
+        "actor": "{{actor}} cambió Simplificar deudas",
+        "viewer": "Cambiaste Simplificar deudas"
+      }
+    }
+  },
   "errors": {
     "NAME_REQUIRED": "Escribe un nombre para el grupo.",
     "NAME_TOO_LONG": "El nombre no puede superar los 60 caracteres.",
@@ -250,6 +357,8 @@
     "NO_INVITEES": "Elige al menos un amigo.",
     "MEMBER_NOT_FOUND": "Ese miembro ya no está en el grupo.",
     "CANNOT_REMOVE_OWNER": "El propietario no puede salir del grupo.",
+    "BALANCE_NOT_SETTLED": "Hay saldos sin liquidar. Liquídalos antes de continuar.",
+    "INVALID_OWNERSHIP_TARGET": "Esa persona no puede pasar a ser propietaria del grupo.",
     "DUPLICATE_INVITEE": "Esa persona ya tiene una invitación.",
     "INVALID_JOIN_CODE": "Ese código no es válido o no corresponde a ningún grupo.",
     "JOIN_REQUEST_NOT_FOUND": "La solicitud ya no existe.",

@@ -50,7 +50,11 @@ describe("GroupExpensesService.deleteGroupExpense", () => {
 
     for (const harness of [owner, creator, payer]) {
       expect(harness.repository.deleteCalls).toEqual([
-        { expenseId: "expense-1", deletedAt: expect.any(String) },
+        {
+          expenseId: "expense-1",
+          deletedAt: expect.any(String),
+          viewerUid: expect.any(String),
+        },
       ]);
       expect(harness.repository.expenses.get("expense-1")).toMatchObject({
         deletedAt: expect.any(String),

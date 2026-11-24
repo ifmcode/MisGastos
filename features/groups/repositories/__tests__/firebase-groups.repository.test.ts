@@ -32,7 +32,30 @@ jest.mock("../group-create.operation", () => ({
 
 jest.mock("../group-update.operations", () => ({
   updateGroupOperation: (...args: unknown[]) => mockUpdate(...args),
+}));
+
+jest.mock("../group-member-remove.operation", () => ({
   removeGroupMemberOperation: (...args: unknown[]) => mockRemove(...args),
+}));
+
+const mockLeave = jest.fn(async (..._args: unknown[]) => "left");
+const mockTransfer = jest.fn(async (..._args: unknown[]) => "transferred");
+
+jest.mock("../group-member-leave.operation", () => ({
+  leaveGroupOperation: (...args: unknown[]) => mockLeave(...args),
+}));
+
+jest.mock("../group-owner-transfer.operation", () => ({
+  transferGroupOwnershipOperation: (...args: unknown[]) => mockTransfer(...args),
+}));
+
+const mockGetActivity = jest.fn(async (..._args: unknown[]) => ({
+  items: ["activity"],
+  hasMore: false,
+}));
+
+jest.mock("../group-activity.operations", () => ({
+  getGroupActivityOperation: (...args: unknown[]) => mockGetActivity(...args),
 }));
 
 const mockInvite = jest.fn(async (..._args: unknown[]) => ["invite"]);
@@ -89,7 +112,7 @@ describe("FirebaseGroupsRepository delegation", () => {
       "invite",
     );
     await expect(
-      repository.getGroupInvitations("user-a", "group-1"),
+      repository.getGroupInvitations("group-1"),
     ).resolves.toEqual(["invite"]);
     await expect(repository.getPendingInvitations("user-b")).resolves.toEqual([
       "invite",
@@ -101,15 +124,19 @@ describe("FirebaseGroupsRepository delegation", () => {
     await expect(repository.getGroupJoinRequests("group-1")).resolves.toEqual([
       "request",
     ]);
+    await expect(
+      repository.getGroupActivity("group-1", { limit: 10 }),
+    ).resolves.toEqual({ items: ["activity"], hasMore: false });
 
     expect(mockGetGroups).toHaveBeenCalledWith("user-a");
     expect(mockGetGroup).toHaveBeenCalledWith("group-1");
     expect(mockGetGroupInvitation).toHaveBeenCalledWith("group-1__user-b");
-    expect(mockGetGroupInvitations).toHaveBeenCalledWith("user-a", "group-1");
+    expect(mockGetGroupInvitations).toHaveBeenCalledWith("group-1");
     expect(mockGetPendingInvitations).toHaveBeenCalledWith("user-b");
     expect(mockGetGroupCode).toHaveBeenCalledWith("ABCD2345");
     expect(mockGetGroupJoinRequest).toHaveBeenCalledWith("group-1__user-b");
     expect(mockGetGroupJoinRequests).toHaveBeenCalledWith("group-1");
+    expect(mockGetActivity).toHaveBeenCalledWith("group-1", { limit: 10 });
   });
 
   it("delegates every write to its operation", async () => {
@@ -139,12 +166,34 @@ describe("FirebaseGroupsRepository delegation", () => {
     await expect(
       repository.createGroupWithInvitations(createInput),
     ).resolves.toBe("created");
-    await expect(repository.updateGroup("group-1", update)).resolves.toBe(
-      "updated",
-    );
     await expect(
-      repository.removeMember("group-1", "user-b", "2026-11-20T10:00:00.000Z"),
+      repository.updateGroup("user-a", "group-1", update),
+    ).resolves.toBe("updated");
+    await expect(
+      repository.removeMember({
+        groupId: "group-1",
+        actorId: "user-a",
+        memberId: "user-b",
+        targetName: "Bea",
+        updatedAt: "2026-11-20T10:00:00.000Z",
+      }),
     ).resolves.toBe("removed");
+    await expect(
+      repository.leaveGroup({
+        groupId: "group-1",
+        memberId: "user-b",
+        targetName: "Bea",
+        updatedAt: "2026-11-20T10:00:00.000Z",
+      }),
+    ).resolves.toBe("left");
+    await expect(
+      repository.transferOwnership({
+        groupId: "group-1",
+        actorId: "user-a",
+        newOwnerId: "user-b",
+        updatedAt: "2026-11-20T10:00:00.000Z",
+      }),
+    ).resolves.toBe("transferred");
     await expect(repository.inviteMembers(inviteInput)).resolves.toEqual([
       "invite",
     ]);
@@ -183,11 +232,17 @@ describe("FirebaseGroupsRepository delegation", () => {
     ).resolves.toBe("group");
 
     expect(mockCreate).toHaveBeenCalledWith(createInput);
-    expect(mockUpdate).toHaveBeenCalledWith("group-1", update);
-    expect(mockRemove).toHaveBeenCalledWith(
-      "group-1",
-      "user-b",
-      "2026-11-20T10:00:00.000Z",
+    expect(mockUpdate).toHaveBeenCalledWith("user-a", "group-1", update);
+    expect(mockRemove).toHaveBeenCalledWith({
+      groupId: "group-1",
+      actorId: "user-a",
+      memberId: "user-b",
+      targetName: "Bea",
+      updatedAt: "2026-11-20T10:00:00.000Z",
+    });
+    expect(mockLeave).toHaveBeenCalledWith(expect.objectContaining({ memberId: "user-b" }));
+    expect(mockTransfer).toHaveBeenCalledWith(
+      expect.objectContaining({ newOwnerId: "user-b" }),
     );
     expect(mockInvite).toHaveBeenCalledWith(inviteInput);
     expect(mockAccept).toHaveBeenCalledWith("user-b", "group-1__user-b");

@@ -83,18 +83,18 @@ export async function getGroupInvitationOperation(
 }
 
 /**
- * Every invitation the caller sent, filtered by group client-side. The query
- * is constrained by `inviterId` on purpose: a `groupId`-only query could return
- * invitations the rules cannot prove the caller may read.
+ * Every invitation of one group, regardless of who opened it. The query uses
+ * the single-field `groupId` index (no composite index) so a promoted owner
+ * sees the pending invitations created before the transfer; the rules let the
+ * current owner `list` them.
  */
 export async function getGroupInvitationsOperation(
-  inviterId: string,
   groupId: string,
 ): Promise<GroupInvitation[]> {
   const snapshot = await getDocs(
     query(
       collection(db, GROUP_INVITATIONS_COLLECTION),
-      where("inviterId", "==", inviterId),
+      where("groupId", "==", groupId),
     ),
   );
 
@@ -105,9 +105,7 @@ export async function getGroupInvitationsOperation(
       document.id,
       document.data() as Record<string, unknown>,
     );
-    if (invitation && invitation.groupId === groupId) {
-      invitations.push(invitation);
-    }
+    if (invitation) invitations.push(invitation);
   }
 
   return invitations;

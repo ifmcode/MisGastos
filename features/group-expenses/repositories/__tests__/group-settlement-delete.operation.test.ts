@@ -7,6 +7,7 @@ import {
   SETTLEMENT_ID,
   WALLET_ID,
   groupSettlementDocument,
+  activityRef,
   lastWriteOf,
   missingSnapshot,
   mockSetDoc,
@@ -18,6 +19,7 @@ import {
   settlementRef,
   snapshot,
   transactionGet,
+  transactionSet,
   transactionUpdate,
   walletDocument,
   walletRef,
@@ -88,6 +90,16 @@ describe("softDeleteGroupSettlementOperation", () => {
     expect(
       notificationWriteOf(notificationRef(buildNotification("user-c", "user-b").dedupeKey)),
     ).toBeDefined();
+    expect(lastWriteOf(transactionSet, activityRef("activity-new"))).toMatchObject({
+      type: "settlement-deleted",
+      actorId: "user-c",
+      settlementId: SETTLEMENT_ID,
+      fromUserId: "user-b",
+      toUserId: "user-c",
+      amountCents: 1000,
+      description: "Dinner",
+      createdAt: DELETED_AT,
+    });
   });
 
   it("lets the debtor delete a social-only settlement", async () => {
@@ -125,6 +137,7 @@ describe("softDeleteGroupSettlementOperation", () => {
 
     await expect(run("user-c")).resolves.toBeUndefined();
     expect(transactionUpdate).not.toHaveBeenCalled();
+    expect(transactionSet).not.toHaveBeenCalled();
     expect(mockSetDoc).not.toHaveBeenCalled();
   });
 

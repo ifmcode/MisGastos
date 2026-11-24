@@ -11,9 +11,20 @@ import type {
   GroupUpdateInput,
   PendingGroupInvitationItem,
 } from "../types/group.types";
+import type {
+  GroupActivityPage,
+  GroupActivityQuery,
+} from "../types/group-activity.types";
 import { createGroupWithFriends } from "./group-create";
+import { loadGroupActivity } from "./group-activity.read";
+import type { IGroupBalancePort } from "./group-balance.port";
 import { assertGroupMember, requireGroupViewer } from "./group-guards";
 import { GroupsJoinUseCases } from "./groups-join.usecases";
+import {
+  leaveGroupRecord,
+  removeGroupMemberRecord,
+  transferGroupOwnershipRecord,
+} from "./group-membership-write";
 import {
   loadGroupDetailFor,
   loadGroups,
@@ -27,7 +38,6 @@ import {
   cancelGroupInvitation,
   inviteGroupMembers,
   rejectGroupInvitation,
-  removeGroupMemberRecord,
   updateGroupRecord,
 } from "./group-write";
 
@@ -37,8 +47,9 @@ export class GroupsService extends GroupsJoinUseCases {
     repository: IGroupsRepository,
     friendsRepository: IFriendsRepository,
     notifications: IGroupNotificationPort,
+    balances: IGroupBalancePort,
   ) {
-    super({ repository, friendsRepository, notifications });
+    super({ repository, friendsRepository, notifications, balances });
   }
 
   async getGroups(viewerUid: string): Promise<Group[]> {
@@ -60,34 +71,34 @@ export class GroupsService extends GroupsJoinUseCases {
     return loadGroupDetailFor(this.writeDeps, viewer, groupId);
   }
 
-  async createGroup(viewerUid: string, input: GroupInput): Promise<Group> {
-    const viewer = requireGroupViewer(viewerUid);
-
-    return createGroupWithFriends(
-      this.writeDeps,
-      viewer,
-      validateGroupOrThrow(input, viewer),
-    );
+  async getGroupActivity(viewerUid: string, groupId: string, query: GroupActivityQuery = {}): Promise<GroupActivityPage> {
+    return loadGroupActivity(this.writeDeps.repository, requireGroupViewer(viewerUid), groupId, query);
   }
 
-  async updateGroup(
-    viewerUid: string,
-    groupId: string,
-    input: GroupUpdateInput,
-  ): Promise<Group> {
+  async createGroup(viewerUid: string, input: GroupInput): Promise<Group> {
+    const viewer = requireGroupViewer(viewerUid);
+    return createGroupWithFriends(this.writeDeps, viewer, validateGroupOrThrow(input, viewer));
+  }
+
+  async updateGroup(viewerUid: string, groupId: string, input: GroupUpdateInput): Promise<Group> {
     const viewer = requireGroupViewer(viewerUid);
     return updateGroupRecord(this.writeDeps.repository, viewer, groupId, input);
   }
 
-  async removeMember(
-    viewerUid: string,
-    groupId: string,
-    memberId: string,
-  ): Promise<Group> {
+  async removeMember(viewerUid: string, groupId: string, memberId: string): Promise<Group> {
     const viewer = requireGroupViewer(viewerUid);
-    const repository = this.writeDeps.repository;
 
-    return removeGroupMemberRecord(repository, viewer, groupId, memberId);
+    return removeGroupMemberRecord(this.writeDeps, viewer, groupId, memberId);
+  }
+
+  /** A non-owner leaves; blocked by the owner check and the zero-balance guard. */
+  async leaveGroup(viewerUid: string, groupId: string): Promise<Group> {
+    return leaveGroupRecord(this.writeDeps, requireGroupViewer(viewerUid), groupId);
+  }
+
+  /** Owner-only; the target must be an active member and not the current owner. */
+  async transferOwnership(viewerUid: string, groupId: string, newOwnerId: string): Promise<Group> {
+    return transferGroupOwnershipRecord(this.writeDeps, requireGroupViewer(viewerUid), groupId, newOwnerId);
   }
 
   async inviteMembers(
@@ -105,10 +116,7 @@ export class GroupsService extends GroupsJoinUseCases {
     return acceptGroupInvitation(this.writeDeps, viewer, invitationId);
   }
 
-  async rejectInvitation(
-    viewerUid: string,
-    invitationId: string,
-  ): Promise<GroupInvitation> {
+  async rejectInvitation(viewerUid: string, invitationId: string): Promise<GroupInvitation> {
     const viewer = requireGroupViewer(viewerUid);
     return rejectGroupInvitation(
       this.writeDeps.repository,
@@ -117,21 +125,12 @@ export class GroupsService extends GroupsJoinUseCases {
     );
   }
 
-  async cancelInvitation(
-    viewerUid: string,
-    invitationId: string,
-  ): Promise<GroupInvitation> {
+  async cancelInvitation(viewerUid: string, invitationId: string): Promise<GroupInvitation> {
     const viewer = requireGroupViewer(viewerUid);
-    return cancelGroupInvitation(
-      this.writeDeps.repository,
-      viewer,
-      invitationId,
-    );
+    return cancelGroupInvitation(this.writeDeps.repository, viewer, invitationId);
   }
 
-  async getPendingInvitations(
-    viewerUid: string,
-  ): Promise<PendingGroupInvitationItem[]> {
+  async getPendingInvitations(viewerUid: string): Promise<PendingGroupInvitationItem[]> {
     const viewer = requireGroupViewer(viewerUid);
     return loadReceivedPendingInvitations(this.writeDeps, viewer);
   }

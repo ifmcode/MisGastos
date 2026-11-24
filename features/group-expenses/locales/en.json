@@ -1,9 +1,6 @@
 {
-  "sectionTitle": "Group expenses",
   "loading": "Loading the group expenses…",
   "retryAccessibility": "Retry loading the group expenses",
-  "emptyTitle": "There are no expenses in this group yet",
-  "emptyMessage": "Add the first shared expense and split it between the members.",
   "viewerName": "You",
   "memberFallback": "Member",
   "row": {

@@ -35,6 +35,7 @@ export function buildGroup(overrides: Partial<Group> = {}): Group {
   return {
     id: GROUP_ID,
     ownerId: VIEWER,
+    createdBy: VIEWER,
     memberIds: [VIEWER, "user-b", "user-c"],
     name: "Viaje",
     description: null,

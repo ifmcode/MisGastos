@@ -4,6 +4,7 @@ import type { GroupDetailSettlementsController } from "@/features/group-expenses
 
 import type { GroupDetail } from "../types/group.types";
 import type { GroupDetailStatus } from "../utils/group-detail-status";
+import type { GroupActivityFeedController } from "./use-group-activity-feed";
 import type { GroupDetailExpensesController } from "./use-group-detail-expenses";
 import type { GroupDetailMembershipController } from "./use-group-detail-membership";
 import type { GroupEditorController } from "./use-group-editor";
@@ -11,6 +12,10 @@ import type { GroupInviteMembersController } from "./use-group-invite-members";
 
 export interface UseGroupDetailScreenOptions {
   groupId: string;
+  /** Leaves the route after the viewer left the group. */
+  onLeft?: () => void;
+  /** Opens the settle route from the blocked-balance dialog. */
+  onOpenSettle?: () => void;
 }
 
 export interface GroupDetailScreenController
@@ -27,6 +32,7 @@ export interface GroupDetailScreenController
   expenses: GroupDetailExpensesController;
   balances: GroupBalancesController;
   settlements: GroupDetailSettlementsController;
+  activity: GroupActivityFeedController;
   invite: GroupInviteMembersController;
   reload: () => void;
   refresh: () => void;

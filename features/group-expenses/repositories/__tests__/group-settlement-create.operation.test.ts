@@ -5,6 +5,7 @@ import {
   GROUP_ID,
   NOW,
   WALLET_ID,
+  activityRef,
   lastWriteOf,
   missingSnapshot,
   mockGetDoc,
@@ -115,6 +116,19 @@ describe("createGroupSettlementOperation - social-only", () => {
         settlementId: NEW_SETTLEMENT_ID,
         amountCents: 1000,
       }),
+    });
+    expect(
+      lastWriteOf(transactionSet, activityRef("activity-new")),
+    ).toMatchObject({
+      type: "settlement-created",
+      actorId: "user-b",
+      settlementId: NEW_SETTLEMENT_ID,
+      fromUserId: "user-b",
+      toUserId: "user-c",
+      amountCents: 1000,
+      currency: "EUR",
+      description: "Dinner",
+      createdAt: NOW,
     });
     expect(
       lastWriteOf(transactionSet, movementRef(NEW_MOVEMENT_ID)),

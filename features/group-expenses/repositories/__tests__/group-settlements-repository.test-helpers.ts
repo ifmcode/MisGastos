@@ -61,6 +61,10 @@ export function notificationRef(id = "notification-1") {
   return { kind: "notification", id };
 }
 
+export function activityRef(id = "activity-1") {
+  return { kind: "activity", id };
+}
+
 export function snapshot(id: string, data?: Record<string, unknown>) {
   return { id, exists: () => data !== undefined, data: () => data };
 }
@@ -138,6 +142,7 @@ function buildReference(collectionName: string, id: string): Reference {
   if (collectionName === "wallets") return walletRef(id);
   if (collectionName === "transactions") return movementRef(id);
   if (collectionName === "notifications") return notificationRef(id);
+  if (collectionName === "groups") return activityRef(id);
 
   return settlementRef(id);
 }
@@ -156,9 +161,10 @@ export function setupGroupSettlementMocks() {
     if (args.length === 1) {
       const path = (args[0] as { path?: string }).path ?? "";
 
-      return path === "transactions"
-        ? movementRef("movement-new")
-        : settlementRef("settlement-new");
+      if (path === "groups") return activityRef("activity-new");
+      if (path === "transactions") return movementRef("movement-new");
+
+      return settlementRef("settlement-new");
     }
 
     const [, name, id] = args as [unknown, string, string];

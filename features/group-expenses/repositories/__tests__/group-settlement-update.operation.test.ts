@@ -7,6 +7,7 @@ import {
   SETTLEMENT_ID,
   WALLET_ID,
   groupSettlementDocument,
+  activityRef,
   lastWriteOf,
   missingSnapshot,
   mockGetDoc,
@@ -20,6 +21,7 @@ import {
   settlementRef,
   snapshot,
   transactionGet,
+  transactionSet,
   transactionUpdate,
   walletDocument,
   walletRef,
@@ -92,6 +94,15 @@ describe("updateGroupSettlementOperation - debtor edit", () => {
       }),
     );
     expect(transactionUpdate).toHaveBeenCalledTimes(1);
+    expect(lastWriteOf(transactionSet, activityRef("activity-new"))).toMatchObject({
+      type: "settlement-updated",
+      actorId: "user-b",
+      settlementId: SETTLEMENT_ID,
+      fromUserId: "user-b",
+      toUserId: "user-c",
+      amountCents: 1000,
+      description: "Bank transfer",
+    });
     expect(notificationWriteOf(notificationRef(NOTIFICATION_ID))).toBeDefined();
   });
 

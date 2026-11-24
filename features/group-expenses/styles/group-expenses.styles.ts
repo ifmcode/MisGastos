@@ -30,9 +30,6 @@ export const groupExpensesStyles = StyleSheet.create({
     letterSpacing: 0.6,
     textTransform: "uppercase",
   },
-  timelineList: {
-    gap: 2,
-  },
   rowBody: {
     flex: 1,
     gap: 2,

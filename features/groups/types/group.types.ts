@@ -1,6 +1,17 @@
 import type { FriendProfile } from "@/features/friends/types/friend.types";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 
+import type { GroupMember } from "./group-membership.types";
+
+export type {
+  GroupDetail,
+  GroupMember,
+  GroupMemberRole,
+  LeaveGroupInput,
+  RemoveGroupMemberInput,
+  TransferGroupOwnershipInput,
+} from "./group-membership.types";
+
 /** Owner included; mirrored by `firestore.rules` and the group schema. */
 export const GROUP_MAX_MEMBERS = 20;
 
@@ -24,8 +35,6 @@ export const GROUP_INVITATION_STATUSES: readonly GroupInvitationStatus[] = [
   "cancelled",
 ];
 
-export type GroupMemberRole = "owner" | "member";
-
 /**
  * `groups/{groupId}` document. `memberIds` is owner-first, unique and holds
  * accepted members only; `defaultCurrency` is the default for future group
@@ -34,6 +43,11 @@ export type GroupMemberRole = "owner" | "member";
 export interface Group {
   id: string;
   ownerId: string;
+  /**
+   * Immutable creator uid and id-prefix namespace: a transfer changes `ownerId`
+   * but never `createdBy`, so invitations still prove the original namespace.
+   */
+  createdBy: string;
   memberIds: string[];
   name: string;
   description: string | null;
@@ -41,9 +55,8 @@ export interface Group {
   /** Stable shareable code; `null` only for groups created before TICKET-061. */
   joinCode: string | null;
   /**
-   * **Simplificar deudas** (TICKET-010): the owner setting that switches the
-   * suggested transfers between simplified and direct. Missing on legacy groups
-   * maps to `true`, so they keep simplifying.
+   * **Simplificar deudas** (TICKET-010): the owner toggle between simplified
+   * and direct suggestions. Missing on legacy groups maps to `true`.
    */
   simplifyDebts: boolean;
   createdAt: string;
@@ -92,13 +105,6 @@ export interface ValidatedGroup extends ValidatedGroupMetadata {
   inviteeIds: string[];
 }
 
-export interface GroupMember {
-  uid: string;
-  displayName: string | null;
-  email: string;
-  role: GroupMemberRole;
-}
-
 /** Pending invitation of one group with the invitee profile when available. */
 export interface GroupInvitationItem {
   invitation: GroupInvitation;
@@ -113,12 +119,6 @@ export interface PendingGroupInvitationItem {
   inviterId: string;
   inviter: FriendProfile | null;
   createdAt: string;
-}
-
-export interface GroupDetail {
-  group: Group;
-  members: GroupMember[];
-  invitations: GroupInvitationItem[];
 }
 
 /** Metadata write; the service stamps `updatedAt` before persistence. */

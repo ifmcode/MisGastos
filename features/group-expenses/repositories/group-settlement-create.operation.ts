@@ -1,6 +1,7 @@
 import { runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { addGroupActivity } from "@/features/groups/repositories/group-activity.writes";
 
 import { GroupExpenseOperationError } from "../services/group-expense.errors";
 import type {
@@ -61,6 +62,18 @@ export async function createGroupSettlementOperation(
         : readGroupSettlementWallet(walletSnapshot, dto.toUserId, dto.currency);
 
     transaction.set(settlementDocument, toGroupSettlementData(settlement));
+    addGroupActivity(transaction, {
+      type: "settlement-created",
+      groupId: dto.groupId,
+      actorId: dto.createdBy,
+      settlementId: settlement.id,
+      fromUserId: settlement.fromUserId,
+      toUserId: settlement.toUserId,
+      amountCents: dto.amountCents,
+      currency: dto.currency,
+      description: dto.note,
+      createdAt: now,
+    });
 
     if (walletId !== null && movementDocument !== null) {
       transaction.set(

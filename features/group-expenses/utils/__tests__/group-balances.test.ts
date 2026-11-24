@@ -9,6 +9,7 @@ import {
   buildDirectGroupDebts,
   calculateGroupBalances,
   calculateGroupNetBalances,
+  getMemberNetBalances,
   getViewerGroupBalance,
   simplifyGroupDebts,
 } from "../group-balances";
@@ -428,6 +429,42 @@ describe("getViewerGroupBalance", () => {
     expect(getViewerGroupBalance(balances, "  ")).toEqual([]);
     expect(
       getViewerGroupBalance(balances, null as unknown as string),
+    ).toEqual([]);
+  });
+});
+
+describe("getMemberNetBalances", () => {
+  const currencies: GroupCurrencyBalances[] = [
+    {
+      currency: "EUR",
+      balances: [
+        { userId: "user-a", netCents: 0 },
+        { userId: "user-b", netCents: -500 },
+      ],
+    },
+    {
+      currency: "USD",
+      balances: [{ userId: "user-b", netCents: 1200 }],
+    },
+  ];
+
+  it("returns the member's non-zero nets, one row per currency", () => {
+    expect(getMemberNetBalances(currencies, "user-b")).toEqual([
+      { currency: "EUR", netCents: -500 },
+      { currency: "USD", netCents: 1200 },
+    ]);
+    expect(getMemberNetBalances(currencies, " user-b ")).toEqual([
+      { currency: "EUR", netCents: -500 },
+      { currency: "USD", netCents: 1200 },
+    ]);
+  });
+
+  it("returns an empty list for a settled, absent or blank member", () => {
+    expect(getMemberNetBalances(currencies, "user-a")).toEqual([]);
+    expect(getMemberNetBalances(currencies, "user-z")).toEqual([]);
+    expect(getMemberNetBalances(currencies, "  ")).toEqual([]);
+    expect(
+      getMemberNetBalances(currencies, null as unknown as string),
     ).toEqual([]);
   });
 });

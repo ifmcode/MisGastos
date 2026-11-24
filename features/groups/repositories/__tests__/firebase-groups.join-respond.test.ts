@@ -7,6 +7,7 @@ import {
   documentSnapshot,
   missingSnapshot,
   mockTransactionGet,
+  mockTransactionSet,
   mockTransactionUpdate,
   setupGroupsRepositoryMocks,
 } from "./groups-repository.test-helpers";
@@ -63,6 +64,15 @@ describe("respondToGroupJoinRequestOperation", () => {
       memberIds: ["user-a", "user-b", "user-c"],
       updatedAt: UPDATED_AT,
     });
+    expect(mockTransactionSet).toHaveBeenCalledWith(
+      { kind: "activity", id: "activity-1" },
+      expect.objectContaining({
+        type: "member-joined",
+        actorId: "user-a",
+        targetUserId: "user-c",
+        createdAt: UPDATED_AT,
+      }),
+    );
   });
 
   it("rejects the request without touching the group", async () => {
@@ -80,6 +90,7 @@ describe("respondToGroupJoinRequestOperation", () => {
       status: "rejected",
       updatedAt: UPDATED_AT,
     });
+    expect(mockTransactionSet).not.toHaveBeenCalled();
   });
 
   it("rejects a caller that is not the owner", async () => {

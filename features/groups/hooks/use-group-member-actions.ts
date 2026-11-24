@@ -1,121 +1,66 @@
-import { useCallback, useRef, useState } from "react";
-
-import { getFriendDisplayName } from "@/features/friends/utils/friend-display";
-import {
-  useConfirmDialog,
-  type UseConfirmDialogResult,
-} from "@/shared/hooks/use-confirm-dialog";
-import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
-
-import { getGroupErrorCode } from "../services/group.errors";
+import { useGroupLeaveAction } from "./use-group-leave-action";
+import { useGroupMemberActionsCore } from "./use-group-member-actions-core";
 import type {
-  GroupInvitationItem,
-  GroupMember,
-} from "../types/group.types";
-import { useGroupsService } from "./use-groups-service";
+  GroupMemberActionsController,
+  GroupMemberPendingAction,
+  UseGroupMemberActionsOptions,
+} from "./use-group-member-actions.types";
+import { useGroupMemberModeration } from "./use-group-member-moderation";
 
-export interface UseGroupMemberActionsOptions {
-  viewerUid: string | undefined;
-  groupId: string;
-  onChanged: () => void | Promise<void>;
-}
+export type {
+  GroupMemberActionsController,
+  GroupMemberPendingAction,
+  UseGroupMemberActionsOptions,
+} from "./use-group-member-actions.types";
 
-export interface GroupMemberActionsController {
-  /** uid of the removed member or id of the cancelled invitation. */
-  pendingId: string | null;
-  error: string | null;
-  removeConfirm: UseConfirmDialogResult;
-  cancelConfirm: UseConfirmDialogResult;
-  requestRemove: (member: GroupMember) => void;
-  requestCancelInvitation: (item: GroupInvitationItem) => void;
-}
-
-/** Owner moderation of the group: remove a member and cancel an invitation. */
+/**
+ * Facade of the membership actions of one group. The in-flight state and the
+ * balance guard live in the core, while the moderation (remove, cancel, transfer)
+ * and the self-service leave keep their own dialogs.
+ */
 export function useGroupMemberActions({
   viewerUid,
   groupId,
+  groupName,
+  isOwner,
+  balances,
   onChanged,
+  onLeft,
+  onOpenSettle,
 }: UseGroupMemberActionsOptions): GroupMemberActionsController {
-  const service = useGroupsService();
-  const { t, tr } = useScopedTranslation("groups");
-  const [pendingId, setPendingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const removeConfirm = useConfirmDialog();
-  const cancelConfirm = useConfirmDialog();
-  const inFlightRef = useRef(false);
-
-  const run = useCallback(
-    async (
-      id: string,
-      fallback: "SAVE_FAILED" | "DELETE_FAILED",
-      operation: (viewer: string) => Promise<unknown>,
-    ) => {
-      if (!viewerUid || inFlightRef.current) return;
-
-      inFlightRef.current = true;
-      setPendingId(id);
-      setError(null);
-
-      try {
-        await operation(viewerUid);
-        await onChanged();
-      } catch (actionError: unknown) {
-        setError(tr(`errors.${getGroupErrorCode(actionError, fallback)}`));
-      } finally {
-        inFlightRef.current = false;
-        setPendingId(null);
-      }
-    },
-    [onChanged, tr, viewerUid],
-  );
-
-  const requestRemove = useCallback(
-    (member: GroupMember) => {
-      removeConfirm.open({
-        title: t("details.removeDialogTitle"),
-        message: t("details.removeDialogMessage", {
-          name: getFriendDisplayName(member),
-        }),
-        confirmLabel: t("details.removeDialogConfirm"),
-        cancelLabel: t("details.removeDialogCancel"),
-        onConfirm: () => {
-          void run(member.uid, "DELETE_FAILED", (viewer) =>
-            service.removeMember(viewer, groupId, member.uid),
-          );
-        },
-      });
-    },
-    [groupId, removeConfirm, run, service, t],
-  );
-
-  const requestCancelInvitation = useCallback(
-    (item: GroupInvitationItem) => {
-      const name = item.invitee
-        ? getFriendDisplayName(item.invitee)
-        : t("details.unknownInvitee");
-      const invitationId = item.invitation.id;
-
-      cancelConfirm.open({
-        title: t("details.cancelInvitationDialogTitle"),
-        message: t("details.cancelInvitationDialogMessage", { name }),
-        confirmLabel: t("details.cancelInvitationDialogConfirm"),
-        cancelLabel: t("details.cancelInvitationDialogCancel"),
-        onConfirm: () => {
-          void run(invitationId, "DELETE_FAILED", (viewer) =>
-            service.cancelInvitation(viewer, invitationId),
-          );
-        },
-      });
-    },
-    [cancelConfirm, run, service, t],
-  );
+  const core = useGroupMemberActionsCore({
+    viewerUid,
+    isOwner,
+    balances,
+    onOpenSettle,
+  });
+  const moderation = useGroupMemberModeration({
+    core,
+    groupId,
+    isOwner,
+    onChanged,
+  });
+  const leave = useGroupLeaveAction({
+    core,
+    viewerUid,
+    groupId,
+    groupName,
+    onLeft,
+  });
 
   return {
-    pendingId,
-    error,
-    removeConfirm,
-    cancelConfirm,
-    requestRemove,
-    requestCancelInvitation,
+    pendingId: core.pendingId,
+    pendingAction: core.pendingAction,
+    error: core.error,
+    blockedDialog: core.blockedDialog,
+    canLeave: core.canLeave,
+    removeConfirm: moderation.removeConfirm,
+    cancelConfirm: moderation.cancelConfirm,
+    transferConfirm: moderation.transferConfirm,
+    leaveConfirm: leave.leaveConfirm,
+    requestRemove: moderation.requestRemove,
+    requestCancelInvitation: moderation.requestCancelInvitation,
+    requestTransfer: moderation.requestTransfer,
+    requestLeave: leave.requestLeave,
   };
 }

@@ -28,6 +28,7 @@ export const mockTransactionGet = jest.fn<
 export const mockTransactionUpdate = jest.fn(
   (..._args: unknown[]) => undefined,
 );
+export const mockTransactionSet = jest.fn((..._args: unknown[]) => undefined);
 
 jest.mock("firebase/firestore", () => ({
   getDoc: (...args: unknown[]) => mockGetDoc(...args),
@@ -59,12 +60,21 @@ export function setupGroupsRepositoryMocks() {
   mockGetDoc.mockReset();
   mockGetDocs.mockReset();
   let generatedDocs = 0;
-  mockCollection.mockReturnValue({ path: "collection" });
+  let generatedActivity = 0;
+  // `collection(db, "groups", groupId, "activity")` is the only 4-argument
+  // collection call in the modules under test.
+  mockCollection.mockImplementation((...args: unknown[]) =>
+    args.length === 4 ? { path: "activity" } : { path: "collection" },
+  );
   mockQuery.mockReturnValue({ path: "query" });
   mockWhere.mockReturnValue({ path: "where" });
   mockDoc.mockImplementation((first, second, third) => {
     if (typeof second === "string" && typeof third === "string") {
       return { id: third, path: `${second}/${third}` };
+    }
+    if ((first as { path?: string } | undefined)?.path === "activity") {
+      generatedActivity += 1;
+      return { kind: "activity", id: `activity-${generatedActivity}` };
     }
 
     generatedDocs += 1;
@@ -83,6 +93,7 @@ export function setupGroupsRepositoryMocks() {
     run({
       get: mockTransactionGet,
       update: mockTransactionUpdate,
+      set: mockTransactionSet,
     }),
   );
 }
@@ -113,6 +124,7 @@ export const INVITATION_ID = `${GROUP_ID}__user-b`;
 
 export const GROUP_DOCUMENT = {
   ownerId: "user-a",
+  createdBy: "user-a",
   memberIds: ["user-a", "user-b"],
   name: "Viaje",
   description: null,

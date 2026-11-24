@@ -112,6 +112,58 @@ describe("inviteMembersOperation", () => {
     expect(mockUpdateDoc).toHaveBeenCalledTimes(1);
   });
 
+  it("creates the invitation under the transferred owner", async () => {
+    mockGetDocs.mockResolvedValue(querySnapshot([]));
+
+    await inviteMembersOperation({
+      ...baseInput,
+      inviterId: "user-b",
+      inviteeIds: ["user-c"],
+    });
+
+    expect(mockSetDoc.mock.calls[0][1]).toMatchObject({
+      groupId: GROUP_ID,
+      inviterId: "user-b",
+      inviteeId: "user-c",
+      pairId: "user-b__user-c",
+      status: "pending",
+    });
+  });
+
+  it("reopens after a transfer and rewrites the inviter and its pair", async () => {
+    mockGetDocs.mockResolvedValue(
+      querySnapshot([
+        {
+          id: `${GROUP_ID}__user-c`,
+          data: () => ({
+            ...INVITATION_DOCUMENT,
+            inviteeId: "user-c",
+            pairId: "user-a__user-c",
+            status: "rejected",
+          }),
+        },
+      ]),
+    );
+
+    const invitations = await inviteMembersOperation({
+      ...baseInput,
+      inviterId: "user-b",
+      inviteeIds: ["user-c"],
+    });
+
+    expect(mockUpdateDoc.mock.calls[0][1]).toEqual({
+      status: "pending",
+      updatedAt: UPDATED_AT,
+      inviterId: "user-b",
+      pairId: "user-b__user-c",
+    });
+    expect(invitations[0]).toMatchObject({
+      inviterId: "user-b",
+      pairId: "user-b__user-c",
+      status: "pending",
+    });
+  });
+
   it("refuses an invitee that would produce an empty pair id", async () => {
     mockGetDocs.mockResolvedValue(querySnapshot([]));
 

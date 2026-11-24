@@ -8,11 +8,11 @@ import {
   softDeleteGroupExpenseLinkOperation,
   updateGroupExpenseLinkOperation,
 } from "./group-expense-link.operations";
+import { softDeleteGroupExpenseOperation } from "./group-expense-delete.operation";
 import {
   createGroupExpenseOperation,
   getGroupExpenseOperation,
   getGroupExpensesOperation,
-  softDeleteGroupExpenseOperation,
   updateGroupExpenseOperation,
 } from "./group-expenses.operations";
 import type {
@@ -39,12 +39,17 @@ export class FirebaseGroupExpensesRepository
   updateExpense(
     expenseId: string,
     update: UpdateGroupExpenseDto,
+    viewerUid: string,
   ): Promise<GroupExpense> {
-    return updateGroupExpenseOperation(expenseId, update);
+    return updateGroupExpenseOperation(expenseId, update, viewerUid);
   }
 
-  softDeleteExpense(expenseId: string, deletedAt: string): Promise<void> {
-    return softDeleteGroupExpenseOperation(expenseId, deletedAt);
+  softDeleteExpense(
+    expenseId: string,
+    deletedAt: string,
+    viewerUid: string,
+  ): Promise<void> {
+    return softDeleteGroupExpenseOperation(expenseId, deletedAt, viewerUid);
   }
 
   createExpenseLink(dto: CreateGroupExpenseDto): Promise<GroupExpense> {

@@ -1,14 +1,12 @@
 import { useRouter, type Href } from "expo-router";
 import { useCallback, useMemo } from "react";
 
-import type { GroupExpense } from "@/features/group-expenses/types/group-expense.types";
-import type { GroupSettlement } from "@/features/group-expenses/types/group-settlement.types";
-
 export interface GroupDetailNavigation {
-  openExpense: (expense: GroupExpense) => void;
+  /** Opens one expense of this group; the row carries only its id. */
+  openExpense: (expenseId: string) => void;
   /** Opens the settle route without a pair; the route shows the debt step. */
   openSettle: () => void;
-  openSettlement: (settlement: GroupSettlement) => void;
+  openSettlement: (settlementId: string) => void;
 }
 
 /** Destinations of the group detail, kept out of the screen component. */
@@ -20,13 +18,14 @@ export function useGroupDetailNavigation({
   const router = useRouter();
 
   const openExpense = useCallback(
-    (expense: GroupExpense) => {
-      const group = encodeURIComponent(expense.groupId);
-      router.push(
-        `/social/group-expenses/${expense.id}?groupId=${group}` as Href,
-      );
+    (expenseId: string) => {
+      if (!groupId) return;
+
+      const expense = encodeURIComponent(expenseId);
+      const group = encodeURIComponent(groupId);
+      router.push(`/social/group-expenses/${expense}?groupId=${group}` as Href);
     },
-    [router],
+    [groupId, router],
   );
 
   const openSettle = useCallback(() => {
@@ -38,9 +37,9 @@ export function useGroupDetailNavigation({
   }, [groupId, router]);
 
   const openSettlement = useCallback(
-    (settlement: GroupSettlement) => {
+    (settlementId: string) => {
       router.push(
-        `/social/group-settlements/${encodeURIComponent(settlement.id)}` as Href,
+        `/social/group-settlements/${encodeURIComponent(settlementId)}` as Href,
       );
     },
     [router],

@@ -43,6 +43,7 @@ export async function createGroupWithInvitationsOperation(
   const group: Group = {
     id: groupId,
     ownerId: input.ownerId,
+    createdBy: input.ownerId,
     memberIds: prepareGroupMemberIds(input.ownerId),
     name: input.name,
     description: input.description,

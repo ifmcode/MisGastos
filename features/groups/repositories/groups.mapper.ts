@@ -2,69 +2,25 @@ import { createFriendPairId } from "@/features/friends/utils/friend-pair";
 import { isCurrencyCode } from "@/shared/constants/currencies";
 
 import {
-  GROUP_DESCRIPTION_MAX_LENGTH,
-  GROUP_INVITATION_STATUSES,
   GROUP_MAX_MEMBERS,
   GROUP_NAME_MAX_LENGTH,
   type Group,
   type GroupInvitation,
-  type GroupInvitationStatus,
 } from "../types/group.types";
 import { createGroupInvitationId, groupIdBelongsToOwner } from "../utils/group-ids";
-import { normalizeGroupJoinCode } from "../utils/group-join-code";
+import {
+  readDescription,
+  readJoinCode,
+  readSimplifyDebts,
+  readStatus,
+  readStringList,
+  readText,
+} from "./groups.mapper.readers";
 
 export {
   mapGroupCodeDocument,
   mapGroupJoinRequestDocument,
 } from "./group-join.mapper";
-
-function readText(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function readStringList(value: unknown): string[] | null {
-  if (!Array.isArray(value)) return null;
-
-  const items: unknown[] = value;
-  const list = items.map((item) => readText(item));
-
-  return list.every((item) => item.length > 0) ? list : null;
-}
-
-function readDescription(value: unknown): string | null | undefined {
-  if (value === null || value === undefined) return null;
-  if (typeof value !== "string") return undefined;
-
-  const description = value.trim();
-  if (description.length > GROUP_DESCRIPTION_MAX_LENGTH) return undefined;
-
-  return description.length > 0 ? description : null;
-}
-
-function readStatus(value: unknown): GroupInvitationStatus | null {
-  return GROUP_INVITATION_STATUSES.includes(value as GroupInvitationStatus)
-    ? (value as GroupInvitationStatus)
-    : null;
-}
-
-/**
- * **Simplificar deudas** is on by default: absent or `null` is a group created
- * before TICKET-010, and a malformed value also keeps it on instead of dropping
- * the whole group. Only a stored `false` turns the toggle off.
- */
-function readSimplifyDebts(value: unknown): boolean {
-  return typeof value === "boolean" ? value : true;
-}
-
-/**
- * Absent/null is a legacy group (no code yet); a present but malformed code
- * maps to null instead of dropping the whole group.
- */
-function readJoinCode(value: unknown): string | null {
-  if (value === null || value === undefined) return null;
-
-  return normalizeGroupJoinCode(value) || null;
-}
 
 /**
  * Converts a `groups` document. The id must be owner-namespaced
@@ -79,6 +35,11 @@ export function mapGroupDocument(
 ): Group | null {
   const groupId = readText(id);
   const ownerId = readText(data.ownerId);
+  const storedCreatedBy = data.createdBy;
+  const createdBy =
+    storedCreatedBy === null || storedCreatedBy === undefined
+      ? ownerId
+      : readText(storedCreatedBy);
   const memberIds = readStringList(data.memberIds);
   const name = readText(data.name);
   const description = readDescription(data.description);
@@ -89,7 +50,10 @@ export function mapGroupDocument(
   const simplifyDebts = readSimplifyDebts(data.simplifyDebts);
 
   if (groupId.length === 0 || ownerId.length === 0) return null;
-  if (!groupIdBelongsToOwner(groupId, ownerId)) return null;
+  // The id prefix always belongs to the immutable creator, never to a promoted
+  // owner; a missing `createdBy` is a pre-TICKET-068 group and falls back.
+  if (createdBy.length === 0) return null;
+  if (!groupIdBelongsToOwner(groupId, createdBy)) return null;
   if (description === undefined) return null;
   if (!isCurrencyCode(currency)) return null;
   if (createdAt.length === 0 || updatedAt.length === 0) return null;
@@ -102,6 +66,7 @@ export function mapGroupDocument(
   return {
     id: groupId,
     ownerId,
+    createdBy,
     memberIds,
     name,
     description,
@@ -114,10 +79,14 @@ export function mapGroupDocument(
 }
 
 /**
- * Converts a `groupInvitations` document. The id and the pair are rebuilt from
- * the stored ids, so a forged or stale value can never open an invitation the
- * rules would not accept; a group id outside the inviter's namespace is a
- * forged invitation and is dropped too.
+ * Converts a `groupInvitations` document. The id, the pair and the status are
+ * rebuilt from the stored ids, so a forged or stale value can never open an
+ * invitation the rules would not accept.
+ *
+ * The id prefix is deliberately NOT checked against `inviterId`: the prefix
+ * belongs to the immutable `createdBy`, while `inviterId` is the current owner
+ * who (re)opened the invitation. After a transfer the two legitimately differ,
+ * and the rules already prove who may create or reopen the document.
  */
 export function mapGroupInvitationDocument(
   id: string,
@@ -140,7 +109,6 @@ export function mapGroupInvitationDocument(
   if (groupName.length === 0 || groupName.length > GROUP_NAME_MAX_LENGTH) {
     return null;
   }
-  if (!groupIdBelongsToOwner(groupId, inviterId)) return null;
   if (createGroupInvitationId(groupId, inviteeId) !== invitationId) return null;
   if (createFriendPairId(inviterId, inviteeId) !== pairId) return null;
   if (pairId.length === 0) return null;

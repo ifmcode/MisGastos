@@ -18,6 +18,7 @@ export function buildGroup(overrides: Partial<Group> = {}): Group {
   return {
     id: GROUP_ID,
     ownerId: "user-a",
+    createdBy: "user-a",
     memberIds: ["user-a", "user-b", "user-c"],
     name: "Viaje",
     description: null,
@@ -64,8 +65,13 @@ export class FakeGroupExpensesRepository implements IGroupExpensesRepository {
   readonly updateCalls: Array<{
     expenseId: string;
     update: UpdateGroupExpenseDto;
+    viewerUid: string;
   }> = [];
-  readonly deleteCalls: Array<{ expenseId: string; deletedAt: string }> = [];
+  readonly deleteCalls: Array<{
+    expenseId: string;
+    deletedAt: string;
+    viewerUid: string;
+  }> = [];
   failure: Error | null = null;
 
   seed(expense: GroupExpense): GroupExpense {
@@ -106,9 +112,10 @@ export class FakeGroupExpensesRepository implements IGroupExpensesRepository {
   async updateExpense(
     expenseId: string,
     update: UpdateGroupExpenseDto,
+    viewerUid: string,
   ): Promise<GroupExpense> {
     this.guard();
-    this.updateCalls.push({ expenseId, update });
+    this.updateCalls.push({ expenseId, update, viewerUid });
 
     const existing = this.expenses.get(expenseId);
     if (!existing) throw new GroupExpenseOperationError("EXPENSE_NOT_FOUND");
@@ -122,9 +129,10 @@ export class FakeGroupExpensesRepository implements IGroupExpensesRepository {
   async softDeleteExpense(
     expenseId: string,
     deletedAt: string,
+    viewerUid: string,
   ): Promise<void> {
     this.guard();
-    this.deleteCalls.push({ expenseId, deletedAt });
+    this.deleteCalls.push({ expenseId, deletedAt, viewerUid });
 
     const existing = this.expenses.get(expenseId);
     if (!existing) return;

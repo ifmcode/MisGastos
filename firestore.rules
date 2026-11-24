@@ -500,7 +500,9 @@ service cloud.firestore {
     }
 
     // The referenced group must belong to the actor: an invitation document
-    // alone cannot authorize a notification for someone else's group.
+    // alone cannot authorize a notification for someone else's group. Keyed on
+    // the current `ownerId` (never the id prefix), so a promoted owner can
+    // notify after a TICKET-068 transfer.
     function isGroupInviteFor(group, invitation, notification) {
       return group.ownerId == request.auth.uid
         && invitation.inviteeId == notification.userId
@@ -793,9 +795,17 @@ service cloud.firestore {
         && memberIds.toSet().size() == memberIds.size();
     }
 
+    // Creation identity: the stamp and the immutable creator never move. The
+    // tolerant `get` keeps a pre-TICKET-068 group (no `createdBy` yet) editable
+    // while still forbidding the client from adding or changing the field.
+    function keepsGroupCreation(previous, next) {
+      return next.createdAt == previous.createdAt
+        && next.get('createdBy', null) == previous.get('createdBy', null);
+    }
+
     function keepsGroupIdentity(previous, next) {
       return next.ownerId == previous.ownerId
-        && next.createdAt == previous.createdAt;
+        && keepsGroupCreation(previous, next);
     }
 
     // a) owner metadata edit: membership, owner and creation stamp are frozen.
@@ -829,6 +839,143 @@ service cloud.firestore {
         && next.updatedAt is string;
     }
 
+    // c) TICKET-068 self-removal: the caller is the removed uid, the owner stays,
+    //    the set only shrinks by one. The zero-balance guard is service-side
+    //    because rules cannot sum the ledger.
+    function isSelfGroupMemberRemoval(previous, next) {
+      return request.auth.uid in previous.memberIds
+        && request.auth.uid != previous.ownerId
+        && next.memberIds.size() == previous.memberIds.size() - 1
+        && previous.memberIds.toSet().hasAll(next.memberIds)
+        && !(request.auth.uid in next.memberIds)
+        && next.diff(previous).affectedKeys().hasOnly(['memberIds', 'updatedAt'])
+        && hasGroupMembers(next.memberIds, previous.ownerId)
+        && next.updatedAt is string;
+    }
+
+    // d) TICKET-068 ownership transfer: current owner only, the new owner is an
+    //    active member, the member set is unchanged and reordered owner-first,
+    //    and `createdAt`/`createdBy`/the id stay frozen. The old owner remains
+    //    a member, so the group always keeps exactly one owner.
+    function isGroupOwnershipTransfer(previous, next) {
+      return previous.ownerId == request.auth.uid
+        && next.ownerId != previous.ownerId
+        && next.ownerId in previous.memberIds
+        && next.memberIds.size() == previous.memberIds.size()
+        && next.memberIds[0] == next.ownerId
+        && next.memberIds.toSet().hasAll(previous.memberIds)
+        && previous.memberIds.toSet().hasAll(next.memberIds)
+        && hasGroupMembers(next.memberIds, next.ownerId)
+        && next.diff(previous).affectedKeys().hasOnly(
+             ['ownerId', 'memberIds', 'updatedAt']
+           )
+        && keepsGroupCreation(previous, next)
+        && next.updatedAt is string;
+    }
+
+    // ---- TICKET-011 group activity ---------------------------------------
+    // The history lives in `groups/{groupId}/activity`, an append-only event
+    // log. Rules cannot read the expense/settlement an event points to nor sum
+    // the ledger, so actor authenticity beyond "the caller is (or becomes) a
+    // member of the parent group" is an accepted V1 trade-off: any member could
+    // forge an event attributed to themselves. The service is the only writer
+    // and the feed is advisory. Events are structured data, never a sentence.
+    //
+    // No composite index: the repository sorts by `createdAt` and the document
+    // id inside one subcollection, with no extra filter.
+    function isGroupActivityType(value) {
+      return value in [
+        'expense-created',
+        'expense-updated',
+        'expense-deleted',
+        'settlement-created',
+        'settlement-updated',
+        'settlement-deleted',
+        'member-joined',
+        'member-left',
+        'member-removed',
+        'owner-transferred',
+        'group-updated',
+        'simplify-debts-changed'
+      ];
+    }
+
+    // `null` is a missing payload; a present value must be bounded text.
+    function isGroupActivityText(value, maxLength) {
+      return value == null || (value is string && value.size() <= maxLength);
+    }
+
+    // Read: any active member of the parent group.
+    function isGroupActivityMember(groupId) {
+      return isGroupMember(
+        get(/databases/$(database)/documents/groups/$(groupId)).data
+      );
+    }
+
+    // Create: a join/leave changes `memberIds` in the same commit, so the caller
+    // is accepted as a member either before or after that parent write.
+    function isGroupActivityActor(groupId) {
+      return request.auth.uid in get(
+               /databases/$(database)/documents/groups/$(groupId)
+             ).data.memberIds
+        || request.auth.uid in getAfter(
+               /databases/$(database)/documents/groups/$(groupId)
+             ).data.memberIds;
+    }
+
+    // Every key is read below, so a document missing one fails to evaluate and
+    // is denied. `changedFields` is a short list: rules cannot iterate it, so
+    // its allowed values stay in the mapper and the service.
+    function hasGroupActivityFields(data) {
+      return data.keys().hasOnly(
+          [
+            'type',
+            'groupId',
+            'actorId',
+            'targetUserId',
+            'targetName',
+            'expenseId',
+            'settlementId',
+            'fromUserId',
+            'toUserId',
+            'amountCents',
+            'currency',
+            'description',
+            'changedFields',
+            'simplifyDebts',
+            'previousOwnerId',
+            'newOwnerId',
+            'createdAt'
+          ]
+        )
+        && isGroupActivityType(data.type)
+        && isGroupText(data.groupId, 1500)
+        && isGroupText(data.actorId, 1500)
+        && isGroupActivityText(data.targetUserId, 1500)
+        && isGroupActivityText(data.targetName, 60)
+        && isGroupActivityText(data.expenseId, 1500)
+        && isGroupActivityText(data.settlementId, 1500)
+        && isGroupActivityText(data.fromUserId, 1500)
+        && isGroupActivityText(data.toUserId, 1500)
+        && (
+             data.amountCents == null
+             || (
+               data.amountCents is int
+               && data.amountCents > 0
+               && data.amountCents <= 100000000
+             )
+           )
+        && (data.currency == null || hasGroupCurrency(data.currency))
+        && isGroupActivityText(data.description, 500)
+        && data.changedFields is list
+        && data.changedFields.size() <= 3
+        && (data.simplifyDebts == null || data.simplifyDebts is bool)
+        && isGroupActivityText(data.previousOwnerId, 1500)
+        && isGroupActivityText(data.newOwnerId, 1500)
+        && data.createdAt is string
+        && data.createdAt.size() > 0;
+    }
+
     // Deterministic invitation id: `groupId__inviteeId`.
     function isGroupInvitationParticipant(data) {
       return isSignedIn()
@@ -836,6 +983,16 @@ service cloud.firestore {
           data.inviterId == request.auth.uid
           || data.inviteeId == request.auth.uid
         );
+    }
+
+    // Current owner of the parent group: after a TICKET-068 transfer the stored
+    // `inviterId` may name the previous owner, so ownership is proven against
+    // the group document, never against the invitation.
+    function isGroupOwner(groupId) {
+      return isSignedIn()
+        && get(
+             /databases/$(database)/documents/groups/$(groupId)
+           ).data.ownerId == request.auth.uid;
     }
 
     function isGroupInvitationPair(data) {
@@ -878,11 +1035,12 @@ service cloud.firestore {
         && data.updatedAt is string;
     }
 
+    // Frozen identity of an invitation. `inviterId`/`pairId` are NOT frozen:
+    // a reopen after a transfer rewrites them to the current owner, and each
+    // update branch below restricts exactly which keys it may change.
     function keepsGroupInvitationIdentity(previous, next) {
-      return next.inviterId == previous.inviterId
-        && next.inviteeId == previous.inviteeId
+      return next.inviteeId == previous.inviteeId
         && next.groupId == previous.groupId
-        && next.pairId == previous.pairId
         && next.createdAt == previous.createdAt;
     }
 
@@ -898,17 +1056,18 @@ service cloud.firestore {
         && isInvitationStatusChange(previous, next);
     }
 
-    // Inviter: pending -> cancelled.
+    // Current owner: pending -> cancelled. The stored inviter may be a previous
+    // owner after a transfer, so only the group's `ownerId` counts.
     function isInviterInvitationCancel(previous, next) {
-      return previous.inviterId == request.auth.uid
+      return isGroupOwner(previous.groupId)
         && previous.status == 'pending'
         && next.status == 'cancelled'
         && isInvitationStatusChange(previous, next);
     }
 
-    // Inviter rename propagation while the invitation is still pending.
+    // Current owner rename propagation while the invitation is still pending.
     function isInvitationRename(previous, next) {
-      return previous.inviterId == request.auth.uid
+      return isGroupOwner(previous.groupId)
         && previous.status == 'pending'
         && next.status == 'pending'
         && isGroupText(next.groupName, 60)
@@ -917,19 +1076,34 @@ service cloud.firestore {
            );
     }
 
-    // Inviter re-invite: a rejected/cancelled (or accepted-then-removed) row is
-    // reopened instead of duplicated; the service only does it for non-members.
+    // Current owner re-invite: a rejected/cancelled (or accepted-then-removed)
+    // row is reopened instead of duplicated. The reopen rewrites `inviterId`
+    // (and its sorted `pairId`) to whoever invites now, and the referenced
+    // friendship must exist for that new pair.
     function isInvitationReopen(previous, next) {
-      return previous.inviterId == request.auth.uid
+      return isGroupOwner(previous.groupId)
         && previous.status in ['rejected', 'cancelled', 'accepted']
         && next.status == 'pending'
-        && isInvitationStatusChange(previous, next);
+        && next.inviterId == request.auth.uid
+        && next.diff(previous).affectedKeys().hasOnly(
+             ['status', 'updatedAt', 'inviterId', 'pairId']
+           )
+        && isGroupInvitationPair(next)
+        && isFriendshipOf(
+             get(/databases/$(database)/documents/friendships/$(next.pairId)).data,
+             next.inviterId,
+             next.inviteeId
+           )
+        && next.updatedAt is string;
     }
 
-    function isAcceptedGroupInvitation(invitation, groupId, ownerId) {
+    // An accepted invitation proves the join by group + invitee + status. The
+    // inviter is NOT compared with the current owner: the create rule already
+    // proved the inviter was an owner then, and a pending invitation must keep
+    // working after a transfer.
+    function isAcceptedGroupInvitation(invitation, groupId) {
       return invitation.groupId == groupId
         && invitation.inviteeId == request.auth.uid
-        && invitation.inviterId == ownerId
         && invitation.status == 'accepted';
     }
 
@@ -949,8 +1123,7 @@ service cloud.firestore {
              getAfter(
                /databases/$(database)/documents/groupInvitations/$(groupId + '__' + request.auth.uid)
              ).data,
-             groupId,
-             previous.ownerId
+             groupId
            );
     }
 
@@ -1497,6 +1670,7 @@ service cloud.firestore {
 
       allow create: if isSignedIn()
         && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.createdBy == request.auth.uid
         && isOwnedGroupId(groupId, request.auth.uid)
         && request.resource.data.memberIds == [request.auth.uid]
         && isGroupText(request.resource.data.name, 60)
@@ -1509,6 +1683,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(
              [
                'ownerId',
+               'createdBy',
                'memberIds',
                'name',
                'description',
@@ -1520,24 +1695,50 @@ service cloud.firestore {
              ]
            );
 
-      allow update: if keepsGroupIdentity(resource.data, request.resource.data)
-        && (
-          isGroupMetadataEdit(resource.data, request.resource.data)
-          || isGroupMemberRemoval(resource.data, request.resource.data)
-          || joinsGroupThroughInvitation(
-               resource.data,
-               request.resource.data,
-               groupId
-             )
-          || isGroupJoinCodeBackfill(resource.data, request.resource.data)
-          || joinsGroupThroughJoinRequest(
-               resource.data,
-               request.resource.data,
-               groupId
-             )
+      allow update: if (
+          (
+            keepsGroupIdentity(resource.data, request.resource.data)
+            && (
+              isGroupMetadataEdit(resource.data, request.resource.data)
+              || isGroupMemberRemoval(resource.data, request.resource.data)
+              || isSelfGroupMemberRemoval(
+                   resource.data,
+                   request.resource.data
+                 )
+              || joinsGroupThroughInvitation(
+                   resource.data,
+                   request.resource.data,
+                   groupId
+                 )
+              || isGroupJoinCodeBackfill(resource.data, request.resource.data)
+              || joinsGroupThroughJoinRequest(
+                   resource.data,
+                   request.resource.data,
+                   groupId
+                 )
+            )
+          )
+          // A transfer changes `ownerId`, so it cannot pass through
+          // `keepsGroupIdentity`; its own branch freezes creation identity.
+          || isGroupOwnershipTransfer(resource.data, request.resource.data)
         );
 
       allow delete: if false;
+
+      // Member-only, append-only history (TICKET-011). Any member reads; only
+      // the signed-in actor appends, with the event shape above; nothing is
+      // ever updated or deleted. See the helper block for the actor trade-off.
+      match /activity/{activityId} {
+        allow get, list: if isGroupActivityMember(groupId);
+
+        allow create: if isSignedIn()
+          && request.resource.data.actorId == request.auth.uid
+          && request.resource.data.groupId == groupId
+          && isGroupActivityActor(groupId)
+          && hasGroupActivityFields(request.resource.data);
+
+        allow update, delete: if false;
+      }
     }
 
     // ---- TICKET-009 group expenses ---------------------------------------
@@ -1952,6 +2153,9 @@ service cloud.firestore {
     // `list` is participant-only. The repository queries by `inviterId` (owner
     // list) or `inviteeId` (received list), each a single-field index that
     // proves one of the two branches; a `groupId`-only query would not.
+    // `list` is owner-or-participant: the repository queries one group by its
+    // `groupId` (single-field index), so a promoted owner can see the pending
+    // invitations created before the transfer; the invitee still sees its own.
     match /groupInvitations/{invitationId} {
       // A `get` on a missing invitation must resolve to not-found so an
       // idempotent invite can decide whether to create or reopen it. Same
@@ -1960,13 +2164,26 @@ service cloud.firestore {
         && (
           !exists(/databases/$(database)/documents/groupInvitations/$(invitationId))
           || isGroupInvitationParticipant(resource.data)
+          || isGroupOwner(resource.data.groupId)
         );
 
-      allow list: if isGroupInvitationParticipant(resource.data);
+      allow list: if isGroupInvitationParticipant(resource.data)
+        || isGroupOwner(resource.data.groupId);
 
       allow create: if isSignedIn()
         && request.resource.data.inviterId == request.auth.uid
-        && isOwnedGroupId(request.resource.data.groupId, request.auth.uid)
+        // Ownership proof: the original creator short-circuits on the id
+        // prefix (no group read, so a 19-invite batch stays one friendship read
+        // per invitation); a transferred owner falls back to the stored
+        // `ownerId` (one group read + one friendship read per invitation, still
+        // inside the per-document budget). The service writes each invitation
+        // as a single document, so the cached group read is reused per write.
+        && (
+             isOwnedGroupId(request.resource.data.groupId, request.auth.uid)
+             || get(
+                  /databases/$(database)/documents/groups/$(request.resource.data.groupId)
+                ).data.ownerId == request.auth.uid
+           )
         && request.resource.data.status == 'pending'
         && invitationId == request.resource.data.groupId
              + '__' + request.resource.data.inviteeId
@@ -1979,7 +2196,10 @@ service cloud.firestore {
              request.resource.data.inviteeId
            );
 
-      allow update: if isGroupInvitationParticipant(resource.data)
+      allow update: if (
+          isGroupInvitationParticipant(resource.data)
+          || isGroupOwner(resource.data.groupId)
+        )
         && keepsGroupInvitationIdentity(resource.data, request.resource.data)
         && hasGroupInvitationFields(request.resource.data)
         && (
@@ -2026,20 +2246,28 @@ service cloud.firestore {
              code
            );
 
-      // Rename propagation only: group, owner and the code itself are frozen.
-      // `getAfter` accepts the batch that renames the group and the projection
-      // together and keeps the shared name from drifting.
+      // Rename and owner propagation only: the group id and the code are frozen.
+      // The caller must be the group's owner before the write (`get` of the
+      // pre-state): the old owner performs a TICKET-068 transfer, the new owner
+      // performs later renames. The projection must agree with the group after
+      // the write, so the shared name and owner never drift; `getAfter` accepts
+      // the batch/transaction that writes both together.
       allow update: if isSignedIn()
-        && resource.data.ownerId == request.auth.uid
-        && request.resource.data.ownerId == resource.data.ownerId
+        && get(
+             /databases/$(database)/documents/groups/$(resource.data.groupId)
+           ).data.ownerId == request.auth.uid
         && request.resource.data.groupId == resource.data.groupId
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
-             ['groupName']
+             ['groupName', 'ownerId']
            )
         && isGroupText(request.resource.data.groupName, 60)
+        && isGroupText(request.resource.data.ownerId, 1500)
         && getAfter(
              /databases/$(database)/documents/groups/$(resource.data.groupId)
            ).data.name == request.resource.data.groupName
+        && getAfter(
+             /databases/$(database)/documents/groups/$(resource.data.groupId)
+           ).data.ownerId == request.resource.data.ownerId
         && getAfter(
              /databases/$(database)/documents/groups/$(resource.data.groupId)
            ).data.joinCode == code;

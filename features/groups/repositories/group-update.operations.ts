@@ -1,10 +1,11 @@
-import { doc, getDoc, runTransaction, writeBatch } from "firebase/firestore";
+import { doc, getDoc, writeBatch, type WriteBatch } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 
 import { GroupOperationError } from "../services/group.errors";
 import type { Group, GroupMetadataUpdate } from "../types/group.types";
-import { removeGroupMember } from "../utils/group-membership";
+import { collectGroupMetadataChanges } from "../utils/group-activity";
+import { addGroupActivity } from "./group-activity.writes";
 import {
   GROUP_INVITATIONS_COLLECTION,
   toGroupCodeRenameData,
@@ -31,12 +32,44 @@ async function requireGroupDocument(groupId: string): Promise<Group> {
   return group;
 }
 
+/** One `group-updated` per metadata change and one setting event when toggled. */
+function writeMetadataActivity(
+  batch: WriteBatch,
+  actorId: string,
+  group: Group,
+  update: GroupMetadataUpdate,
+): void {
+  const changedFields = collectGroupMetadataChanges(group, update);
+
+  if (changedFields.length > 0) {
+    addGroupActivity(batch, {
+      type: "group-updated",
+      groupId: group.id,
+      actorId,
+      changedFields,
+      createdAt: update.updatedAt,
+    });
+  }
+
+  if (group.simplifyDebts !== update.simplifyDebts) {
+    addGroupActivity(batch, {
+      type: "simplify-debts-changed",
+      groupId: group.id,
+      actorId,
+      simplifyDebts: update.simplifyDebts,
+      createdAt: update.updatedAt,
+    });
+  }
+}
+
 /**
  * Owner metadata edit. A rename also refreshes the denormalized `groupName` of
  * every pending invitation in the same batch, so the invitee list never shows
- * an old name. The rules allow exactly these two write shapes.
+ * an old name. The metadata changes and the **Simplificar deudas** toggle are
+ * appended to the history in that same batch, so group and feed never disagree.
  */
 export async function updateGroupOperation(
+  viewerUid: string,
   groupId: string,
   update: GroupMetadataUpdate,
 ): Promise<Group> {
@@ -44,6 +77,7 @@ export async function updateGroupOperation(
   const batch = writeBatch(db);
 
   batch.update(groupRef(group.id), toGroupUpdateData(update));
+  writeMetadataActivity(batch, viewerUid, group, update);
 
   if (update.name !== group.name) {
     if (group.joinCode) {
@@ -53,10 +87,7 @@ export async function updateGroupOperation(
       );
     }
 
-    const invitations = await getGroupInvitationsOperation(
-      group.ownerId,
-      group.id,
-    );
+    const invitations = await getGroupInvitationsOperation(group.id);
 
     for (const invitation of invitations) {
       if (invitation.status !== "pending") continue;
@@ -79,41 +110,4 @@ export async function updateGroupOperation(
     simplifyDebts: update.simplifyDebts,
     updatedAt: update.updatedAt,
   };
-}
-
-/**
- * Owner removal of one member, never themselves. A transaction keeps the
- * read-modify-write of `memberIds` safe against a concurrent acceptance.
- */
-export async function removeGroupMemberOperation(
-  groupId: string,
-  memberId: string,
-  updatedAt: string,
-): Promise<Group> {
-  let updated: Group | null = null;
-
-  await runTransaction(db, async (transaction) => {
-    const snapshot = await transaction.get(groupRef(groupId));
-    if (!snapshot.exists()) throw new GroupOperationError("GROUP_NOT_FOUND");
-
-    const group = mapGroupDocument(
-      snapshot.id,
-      snapshot.data() as Record<string, unknown>,
-    );
-    if (!group) throw new GroupOperationError("GROUP_NOT_FOUND");
-    if (memberId === group.ownerId) {
-      throw new GroupOperationError("CANNOT_REMOVE_OWNER");
-    }
-    if (!group.memberIds.includes(memberId)) {
-      throw new GroupOperationError("MEMBER_NOT_FOUND");
-    }
-
-    const memberIds = removeGroupMember(group.memberIds, memberId);
-    transaction.update(groupRef(group.id), { memberIds, updatedAt });
-    updated = { ...group, memberIds, updatedAt };
-  });
-
-  if (!updated) throw new GroupOperationError("GROUP_NOT_FOUND");
-
-  return updated;
 }

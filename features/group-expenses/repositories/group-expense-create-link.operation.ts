@@ -7,6 +7,7 @@ import {
   newMovementRef,
   walletRef,
 } from "@/features/shared-expenses/repositories/shared-expense-movement-ref";
+import { addGroupActivity } from "@/features/groups/repositories/group-activity.writes";
 
 import { GroupExpenseOperationError } from "../services/group-expense.errors";
 import type {
@@ -78,6 +79,16 @@ export async function createGroupExpenseLinkOperation(
       }),
     );
     transaction.update(wallet, { balance: nextBalance, updatedAt: now });
+    addGroupActivity(transaction, {
+      type: "expense-created",
+      groupId: dto.groupId,
+      actorId: dto.createdBy,
+      expenseId: expense.id,
+      amountCents: dto.amountCents,
+      currency: dto.currency,
+      description: dto.description,
+      createdAt: now,
+    });
 
     created = mapGroupExpenseDocument(expense.id, expenseData);
   });

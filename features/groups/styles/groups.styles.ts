@@ -321,6 +321,28 @@ export const groupsStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  memberActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+  },
+  leaveButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    minHeight: 44,
+  },
+  leaveButtonText: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  ownerLeaveHint: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
 
   // Received invitations route
   invitationCard: {

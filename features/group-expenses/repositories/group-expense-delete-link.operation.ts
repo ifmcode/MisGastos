@@ -4,6 +4,7 @@ import { db } from "@/lib/firebase";
 import { FirebaseLinkedMovementPort } from "@/features/shared-expenses/repositories/firebase-linked-movement.port";
 import type { ILinkedMovementPort } from "@/features/shared-expenses/repositories/linked-movement.port";
 import { movementRef } from "@/features/shared-expenses/repositories/shared-expense-movement-ref";
+import { addGroupActivity } from "@/features/groups/repositories/group-activity.writes";
 
 import { GroupExpenseOperationError } from "../services/group-expense.errors";
 import { readGroupExpenseDocument } from "./group-expense-link.helpers";
@@ -89,5 +90,15 @@ export async function softDeleteGroupExpenseLinkOperation(
     }
 
     transaction.update(expenseRef, patch);
+    addGroupActivity(transaction, {
+      type: "expense-deleted",
+      groupId: stored.groupId,
+      actorId: viewerUid,
+      expenseId,
+      amountCents: stored.amountCents,
+      currency: stored.currency,
+      description: stored.description,
+      createdAt: deletedAt,
+    });
   });
 }

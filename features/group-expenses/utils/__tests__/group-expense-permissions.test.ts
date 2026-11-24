@@ -14,6 +14,7 @@ function buildGroup(overrides: Partial<Group> = {}): Group {
   return {
     id: "user-a__group-1",
     ownerId: "user-a",
+    createdBy: "user-a",
     memberIds: ["user-a", "user-b", "user-c", "user-d"],
     name: "Viaje",
     description: null,

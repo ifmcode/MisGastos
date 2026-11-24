@@ -9,6 +9,7 @@ import type {
   RespondToGroupJoinRequestInput,
 } from "../types/group-join.types";
 import { appendGroupMember, isGroupFull } from "../utils/group-membership";
+import { addGroupActivity } from "./group-activity.writes";
 import { mapGroupDocument, mapGroupJoinRequestDocument } from "./groups.mapper";
 import { groupJoinRequestRef, groupRef } from "./groups.operations";
 
@@ -83,6 +84,13 @@ export async function respondToGroupJoinRequestOperation(
     transaction.update(groupRef(group.id), {
       memberIds,
       updatedAt: input.updatedAt,
+    });
+    addGroupActivity(transaction, {
+      type: "member-joined",
+      groupId: group.id,
+      actorId: input.viewerUid,
+      targetUserId: request.requesterId,
+      createdAt: input.updatedAt,
     });
 
     result = {
