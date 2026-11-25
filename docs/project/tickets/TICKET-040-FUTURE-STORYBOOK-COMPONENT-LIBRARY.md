@@ -4,10 +4,10 @@
 **Priority:** Medium  
 **Status:** ⏳ Pending  
 **Related:** PM-040; TICKET-024, TICKET-037  
-**Sprint:** Developer Experience / Phase 8  
+**Sprint:** V1 / Phase 8 (last ticket before V1 ships)  
 
 ## Description
-Set up Storybook as a living catalog of the shared component layer plus the reused feature components, with light/dark and Spanish/English variants, without changing app behavior or shipping Storybook to production. It is developer tooling, not a user-facing feature.
+Set up Storybook as a living catalog of the shared component layer plus the reused feature components, with light/dark and Spanish/English variants, without changing app behavior or shipping Storybook to production. It is developer tooling, not a user-facing feature. It runs after TICKET-074, so the catalog documents the final visual system instead of the pre-redesign one.
 
 ## Requirements
 - [ ] Decide the Storybook flavor (on-device React Native Storybook vs web catalog via `react-native-web`) and record the decision and alternatives in a development note
@@ -16,6 +16,7 @@ Set up Storybook as a living catalog of the shared component layer plus the reus
 - [ ] Add global decorators/providers for `AppThemeProvider` (light/dark), `AppLanguageProvider` (es/en) and the gesture/reanimated setup the components need
 - [ ] Cover every component in `shared/components/molecules` and `shared/components/organisms` with at least one story, including variants and edge cases (long text, disabled, loading, empty, error)
 - [ ] Cover the reused feature components (movement card, transfer card, movement/transfer detail and form modals) that the shared layer exposes
+- [ ] Cover the tokens and components produced by TICKET-074, including light/dark and the redesigned variants
 - [ ] Define the story location/naming convention and the rule that a new shared component needs a story before it is considered done
 - [ ] Keep stories out of the production bundle, the Jest coverage scope and the copy audit (or use translated copy)
 - [ ] Document how to add a story and how to run the catalog on device and web
@@ -39,12 +40,17 @@ Set up Storybook as a living catalog of the shared component layer plus the reus
 - Keep the Storybook entry outside `app/` and never import it from `app/_layout.tsx`; use a dedicated script/entry point.
 - Proposed story location: `__stories__/<name>.stories.tsx` next to the component; document the final choice.
 - Rejected alternative: an in-app gallery screen; it duplicates Storybook, ships to users and has no isolated controls.
-- Reference: `docs/project/development-notes/component-inventory.md` lists the shared component layer.
+- Reference: `docs/project/development-notes/component-inventory.md` lists the shared component layer; TICKET-074 updates it with the final visual system before this ticket starts.
 
 ## Validation Plan
 - Pilot with three components (`RecordCard`, `EmptyState`, `DetailModal`) to prove the setup before covering the rest.
 - Run the catalog on Android and, if the web flavor is chosen, in the browser.
 - Confirm the production export excludes stories and that the four verification commands still pass.
+
+## Dependencies
+- TICKET-074 integral visual redesign (final tokens and component variants; it runs before this ticket)
+- TICKET-037 shared component layer (the components the catalog must cover)
+- TICKET-024 project agents and skills (tooling and conventions model)
 
 ## Out of Scope
 Visual regression hosting, publishing the catalog, replacing `component-inventory.md`, and any change to component behavior or styles.

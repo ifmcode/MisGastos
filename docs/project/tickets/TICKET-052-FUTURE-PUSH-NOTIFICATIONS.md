@@ -4,7 +4,7 @@
 **Priority:** Low  
 **Status:** ⏳ Pending  
 **Related:** TICKET-047, TICKET-046  
-**Sprint:** Post-V1
+**Sprint:** V1 / Phase 8
 
 ## Description
 Deliver OS-level push notifications for the events the in-app inbox already receives, so a user who is not looking at the app still learns about a settlement or a friend request. The app stays in-app-first: the inbox remains the source of truth, the push payload carries ids and numbers only, and a denied permission degrades to the current behaviour without breaking anything.
@@ -48,7 +48,7 @@ Deliver OS-level push notifications for the events the in-app inbox already rece
 - [ ] `npx tsc --noEmit`, `npx expo lint`, `npx jest` and `npm run check:copy` pass
 
 ## Technical Notes
-- **Why post-V1:** the inbox (TICKET-047) already covers the product need, and push requires Cloud Functions plus a paid Firebase plan, a native credential setup and real-device validation. Those costs do not belong to V1.0 scope.
+- **Why it lands after offline:** the inbox (TICKET-047) already covers the product need, and push requires Cloud Functions plus a paid Firebase plan, a native credential setup and real-device validation, so those costs land once the offline-first epic is closed. It is the first V1 closeout item after Phase 7.
 - **Payload stays dumb:** `type` + ids + amount + currency only. Push payloads are visible on the lock screen, so no concept text, no counterpart name and no note is included; the client resolves copy from the translation namespace, exactly as the inbox does.
 - **Token lifecycle:** one document per token, not per user, because a user can have several devices; `lastSeenAt` is refreshed on app start, `revokedAt` on logout or an explicit disconnect, and the sending function filters on an active token.
 - **Function trigger:** the function fires on the `notifications` create, which already carries `userId`, `type`, `payload` and `dedupeKey`. The client write stays the single event source, so no second event model is introduced.

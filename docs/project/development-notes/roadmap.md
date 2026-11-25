@@ -1,7 +1,7 @@
 # Roadmap - MisGastos
 
 > Development guide: V1 scope, phase order, ticket order and the current ticket.
-> **Last reviewed:** 24/11/2026
+> **Last reviewed:** 25/11/2026
 
 ## Scope of this file
 - This file answers **what to build next and in which order**, plus the rules for doing it.
@@ -14,12 +14,12 @@
 A personal finance manager (wallets, movements, transfers and dashboard) merged with Splitwise-style shared finances (friends, groups, shared expenses, balances and settlements). **V1.0 is everything defined in this roadmap**; the MVP was the first milestone, not the release.
 
 ## Current Focus
-- **Milestone:** M4 - Offline and retention
+- **Milestone:** M4 - Offline and V1 closeout
 - **Phase:** 7 - Offline-first implementation
 - **Current ticket:** TICKET-023 - Offline-first implementation (full epic)
 - **Status:** 🚧 In progress
 - **Last completed:** TICKET-073 - Group activity in the group detail (24/11/2026)
-- **Queued:** Phase 8 tickets (TICKET-012, TICKET-016, TICKET-015, TICKET-013, TICKET-017, TICKET-019, TICKET-040)
+- **Queued:** Phase 8 V1 closeout (TICKET-052, TICKET-074, TICKET-040)
 - **Next:** continue TICKET-023 with the offline write queue for expenses, incomes and transfers (local balance derivation)
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
@@ -29,9 +29,9 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 | **M1 - Core personal finance (MVP)** | Auth, wallets, movements, transfers, dashboard and history | 0, 2 | ✅ Done |
 | **M2 - Personal finance complete** | UX follow-up, i18n and shared components | 3 | ✅ Done |
 | **M3 - Social and platform** | Architecture spike, friends, shared expenses, balances, groups and group history | 4-6 | ✅ Done |
-| **M4 - Offline and retention** | Offline-first implementation, budgets, statistics, search, export and final polish | 7-8 | ⏳ Pending |
+| **M4 - Offline and V1 closeout** | Offline-first implementation and V1 closeout: push notifications, integral visual redesign and Storybook | 7-8 | ⏳ Pending |
 
-**V1.0 ships when M1-M4 are complete.** Phase 1 (foundation) is a completed cross-cutting quality track; its coverage gate stays enforced. Anything outside these phases is post-V1.
+**V1.0 ships when M1-M4 are complete.** The release order is Phase 7 (offline-first) → TICKET-052 (push notifications) → TICKET-074 (integral visual redesign and UX alignment) → TICKET-040 (Storybook); V1 ships when TICKET-040 closes. Phase 9 and the post-V1 backlog start only after V1 ships. Phase 1 (foundation) is a completed cross-cutting quality track; its coverage gate stays enforced. Anything outside these phases is post-V1.
 
 ## Phase Overview
 | Phase | Theme | Status |
@@ -44,13 +44,14 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 | 5 | Social vertical slice | ✅ Done |
 | 6 | Groups | ✅ Done |
 | 7 | Offline-first implementation | 🚧 In progress |
-| 8 | Retention and final polish | ⏳ Queued |
+| 8 | V1 closeout | ⏳ Queued |
+| 9 | Post-V1 retention and enhancements | ⏳ Queued |
 
 > Subphase numbers group related work; they are not a strict execution order. **Current Focus** is the execution order.
 >
 > The former `PM-xxx` feature ids remain as aliases in each ticket's `Related` field; ticket ids are the canonical reference.
 >
-> Tickets created before the 12/11/2026 consolidation may reference the old plan phases: A → 3, A.1 → 3.1, A.2 → 3.2, A.3 → 3.3, A.4 → 3.4, A.5 → 3.5, A.6 → 3.6, B → 4, C → 5, D → 6, E → 7, F → 8.
+> Tickets created before the 12/11/2026 consolidation may reference the old plan phases: A → 3, A.1 → 3.1, A.2 → 3.2, A.3 → 3.3, A.4 → 3.4, A.5 → 3.5, A.6 → 3.6, B → 4, C → 5, D → 6, E → 7, F → 9 (the former retention phase, now post-V1).
 
 ## Phase 0: Organization (COMPLETED)
 - [x] Create folder structure
@@ -190,22 +191,31 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - If offline is a launch requirement, move this phase before Phase 6
 - Do not retrofit offline after groups without the Phase 4 decisions; the current Firestore transaction-based balance model may need to change
 
-## Phase 8: Retention and final polish (QUEUED)
-- [ ] TICKET-012 budgets, TICKET-016 statistics, TICKET-015 advanced search, TICKET-013 export of wallets, movements, transfers, categories and account settings (excluding shared/group data), TICKET-017 history grouping and TICKET-019 dashboard quick add
-- [ ] TICKET-040 Storybook component catalog (developer tooling; can move earlier if the social UI needs it)
-- Then invest in final visual polish with real social screens
+## Phase 8: V1 closeout (QUEUED)
+- [ ] TICKET-052 push notifications for background and closed app (after Phase 7)
+- [ ] TICKET-074 integral visual redesign and UX alignment (after push notifications)
+- [ ] TICKET-040 Storybook component catalog (after the redesign; V1 ships when this closes)
+- These three are the only V1 items left, and their order is the release order.
+
+## Phase 9: Post-V1 retention and enhancements (QUEUED)
+- [ ] TICKET-012 budgets
+- [ ] TICKET-016 statistics
+- [ ] TICKET-015 advanced search
+- [ ] TICKET-013 export of wallets, movements, transfers, categories and account settings (excluding shared/group data)
+- [ ] TICKET-017 history grouping
+- [ ] TICKET-019 dashboard quick add
+- These start only after V1 ships.
 
 ## Post-V1 backlog (NOT in V1 scope)
-- [ ] TICKET-052 push notifications for background and closed app
 - [ ] TICKET-053 account data import
 - [ ] TICKET-054 Google Drive backup and restore
-- These are intentionally outside V1.0 scope, listed so their order and dependencies stay visible, and they start only after V1 ships.
+- The Phase 9 tickets above are also post-V1. These are intentionally outside V1.0 scope, listed so their order and dependencies stay visible, and they start only after V1 ships.
 
 ## Ordering Rules
-- **Recommended:** 0-3 → 4 → 5 → 6 → 7 → 8
-- **Validate the Splitwise side first:** complete Phase 3, then 4 → 5 → 6
-- **Offline-first launch:** complete Phase 3, then 4 → 7 → 5 → 6
-- **Polished personal-finance first:** complete Phases 3 and 8, delay social
+- **Recommended:** 0-3 → 4 → 5 → 6 → 7 → 8 (V1) → 9
+- **Validate the Splitwise side first:** complete Phase 3, then 4 → 5 → 6, before 7 and 8
+- **Offline-first launch:** complete Phase 3, then 4 → 7 → 5 → 6 → 8 → 9; Phase 8 stays together as the V1 closeout
+- **Polished personal-finance first:** complete Phase 3, then 7 → 8 (V1), and delay the social phases (5 and 6) until the next release
 - **Never** implement full offline after groups without the Phase 4 spike
 
 ## Rules

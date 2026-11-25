@@ -4,7 +4,7 @@
 **Priority:** Low  
 **Status:** ⏳ Pending  
 **Related:** PM-012; TICKET-002, TICKET-003, TICKET-006, TICKET-053, TICKET-054  
-**Sprint:** Post-MVP / Phase 8
+**Sprint:** Post-V1 / Phase 9
 
 ## Description
 Allow users to export their account data to a canonical, versioned JSON snapshot, either for the whole account or for one wallet. The JSON snapshot is the portable format that the import (TICKET-053) and the Google Drive backup (TICKET-054) consume. CSV and PDF are deliberately deferred until a real readability need appears. Shared and group data is never exported.
