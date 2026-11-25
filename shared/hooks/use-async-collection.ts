@@ -3,8 +3,12 @@ import {
   SetStateAction,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
+
+import { useNetworkStatus } from "@/shared/hooks/use-network-status";
+import { isOfflineFirstEnabled } from "@/shared/lib/local-db/offline-first.flag";
 
 type LoadMode = "initial" | "refresh";
 
@@ -19,6 +23,12 @@ export interface UseAsyncCollectionOptions<T> {
    * usual loading/error behaviour. Pull-to-refresh stays remote-only.
    */
   readCached?: (ownerId: string) => Promise<T[] | null>;
+  /**
+   * Reloads the collection when the connection comes back, so the screen does
+   * not keep serving cached data after the network returns. Only wired while the
+   * offline read cache is enabled.
+   */
+  refreshOnReconnect?: boolean;
 }
 
 export interface AsyncCollection<T> {
@@ -37,11 +47,17 @@ export function useAsyncCollection<T>({
   load,
   describeError,
   readCached,
+  refreshOnReconnect = false,
 }: UseAsyncCollectionOptions<T>): AsyncCollection<T> {
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const reconnectRefreshEnabled =
+    refreshOnReconnect && isOfflineFirstEnabled();
+  const { isOffline } = useNetworkStatus(reconnectRefreshEnabled);
+  const wasOffline = useRef(false);
 
   const readCachedSafely = useCallback(
     async (currentOwnerId: string): Promise<T[] | null> => {
@@ -109,6 +125,18 @@ export function useAsyncCollection<T>({
 
   const reload = useCallback(() => loadItems("initial"), [loadItems]);
   const refresh = useCallback(() => loadItems("refresh"), [loadItems]);
+
+  // Reload once when connectivity returns, so the screen stops showing cached
+  // data as soon as the remote is reachable again. Phase 5 replaces this with
+  // the sync engine's pull.
+  useEffect(() => {
+    if (!reconnectRefreshEnabled) return;
+
+    const cameBackOnline = wasOffline.current && !isOffline;
+    wasOffline.current = isOffline;
+
+    if (cameBackOnline) void refresh();
+  }, [isOffline, reconnectRefreshEnabled, refresh]);
 
   return { items, setItems, loading, refreshing, error, reload, refresh };
 }

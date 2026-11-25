@@ -8,6 +8,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { assertServerSnapshot } from "@/shared/lib/local-db/offline-read";
 
 import {
   CreateWalletDto,
@@ -37,6 +38,7 @@ export class FirebaseWalletRepository implements IWalletRepository {
     const snapshot = await getDocs(
       query(walletsRef, where("ownerId", "==", ownerId)),
     );
+    assertServerSnapshot(snapshot);
 
     const wallets: Wallet[] = [];
 

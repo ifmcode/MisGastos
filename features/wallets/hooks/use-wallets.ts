@@ -58,6 +58,7 @@ export function useWallets(): UseWalletsResult {
     load: loadWallets,
     describeError: describeLoadError,
     readCached: readCachedWallets,
+    refreshOnReconnect: true,
   });
 
   const mutations = useWalletMutations({ ownerId: user?.uid, setWallets });

@@ -97,13 +97,14 @@ Three files per feature, each in `features/<feature>/repositories/`:
 
 ### 6. Offline banner (`features/sync/`)
 
-- `utils/network-status.ts`: `resolveNetworkStatus`, a three-state NetInfo
+- `shared/utils/network-status.ts`: `resolveNetworkStatus`, a three-state NetInfo
   collapse where `unknown` counts as online so the strip never flashes.
+- `shared/hooks/use-network-status.ts`: NetInfo subscription shared by the strip
+  and the collection hooks; `enabled: false` skips the subscription entirely.
 - `utils/banner-offset.ts`: `TAB_BAR_HEIGHT = 49` (mirrors
   `@react-navigation/bottom-tabs` `BottomTabBar`), `TAB_ROUTES` with the five tabs,
   `getBannerBottomOffset` and `isTabRoute`.
-- `hooks/use-network-status.ts` (NetInfo subscription),
-  `components/offline-banner.tsx` (edge-to-edge strip, one accessible element with
+- `components/offline-banner.tsx` (edge-to-edge strip, one accessible element with
   the full sentence, `pointerEvents="none"`, `warning*` theme tokens),
   `components/offline-banner-view.tsx`, `components/offline-banner-host.tsx`
   (returns `null` before mounting the subscription when the flag is off) and
@@ -170,6 +171,65 @@ and re-verified before closing:
   dynamic `expo-sqlite` path cannot run in Jest.
 - No `firestore.rules` or index change, so nothing to deploy.
 
+## Device validation and fixes (25/11/2026)
+
+The first run on a physical Android device (dark mode) found two defects that
+Jest could not see. Both are fixed and the suite is green again.
+
+### 1. The strip was unreadable in dark mode
+
+`warningSurface` is a translucent amber in dark mode, so the strip took the colour
+of whatever was behind it and the pale `warningText` lost contrast. It now uses a
+solid `warning` background with a computed foreground (`background` in dark mode,
+`onPrimary` in light mode), which keeps the 12 px label readable over any content.
+The top border was removed because the background is solid.
+
+### 2. An offline read wiped the cache
+
+Verified on the device: without connection, Firestore `getDocs` **resolves** with
+an empty snapshot served from its local cache (`size = 0`,
+`metadata.fromCache = true`) instead of rejecting. The read path treated it as
+server truth, so `mirrorOwnerRows` deleted every cached row and the screens
+painted their empty states. The cache marker was stamped at the same time, so the
+device looked "cached but empty" and could not recover while offline.
+
+`shared/lib/local-db/offline-read.ts` adds `assertServerSnapshot`, called by the
+four list reads (`wallets`, `categories`, `transactions`, `transfers`): a cached
+**empty** snapshot throws `OfflineReadError` (`OFFLINE_READ`), so
+`useAsyncCollection` keeps the cached list, nothing is mirrored and the cache is
+not deleted. A cached snapshot with documents is the last known server state and
+is still accepted. The guard is deliberately not behind the feature flag: serving
+an empty list for an unreachable server is wrong in both modes.
+
+Consequence: with a cold cache and no connection the screen shows the regular load
+error instead of a misleading empty list.
+
+### 3. The lists refresh when the connection returns
+
+The strip already disappeared on reconnect (NetInfo drives it), but the screens
+kept painting the cached list until the user switched tabs or pulled to refresh.
+`useAsyncCollection` gained an optional `refreshOnReconnect`: the shared
+`useNetworkStatus` hook reports the offline→online transition and the hook runs
+its `refresh` once, so the remote read replaces the cached data and the mirror
+updates. It is wired by the four data hooks and only subscribes while
+`EXPO_PUBLIC_OFFLINE_FIRST` is enabled. `network-status.ts` and
+`use-network-status.ts` moved from `features/sync` to `shared/utils` and
+`shared/hooks` because the shared collection hook now depends on them (shared
+code must not import a feature). The ADR plans the sync engine's pull on
+reconnect for phase 5; this is the phase-3 equivalent until then.
+
+### 4. Dev-only LogBox toasts over the app
+
+While offline, the Firestore SDK emits a connection warning on every launch and
+React Native's LogBox renders it — and its error counterpart — as white toasts at
+the bottom of the screen. They are a development overlay, not product UI, they
+disappear in release builds, and in dark mode their text is unreadable. The root
+layout now calls `LogBox.ignoreLogs` under `__DEV__` for the four Firestore
+connection patterns (`Could not reach Cloud Firestore backend`,
+`WebChannelConnection`, `RestConnection`, `transport errored`), so the stack of
+white bars cannot cover the app any more. The underlying connectivity problem is
+the sync engine's job in phase 5.
+
 ## Deviations from the ADR
 
 1. **ADR §4 did not list** the four transaction link ids, the transfer wallet
@@ -206,3 +266,30 @@ and re-verified before closing:
 - Device validation of airplane mode after one online load (wallets, categories,
   movements and transfers), of app kill/relaunch while offline, of reconnect, of
   the strip on tab routes vs pushed routes and of dark mode.
+- After the cache-wipe fix (25/11/2026) the cache must be repopulated with one
+  online load: the phone had no internet during the validation session
+  (`ERR_INTERNET_DISCONNECTED`), so the airplane-mode walkthrough still needs to
+  be repeated end to end.
+
+## Android toolchain findings (24/11/2026, macOS)
+
+The Android development build was generated and compiled on the macOS machine
+(`expo prebuild` + `app:assembleDebug`, 31 min the first time). `android/` is
+gitignored, so nothing of this reached the repository. Three findings that are
+**local to this machine** and worth recording:
+
+1. `~/.zshrc` reassigned `PATH` further down the file, so the Android exports had
+   to live at the end of the file; `cmdline-tools/latest/bin` was missing from
+   `PATH` and is now included. `JAVA_HOME` points at JDK 17.
+2. A stale package install produced
+   `TurboModuleRegistry.getEnforcing('RNGoogleSignin') could not be found` even
+   though the APK contained the module (same md5 as the installed
+   `base.apk`). A clean `adb uninstall` + `adb install -r app-debug.apk` fixed it,
+   so the slice needs no code or dependency change. Keep it in mind for future
+   native rebuilds.
+3. Google sign-in cannot complete on the emulator: the `AndroidWifi` network
+   reports `PARTIAL_CONNECTIVITY` and the flow ends at *There was a problem
+   connecting to accounts.google.com*. This is a host network/VPN limitation, not
+   the app. Email sign-in or a physical device with working connectivity is
+   required to validate the cache and the banner manually.
+

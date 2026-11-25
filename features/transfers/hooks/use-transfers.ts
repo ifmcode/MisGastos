@@ -67,6 +67,7 @@ export function useTransfers(): UseTransfersResult {
     load: loadTransfers,
     describeError: describeLoadError,
     readCached: readCachedTransfers,
+    refreshOnReconnect: true,
   });
 
   const mutations = useTransferMutations({ ownerId, setTransfers });

@@ -230,8 +230,8 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
-Estado actual (24/11/2026): **426 suites / 2832 tests**; la cobertura acotada a la
-lógica de negocio está en **98,90 % de sentencias, 95,00 % de ramas, 98,64 % de
+Estado actual (25/11/2026): **427 suites / 2838 tests**; la cobertura acotada a la
+lógica de negocio está en **98,90 % de sentencias, 95,01 % de ramas, 98,64 % de
 funciones y 99,48 % de líneas**, y `npm run check:copy` audita **346 archivos TSX**.
 
 ## 🗺️ Roadmap

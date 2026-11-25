@@ -2,8 +2,7 @@ import { usePathname } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/hooks/use-auth";
-
-import { useNetworkStatus } from "../hooks/use-network-status";
+import { useNetworkStatus } from "@/shared/hooks/use-network-status";
 import { getBannerBottomOffset, isTabRoute } from "../utils/banner-offset";
 import { OfflineBanner } from "./offline-banner";
 

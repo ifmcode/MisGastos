@@ -21,6 +21,9 @@ export interface OfflineBannerProps {
 export function OfflineBanner({ bottomOffset }: OfflineBannerProps) {
   const theme = useFormTheme();
   const { t } = useScopedTranslation("sync");
+  // Solid amber behind dark text on dark mode and white text on light mode: a
+  // translucent `warningSurface` was unreadable over light content.
+  const foreground = theme.isDark ? theme.background : theme.onPrimary;
 
   return (
     <View
@@ -31,23 +34,19 @@ export function OfflineBanner({ bottomOffset }: OfflineBannerProps) {
       accessibilityLabel={t("offlineBanner.accessibility")}
       style={[
         styles.banner,
-        {
-          bottom: bottomOffset,
-          backgroundColor: theme.warningSurface,
-          borderTopColor: theme.warning,
-        },
+        { bottom: bottomOffset, backgroundColor: theme.warning },
       ]}
     >
       <Ionicons
         name="cloud-offline-outline"
         size={16}
-        color={theme.warningText}
+        color={foreground}
         accessible={false}
       />
       <ThemedText
         accessible={false}
         numberOfLines={1}
-        style={[styles.label, { color: theme.warningText }]}
+        style={[styles.label, { color: foreground }]}
       >
         {t("offlineBanner.label")}
       </ThemedText>

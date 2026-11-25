@@ -8,6 +8,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { assertServerSnapshot } from "@/shared/lib/local-db/offline-read";
 
 import {
   Category,
@@ -39,6 +40,7 @@ export class FirebaseCategoryRepository implements ICategoryRepository {
     const snapshot = await getDocs(
       query(categoriesRef, where("ownerId", "==", ownerId)),
     );
+    assertServerSnapshot(snapshot);
 
     const categories: Category[] = [];
 

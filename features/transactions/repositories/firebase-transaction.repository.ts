@@ -1,6 +1,7 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { assertServerSnapshot } from "@/shared/lib/local-db/offline-read";
 
 import {
   CreateTransactionDto,
@@ -23,6 +24,7 @@ export class FirebaseTransactionRepository implements ITransactionRepository {
     const snapshot = await getDocs(
       query(transactionsRef, where("ownerId", "==", ownerId)),
     );
+    assertServerSnapshot(snapshot);
 
     const transactions: Transaction[] = [];
 

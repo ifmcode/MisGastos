@@ -83,6 +83,7 @@ export function useTransactions({
     load: loadTransactions,
     describeError: describeLoadError,
     readCached: readCachedTransactions,
+    refreshOnReconnect: true,
   });
 
   const mutations = useTransactionMutations({ ownerId, setTransactions });

@@ -107,6 +107,20 @@ describe("FirebaseWalletRepository.getWallets", () => {
 
     await expect(repository.getWallets("user-1")).rejects.toBe(failure);
   });
+
+  it("rejects a cached snapshot that carries no documents", async () => {
+    mockGetDocs.mockResolvedValue({
+      docs: [],
+      size: 0,
+      metadata: { fromCache: true },
+    });
+
+    const repository = new FirebaseWalletRepository();
+
+    await expect(repository.getWallets("user-1")).rejects.toMatchObject({
+      code: "OFFLINE_READ",
+    });
+  });
 });
 
 describe("FirebaseWalletRepository.createWallet", () => {

@@ -42,6 +42,7 @@ export function useCategories(): UseCategoriesResult {
       load: loadCategories,
       describeError: describeLoadError,
       readCached: readCachedCategories,
+      refreshOnReconnect: true,
     });
 
   const addCategory = useCallback(

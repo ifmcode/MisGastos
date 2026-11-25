@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import { LogBox, StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
 import '../global.css';
 
@@ -19,6 +19,22 @@ import { AppThemeProvider } from '@/shared/providers/theme-provider';
 export const unstable_settings = {
   anchor: '(tabs)',
 };
+
+/**
+ * The Firestore SDK logs a connection warning on every launch while the device
+ * is offline. LogBox renders them as dev-only toasts over the app (they are not
+ * product UI, and its dark theme makes the text unreadable), while the offline
+ * strip already reports the state. The real fix for the connection itself is
+ * phase 5 of TICKET-023.
+ */
+if (__DEV__) {
+  LogBox.ignoreLogs([
+    'Could not reach Cloud Firestore backend',
+    'WebChannelConnection',
+    'RestConnection',
+    'transport errored',
+  ]);
+}
 
 function RootNavigator() {
   const colorScheme = useAppColorScheme();

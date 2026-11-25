@@ -15,7 +15,6 @@ export const offlineBannerStyles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     paddingHorizontal: 24,
-    borderTopWidth: 1,
     zIndex: 20,
     elevation: 20,
   },

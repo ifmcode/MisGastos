@@ -161,6 +161,39 @@ routes and dark mode.
 **Next slice:** offline write queue for expenses, incomes and transfers with
 local balance derivation (ADR phase 4).
 
+### Phase 3 device fixes (25/11/2026)
+
+The first physical-device run (dark mode) found two defects:
+
+1. The bottom strip was unreadable because `warningSurface` is a translucent
+   amber in dark mode; it now uses a solid `warning` background with a computed
+   foreground (`background` in dark mode, `onPrimary` in light mode).
+2. **An offline read wiped the cache.** Firestore `getDocs` resolves with an empty
+   cached snapshot (`size = 0`, `metadata.fromCache = true`) instead of rejecting;
+   the mirror deleted every row and the screens showed empty states. New
+   `shared/lib/local-db/offline-read.ts` (`assertServerSnapshot`) makes the four
+   list reads reject a cached **empty** snapshot with `OFFLINE_READ`; cached
+   snapshots with documents are still accepted. Not behind the feature flag:
+   serving an empty list for an unreachable server is wrong in both modes.
+3. **The lists did not reload when the connection returned.** `useAsyncCollection`
+   gained `refreshOnReconnect`: the shared `useNetworkStatus` hook reports the
+   offline→online transition and the collection refreshes once, so the remote read
+   replaces the cached data. Only subscribes while `EXPO_PUBLIC_OFFLINE_FIRST` is
+   enabled; phase 5 replaces it with the sync engine's pull.
+4. **Dev-only LogBox toasts over the app.** The Firestore connection warnings of
+   every offline launch were rendered by LogBox as white toasts (unreadable in
+   dark mode, sometimes two at once). `app/_layout.tsx` ignores the four Firestore
+   connection patterns under `__DEV__`; release builds never showed them.
+
+**Verification:** `npx tsc --noEmit`, `npx expo lint` and `npm run check:copy`
+clean; `npx jest` → 427 suites / 2838 tests; `npm run test:coverage` → 98.90 %
+statements, 95.01 % branches, 98.64 % functions, 99.48 % lines.
+
+**Pending:** repopulate the cache with one online load and repeat the
+airplane-mode walkthrough (the device had no internet during validation).
+
+**Detail:** [`session-notes/2026-11-24-offline-read-cache-and-banner.md`](../development-notes/session-notes/2026-11-24-offline-read-cache-and-banner.md)
+
 ## Design Spike (14/11/2026)
 
 **Status:** ✅ Accepted. **No app code changed** in this session; the epic stays in progress until the

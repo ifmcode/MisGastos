@@ -8,6 +8,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { assertServerSnapshot } from "@/shared/lib/local-db/offline-read";
 
 import { CreateTransferDto, Transfer, UpdateTransferDto } from "../types/transfer.types";
 import { sortTransfersByDate } from "../utils/transfer-sort";
@@ -27,6 +28,7 @@ export class FirebaseTransferRepository implements ITransferRepository {
     const snapshot = await getDocs(
       query(transfersRef, where("ownerId", "==", ownerId)),
     );
+    assertServerSnapshot(snapshot);
 
     const transfers: Transfer[] = [];
 
