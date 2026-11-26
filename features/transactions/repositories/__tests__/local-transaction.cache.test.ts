@@ -100,6 +100,19 @@ describe("transactions local cache", () => {
     ]);
   });
 
+  it("returns a local row even when the collection was never listed", async () => {
+    await db.upsert(
+      "transactions",
+      toTransactionLocalRow(buildTransaction({ id: "transaction-local" })),
+    );
+
+    const cached = await readCachedTransactions(LOCAL_TEST_OWNER);
+
+    expect(cached?.map((transaction) => transaction.id)).toEqual([
+      "transaction-local",
+    ]);
+  });
+
   it("removes rows missing from the next remote list", async () => {
     const first = buildTransaction({ id: "transaction-1" });
     const second = buildTransaction({

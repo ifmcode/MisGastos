@@ -1,6 +1,6 @@
 import { isCurrencyCode } from "@/shared/constants/currencies";
 
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 
 import { Transaction } from "../types/transaction.types";
 import {

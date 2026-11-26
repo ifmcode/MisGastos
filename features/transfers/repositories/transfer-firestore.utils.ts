@@ -2,7 +2,7 @@ import { doc, Transaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { INITIAL_REVISION } from "@/shared/utils/revision";
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 
 import { TransferOperationError } from "../services/transfer.errors";

@@ -2,7 +2,11 @@ import type {
   DatabasePort,
   LocalDatabaseTransaction,
 } from "./database.port";
-import type { OutboxMutation, OutboxMutationInput } from "./local-db.types";
+import type {
+  OutboxEntityType,
+  OutboxMutation,
+  OutboxMutationInput,
+} from "./local-db.types";
 import { selectNextOutboxMutation } from "./outbox.ordering";
 import type {
   IOutboxRepository,
@@ -10,6 +14,7 @@ import type {
   MarkOutboxFailedInput,
 } from "./outbox.repository";
 import {
+  findOutboxMutationForEntity,
   listOutboxRowsByOwner,
   OUTBOX_TABLE,
 } from "./outbox.repository.helpers";
@@ -36,8 +41,25 @@ export class LocalOutboxRepository implements IOutboxRepository {
     return enqueueOutboxMutation(this.port, tx, input);
   }
 
-  async listByOwner(ownerId: string): Promise<OutboxMutation[]> {
-    return listOutboxRowsByOwner(this.port, ownerId);
+  async listByOwner(
+    ownerId: string,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation[]> {
+    return listOutboxRowsByOwner(tx ?? this.port, ownerId);
+  }
+
+  async find(
+    ownerId: string,
+    entityType: OutboxEntityType,
+    entityId: string,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation | null> {
+    return findOutboxMutationForEntity(
+      tx ?? this.port,
+      ownerId,
+      entityType,
+      entityId,
+    );
   }
 
   async listPending(ownerId: string): Promise<OutboxMutation[]> {

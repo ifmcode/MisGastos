@@ -1,4 +1,4 @@
-import type { CreateTransactionDto } from "../types/transaction.types";
+import type { CreateTransactionDto, Transaction } from "../types/transaction.types";
 
 /**
  * Link readers of a transaction DTO. Each link is only valid on one type:
@@ -38,4 +38,24 @@ function readLink(value: unknown): string | null {
   const id = typeof value === "string" ? value.trim() : "";
 
   return id.length > 0 ? id : null;
+}
+
+/** Valid link ids of a movement DTO, ready to spread into the entity. */
+export function readTransactionLinkIds(
+  dto: CreateTransactionDto,
+): Pick<
+  Transaction,
+  "sharedExpenseId" | "groupExpenseId" | "settlementId" | "groupSettlementId"
+> {
+  const sharedExpenseId = readSharedExpenseId(dto);
+  const groupExpenseId = readGroupExpenseId(dto);
+  const settlementId = readSettlementId(dto);
+  const groupSettlementId = readGroupSettlementId(dto);
+
+  return {
+    ...(sharedExpenseId ? { sharedExpenseId } : {}),
+    ...(groupExpenseId ? { groupExpenseId } : {}),
+    ...(settlementId ? { settlementId } : {}),
+    ...(groupSettlementId ? { groupSettlementId } : {}),
+  };
 }

@@ -9,7 +9,7 @@ import {
   getDeletedWalletName,
   ORPHANED_WALLET_ID,
 } from "../utils/deleted-wallet";
-import { roundMoney } from "../utils/money";
+import { roundMoney } from "@/shared/utils/money";
 import { WalletMovements } from "./wallet-movements";
 import {
   assertBatchSize,

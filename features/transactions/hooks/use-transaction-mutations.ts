@@ -1,11 +1,7 @@
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useState,
-} from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useWallets } from "@/features/wallets/hooks/use-wallets";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
+import { useSingleFlightMutation } from "@/shared/hooks/use-single-flight-mutation";
 
 import {
   TransactionInput,
@@ -42,7 +38,6 @@ export function useTransactionMutations({
   const transactionService = useTransactionService();
   const { reload: reloadWallets } = useWallets();
 
-  const [mutating, setMutating] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [mutationFieldErrors, setMutationFieldErrors] =
     useState<TransactionValidationErrors>({});
@@ -62,31 +57,22 @@ export function useTransactionMutations({
     [tr],
   );
 
-  const run = useCallback(
-    async (
-      operation: (ownerId: string) => Promise<void>,
-      unauthenticatedKey: string,
-    ): Promise<boolean> => {
-      if (!ownerId) {
-        setMutationError(tr(unauthenticatedKey));
-        return false;
-      }
-
-      setMutating(true);
-      clearMutationState();
-
-      try {
-        await operation(ownerId);
-        void reloadWallets();
-        return true;
-      } catch (failure: unknown) {
-        return fail(failure);
-      } finally {
-        setMutating(false);
-      }
-    },
-    [ownerId, clearMutationState, fail, reloadWallets, tr],
+  const unauthenticated = useCallback(
+    (key: string) => setMutationError(tr(key)),
+    [tr],
   );
+
+  const afterSuccess = useCallback(() => {
+    void reloadWallets();
+  }, [reloadWallets]);
+
+  const { mutating, run } = useSingleFlightMutation({
+    ownerId,
+    clear: clearMutationState,
+    fail,
+    unauthenticated,
+    afterSuccess,
+  });
 
   const createTransaction = useCallback(
     (input: TransactionInput) =>

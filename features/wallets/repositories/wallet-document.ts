@@ -2,7 +2,7 @@ import { CurrencyCode } from "@/shared/constants/currencies";
 import { INITIAL_REVISION } from "@/shared/utils/revision";
 
 import { CreateWalletDto, WalletType } from "../types/wallet.types";
-import { roundMoney } from "../utils/money";
+import { roundMoney } from "@/shared/utils/money";
 
 /** Stored shape of a wallet document, shared by every wallet write. */
 export interface WalletDocumentData {

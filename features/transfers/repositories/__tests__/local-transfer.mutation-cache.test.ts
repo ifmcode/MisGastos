@@ -42,8 +42,11 @@ describe("transfers single-record cache", () => {
   it("mirrors a mutation without marking the collection fetched", async () => {
     await cacheTransfer(LOCAL_TEST_OWNER, buildTransfer(), NOW);
 
-    await expect(readCachedTransfers(LOCAL_TEST_OWNER)).resolves.toBeNull();
-    await expect(db.count("transfers")).resolves.toBe(1);
+    // A local row is visible even before the first list read, but the
+    // collection is still marked as never fetched.
+    const cached = await readCachedTransfers(LOCAL_TEST_OWNER);
+    expect(cached?.map((transfer) => transfer.id)).toEqual(["transfer-1"]);
+    await expect(db.count("cacheMeta")).resolves.toBe(0);
   });
 
   it("does not overwrite a pending row", async () => {

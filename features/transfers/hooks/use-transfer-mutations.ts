@@ -1,10 +1,6 @@
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useState,
-} from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
+import { useSingleFlightMutation } from "@/shared/hooks/use-single-flight-mutation";
 
 import {
   TransferInput,
@@ -41,7 +37,6 @@ export function useTransferMutations({
   const { tr } = useScopedTranslation("transfers");
   const transferService = useTransferService();
 
-  const [mutating, setMutating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createFieldErrors, setCreateFieldErrors] =
     useState<TransferValidationErrors>({});
@@ -61,30 +56,17 @@ export function useTransferMutations({
     [tr],
   );
 
-  const run = useCallback(
-    async (
-      operation: (ownerId: string) => Promise<void>,
-      unauthenticatedKey: string,
-    ): Promise<boolean> => {
-      if (!ownerId) {
-        setCreateError(tr(unauthenticatedKey));
-        return false;
-      }
-
-      setMutating(true);
-      clearCreateState();
-
-      try {
-        await operation(ownerId);
-        return true;
-      } catch (failure: unknown) {
-        return fail(failure);
-      } finally {
-        setMutating(false);
-      }
-    },
-    [ownerId, clearCreateState, fail, tr],
+  const unauthenticated = useCallback(
+    (key: string) => setCreateError(tr(key)),
+    [tr],
   );
+
+  const { mutating, run } = useSingleFlightMutation({
+    ownerId,
+    clear: clearCreateState,
+    fail,
+    unauthenticated,
+  });
 
   const createTransfer = useCallback(
     (input: TransferInput) =>

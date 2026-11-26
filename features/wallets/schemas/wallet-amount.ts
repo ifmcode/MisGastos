@@ -1,4 +1,4 @@
-import { roundMoney } from "../utils/money";
+import { roundMoney } from "@/shared/utils/money";
 import { WALLET_MAX_AMOUNT } from "./wallet-validation.types";
 
 const AMOUNT_PATTERN = /^\d{1,12}(?:\.\d{1,2})?$/;

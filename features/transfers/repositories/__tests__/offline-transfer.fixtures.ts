@@ -1,0 +1,78 @@
+import { jest } from "@jest/globals";
+
+import type { LocalRow } from "@/shared/lib/local-db/local-db.types";
+import { InMemoryDatabase } from "@/shared/lib/local-db/in-memory.database";
+import { LocalOutboxRepository } from "@/shared/lib/local-db/local-outbox.repository";
+import { toWalletLocalRow } from "@/features/wallets/repositories/local-wallet.mapper";
+import { buildWallet } from "@/features/wallets/repositories/__tests__/local-wallet.fixtures";
+
+import { OfflineTransferRepository } from "../offline-transfer.repository";
+import type { ITransferRepository } from "../transfer.repository";
+
+export const OFFLINE_OWNER = "owner-1";
+export const OFFLINE_NOW = "2026-11-20T10:00:00.000Z";
+
+export function createRemote(): jest.Mocked<ITransferRepository> {
+  return {
+    getTransfers: jest.fn(),
+    getTransfer: jest.fn(),
+    createTransfer: jest.fn(),
+    updateTransfer: jest.fn(),
+    deleteTransfer: jest.fn(),
+  };
+}
+
+export async function seedWallet(
+  db: InMemoryDatabase,
+  overrides: Parameters<typeof buildWallet>[0] = {},
+): Promise<LocalRow> {
+  const row = toWalletLocalRow(
+    buildWallet({ ownerId: OFFLINE_OWNER, ...overrides }),
+  );
+  await db.upsert("wallets", row);
+
+  return row;
+}
+
+export function createRepository(
+  db: InMemoryDatabase,
+  remote: ITransferRepository,
+  overrides: {
+    getPort?: () => Promise<InMemoryDatabase | null>;
+    now?: () => string;
+    createId?: () => string;
+  } = {},
+): OfflineTransferRepository {
+  let counter = 0;
+
+  return new OfflineTransferRepository(remote, {
+    getPort: async () => db,
+    now: () => OFFLINE_NOW,
+    createId: () => `id-${++counter}`,
+    ...overrides,
+  });
+}
+
+export async function listOutbox(
+  db: InMemoryDatabase,
+): Promise<Awaited<ReturnType<LocalOutboxRepository["listByOwner"]>>> {
+  return new LocalOutboxRepository(db).listByOwner(OFFLINE_OWNER);
+}
+
+export async function findOutboxMutation(
+  db: InMemoryDatabase,
+  entityId: string,
+) {
+  return new LocalOutboxRepository(db).find(
+    OFFLINE_OWNER,
+    "transfer",
+    entityId,
+  );
+}
+
+export async function readTransferRows(
+  db: InMemoryDatabase,
+  id?: string,
+): Promise<LocalRow[]> {
+  return db.select<LocalRow>("transfers", id ? { where: { id } } : undefined);
+}

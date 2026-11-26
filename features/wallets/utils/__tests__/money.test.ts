@@ -6,7 +6,6 @@ import {
   calculateWalletTotals,
   formatMoney,
   getCurrencySymbol,
-  roundMoney,
 } from "../money";
 
 function buildWallet(overrides: Partial<Wallet>): Wallet {
@@ -29,12 +28,6 @@ function buildWallet(overrides: Partial<Wallet>): Wallet {
 }
 
 describe("money helpers", () => {
-  it("rounds to two decimals", () => {
-    expect(roundMoney(1.005)).toBe(1.01);
-    expect(roundMoney(0.1 + 0.2)).toBe(0.3);
-    expect(roundMoney(-1.234)).toBe(-1.23);
-  });
-
   it("returns currency symbols", () => {
     expect(getCurrencySymbol("EUR")).toBe("€");
     expect(getCurrencySymbol("USD")).toBe("$");

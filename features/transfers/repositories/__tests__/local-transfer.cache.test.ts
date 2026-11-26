@@ -95,6 +95,17 @@ describe("transfers local cache", () => {
     expect(cached?.map((transfer) => transfer.id)).toEqual(["transfer-1"]);
   });
 
+  it("returns a local row even when the collection was never listed", async () => {
+    await db.upsert(
+      "transfers",
+      toTransferLocalRow(buildTransfer({ id: "transfer-local" })),
+    );
+
+    const cached = await readCachedTransfers(LOCAL_TEST_OWNER);
+
+    expect(cached?.map((transfer) => transfer.id)).toEqual(["transfer-local"]);
+  });
+
   it("removes rows missing from the next remote list", async () => {
     const first = buildTransfer({ id: "transfer-1" });
     const second = buildTransfer({ id: "transfer-2" });

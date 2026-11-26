@@ -5,7 +5,10 @@ import {
 } from "../types/category.types";
 import { CategoryOrderUpdate } from "../utils/category-order";
 import { ICategoryRepository } from "./category.repository";
-import { cacheCategories } from "./local-category.cache";
+import {
+  cacheCategories,
+  readCachedCategories,
+} from "./local-category.cache";
 
 /**
  * Read-through category repository. Every method delegates to the remote
@@ -27,11 +30,22 @@ export class CachedCategoryRepository implements ICategoryRepository {
     return categories;
   }
 
-  getCategory(
+  async getCategory(
     ownerId: string,
     categoryId: string,
   ): Promise<Category | null> {
-    return this.remote.getCategory(ownerId, categoryId);
+    try {
+      return await this.remote.getCategory(ownerId, categoryId);
+    } catch (error) {
+      const cached = await readCachedCategories(ownerId);
+      const category = cached?.find(
+        (item) => item.id === categoryId || item.legacyId === categoryId,
+      );
+
+      if (category) return category;
+
+      throw error;
+    }
   }
 
   createCategory(

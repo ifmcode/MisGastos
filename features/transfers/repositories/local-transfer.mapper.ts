@@ -1,4 +1,7 @@
-import type { LocalRow } from "@/shared/lib/local-db/local-db.types";
+import type {
+  LocalRecordSyncStatus,
+  LocalRow,
+} from "@/shared/lib/local-db/local-db.types";
 import {
   readLocalRowId,
   readLocalRowOwnerId,
@@ -16,7 +19,10 @@ const EPOCH_ISO = new Date(0).toISOString();
  * the Firestore-shaped document and delegates to `mapTransferDocument` so the
  * amount/currency/date validation is not duplicated.
  */
-export function toTransferLocalRow(transfer: Transfer): LocalRow {
+export function toTransferLocalRow(
+  transfer: Transfer,
+  syncStatus: LocalRecordSyncStatus = "synced",
+): LocalRow {
   return {
     id: transfer.id,
     ownerId: transfer.ownerId,
@@ -32,7 +38,7 @@ export function toTransferLocalRow(transfer: Transfer): LocalRow {
     updatedAt: toIsoTimestamp(transfer.updatedAt) ?? EPOCH_ISO,
     deletedAt: transfer.deletedAt ?? null,
     revision: transfer.revision,
-    syncStatus: "synced",
+    syncStatus,
   };
 }
 

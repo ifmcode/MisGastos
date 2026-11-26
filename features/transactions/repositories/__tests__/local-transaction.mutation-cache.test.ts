@@ -45,8 +45,13 @@ describe("transactions single-record cache", () => {
   it("mirrors a mutation without marking the collection fetched", async () => {
     await cacheTransaction(LOCAL_TEST_OWNER, buildTransaction(), NOW);
 
-    await expect(readCachedTransactions(LOCAL_TEST_OWNER)).resolves.toBeNull();
-    await expect(db.count("transactions")).resolves.toBe(1);
+    // A local row is visible even before the first list read, but the
+    // collection is still marked as never fetched.
+    const cached = await readCachedTransactions(LOCAL_TEST_OWNER);
+    expect(cached?.map((transaction) => transaction.id)).toEqual([
+      "transaction-1",
+    ]);
+    await expect(db.count("cacheMeta")).resolves.toBe(0);
   });
 
   it("does not overwrite a pending row", async () => {

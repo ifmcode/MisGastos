@@ -2,7 +2,7 @@ import { DocumentReference, getDoc } from "firebase/firestore";
 
 import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 import { INITIAL_REVISION } from "@/shared/utils/revision";
 
 import { CreateTransactionDto, Transaction } from "../types/transaction.types";

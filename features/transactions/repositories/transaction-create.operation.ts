@@ -4,14 +4,14 @@ import { db } from "@/lib/firebase";
 import { readClientDocumentId } from "@/shared/utils/client-id";
 import { INITIAL_REVISION, nextRevision } from "@/shared/utils/revision";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 
 import { TransactionOperationError } from "../services/transaction.errors";
 import {
   CreateTransactionDto,
   Transaction,
 } from "../types/transaction.types";
-import { getSignedTransactionAmount } from "../utils/transaction-balance";
+import { getSignedTransactionAmount } from "@/shared/utils/transaction-balance";
 import {
   buildTransaction,
   getMappedWallet,

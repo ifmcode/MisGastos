@@ -46,9 +46,10 @@ services, `firestore.rules` and `firestore.indexes.json`.
 - Multi-document money writes run inside `runTransaction` and keep the wallet
   balance and the record in sync: `features/transactions/repositories/*.operation.ts`
   and `features/transfers/repositories/*.operation.ts` are the reference.
-- All money math goes through `roundMoney` (`features/wallets/utils/money.ts`) and
-  the signed helpers in `features/transactions/utils/transaction-balance.ts` and
-  `features/transfers/utils/transfer-balance.ts`. Never sum floats directly.
+- All money math goes through `roundMoney` (`shared/utils/money.ts`) and the
+  signed helpers in `shared/utils/transaction-balance.ts` and
+  `features/transfers/utils/transfer-balance.ts`. The offline pending delta uses
+  `shared/lib/local-db/pending-balance.ts`. Never sum floats directly.
 - Owner scoping is enforced twice: `ownerId` filters in the query and rules in
   `firestore.rules`. Every new collection needs both, plus an index entry when a
   composite query is introduced.

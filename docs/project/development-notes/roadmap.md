@@ -1,7 +1,7 @@
 # Roadmap - MisGastos
 
 > Development guide: V1 scope, phase order, ticket order and the current ticket.
-> **Last reviewed:** 25/11/2026
+> **Last reviewed:** 26/11/2026
 
 ## Scope of this file
 - This file answers **what to build next and in which order**, plus the rules for doing it.
@@ -20,7 +20,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Status:** 🚧 In progress
 - **Last completed:** TICKET-073 - Group activity in the group detail (24/11/2026)
 - **Queued:** Phase 8 V1 closeout (TICKET-052, TICKET-074, TICKET-040)
-- **Next:** continue TICKET-023 with the offline write queue for expenses, incomes and transfers (local balance derivation)
+- **Next:** continue TICKET-023 with the sync engine, retry/backoff, exactly-once and the conflict UI (phase 5)
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -184,7 +184,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [ ] Full TICKET-023 (design accepted in Phase 4)
   - [x] Foundations: local SQLite DB, client-generated ids, `revision`/`deletedAt`/`appliedMutations` and rules ✅ 24/11/2026
   - [x] Local read cache for personal data and offline banner ✅ 24/11/2026
-  - [ ] Offline write queue for expenses, incomes and transfers with local balance derivation
+  - [x] Offline write queue for expenses, incomes and transfers with local balance derivation ✅ 26/11/2026
   - [ ] Sync engine, retry/backoff, exactly-once and conflict UI
   - [ ] Offline group/friend movements (after Phase 6)
   - [ ] Offline UX, observability, account purge on logout/switch and web decision

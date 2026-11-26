@@ -4,14 +4,14 @@ import { db } from "@/lib/firebase";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 import { nextRevision } from "@/shared/utils/revision";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 
 import { TransactionOperationError } from "../services/transaction.errors";
 import type { TransactionType } from "../types/transaction.types";
 import {
   applyTransactionUpdateToBalance,
   getSignedTransactionAmount,
-} from "../utils/transaction-balance";
+} from "@/shared/utils/transaction-balance";
 import { toWalletBalance } from "./transaction-firestore.utils";
 
 /** Stored effect of the movement being replaced. */

@@ -3,7 +3,7 @@ import { deleteField, doc, runTransaction } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 import { toIsoTimestamp } from "@/shared/utils/date";
 import { nextRevision } from "@/shared/utils/revision";
 

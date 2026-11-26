@@ -3,7 +3,7 @@
 **Type:** Epic / Architecture  
 **Priority:** High  
 **Status:** 🚧 In progress  
-**Design spike:** ✅ Accepted (14/11/2026) — implementation started 24/11/2026 (foundations and write prerequisites)  
+**Design spike:** ✅ Accepted (14/11/2026) — implementation started 24/11/2026 (foundations, write prerequisites, read cache and write queue)  
 **Related:** PM-023; TICKET-002, TICKET-003, TICKET-007, TICKET-009, TICKET-010  
 **Sprint:** Platform / Post-MVP  
 
@@ -194,6 +194,55 @@ airplane-mode walkthrough (the device had no internet during validation).
 
 **Detail:** [`session-notes/2026-11-24-offline-read-cache-and-banner.md`](../development-notes/session-notes/2026-11-24-offline-read-cache-and-banner.md)
 
+### Fourth slice — offline write queue (ADR phase 4, 26/11/2026)
+
+Every epic checkbox stays open: the queue is local-only until the phase-5 sync
+engine drains it, and the flag is a development switch.
+
+**Delivered:** `roundMoney` and the signed balance helpers moved to
+`shared/utils/money.ts` and `shared/utils/transaction-balance.ts` (ADR §11.3);
+`shared/lib/local-db/pending-balance.ts` derives the per-wallet pending delta
+from the outbox snapshots with the create/update/delete matrix (pending,
+syncing, failed and conflict rows included; malformed snapshots ignored);
+`IOutboxRepository.find` and owner reads inside a caller transaction; the local
+write repositories `OfflineTransactionRepository` and
+`OfflineTransferRepository` write the record and one coalesced outbox row in a
+single local transaction, keep the local revision at the server-known value,
+preserve `baseRevision`/`serverSnapshot` when coalescing, cancel a create+delete
+without sending it, soft-delete, reject linked movements and edit orphan `-1`
+movements with online parity; transfers validate self-transfer, ownership,
+currency, amount and the **derived** funds inside the same transaction with the
+previous effect added back, and `getTransfer` reads the local row first. Wallet
+rows are never rewritten: `local-wallet.balances.ts` recomputes
+`serverBalance + delta` on every read, `CachedWalletRepository` mirrors the
+server list and returns the derived cache (falling back to it when the remote
+read fails), `CachedCategoryRepository.getCategory` resolves from the cached
+list by id or `legacyId`, and cached list reads return local rows even without
+`cacheMeta`. Factories wire it only with `EXPO_PUBLIC_OFFLINE_FIRST`; both
+mutation hooks share `useSingleFlightMutation`, so a double tap cannot open two
+writes. No schema, rules, index or document change.
+
+**Review:** the first pass returned `changes requested` (orphan `-1` edit parity
+and local transaction concurrency on a double tap); both fixed. The second pass
+returned `approve with nits` (150-line limit in the hooks, duplicate-id guard by
+real primary key, trim-safe orphan check, idempotent delete without an extra
+outbox read); all fixed.
+
+**Verification:** `npx tsc --noEmit`, `npx expo lint` and `npm run check:copy`
+clean (346 TSX); `npx jest` → 440 suites / 2952 tests; `npm run test:coverage` →
+98.92 % statements, 95.07 % branches, 98.69 % functions, 99.46 % lines.
+
+**Pending:** push/pull, retry/backoff, exactly-once (`appliedMutations`),
+conflicts and the sync UI are phase 5/7. With the flag on the outbox is not
+drained, so nothing is sent to Firestore (set `EXPO_PUBLIC_OFFLINE_FIRST=false`
+for normal online use until phase 5). Residual limitation: a user write can
+still overlap a cache-mirror transaction on the same local port and surface
+`LOCAL_DB_NESTED_TRANSACTION`/`SAVE_FAILED` (abortive, no money corruption);
+phase 5 owns serialization. Device validation of airplane-mode
+create/edit/delete plus restart is pending.
+
+**Detail:** [`session-notes/2026-11-26-offline-write-queue.md`](../development-notes/session-notes/2026-11-26-offline-write-queue.md)
+
 ## Design Spike (14/11/2026)
 
 **Status:** ✅ Accepted. **No app code changed** in this session; the epic stays in progress until the
@@ -240,7 +289,7 @@ implementation phases below are delivered.
 | 1 | Architecture spike and ADR | ✅ Phase 4 (this session) |
 | 2 | Local DB foundations, client ids, `revision`/`deletedAt`/`appliedMutations` + rules | Phase 7 ✅ 24/11/2026 |
 | 3 | Local read cache for personal data | Phase 7 ✅ 24/11/2026 |
-| 4 | Offline write queue for expenses, incomes and transfers | Phase 7 |
+| 4 | Offline write queue for expenses, incomes and transfers | Phase 7 ✅ 26/11/2026 |
 | 5 | Sync engine, retry, exactly-once and conflicts | Phase 7 |
 | 6 | Offline group/friend movements | Phase 7 (after TICKET-009/010) |
 | 7 | Offline UX, observability, account purge and web decision | Phase 7 |

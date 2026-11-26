@@ -1,4 +1,4 @@
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 
 export interface TransferBalances {
   fromBalance: number;

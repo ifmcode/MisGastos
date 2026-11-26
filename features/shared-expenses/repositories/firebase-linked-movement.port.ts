@@ -3,8 +3,8 @@ import type { CreateTransactionDto } from "@/features/transactions/types/transac
 import {
   applyTransactionToBalance,
   revertTransactionFromBalance,
-} from "@/features/transactions/utils/transaction-balance";
-import { roundMoney } from "@/features/wallets/utils/money";
+} from "@/shared/utils/transaction-balance";
+import { roundMoney } from "@/shared/utils/money";
 import { INITIAL_REVISION, readStoredRevision } from "@/shared/utils/revision";
 
 import { centsToAmount } from "../utils/expense-amount";

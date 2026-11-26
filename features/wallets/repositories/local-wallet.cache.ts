@@ -5,11 +5,20 @@ import { getLocalDatabase } from "@/shared/lib/local-db/local-db.runtime";
 import { isOfflineFirstEnabled } from "@/shared/lib/local-db/offline-first.flag";
 
 import { Wallet } from "../types/wallet.types";
+import {
+  applyPendingWalletDeltas,
+  readPendingWalletDeltas,
+} from "./local-wallet.balances";
 import { fromWalletLocalRow, toWalletLocalRow } from "./local-wallet.mapper";
 
 const COLLECTION = "wallets" as const;
 
-/** Cached wallets, or null when the flag is off, there is no port or no fetch. */
+/**
+ * Cached wallets with `serverBalance + pending outbox delta`, or null when the
+ * flag is off, there is no port, the read fails, or the collection was never
+ * fetched AND has no local rows (a local write must be visible even before the
+ * first online list read).
+ */
 export async function readCachedWallets(
   ownerId: string,
 ): Promise<Wallet[] | null> {
@@ -20,17 +29,21 @@ export async function readCachedWallets(
     if (!port) return null;
 
     const meta = new LocalCacheMetaRepository(port);
-    if ((await meta.getFetchedAt(ownerId, COLLECTION)) === null) return null;
-
+    const fetchedAt = await meta.getFetchedAt(ownerId, COLLECTION);
     const rows = await port.select<LocalRow>(COLLECTION, {
       where: { ownerId },
       orderBy: [{ column: "createdAt", direction: "desc" }],
     });
 
-    return rows.flatMap((row) => {
+    if (fetchedAt === null && rows.length === 0) return null;
+
+    const wallets = rows.flatMap((row) => {
       const wallet = fromWalletLocalRow(row);
       return wallet ? [wallet] : [];
     });
+    const deltas = await readPendingWalletDeltas(port, ownerId);
+
+    return applyPendingWalletDeltas(wallets, deltas);
   } catch {
     return null;
   }

@@ -7,6 +7,7 @@ import {
   setLocalDatabasePort,
 } from "@/shared/lib/local-db/local-db.runtime";
 import { NOW } from "@/shared/lib/local-db/__tests__/outbox.fixtures";
+import { LocalOutboxRepository } from "@/shared/lib/local-db/local-outbox.repository";
 
 import { cacheWallets, readCachedWallets } from "../local-wallet.cache";
 import { toWalletLocalRow } from "../local-wallet.mapper";
@@ -111,6 +112,101 @@ describe("wallets local cache", () => {
     jest.spyOn(db, "select").mockRejectedValueOnce(new Error("read failed"));
 
     await expect(readCachedWallets(LOCAL_TEST_OWNER)).resolves.toBeNull();
+  });
+
+  it("applies the pending transaction delta exactly once", async () => {
+    await cacheWallets(LOCAL_TEST_OWNER, [buildWallet({ balance: 100 })], NOW);
+    await new LocalOutboxRepository(db).enqueue({
+      clientMutationId: "m-1",
+      ownerId: LOCAL_TEST_OWNER,
+      entityType: "transaction",
+      entityId: "tx-1",
+      operation: "create",
+      baseRevision: 0,
+      localSnapshot: { type: "expense", amount: 25.5, walletId: "wallet-1" },
+      now: NOW,
+    });
+
+    const first = await readCachedWallets(LOCAL_TEST_OWNER);
+    const second = await readCachedWallets(LOCAL_TEST_OWNER);
+
+    expect(first?.[0]?.balance).toBe(74.5);
+    expect(second?.[0]?.balance).toBe(74.5);
+  });
+
+  it("applies pending transfer deltas to both wallets", async () => {
+    await cacheWallets(
+      LOCAL_TEST_OWNER,
+      [
+        buildWallet({ id: "wallet-1", balance: 100 }),
+        buildWallet({ id: "wallet-2", balance: 50, name: "Ahorros" }),
+      ],
+      NOW,
+    );
+    await new LocalOutboxRepository(db).enqueue({
+      clientMutationId: "m-1",
+      ownerId: LOCAL_TEST_OWNER,
+      entityType: "transfer",
+      entityId: "transfer-1",
+      operation: "create",
+      baseRevision: 0,
+      localSnapshot: {
+        fromWalletId: "wallet-1",
+        toWalletId: "wallet-2",
+        amount: 40,
+      },
+      now: NOW,
+    });
+
+    const cached = await readCachedWallets(LOCAL_TEST_OWNER);
+    const byId = new Map(cached?.map((wallet) => [wallet.id, wallet]));
+
+    expect(byId.get("wallet-1")?.balance).toBe(60);
+    expect(byId.get("wallet-2")?.balance).toBe(90);
+  });
+
+  it("returns local rows even when the collection was never listed", async () => {
+    await db.upsert(
+      "wallets",
+      toWalletLocalRow(buildWallet({ id: "wallet-local", balance: 10 })),
+    );
+    await new LocalOutboxRepository(db).enqueue({
+      clientMutationId: "m-1",
+      ownerId: LOCAL_TEST_OWNER,
+      entityType: "transaction",
+      entityId: "tx-1",
+      operation: "create",
+      baseRevision: 0,
+      localSnapshot: {
+        type: "income",
+        amount: 5,
+        walletId: "wallet-local",
+      },
+      now: NOW,
+    });
+
+    const cached = await readCachedWallets(LOCAL_TEST_OWNER);
+
+    expect(cached?.map((wallet) => wallet.id)).toEqual(["wallet-local"]);
+    expect(cached?.[0]?.balance).toBe(15);
+  });
+
+  it("does not apply the orphan wallet delta to a real wallet", async () => {
+    await cacheWallets(LOCAL_TEST_OWNER, [buildWallet({ balance: 100 })], NOW);
+    await new LocalOutboxRepository(db).enqueue({
+      clientMutationId: "m-1",
+      ownerId: LOCAL_TEST_OWNER,
+      entityType: "transaction",
+      entityId: "tx-orphan",
+      operation: "create",
+      baseRevision: 0,
+      localSnapshot: { type: "expense", amount: 25, walletId: "-1" },
+      now: NOW,
+    });
+
+    const cached = await readCachedWallets(LOCAL_TEST_OWNER);
+
+    expect(cached?.[0]?.balance).toBe(100);
   });
 
   it("does not read or write when the flag is off", async () => {

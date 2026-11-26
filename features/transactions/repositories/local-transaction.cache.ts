@@ -26,11 +26,13 @@ export async function readCachedTransactions(
     if (!port) return null;
 
     const meta = new LocalCacheMetaRepository(port);
-    if ((await meta.getFetchedAt(ownerId, COLLECTION)) === null) return null;
-
+    const fetchedAt = await meta.getFetchedAt(ownerId, COLLECTION);
     const rows = await port.select<LocalRow>(COLLECTION, {
       where: { ownerId },
     });
+
+    // A local write must be visible even if the collection was never listed.
+    if (fetchedAt === null && rows.length === 0) return null;
 
     return rows.flatMap((row) => {
       const transaction = fromTransactionLocalRow(row);
@@ -60,7 +62,9 @@ export async function cacheTransactions(
     await mirrorOwnerRows(tx, {
       table: COLLECTION,
       ownerId,
-      rows: transactions.map(toTransactionLocalRow),
+      rows: transactions.map((transaction) =>
+        toTransactionLocalRow(transaction),
+      ),
       now,
     });
     await meta.markFetched(ownerId, COLLECTION, now, tx);

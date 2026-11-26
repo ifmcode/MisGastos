@@ -1,5 +1,9 @@
 import type { LocalDatabaseTransaction } from "./database.port";
-import type { OutboxMutation, OutboxMutationInput } from "./local-db.types";
+import type {
+  OutboxEntityType,
+  OutboxMutation,
+  OutboxMutationInput,
+} from "./local-db.types";
 
 export type MarkOutboxFailedInput = {
   errorCode: string;
@@ -28,7 +32,17 @@ export interface IOutboxRepository {
     tx?: LocalDatabaseTransaction,
   ): Promise<OutboxMutation>;
   /** Every queued mutation, `seq` ascending. */
-  listByOwner(ownerId: string): Promise<OutboxMutation[]>;
+  listByOwner(
+    ownerId: string,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation[]>;
+  /** The queued mutation of one entity, if any (used inside local writes). */
+  find(
+    ownerId: string,
+    entityType: OutboxEntityType,
+    entityId: string,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation | null>;
   /** `pending` and `failed` rows, `seq` ascending. */
   listPending(ownerId: string): Promise<OutboxMutation[]>;
   countPending(ownerId: string): Promise<number>;

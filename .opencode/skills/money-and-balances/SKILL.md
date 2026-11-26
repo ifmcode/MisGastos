@@ -12,9 +12,8 @@ helpers instead of writing new arithmetic.
 
 - Amounts are decimal numbers rounded to 2 decimals, **not** integer cents, for
   the personal-finance V1 path (`project-memory.md` key decisions).
-- Every arithmetic result goes through `roundMoney`
-  (`features/wallets/utils/money.ts`). It is idempotent and handles float drift
-  and non-finite input (returns `0`).
+- Every arithmetic result goes through `roundMoney` (`shared/utils/money.ts`).
+  It is idempotent and handles float drift and non-finite input (returns `0`).
 - Shared expenses, splits and settlements must be exact. When TICKET-009/010 add
   sharing, compute in integer cents or a decimal type inside the split function
   and convert at the boundary; do not chain `roundMoney` per participant.
@@ -25,10 +24,11 @@ helpers instead of writing new arithmetic.
 
 | Helper | File | Purpose |
 |---|---|---|
-| `roundMoney` | `features/wallets/utils/money.ts` | single rounding entry point |
-| `calculateWalletBalance` | same | initial + movements |
+| `roundMoney` | `shared/utils/money.ts` | single rounding entry point |
+| `calculateWalletBalance` | `features/wallets/utils/money.ts` | initial + movements |
 | `calculateWalletTotals` | same | dashboard totals by currency |
-| `getSignedTransactionAmount` | `features/transactions/utils/transaction-balance.ts` | income `+`, expense `-` |
+| `readOutboxWalletDeltas` | `shared/lib/local-db/pending-balance.ts` | pending balance delta from the outbox |
+| `getSignedTransactionAmount` | `shared/utils/transaction-balance.ts` | income `+`, expense `-` |
 | `applyTransactionToBalance` / `revertTransactionFromBalance` | same | apply/revert one movement |
 | `applyTransactionUpdateToBalance` | same | revert previous + apply next |
 | `applyTransferToBalances` / `hasSufficientBalance` | `features/transfers/utils/transfer-balance.ts` | move between wallets |

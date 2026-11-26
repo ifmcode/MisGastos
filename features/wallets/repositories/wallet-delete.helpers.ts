@@ -1,5 +1,5 @@
 import { WalletOperationError } from "../services/wallet.errors";
-import { roundMoney } from "../utils/money";
+import { roundMoney } from "@/shared/utils/money";
 
 const MAX_BATCH_WRITES = 450;
 

@@ -2,7 +2,7 @@ import { isCurrencyCode } from "@/shared/constants/currencies";
 import { readStoredRevision } from "@/shared/utils/revision";
 
 import { Wallet } from "../types/wallet.types";
-import { roundMoney } from "../utils/money";
+import { roundMoney } from "@/shared/utils/money";
 import {
   isWalletIcon,
   isWalletType,

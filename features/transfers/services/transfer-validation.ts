@@ -1,5 +1,5 @@
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 
 import {
   CreateTransferDto,

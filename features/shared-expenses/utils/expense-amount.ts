@@ -1,4 +1,4 @@
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 
 const CENTS_FACTOR = 100;
 const AMOUNT_INPUT_PATTERN = /^\d{1,9}(?:[.,]\d{1,2})?$/;

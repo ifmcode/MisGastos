@@ -1,9 +1,11 @@
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "./money";
 
-import { TransactionType } from "../types/transaction.types";
+/** Movement kinds that affect a wallet balance. Kept local so shared code
+ * never depends on a feature. */
+export type MovementType = "expense" | "income";
 
 export interface TransactionMovement {
-  type: TransactionType;
+  type: MovementType;
   amount: number;
 }
 

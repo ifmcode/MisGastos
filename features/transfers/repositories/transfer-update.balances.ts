@@ -5,7 +5,7 @@ import { nextRevision } from "@/shared/utils/revision";
 import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 
 import { TransferOperationError } from "../services/transfer.errors";
 import { toWalletBalance } from "./transfer-firestore.utils";

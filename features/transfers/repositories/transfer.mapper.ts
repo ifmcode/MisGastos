@@ -1,7 +1,7 @@
 import { isCurrencyCode } from "@/shared/constants/currencies";
 
 import { ORPHANED_WALLET_ID } from "@/features/wallets/utils/deleted-wallet";
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 import {
   toIsoDateValue,
   toIsoTimestamp,

@@ -1,5 +1,5 @@
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { roundMoney } from "@/features/wallets/utils/money";
+import { roundMoney } from "@/shared/utils/money";
 import type { CurrencyCode } from "@/shared/constants/currencies";
 import type { Translate } from "@/shared/i18n/translate";
 import { getDefaultMovementIsoDate } from "@/shared/utils/date-defaults";

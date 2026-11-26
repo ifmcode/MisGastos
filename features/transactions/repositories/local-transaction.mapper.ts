@@ -1,4 +1,7 @@
-import type { LocalRow } from "@/shared/lib/local-db/local-db.types";
+import type {
+  LocalRecordSyncStatus,
+  LocalRow,
+} from "@/shared/lib/local-db/local-db.types";
 import {
   readLocalRowId,
   readLocalRowOwnerId,
@@ -16,7 +19,10 @@ const EPOCH_ISO = new Date(0).toISOString();
  * Firestore-shaped document and delegates to `mapTransactionDocument`, which
  * owns validation, date normalisation and the type-specific link rules.
  */
-export function toTransactionLocalRow(transaction: Transaction): LocalRow {
+export function toTransactionLocalRow(
+  transaction: Transaction,
+  syncStatus: LocalRecordSyncStatus = "synced",
+): LocalRow {
   return {
     id: transaction.id,
     ownerId: transaction.ownerId,
@@ -37,7 +43,7 @@ export function toTransactionLocalRow(transaction: Transaction): LocalRow {
     updatedAt: toIsoTimestamp(transaction.updatedAt) ?? EPOCH_ISO,
     deletedAt: transaction.deletedAt ?? null,
     revision: transaction.revision,
-    syncStatus: "synced",
+    syncStatus,
   };
 }
 

@@ -7,22 +7,35 @@ import {
   WalletDeletionResult,
   WalletUsage,
 } from "../types/wallet.types";
-import { cacheWallets } from "./local-wallet.cache";
+import { cacheWallets, readCachedWallets } from "./local-wallet.cache";
 import { IWalletRepository } from "./wallet.repository";
 
 /**
- * Read-through wallet repository. Every method delegates to the remote
- * implementation; only the list read mirrors the result into SQLite, and a
- * cache failure never fails the online read.
+ * Read-through wallet repository. The list read mirrors the remote result with
+ * the server balance and returns it with the pending outbox delta applied. When
+ * the remote read fails and a cache exists, the derived cache is returned
+ * instead of propagating the error.
  */
 export class CachedWalletRepository implements IWalletRepository {
   constructor(private readonly remote: IWalletRepository) {}
 
   async getWallets(ownerId: string): Promise<Wallet[]> {
-    const wallets = await this.remote.getWallets(ownerId);
+    let wallets: Wallet[];
+
+    try {
+      wallets = await this.remote.getWallets(ownerId);
+    } catch (error) {
+      const cached = await readCachedWallets(ownerId);
+      if (cached) return cached;
+      throw error;
+    }
 
     try {
       await cacheWallets(ownerId, wallets, new Date().toISOString());
+      // `readCachedWallets` already derives `serverBalance + delta`; applying
+      // the delta again here would double it.
+      const derived = await readCachedWallets(ownerId);
+      if (derived) return derived;
     } catch {
       // Best effort: the online read already succeeded.
     }

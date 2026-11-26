@@ -18,7 +18,7 @@ import {
   UpdateWalletDto,
   Wallet,
 } from "../types/wallet.types";
-import { roundMoney } from "../utils/money";
+import { roundMoney } from "@/shared/utils/money";
 import { buildWalletDocumentData } from "./wallet-document";
 import { mapWalletDocument } from "./wallet.mapper";
 
