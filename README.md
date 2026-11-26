@@ -57,6 +57,7 @@ simplicidad de uso.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
 - 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías, dashboard y Social: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila, botón flotante centrado, el menú de acciones del FAB (`FabActionMenu`), que hoy usan los FAB de Social y de Movimientos, y el botón de icono con insignia de contador (`IconBadgeButton`), que comparten la campana del dashboard y la cabecera de Social con una sola insignia destacada y el tope `99+`.
+- 📴 **Sincronización offline** detrás de `EXPO_PUBLIC_OFFLINE_FIRST` (apagado por defecto): con la marca activa, crear, editar y borrar gastos, ingresos y transferencias funciona sin conexión y sobrevive al reinicio, con el saldo mostrado como `serverBalance + cambios pendientes`. Al volver la conexión, el motor envía la cola en orden estricto **exactamente una vez** (marcadores `appliedMutations` en la misma transacción que el cambio de dinero), reintenta los fallos transitorios con backoff exponencial (1 s → 5 min con jitter) y reintenta a mano los fallos permanentes con **Reintentar ahora**. Los conflictos por ediciones simultáneas en varios dispositivos (`REMOTE_CHANGED`, `DELETED_REMOTELY`, `WALLET_UNAVAILABLE`, `INSUFFICIENT_FUNDS`, `INVALID`) nunca se resuelven solos: un icono de sync en la cabecera de **Inicio**, **Carteras**, **Movimientos** y **Social** (a la izquierda de la campana o de las acciones) muestra sin conexión, pendientes y conflictos con insignia y abre el centro `/sync`, donde se ven los cambios sin subir, el último sync y se resuelve cada conflicto comparando **Tu cambio** con **Cambio de otro dispositivo**; el bloque **Sincronización** de Ajustes ofrece el mismo estado y **Reintentar ahora**. Incluye pull completo al arrancar, al reconectar, al volver a primer plano y tras cada escritura (debounce). Las reglas nuevas (`appliedMutations` y el `get` de `transactions`/`transfers` sobre documento inexistente) están **pendientes de despliegue**.
 
 ## 🛠️ Stack tecnológico
 
@@ -67,7 +68,7 @@ simplicidad de uso.
 | Lenguaje | TypeScript 6.0 en modo estricto |
 | UI | NativeWind 4 (Tailwind CSS) · React Navigation · Reanimated · Gesture Handler |
 | Backend | Firebase Authentication + Cloud Firestore |
-| Persistencia local | AsyncStorage (preferencias) · `expo-sqlite` (caché de lectura personal, cola de escritura local de movimientos y transferencias en SQLite + outbox, y aviso sin conexión, detrás de `EXPO_PUBLIC_OFFLINE_FIRST`, apagado por defecto) · ids de cliente, `revision` y borrado lógico de movimientos en Firestore |
+| Persistencia local | AsyncStorage (preferencias) · `expo-sqlite` (caché de lectura personal, cola de escritura local y motor de sincronización con markers exactly-once, reintentos y conflictos, detrás de `EXPO_PUBLIC_OFFLINE_FIRST`, apagado por defecto) · ids de cliente, `revision` y borrado lógico de movimientos en Firestore |
 | Testing | Jest 30 + ts-jest |
 | Calidad | ESLint 9 + eslint-config-expo |
 
@@ -77,7 +78,7 @@ simplicidad de uso.
 MisGastos/
 ├── app/                    # Rutas y layouts de Expo Router
 ├── features/               # Módulos por dominio (auth, profile, wallets, transactions, transfers, dashboard, categories, friends, groups, social, shared-expenses, group-expenses, sync…)
-│   ├── sync/               # Estado de red y aviso sin conexión de la capa offline
+│   ├── sync/               # Estado de sync en la UI: icono de cabecera, bloque de Ajustes, centro /sync y conflictos
 │   └── <feature>/
 │       ├── components/     # UI específica del dominio
 │       ├── hooks/          # Orquestación y estado de UI
@@ -91,7 +92,8 @@ MisGastos/
 │   ├── constants/          # Tokens y constantes
 │   ├── types/              # Tipos globales
 │   ├── utils/              # Utilidades puras
-│   └── lib/local-db/       # Base local offline-first: DatabasePort, esquema y migraciones, outbox y estado de sincronización
+│   ├── lib/local-db/       # Base local offline-first: DatabasePort serializado, esquema y migraciones, outbox, conflictos y sync-state
+│   └── services/sync/      # Motor agnóstico de push/pull, backoff, clasificación de errores, política de conflictos e idempotencia
 ├── components/             # Componentes base de la app
 ├── hooks/                  # Hooks compartidos
 ├── lib/                    # Configuración de Firebase y autenticación
@@ -230,9 +232,9 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
-Estado actual (25/11/2026): **427 suites / 2838 tests**; la cobertura acotada a la
-lógica de negocio está en **98,90 % de sentencias, 95,01 % de ramas, 98,64 % de
-funciones y 99,48 % de líneas**, y `npm run check:copy` audita **346 archivos TSX**.
+Estado actual (26/11/2026): **460 suites / 3109 tests**; la cobertura acotada a la
+lógica de negocio está en **98,65 % de sentencias, 94,67 % de ramas, 98,5 % de
+funciones y 99,22 % de líneas**, y `npm run check:copy` audita **357 archivos TSX**.
 
 ## 🗺️ Roadmap
 
@@ -273,9 +275,10 @@ funciones y 99,48 % de líneas**, y `npm run check:copy` audita **346 archivos T
 - [x] Registrar opcionalmente el gasto de grupo en una cartera personal del pagador (TICKET-069) ✅ 22/11/2026
 - [x] Gestionar las solicitudes para unirse a grupos desde Social (TICKET-070) ✅ 23/11/2026
 - [x] Simplificar el formulario de gasto de grupo: sin **Todos** y solo **Igual**/**Importe**, manteniendo editables los modos antiguos (TICKET-071) ✅ 23/11/2026
-- [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización). Fase 7 **en curso**: base local `shared/lib/local-db` entregada el 24/11/2026 (DatabasePort, esquema y migraciones, outbox con estados y `sync-state`), prerrequisitos de escritura entregados el 24/11/2026 (ids de cliente opcionales, `revision` en carteras/movimientos/transferencias/categorías, borrado lógico de movimientos y reglas de `appliedMutations`) y caché de lectura personal con aviso sin conexión entregada el 24/11/2026 (carteras, categorías, movimientos y transferencias en SQLite detrás de `EXPO_PUBLIC_OFFLINE_FIRST`, y una franja inferior **Sin conexión · Mostrando datos guardados**), y cola de escritura local entregada el 26/11/2026 (gastos, ingresos y transferencias escriben la fila SQLite y una fila de outbox en la misma transacción local, saldo mostrado `serverBalance + delta pendiente`, validación de transferencias contra el saldo derivado, paridad al editar movimientos de cartera eliminada y un solo envío por mutación); pendientes el motor de sincronización, los conflictos, la purga local al cerrar sesión y el despliegue de las reglas; con `EXPO_PUBLIC_OFFLINE_FIRST` activo las escrituras aún no se envían a Firestore hasta la fase 5
+- [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización). Fase 7 **en curso**: base local `shared/lib/local-db` entregada el 24/11/2026 (DatabasePort, esquema y migraciones, outbox con estados y `sync-state`), prerrequisitos de escritura entregados el 24/11/2026 (ids de cliente opcionales, `revision` en carteras/movimientos/transferencias/categorías, borrado lógico de movimientos y reglas de `appliedMutations`), caché de lectura personal con aviso sin conexión entregada el 24/11/2026 (carteras, categorías, movimientos y transferencias en SQLite detrás de `EXPO_PUBLIC_OFFLINE_FIRST`), cola de escritura local entregada el 26/11/2026 (gastos, ingresos y transferencias escriben la fila SQLite y una fila de outbox en la misma transacción local, saldo mostrado `serverBalance + delta pendiente`, validación de transferencias contra el saldo derivado y un solo envío por mutación) y **motor de sincronización, exactly-once, reintentos y conflictos entregado el 26/11/2026** (push en orden por `seq`, markers `appliedMutations`, backoff exponencial, reintento manual, conflictos con **Tu cambio** vs **Cambio de otro dispositivo**, pull completo y centro `/sync`); pendientes los movimientos offline de grupo y amigo, la purga local al cerrar sesión y el **despliegue de las reglas** antes de activar el flag. Con `EXPO_PUBLIC_OFFLINE_FIRST` activo las escrituras ya se sincronizan.
 - [x] Especialización del flujo de desarrollo con agentes y skills de OpenCode
-- [ ] Notificaciones push con la app cerrada (V1, después del offline)
+- [ ] Quitar el pull-to-refresh de todas las listas (TICKET-075) (V1, antes de las notificaciones push)
+- [ ] Notificaciones push con la app cerrada (V1, después del offline y del pull-to-refresh)
 - [ ] Cambio de estética integral y alineación de UX con referencias visuales (TICKET-074) (V1, después de las notificaciones push)
 - [ ] Librería de componentes con Storybook (V1, después del cambio de estética integral; cierra la V1)
 - [ ] Exportar los datos de la cuenta en JSON versionado, por cartera o completa y sin datos compartidos ni de grupo (**post-V1**)
@@ -329,6 +332,7 @@ Consulta el roadmap completo en
 - [Revision, borrado lógico e ids de cliente (TICKET-023, segunda entrega, 24/11/2026)](docs/project/development-notes/session-notes/2026-11-24-offline-revision-and-soft-delete.md): `revision` con create 0 y update +1 (legado 0), ids de cliente opcionales en los DTO de creación, borrado lógico de movimientos con reversión exacta del saldo, exclusión de los movimientos borrados en el uso de cartera y en el bloqueo de categorías, y reglas de `revision`, `deletedAt` y `appliedMutations` con despliegue pendiente.
 - [Caché de lectura offline y aviso sin conexión (TICKET-023, tercera entrega, 24/11/2026)](docs/project/development-notes/session-notes/2026-11-24-offline-read-cache-and-banner.md): esquema v2 con los ids de enlace, `cacheMeta` y `sortOrder` opcional; espejo que nunca pisa filas pendientes; mappers y lecturas con caché por feature detrás de `EXPO_PUBLIC_OFFLINE_FIRST`; caché primero y refresco remoto en `use-async-collection`; filtro de `deletedAt` en las lecturas y espejo tras crear/editar/borrar movimientos y transferencias; franja inferior global **Sin conexión** con `features/sync`; reconstrucción nativa y validación en dispositivo pendientes.
 - [Cola de escritura offline y saldo derivado (TICKET-023, cuarta entrega, 26/11/2026)](docs/project/development-notes/session-notes/2026-11-26-offline-write-queue.md): escritura local de gastos, ingresos y transferencias con fila SQLite + outbox en una sola transacción, saldo mostrado `serverBalance + delta pendiente` recalculado desde el outbox, validación de transferencias contra el saldo derivado, cancelación de create+delete, paridad de movimientos huérfanos, fallback de lectura de carteras y categorías, y un solo envío por mutación; el push llega en la fase 5 y el flag activo aún no envía nada.
+- [Motor de sincronización, exactly-once y conflictos (TICKET-023, quinta entrega, 26/11/2026)](docs/project/development-notes/session-notes/2026-11-26-offline-sync-engine.md): push en orden estricto con single-flight por cuenta, markers `appliedMutations` atómicos con el cambio de dinero, `clientMutationId` inmutable por payload y coalescing con id nuevo, backoff exponencial con reintento manual, conflictos tipados con resolución atómica (`keep-mine`/`keep-remote`), pull completo, serialización de transacciones locales, UI de icono de cabecera/Ajustes/centro `/sync` y reglas `list`/`get` pendientes de despliegue.
 - [Decisiones de gastos de grupo y membresía (20/11/2026)](docs/project/development-notes/session-notes/2026-11-20-group-expenses-and-membership-decisions.md): saldo neto pagado − cuota, selección de participantes, simplificación de deudas con ajuste por grupo, permisos de edición, salida con deuda saldada y transferencia de propiedad.
 - [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)

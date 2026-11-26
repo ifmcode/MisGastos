@@ -13,26 +13,26 @@ Make the app usable without an internet connection. The user must be able to cre
 ## Requirements
 - [x] Choose the local persistence and sync architecture before implementation — decided on 14/11/2026 (see **Design Spike**)
 - [ ] Persist wallets, transactions, transfers, categories, friends, groups, shared expenses and settlements locally
-- [ ] Allow creating, editing and deleting expenses/incomes and transfers while offline
+- [x] Allow creating, editing and deleting expenses/incomes and transfers while offline
 - [ ] Allow creating group expenses and settlements while offline
-- [ ] Queue offline mutations with idempotency keys, retry and backoff
-- [ ] Sync on app start and on reconnect, preserving mutation order and dependencies
+- [x] Queue offline mutations with idempotency keys, retry and backoff
+- [x] Sync on app start and on reconnect, preserving mutation order and dependencies
 - [ ] Recalculate wallet balances and group debts locally with the same rules as the online path
-- [ ] Define conflict resolution for edits made on multiple devices
-- [ ] Surface conflicts to the user instead of silently overwriting money data
-- [ ] Show offline state, pending changes, last sync time and a manual retry action
+- [x] Define conflict resolution for edits made on multiple devices
+- [x] Surface conflicts to the user instead of silently overwriting money data
+- [x] Show offline state, pending changes, last sync time and a manual retry action
 - [ ] Clear or isolate local data on logout and account switching
-- [ ] Add unit tests for the queue/conflict logic and integration tests for offline -> online flows
+- [x] Add unit tests for the queue/conflict logic and integration tests for offline -> online flows
 
 ## Acceptance Criteria
-- [ ] Creating an expense, income or transfer offline works and survives an app restart
-- [ ] Reconnecting syncs each queued mutation exactly once, with no duplicates
+- [x] Creating an expense, income or transfer offline works and survives an app restart
+- [x] Reconnecting syncs each queued mutation exactly once, with no duplicates
 - [ ] Offline group/friend movements sync and balances remain correct
-- [ ] A conflicting edit is reported and never silently discards one user's data
-- [ ] The user can see what is pending and retry a failed sync
-- [ ] The app remains usable when Firebase is temporarily unavailable
+- [x] A conflicting edit is reported and never silently discards one user's data
+- [x] The user can see what is pending and retry a failed sync
+- [x] The app remains usable when Firebase is temporarily unavailable
 - [ ] Logging out removes local access to the previous account's data
-- [ ] Existing online behaviour and balance rules do not regress
+- [x] Existing online behaviour and balance rules do not regress
 
 ## Progress (24/11/2026)
 
@@ -243,6 +243,31 @@ create/edit/delete plus restart is pending.
 
 **Detail:** [`session-notes/2026-11-26-offline-write-queue.md`](../development-notes/session-notes/2026-11-26-offline-write-queue.md)
 
+### Fifth slice — sync engine, retry, exactly-once and conflict UI (26/11/2026)
+
+This slice closes the queue/sync/conflict requirements and the six acceptance
+criteria marked above. The epic stays `🚧 In progress` for offline
+group/friend movements, the local recalculation of group debts and the
+logout/account-switch purge.
+
+**Delivered:** `shared/services/sync/` (error classification transient/conflict/permanent, exponential backoff 1 s→5 min ±20 % jitter, pure conflict policy with keep-mine/keep-remote plans, push loop, single-flight engine, sync trigger, Firestore idempotency helpers `appliedMutations`); `shared/lib/local-db/` (conflicts repository + mapper, record/wallet sync helpers, `serialized.database.ts` that queues every local transaction so user writes, cache mirrors and the engine cannot overlap, outbox `rebase`/`requeueFailed`/`findById`); idempotency in the six online operations (transaction/transfer create/update/delete accept `{clientMutationId, baseRevision}` and write the marker atomically; replay returns the stored record and its wallets; base revision guard; delete of an already soft-deleted record succeeds); coalescing now issues a **fresh** `clientMutationId` per payload and converts an attempted create into update/delete; `markSyncing` counts the attempt; `features/sync/` (Firestore executor + per-entity mutation modules, local applier, conflict resolver, full pull, overview, engine factory); a conflict view model (`toSyncConflictView`) that resolves wallet **names** from the local cache (`readCachedWallets`) with the wallet id as the fallback when it is not cached; UI (a header sync button in Inicio, Carteras, Movimientos and Social, left of the bell/requests/filters, with the pending/conflict badge and a link to `/sync`; Settings **Sincronización** block with manual retry; `/sync` center; conflict bottom sheet "Tu cambio" vs "Cambio de otro dispositivo"; ES/EN copy; dark mode); rules: `transactions`/`transfers` read split into `list` + `get` (a missing-document `get` resolves to not-found), `appliedMutations` unchanged.
+
+**UI revision (26/11/2026):** the pressable bottom banner of the first pass was removed. The sync state lives in a `SyncStatusButton` (shared `IconBadgeButton`) in the four main tab headers: conflicts win, then offline (`cloud-offline-outline`), then pending (`cloud-upload-outline`); the badge counts pending + conflicts and tapping opens `/sync`. The strip, its offset helper and its copy were deleted, so no screen is covered while scrolling. `check:copy` → 355 TSX; `npx jest` → **459 suites / 3098 tests** (two banner test files removed, one indicator test added).
+
+**Exactly-once:** marker `appliedMutations/{ownerId}__{clientMutationId}` written in the same `runTransaction` as the money change; a replay returns the stored state and its wallets without re-applying; `clientMutationId` is immutable per payload (coalescing always issues a new one); updates/deletes compare `baseRevision` with the stored `revision`.
+
+**Retry:** transient (`unavailable`, `deadline-exceeded`, `network-request-failed`, `resource-exhausted`, `aborted`) pauses the queue with `nextAttemptAt`; conflicts and permanent errors stop it until the user acts; **Reintentar ahora** requeues `failed` rows and clears their window; `syncing` rows left by a crash are reclaimed.
+
+**Conflicts:** kinds `REMOTE_CHANGED`, `DELETED_REMOTELY`, `WALLET_UNAVAILABLE`, `INSUFFICIENT_FUNDS`, `INVALID`; keep-mine rebases to the remote revision (or re-creates after a remote delete); keep-remote applies the remote snapshot or removes the local row; resolution writes record + outbox + conflict in one local transaction; open conflicts block the queue.
+
+**Review:** the read-only `reviewer` returned `changes requested` (1 blocker: coalescing reused the mutation id and could silently drop a later edit after a lost ack; 4 majors: create collision, delete of an already-deleted record opening a conflict, replay without wallets, cross-wallet edit leaving the origin `serverBalance` stale). All five fixed plus nits 6, 10 and 12 (explicit stop/transient push result, remote wallet `updatedAt`, retry when a conflict snapshot cannot be read). Nits 7, 8, 9 and 11 are accepted and documented as limitations.
+
+**Verification (26/11/2026):** `npx tsc --noEmit`, `npx expo lint` and `npm run check:copy` clean (355 TSX); `npx jest` → **459 suites / 3098 tests**; `npm run test:coverage` → global **98.65 % statements, 94.67 % branches, 98.5 % functions, 99.22 % lines** (`shared/services/sync` 97.48/97.26/100/97.33 and `features/sync/services` 97.47/91.46/96.87/97.89); `npx firebase deploy --only firestore:rules --dry-run` compiles.
+
+**Pending manual steps:** deploy the new rules (`transactions`/`transfers` get split + `appliedMutations` from the second slice) **before** enabling the flag; set `EXPO_PUBLIC_OFFLINE_FIRST=true` and restart the bundler (the value is inlined); native rebuild only if the installed client predates `expo-sqlite`/`netinfo`; device validation of airplane mode → create/edit/delete → kill/relaunch → reconnect, exactly-once in the console, two-device conflicts and both resolutions, retry after a permanent failure, light/dark mode.
+
+**Detail:** [`session-notes/2026-11-26-offline-sync-engine.md`](../development-notes/session-notes/2026-11-26-offline-sync-engine.md)
+
 ## Design Spike (14/11/2026)
 
 **Status:** ✅ Accepted. **No app code changed** in this session; the epic stays in progress until the
@@ -290,7 +315,7 @@ implementation phases below are delivered.
 | 2 | Local DB foundations, client ids, `revision`/`deletedAt`/`appliedMutations` + rules | Phase 7 ✅ 24/11/2026 |
 | 3 | Local read cache for personal data | Phase 7 ✅ 24/11/2026 |
 | 4 | Offline write queue for expenses, incomes and transfers | Phase 7 ✅ 26/11/2026 |
-| 5 | Sync engine, retry, exactly-once and conflicts | Phase 7 |
+| 5 | Sync engine, retry, exactly-once and conflicts | Phase 7 ✅ 26/11/2026 |
 | 6 | Offline group/friend movements | Phase 7 (after TICKET-009/010) |
 | 7 | Offline UX, observability, account purge and web decision | Phase 7 |
 
@@ -302,7 +327,7 @@ implementation phases below are delivered.
 | Exactly-once sync on reconnect | 5 |
 | Offline group/friend movements keep balances correct | 6 |
 | Conflicting edit reported, never silently discarded | 5 |
-| User sees pending changes and can retry a failed sync | 7 (basic banner in 3) |
+| User sees pending changes and can retry a failed sync | 5 (header icon; basic strip in 3) |
 | App usable while Firebase is unavailable | 3-4 |
 | Logout removes local access to the previous account's data | 7 |
 | Existing online behaviour and balance rules do not regress | 2 + parity tests in every phase |

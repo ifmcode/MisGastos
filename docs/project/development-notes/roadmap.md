@@ -19,8 +19,8 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Current ticket:** TICKET-023 - Offline-first implementation (full epic)
 - **Status:** 🚧 In progress
 - **Last completed:** TICKET-073 - Group activity in the group detail (24/11/2026)
-- **Queued:** Phase 8 V1 closeout (TICKET-052, TICKET-074, TICKET-040)
-- **Next:** continue TICKET-023 with the sync engine, retry/backoff, exactly-once and the conflict UI (phase 5)
+- **Queued:** Phase 8 V1 closeout (TICKET-075, TICKET-052, TICKET-074, TICKET-040)
+- **Next:** continue TICKET-023 with offline group/friend movements (phase 6)
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -29,9 +29,9 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 | **M1 - Core personal finance (MVP)** | Auth, wallets, movements, transfers, dashboard and history | 0, 2 | ✅ Done |
 | **M2 - Personal finance complete** | UX follow-up, i18n and shared components | 3 | ✅ Done |
 | **M3 - Social and platform** | Architecture spike, friends, shared expenses, balances, groups and group history | 4-6 | ✅ Done |
-| **M4 - Offline and V1 closeout** | Offline-first implementation and V1 closeout: push notifications, integral visual redesign and Storybook | 7-8 | ⏳ Pending |
+| **M4 - Offline and V1 closeout** | Offline-first implementation and V1 closeout: pull-to-refresh removal, push notifications, integral visual redesign and Storybook | 7-8 | ⏳ Pending |
 
-**V1.0 ships when M1-M4 are complete.** The release order is Phase 7 (offline-first) → TICKET-052 (push notifications) → TICKET-074 (integral visual redesign and UX alignment) → TICKET-040 (Storybook); V1 ships when TICKET-040 closes. Phase 9 and the post-V1 backlog start only after V1 ships. Phase 1 (foundation) is a completed cross-cutting quality track; its coverage gate stays enforced. Anything outside these phases is post-V1.
+**V1.0 ships when M1-M4 are complete.** The release order is Phase 7 (offline-first) → TICKET-075 (pull-to-refresh removal) → TICKET-052 (push notifications) → TICKET-074 (integral visual redesign and UX alignment) → TICKET-040 (Storybook); V1 ships when TICKET-040 closes. Phase 9 and the post-V1 backlog start only after V1 ships. Phase 1 (foundation) is a completed cross-cutting quality track; its coverage gate stays enforced. Anything outside these phases is post-V1.
 
 ## Phase Overview
 | Phase | Theme | Status |
@@ -185,17 +185,18 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
   - [x] Foundations: local SQLite DB, client-generated ids, `revision`/`deletedAt`/`appliedMutations` and rules ✅ 24/11/2026
   - [x] Local read cache for personal data and offline banner ✅ 24/11/2026
   - [x] Offline write queue for expenses, incomes and transfers with local balance derivation ✅ 26/11/2026
-  - [ ] Sync engine, retry/backoff, exactly-once and conflict UI
+  - [x] Sync engine, retry/backoff, exactly-once and conflict UI ✅ 26/11/2026
   - [ ] Offline group/friend movements (after Phase 6)
   - [ ] Offline UX, observability, account purge on logout/switch and web decision
 - If offline is a launch requirement, move this phase before Phase 6
 - Do not retrofit offline after groups without the Phase 4 decisions; the current Firestore transaction-based balance model may need to change
 
 ## Phase 8: V1 closeout (QUEUED)
-- [ ] TICKET-052 push notifications for background and closed app (after Phase 7)
+- [ ] TICKET-075 disable pull-to-refresh across all lists (pre-V1, before push notifications)
+- [ ] TICKET-052 push notifications for background and closed app (after TICKET-075)
 - [ ] TICKET-074 integral visual redesign and UX alignment (after push notifications)
 - [ ] TICKET-040 Storybook component catalog (after the redesign; V1 ships when this closes)
-- These three are the only V1 items left, and their order is the release order.
+- These four are the only V1 items left, and their order is the release order.
 
 ## Phase 9: Post-V1 retention and enhancements (QUEUED)
 - [ ] TICKET-012 budgets
