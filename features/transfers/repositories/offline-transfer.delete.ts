@@ -1,5 +1,6 @@
 import type { DatabasePort } from "@/shared/lib/local-db/database.port";
 import { LocalOutboxRepository } from "@/shared/lib/local-db/local-outbox.repository";
+import { requestSyncTrigger } from "@/shared/services/sync/sync-trigger";
 
 import { TransferOperationError } from "../services/transfer.errors";
 import { fromTransferLocalRow } from "./local-transfer.mapper";
@@ -21,7 +22,7 @@ export async function deleteOfflineTransfer(
   transferId: string,
   deps: OfflineTransferWriteDeps,
 ): Promise<TransferMutationResult> {
-  return port.transaction(async (tx) => {
+  const result = await port.transaction(async (tx) => {
     const existingRow = await readTransferRow(tx, ownerId, transferId);
     if (!existingRow) {
       throw new TransferOperationError("TRANSFER_NOT_FOUND");
@@ -85,4 +86,7 @@ export async function deleteOfflineTransfer(
       wallets,
     };
   });
+
+  requestSyncTrigger();
+  return result;
 }

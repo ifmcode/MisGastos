@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { SyncStatusButton } from "@/features/sync/components/sync-status-button";
 
 import { walletsStyles } from "../styles/wallets.styles";
 
@@ -22,6 +23,7 @@ export function WalletsHeader() {
           {t("subtitle")}
         </ThemedText>
       </View>
+      <SyncStatusButton />
     </View>
   );
 }

@@ -1,32 +1,29 @@
-import { deleteField, doc, runTransaction } from "firebase/firestore";
+import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
-import { roundMoney } from "@/shared/utils/money";
-import { toIsoTimestamp } from "@/shared/utils/date";
 import { nextRevision } from "@/shared/utils/revision";
+import {
+  assertExpectedRevision,
+  writeAppliedMutation,
+  type SyncMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
 
 import { TransactionOperationError } from "../services/transaction.errors";
 import { Transaction, UpdateTransactionDto } from "../types/transaction.types";
-import {
-  buildTransaction,
-  getMappedWallet,
-  toTransactionData,
-} from "./transaction-firestore.utils";
-import {
-  readStoredDeletedAt,
-  readStoredGroupExpenseId,
-  readStoredGroupSettlementId,
-  readStoredSharedExpenseId,
-} from "./transaction-stored.utils";
-import { applyTransactionWalletAdjustment } from "./transaction-update.wallets";
+import { readTransactionReplay } from "./transaction-mutation.replay";
+import { buildTransaction } from "./transaction-firestore.utils";
+import { readStoredDeletedAt } from "./transaction-stored.utils";
+import { applyTransactionUpdate } from "./transaction-update.apply";
+import { buildTransactionUpdatePatch } from "./transaction-update.patch";
 import { TransactionMutationResult } from "./transaction.repository";
 
 export interface UpdateTransactionOperationOptions {
   ownerId: string;
   transactionId: string;
   dto: UpdateTransactionDto;
+  /** Present only when the sync engine pushes a queued mutation. */
+  mutation?: SyncMutationContext;
 }
 
 /**
@@ -37,14 +34,32 @@ export async function updateTransactionOperation({
   ownerId,
   transactionId,
   dto,
+  mutation,
 }: UpdateTransactionOperationOptions): Promise<TransactionMutationResult> {
   const now = new Date().toISOString();
   const transactionRef = doc(db, "transactions", transactionId);
-  const newWalletRef = doc(db, "wallets", dto.walletId);
 
   let updatedTransaction: Transaction | null = null;
+  let updatedWallets: Wallet[] = [];
+  let replayedWallets: Wallet[] = [];
+  let replayed = false;
 
   await runTransaction(db, async (firestoreTransaction) => {
+    if (mutation) {
+      const replay = await readTransactionReplay(
+        firestoreTransaction,
+        transactionRef,
+        ownerId,
+        mutation,
+      );
+      if (replay.replayed) {
+        replayed = true;
+        updatedTransaction = replay.transaction;
+        replayedWallets = replay.wallets;
+        return;
+      }
+    }
+
     const transactionSnapshot = await firestoreTransaction.get(transactionRef);
     if (!transactionSnapshot.exists()) {
       throw new TransactionOperationError("TRANSACTION_NOT_FOUND");
@@ -62,61 +77,24 @@ export async function updateTransactionOperation({
       throw new TransactionOperationError("TRANSACTION_NOT_FOUND");
     }
 
-    const previousType = transactionData.type;
-    const previousAmount =
-      typeof transactionData.amount === "number"
-        ? roundMoney(transactionData.amount)
-        : null;
-    const previousWalletId =
-      typeof transactionData.walletId === "string"
-        ? transactionData.walletId
-        : "";
+    if (mutation) assertExpectedRevision(transactionData, mutation);
 
-    if (previousType !== "expense" && previousType !== "income") {
-      throw new TransactionOperationError("TRANSACTION_INVALID");
-    }
-    if (previousAmount === null || previousAmount <= 0) {
-      throw new TransactionOperationError("TRANSACTION_INVALID");
-    }
-    if (previousWalletId.length === 0) {
-      throw new TransactionOperationError("TRANSACTION_INVALID");
-    }
-
-    await applyTransactionWalletAdjustment(
+    updatedWallets = await applyTransactionUpdate(
       firestoreTransaction,
       ownerId,
       now,
-      { type: previousType, amount: previousAmount, walletId: previousWalletId },
-      {
-        type: dto.type,
-        amount: dto.amount,
-        walletId: dto.walletId,
-        currency: dto.currency,
-      },
+      transactionData,
+      dto,
     );
 
     const revision = nextRevision(transactionData);
-
-    const patch: Record<string, unknown> = {
-      ...toTransactionData(ownerId, dto, now, revision),
-      createdAt: toIsoTimestamp(transactionData.createdAt) ?? now,
-      // A personal edit keeps the stored soft-delete stamp untouched. It is
-      // always null here because a deleted movement is rejected above.
-      deletedAt: readStoredDeletedAt(transactionData),
-    };
-
-    const sharedExpenseId = readStoredSharedExpenseId(transactionData);
-    if (sharedExpenseId) patch.sharedExpenseId = sharedExpenseId;
-
-    const groupExpenseId = readStoredGroupExpenseId(transactionData);
-    if (groupExpenseId) patch.groupExpenseId = groupExpenseId;
-
-    const groupSettlementId = readStoredGroupSettlementId(transactionData);
-    if (groupSettlementId) patch.groupSettlementId = groupSettlementId;
-
-    if (!(previousWalletId === dto.walletId && isOrphanedWalletId(previousWalletId))) {
-      patch.walletName = deleteField();
-    }
+    const patch = buildTransactionUpdatePatch(
+      ownerId,
+      transactionData,
+      dto,
+      revision,
+      now,
+    );
 
     firestoreTransaction.update(transactionRef, patch);
     updatedTransaction = buildTransaction(
@@ -126,17 +104,25 @@ export async function updateTransactionOperation({
       now,
       revision,
     );
+
+    if (mutation) {
+      writeAppliedMutation(firestoreTransaction, {
+        ownerId,
+        context: mutation,
+        entityType: "transaction",
+        entityId: transactionId,
+        revisionAfter: revision,
+        now,
+      });
+    }
   });
 
   if (!updatedTransaction) {
     throw new TransactionOperationError("TRANSACTION_NOT_FOUND");
   }
 
-  const updatedWallet = await getMappedWallet(newWalletRef, ownerId);
-  const wallets: Wallet[] = updatedWallet ? [updatedWallet] : [];
+  // A replay already has the server state and the wallets it moved.
+  if (replayed) return { transaction: updatedTransaction, wallets: replayedWallets };
 
-  return {
-    transaction: updatedTransaction,
-    wallets,
-  };
+  return { transaction: updatedTransaction, wallets: updatedWallets };
 }

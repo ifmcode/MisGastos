@@ -28,6 +28,11 @@ export const dashboardStyles = StyleSheet.create({
   headerText: {
     flex: 1,
   },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
   title: {
     fontSize: 30,
     lineHeight: 36,

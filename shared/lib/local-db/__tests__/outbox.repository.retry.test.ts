@@ -52,6 +52,40 @@ describe("LocalOutboxRepository permanent failure", () => {
       repository.getNext("owner-1", "2030-01-01T00:00:00.000Z"),
     ).resolves.toBeNull();
   });
+
+  it("manual retry requeues it with a cleared window", async () => {
+    const repository = new LocalOutboxRepository(new InMemoryDatabase());
+    await repository.enqueue(buildInput({ clientMutationId: "m1" }));
+    await repository.markFailed("owner-1", "m1", {
+      errorCode: "PERMISSION_DENIED",
+      attempts: 3,
+      nextAttemptAt: null,
+      now: NOW,
+    });
+
+    const requeued = await repository.requeueFailed("owner-1", LATER);
+
+    expect(requeued).toHaveLength(1);
+    expect(requeued[0]).toMatchObject({
+      status: "pending",
+      attempts: 0,
+      nextAttemptAt: null,
+      lastErrorCode: null,
+      updatedAt: LATER,
+    });
+    await expect(repository.getNext("owner-1", LATER)).resolves.toMatchObject({
+      clientMutationId: "m1",
+    });
+  });
+
+  it("manual retry leaves pending rows untouched", async () => {
+    const repository = new LocalOutboxRepository(new InMemoryDatabase());
+    await repository.enqueue(buildInput({ clientMutationId: "m1" }));
+
+    await expect(repository.requeueFailed("owner-1", LATER)).resolves.toEqual(
+      [],
+    );
+  });
 });
 
 describe("LocalOutboxRepository reclaimInterrupted", () => {

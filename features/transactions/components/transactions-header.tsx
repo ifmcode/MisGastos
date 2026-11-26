@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { SyncStatusButton } from "@/features/sync/components/sync-status-button";
 
 import {
   transactionsPalette,
@@ -32,8 +33,9 @@ export function TransactionsHeader({
         <ThemedText style={styles.subtitle}>{t("subtitle")}</ThemedText>
       </View>
 
-      {showActions ? (
-        <View style={styles.headerActions}>
+      <View style={styles.headerActions}>
+        <SyncStatusButton />
+        {showActions ? (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t("filters.openAccessibility")}
@@ -47,8 +49,8 @@ export function TransactionsHeader({
             />
             {hasFilters ? <View style={styles.filterDot} /> : null}
           </Pressable>
-        </View>
-      ) : null}
+        ) : null}
+      </View>
     </View>
   );
 }

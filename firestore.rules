@@ -1250,7 +1250,18 @@ service cloud.firestore {
     }
 
     match /transactions/{transactionId} {
-      allow read: if isWalletOwner(resource.data);
+      // The offline queue reads a document before an update/delete and needs a
+      // missing one to resolve to "not found" instead of permission-denied, so a
+      // remote delete is not confused with an auth failure. Same existence-oracle
+      // trade-off as appliedMutations: a missing document holds no data and
+      // existing ones stay owner-only.
+      allow get: if isSignedIn()
+        && (
+          !exists(/databases/$(database)/documents/transactions/$(transactionId))
+          || isWalletOwner(resource.data)
+        );
+
+      allow list: if isWalletOwner(resource.data);
 
       // A linked movement is an expense of the payer whose referenced expense
       // must exist once this write is applied (same transaction included), or an
@@ -1396,7 +1407,15 @@ service cloud.firestore {
     // Transfers support edit and soft delete. Documents are never hard-deleted:
     // deletedAt marks a transfer whose balances were already reverted.
     match /transfers/{transferId} {
-      allow read: if isWalletOwner(resource.data);
+      // Same missing-document `get` as transactions: the queued delete/update
+      // must be able to tell "the record is gone" from a permission error.
+      allow get: if isSignedIn()
+        && (
+          !exists(/databases/$(database)/documents/transfers/$(transferId))
+          || isWalletOwner(resource.data)
+        );
+
+      allow list: if isWalletOwner(resource.data);
 
       allow create: if isSignedIn()
         && request.resource.data.ownerId == request.auth.uid

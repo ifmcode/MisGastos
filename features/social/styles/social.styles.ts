@@ -29,6 +29,11 @@ export const socialStyles = StyleSheet.create({
   headerText: {
     flex: 1,
   },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
 
   // Route header with a back action
   routeHeader: {

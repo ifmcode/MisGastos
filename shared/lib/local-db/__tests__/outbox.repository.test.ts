@@ -67,7 +67,7 @@ describe("LocalOutboxRepository enqueue", () => {
     await expect(repository.listByOwner("owner-1")).resolves.toHaveLength(1);
   });
 
-  it("coalesces into one row keeping the original id, seq and baseRevision", async () => {
+  it("coalesces into one row keeping seq and baseRevision with a fresh id", async () => {
     const created = await repository.enqueue(
       buildInput({ clientMutationId: "m-create", baseRevision: 3 }),
     );
@@ -86,13 +86,56 @@ describe("LocalOutboxRepository enqueue", () => {
 
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
-      clientMutationId: "m-create",
+      clientMutationId: "m-update",
       seq: created.seq,
       baseRevision: 3,
       operation: "create",
       localSnapshot: { amount: 25 },
       updatedAt: LATER,
     });
+  });
+
+  it("turns an attempted create plus an edit into an update", async () => {
+    await repository.enqueue(buildInput({ clientMutationId: "m-create" }));
+    await repository.markSyncing("owner-1", "m-create", NOW);
+    await repository.markFailed("owner-1", "m-create", {
+      errorCode: "unavailable",
+      attempts: 1,
+      nextAttemptAt: LATER,
+      now: NOW,
+    });
+
+    const coalesced = await repository.enqueue(
+      buildInput({ clientMutationId: "m-edit", operation: "update", now: LATER }),
+    );
+
+    expect(coalesced).toMatchObject({
+      clientMutationId: "m-edit",
+      operation: "update",
+      baseRevision: 0,
+    });
+    await expect(repository.listByOwner("owner-1")).resolves.toHaveLength(1);
+  });
+
+  it("turns an attempted create plus a delete into a real delete", async () => {
+    await repository.enqueue(buildInput({ clientMutationId: "m-create" }));
+    await repository.markSyncing("owner-1", "m-create", NOW);
+    await repository.markFailed("owner-1", "m-create", {
+      errorCode: "unavailable",
+      attempts: 1,
+      nextAttemptAt: LATER,
+      now: NOW,
+    });
+
+    const coalesced = await repository.enqueue(
+      buildInput({ clientMutationId: "m-delete", operation: "delete", now: LATER }),
+    );
+
+    expect(coalesced).toMatchObject({
+      clientMutationId: "m-delete",
+      operation: "delete",
+    });
+    await expect(repository.listByOwner("owner-1")).resolves.toHaveLength(1);
   });
 
   it("drops the row when a create is followed by a delete", async () => {

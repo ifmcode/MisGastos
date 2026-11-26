@@ -6,12 +6,15 @@ import type {
   OutboxEntityType,
   OutboxMutation,
   OutboxMutationInput,
+  LocalRow,
 } from "./local-db.types";
+import { outboxMutationFromRow } from "./outbox.mapper";
 import { selectNextOutboxMutation } from "./outbox.ordering";
 import type {
   IOutboxRepository,
   MarkOutboxConflictInput,
   MarkOutboxFailedInput,
+  RebaseOutboxInput,
 } from "./outbox.repository";
 import {
   findOutboxMutationForEntity,
@@ -20,8 +23,10 @@ import {
 } from "./outbox.repository.helpers";
 import {
   enqueueOutboxMutation,
+  rebaseOutboxMutation,
   reclaimInterruptedOutboxMutations,
   removeOutboxMutation,
+  requeueFailedOutboxMutations,
   transitionOutboxMutation,
 } from "./outbox.repository.writes";
 import { isPendingOutboxStatus } from "./outbox-state";
@@ -62,6 +67,19 @@ export class LocalOutboxRepository implements IOutboxRepository {
     );
   }
 
+  async findById(
+    ownerId: string,
+    clientMutationId: string,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation | null> {
+    const rows = await (tx ?? this.port).select<LocalRow>(OUTBOX_TABLE, {
+      where: { ownerId, clientMutationId },
+      limit: 1,
+    });
+
+    return rows[0] ? outboxMutationFromRow(rows[0]) : null;
+  }
+
   async listPending(ownerId: string): Promise<OutboxMutation[]> {
     const mutations = await this.listByOwner(ownerId);
 
@@ -92,6 +110,9 @@ export class LocalOutboxRepository implements IOutboxRepository {
     return transitionOutboxMutation(this.port, tx, ownerId, clientMutationId, (current) => ({
       ...current,
       status: "syncing",
+      // Counting the send, not only the failure, is what lets a coalesced edit
+      // know the previous payload may already exist on the server.
+      attempts: current.attempts + 1,
       updatedAt: now,
     }));
   }
@@ -134,12 +155,35 @@ export class LocalOutboxRepository implements IOutboxRepository {
     return removeOutboxMutation(this.port, tx, ownerId, clientMutationId);
   }
 
+  async rebase(
+    ownerId: string,
+    clientMutationId: string,
+    input: RebaseOutboxInput,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation> {
+    return rebaseOutboxMutation(
+      this.port,
+      tx,
+      ownerId,
+      clientMutationId,
+      input,
+    );
+  }
+
   async reclaimInterrupted(
     ownerId: string,
     now: string,
     tx?: LocalDatabaseTransaction,
   ): Promise<OutboxMutation[]> {
     return reclaimInterruptedOutboxMutations(this.port, tx, ownerId, now);
+  }
+
+  async requeueFailed(
+    ownerId: string,
+    now: string,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation[]> {
+    return requeueFailedOutboxMutations(this.port, tx, ownerId, now);
   }
 
   async getNext(

@@ -19,6 +19,8 @@ export const LOCAL_DB_ERROR_CODES = {
   OUTBOX_MUTATION_IN_FLIGHT: "OUTBOX_MUTATION_IN_FLIGHT",
   /** The mutation has an unresolved conflict and keeps its evidence. */
   OUTBOX_CONFLICT_UNRESOLVED: "OUTBOX_CONFLICT_UNRESOLVED",
+  /** The conflict the user is resolving no longer exists (already closed). */
+  CONFLICT_NOT_FOUND: "SYNC_CONFLICT_NOT_FOUND",
 } as const;
 
 export type LocalDbErrorCode =

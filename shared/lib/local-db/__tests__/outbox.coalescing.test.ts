@@ -29,9 +29,9 @@ describe("coalesceOutboxMutation", () => {
     },
   );
 
-  it("keeps the existing id, seq, baseRevision and createdAt", () => {
+  it("keeps seq, baseRevision and createdAt with the incoming id", () => {
     const existing = buildMutation({
-      clientMutationId: "keep-me",
+      clientMutationId: "old-mutation",
       seq: 7,
       baseRevision: 3,
       createdAt: "2026-11-01T00:00:00.000Z",
@@ -40,11 +40,15 @@ describe("coalesceOutboxMutation", () => {
 
     const result = coalesceOutboxMutation(
       existing,
-      buildInput({ operation: "update", now: LATER }),
+      buildInput({
+        clientMutationId: "new-mutation",
+        operation: "update",
+        now: LATER,
+      }),
     );
 
     expect(result).toMatchObject({
-      clientMutationId: "keep-me",
+      clientMutationId: "new-mutation",
       seq: 7,
       baseRevision: 3,
       operation: "update",
@@ -53,7 +57,7 @@ describe("coalesceOutboxMutation", () => {
     });
   });
 
-  it("takes the identity from the existing row", () => {
+  it("keeps the identity of the entity from the existing row", () => {
     const result = coalesceOutboxMutation(
       buildMutation({ ownerId: "owner-1", entityId: "tx-1" }),
       buildInput({ ownerId: "owner-2", entityId: "tx-2" }),
@@ -64,5 +68,27 @@ describe("coalesceOutboxMutation", () => {
       entityType: "transaction",
       entityId: "tx-1",
     });
+  });
+
+  it("turns an attempted create into an update or a delete", () => {
+    const attempted = buildMutation({ operation: "create", attempts: 1 });
+
+    expect(
+      coalesceOutboxMutation(attempted, buildInput({ operation: "update" }))
+        ?.operation,
+    ).toBe("update");
+    expect(
+      coalesceOutboxMutation(attempted, buildInput({ operation: "delete" }))
+        ?.operation,
+    ).toBe("delete");
+  });
+
+  it("still cancels an unattempted create followed by a delete", () => {
+    expect(
+      coalesceOutboxMutation(
+        buildMutation({ operation: "create", attempts: 0 }),
+        buildInput({ operation: "delete" }),
+      ),
+    ).toBeNull();
   });
 });

@@ -1,5 +1,6 @@
 import type { DatabasePort } from "@/shared/lib/local-db/database.port";
 import { LocalOutboxRepository } from "@/shared/lib/local-db/local-outbox.repository";
+import { requestSyncTrigger } from "@/shared/services/sync/sync-trigger";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 import { readWalletsWithPendingBalance } from "@/features/wallets/repositories/local-wallet.balances";
 
@@ -28,7 +29,7 @@ export async function updateOfflineTransaction(
   dto: UpdateTransactionDto,
   deps: OfflineTransactionWriteDeps,
 ): Promise<TransactionMutationResult> {
-  return port.transaction(async (tx) => {
+  const result = await port.transaction(async (tx) => {
     const existingRow = await readTransactionRow(tx, ownerId, transactionId);
     if (!existingRow) {
       throw new TransactionOperationError("TRANSACTION_NOT_FOUND");
@@ -96,4 +97,7 @@ export async function updateOfflineTransaction(
     );
     return { transaction, wallets };
   });
+
+  requestSyncTrigger();
+  return result;
 }

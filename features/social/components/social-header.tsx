@@ -1,6 +1,7 @@
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { SyncStatusButton } from "@/features/sync/components/sync-status-button";
 import { IconBadgeButton } from "@/shared/components/molecules/icon-badge-button";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
@@ -33,17 +34,20 @@ export function SocialHeader({
         </ThemedText>
       </View>
 
-      <IconBadgeButton
-        icon="mail-unread-outline"
-        count={pendingCount}
-        accessibilityLabel={
-          pendingCount > 0
-            ? t("pending.rowAccessibility", { count: pendingCount })
-            : t("pending.labelZero")
-        }
-        accessibilityHint={t("pending.hint")}
-        onPress={onOpenRequests}
-      />
+      <View style={styles.headerActions}>
+        <SyncStatusButton />
+        <IconBadgeButton
+          icon="mail-unread-outline"
+          count={pendingCount}
+          accessibilityLabel={
+            pendingCount > 0
+              ? t("pending.rowAccessibility", { count: pendingCount })
+              : t("pending.labelZero")
+          }
+          accessibilityHint={t("pending.hint")}
+          onPress={onOpenRequests}
+        />
+      </View>
     </View>
   );
 }

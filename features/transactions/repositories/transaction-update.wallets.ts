@@ -1,7 +1,9 @@
 import { doc, type Transaction as FirestoreTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper";
 import type { CurrencyCode } from "@/shared/constants/currencies";
+import type { Wallet } from "@/features/wallets/types/wallet.types";
 import { nextRevision } from "@/shared/utils/revision";
 import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
 import { roundMoney } from "@/shared/utils/money";
@@ -29,10 +31,28 @@ export interface TransactionWalletTarget {
   currency: CurrencyCode;
 }
 
+function toMappedWallet(
+  walletId: string,
+  data: Record<string, unknown>,
+  balance: number,
+  revision: number,
+  updatedAt: string,
+  ownerId: string,
+): Wallet[] {
+  const wallet = mapWalletDocument(
+    walletId,
+    { ...data, balance, updatedAt, revision },
+    ownerId,
+  );
+
+  return wallet ? [wallet] : [];
+}
+
 /**
  * Reverts the stored movement from its wallet and applies the new one, once per
  * wallet, inside the caller's transaction. An orphaned movement has no wallet
- * to adjust, and moving between wallets touches both documents.
+ * to adjust, and moving between wallets touches both documents, so both updated
+ * wallets are returned for the caller to refresh its state.
  */
 export async function applyTransactionWalletAdjustment(
   transaction: FirestoreTransaction,
@@ -40,13 +60,14 @@ export async function applyTransactionWalletAdjustment(
   now: string,
   previous: TransactionWalletMovement,
   next: TransactionWalletTarget,
-): Promise<void> {
+): Promise<Wallet[]> {
   const previousIsOrphaned = isOrphanedWalletId(previous.walletId);
   const sameWallet = previous.walletId === next.walletId;
 
-  if (sameWallet && previousIsOrphaned) return;
-
   const newWalletRef = doc(db, "wallets", next.walletId);
+
+  if (sameWallet && previousIsOrphaned) return [];
+
   const walletSnapshot = await transaction.get(newWalletRef);
   if (!walletSnapshot.exists()) {
     throw new TransactionOperationError("WALLET_NOT_FOUND");
@@ -66,14 +87,25 @@ export async function applyTransactionWalletAdjustment(
       { type: previous.type, amount: previous.amount },
       { type: next.type, amount: next.amount },
     );
+    const revision = nextRevision(walletData);
 
     transaction.update(newWalletRef, {
       balance: nextBalance,
       updatedAt: now,
-      revision: nextRevision(walletData),
+      revision,
     });
-    return;
+
+    return toMappedWallet(
+      next.walletId,
+      walletData,
+      nextBalance,
+      revision,
+      now,
+      ownerId,
+    );
   }
+
+  const wallets: Wallet[] = [];
 
   if (!previousIsOrphaned) {
     const previousWalletRef = doc(db, "wallets", previous.walletId);
@@ -96,11 +128,23 @@ export async function applyTransactionWalletAdjustment(
           amount: previous.amount,
         }),
     );
+    const previousRevision = nextRevision(previousWalletData);
     transaction.update(previousWalletRef, {
       balance: nextPreviousBalance,
       updatedAt: now,
-      revision: nextRevision(previousWalletData),
+      revision: previousRevision,
     });
+
+    wallets.push(
+      ...toMappedWallet(
+        previous.walletId,
+        previousWalletData,
+        nextPreviousBalance,
+        previousRevision,
+        now,
+        ownerId,
+      ),
+    );
   }
 
   const currentNewBalance = toWalletBalance(walletData);
@@ -108,9 +152,23 @@ export async function applyTransactionWalletAdjustment(
     currentNewBalance +
       getSignedTransactionAmount({ type: next.type, amount: next.amount }),
   );
+  const newRevision = nextRevision(walletData);
   transaction.update(newWalletRef, {
     balance: nextNewBalance,
     updatedAt: now,
-    revision: nextRevision(walletData),
+    revision: newRevision,
   });
+
+  wallets.push(
+    ...toMappedWallet(
+      next.walletId,
+      walletData,
+      nextNewBalance,
+      newRevision,
+      now,
+      ownerId,
+    ),
+  );
+
+  return wallets;
 }

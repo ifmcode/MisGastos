@@ -81,6 +81,7 @@ export function AuthNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen name="notifications" options={{ headerShown: false }} />
+      <Stack.Screen name="sync" options={{ headerShown: false }} />
       <Stack.Screen
         name="modal"
         options={{ presentation: "modal", title: t("stack.modal") }}

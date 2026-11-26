@@ -1,6 +1,79 @@
 {
-  "offlineBanner": {
-    "label": "Sin conexión · Mostrando datos guardados",
-    "accessibility": "El dispositivo no tiene conexión a internet. La aplicación muestra los datos guardados en este dispositivo."
-  }
+  "headerStatus": {
+    "offline": "Sin conexión",
+    "offlinePending_one": "Sin conexión · {{count}} cambio pendiente",
+    "offlinePending_other": "Sin conexión · {{count}} cambios pendientes",
+    "pending_one": "{{count}} cambio pendiente de subir",
+    "pending_other": "{{count}} cambios pendientes de subir",
+    "conflicts_one": "{{count}} conflicto sin resolver",
+    "conflicts_other": "{{count}} conflictos sin resolver",
+    "hint": "Abre el centro de sincronización."
+  },
+  "status": {
+    "title": "Sincronización",
+    "pending_one": "{{count}} cambio pendiente de subir",
+    "pending_other": "{{count}} cambios pendientes de subir",
+    "conflicts_one": "{{count}} conflicto sin resolver",
+    "conflicts_other": "{{count}} conflictos sin resolver",
+    "lastSync": "Última sincronización: {{value}}",
+    "never": "Nunca",
+    "retry": "Reintentar ahora",
+    "retryAccessibility": "Reintentar la sincronización ahora",
+    "retryHint": "Sube los cambios pendientes y descarga los cambios de otros dispositivos.",
+    "openCenter": "Ver centro de sincronización",
+    "openCenterAccessibility": "Abrir el centro de sincronización",
+    "openCenterHint": "Muestra los cambios pendientes y los conflictos."
+  },
+  "center": {
+    "title": "Sincronización",
+    "subtitle": "Revisa los cambios pendientes y resuelve los conflictos.",
+    "lastError": "La última sincronización terminó con un error",
+    "conflictsTitle": "Conflictos sin resolver",
+    "openConflictHint": "Abre el detalle del conflicto para elegir qué cambio conservar.",
+    "emptyTitle": "Sin conflictos",
+    "emptyMessage": "No hay conflictos pendientes de resolver en este dispositivo.",
+    "disabledTitle": "Sincronización offline desactivada",
+    "disabledMessage": "La sincronización offline no está activa en este dispositivo. Los cambios se guardan directamente en el servidor cuando hay conexión."
+  },
+  "conflict": {
+    "mine": "Tu cambio",
+    "remote": "Cambio de otro dispositivo",
+    "remoteGone": "El registro ya no existe en el servidor.",
+    "keepMine": "Conservar mi cambio",
+    "keepRemote": "Conservar el de otro dispositivo",
+    "keepMineHint": "Vuelve a enviar tu cambio sobre la última versión del servidor.",
+    "keepRemoteHint": "Descarta tu cambio pendiente y conserva el de otro dispositivo.",
+    "close": "Cerrar el detalle del conflicto",
+    "resolveError": "No se pudo resolver el conflicto. Inténtalo de nuevo.",
+    "kinds": {
+      "REMOTE_CHANGED": {
+        "title": "Cambio en otro dispositivo",
+        "description": "Este registro se modificó en otro dispositivo después de tu último cambio."
+      },
+      "DELETED_REMOTELY": {
+        "title": "Eliminado en otro dispositivo",
+        "description": "El registro se eliminó en otro dispositivo mientras tenías un cambio pendiente."
+      },
+      "WALLET_UNAVAILABLE": {
+        "title": "Cartera no disponible",
+        "description": "La cartera de este movimiento ya no existe o no está disponible para ti."
+      },
+      "INSUFFICIENT_FUNDS": {
+        "title": "Saldo insuficiente",
+        "description": "El servidor rechaza el movimiento porque la cartera quedaría con saldo negativo."
+      },
+      "INVALID": {
+        "title": "Datos no válidos",
+        "description": "El servidor rechazó este cambio porque los datos ya no son válidos."
+      }
+    }
+  },
+  "fieldLabels": {
+    "amount": "Importe",
+    "concept": "Concepto",
+    "wallet": "Cartera",
+    "date": "Fecha",
+    "status": "Estado"
+  },
+  "deletedValue": "Eliminado"
 }

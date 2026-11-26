@@ -1,5 +1,6 @@
 import type { DatabasePort } from "@/shared/lib/local-db/database.port";
 import { LocalOutboxRepository } from "@/shared/lib/local-db/local-outbox.repository";
+import { requestSyncTrigger } from "@/shared/services/sync/sync-trigger";
 import { INITIAL_REVISION } from "@/shared/utils/revision";
 import { readClientDocumentId } from "@/shared/utils/client-id";
 
@@ -32,7 +33,7 @@ export async function createOfflineTransfer(
   dto: CreateTransferDto,
   deps: OfflineTransferWriteDeps,
 ): Promise<TransferMutationResult> {
-  return port.transaction(async (tx) => {
+  const result = await port.transaction(async (tx) => {
     const providedId = readClientDocumentId(dto.id);
     if (providedId) {
       const existing = await readTransferRowById(tx, providedId);
@@ -80,4 +81,7 @@ export async function createOfflineTransfer(
     );
     return { transfer, wallets };
   });
+
+  requestSyncTrigger();
+  return result;
 }

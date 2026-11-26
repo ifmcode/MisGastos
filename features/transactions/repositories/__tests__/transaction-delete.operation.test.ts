@@ -54,7 +54,10 @@ describe("deleteTransactionOperation", () => {
       revision: 5,
     });
     expect(result.transaction.deletedAt).toEqual(expect.any(String));
-    expect(result.wallets).toEqual([]);
+    // The caller refreshes the wallet from the result instead of a new read.
+    expect(result.wallets).toEqual([
+      expect.objectContaining({ id: "wallet-1", balance: 100, revision: 1 }),
+    ]);
   });
 
   it("reverts an income from the wallet", async () => {

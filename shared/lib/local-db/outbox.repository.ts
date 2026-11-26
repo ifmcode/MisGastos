@@ -3,6 +3,7 @@ import type {
   OutboxEntityType,
   OutboxMutation,
   OutboxMutationInput,
+  OutboxOperation,
 } from "./local-db.types";
 
 export type MarkOutboxFailedInput = {
@@ -14,6 +15,15 @@ export type MarkOutboxFailedInput = {
 
 export type MarkOutboxConflictInput = {
   errorCode: string;
+  now: string;
+};
+
+/** Payload that turns a conflicted mutation into a fresh pending attempt. */
+export type RebaseOutboxInput = {
+  operation: OutboxOperation;
+  baseRevision: number;
+  serverSnapshot: Record<string, unknown>;
+  localSnapshot?: Record<string, unknown>;
   now: string;
 };
 
@@ -43,6 +53,12 @@ export interface IOutboxRepository {
     entityId: string,
     tx?: LocalDatabaseTransaction,
   ): Promise<OutboxMutation | null>;
+  /** The queued mutation with that idempotency key, if any. */
+  findById(
+    ownerId: string,
+    clientMutationId: string,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation | null>;
   /** `pending` and `failed` rows, `seq` ascending. */
   listPending(ownerId: string): Promise<OutboxMutation[]>;
   countPending(ownerId: string): Promise<number>;
@@ -65,6 +81,16 @@ export interface IOutboxRepository {
     input: MarkOutboxConflictInput,
     tx?: LocalDatabaseTransaction,
   ): Promise<OutboxMutation>;
+  /**
+   * "Keep mine" after a conflict: rebases the mutation to the remote revision
+   * and puts it back to `pending`. The conflict row keeps the evidence.
+   */
+  rebase(
+    ownerId: string,
+    clientMutationId: string,
+    input: RebaseOutboxInput,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation>;
   /** Deletes the row after a successful push. */
   remove(
     ownerId: string,
@@ -73,6 +99,15 @@ export interface IOutboxRepository {
   ): Promise<void>;
   /** Requeues rows left `syncing` by a crash; returns the requeued rows. */
   reclaimInterrupted(
+    ownerId: string,
+    now: string,
+    tx?: LocalDatabaseTransaction,
+  ): Promise<OutboxMutation[]>;
+  /**
+   * Manual retry: every `failed` row goes back to `pending` with a cleared
+   * window, so a permanent error can be resumed after the user fixes its cause.
+   */
+  requeueFailed(
     ownerId: string,
     now: string,
     tx?: LocalDatabaseTransaction,

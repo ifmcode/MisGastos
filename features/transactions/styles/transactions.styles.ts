@@ -46,7 +46,7 @@ export const transactionsStyles = StyleSheet.create({
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
   },
   headerIconButton: {
     width: 40,

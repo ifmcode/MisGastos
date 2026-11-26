@@ -19,10 +19,14 @@ describe("LocalOutboxRepository transitions", () => {
     await repository.enqueue(buildInput());
   });
 
-  it("marks a pending mutation as syncing and bumps updatedAt", async () => {
+  it("marks a pending mutation as syncing and counts the send", async () => {
     const syncing = await repository.markSyncing("owner-1", "mutation-1", LATER);
 
-    expect(syncing).toMatchObject({ status: "syncing", updatedAt: LATER });
+    expect(syncing).toMatchObject({
+      status: "syncing",
+      attempts: 1,
+      updatedAt: LATER,
+    });
     await expect(repository.getNext("owner-1", NOW)).resolves.toBeNull();
   });
 

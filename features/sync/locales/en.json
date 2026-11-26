@@ -1,6 +1,79 @@
 {
-  "offlineBanner": {
-    "label": "No connection · Showing saved data",
-    "accessibility": "The device has no internet connection. The app is showing the data saved on this device."
-  }
+  "headerStatus": {
+    "offline": "No connection",
+    "offlinePending_one": "No connection · {{count}} pending change",
+    "offlinePending_other": "No connection · {{count}} pending changes",
+    "pending_one": "{{count}} change waiting to upload",
+    "pending_other": "{{count}} changes waiting to upload",
+    "conflicts_one": "{{count}} unresolved conflict",
+    "conflicts_other": "{{count}} unresolved conflicts",
+    "hint": "Opens the sync center."
+  },
+  "status": {
+    "title": "Sync",
+    "pending_one": "{{count}} change waiting to upload",
+    "pending_other": "{{count}} changes waiting to upload",
+    "conflicts_one": "{{count}} unresolved conflict",
+    "conflicts_other": "{{count}} unresolved conflicts",
+    "lastSync": "Last sync: {{value}}",
+    "never": "Never",
+    "retry": "Retry now",
+    "retryAccessibility": "Retry synchronization now",
+    "retryHint": "Uploads pending changes and downloads changes from other devices.",
+    "openCenter": "View sync center",
+    "openCenterAccessibility": "Open the sync center",
+    "openCenterHint": "Shows pending changes and conflicts."
+  },
+  "center": {
+    "title": "Sync",
+    "subtitle": "Review pending changes and resolve conflicts.",
+    "lastError": "The last sync ended with an error",
+    "conflictsTitle": "Unresolved conflicts",
+    "openConflictHint": "Opens the conflict details so you can choose which change to keep.",
+    "emptyTitle": "No conflicts",
+    "emptyMessage": "There are no conflicts waiting to be resolved on this device.",
+    "disabledTitle": "Offline sync is off",
+    "disabledMessage": "Offline sync is not active on this device. Changes are saved directly to the server while you are online."
+  },
+  "conflict": {
+    "mine": "Your change",
+    "remote": "Change from another device",
+    "remoteGone": "The record no longer exists on the server.",
+    "keepMine": "Keep my change",
+    "keepRemote": "Keep the other device's change",
+    "keepMineHint": "Sends your change again on top of the latest server version.",
+    "keepRemoteHint": "Discards your pending change and keeps the other device's.",
+    "close": "Close the conflict details",
+    "resolveError": "The conflict could not be resolved. Try again.",
+    "kinds": {
+      "REMOTE_CHANGED": {
+        "title": "Changed on another device",
+        "description": "This record was modified on another device after your last change."
+      },
+      "DELETED_REMOTELY": {
+        "title": "Deleted on another device",
+        "description": "The record was deleted on another device while you had a pending change."
+      },
+      "WALLET_UNAVAILABLE": {
+        "title": "Wallet unavailable",
+        "description": "The wallet of this movement no longer exists or is not available to you."
+      },
+      "INSUFFICIENT_FUNDS": {
+        "title": "Insufficient funds",
+        "description": "The server rejects the movement because the wallet would end up with a negative balance."
+      },
+      "INVALID": {
+        "title": "Invalid data",
+        "description": "The server rejected this change because the data is no longer valid."
+      }
+    }
+  },
+  "fieldLabels": {
+    "amount": "Amount",
+    "concept": "Concept",
+    "wallet": "Wallet",
+    "date": "Date",
+    "status": "Status"
+  },
+  "deletedValue": "Deleted"
 }

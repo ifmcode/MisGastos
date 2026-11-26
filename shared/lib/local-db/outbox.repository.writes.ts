@@ -54,6 +54,16 @@ export async function enqueueOutboxMutation(
       return existing;
     }
 
+    // A coalesced payload always gets a fresh idempotency key (see
+    // `coalesceOutboxMutation`), so the old primary-key row must go first:
+    // keeping both would violate UNIQUE(ownerId, entityType, entityId).
+    if (coalesced.clientMutationId !== existing.clientMutationId) {
+      await active.delete(OUTBOX_TABLE, {
+        ownerId: existing.ownerId,
+        clientMutationId: existing.clientMutationId,
+      });
+    }
+
     await active.upsert(OUTBOX_TABLE, outboxMutationToRow(coalesced));
     return coalesced;
   });
@@ -97,22 +107,89 @@ export async function reclaimInterruptedOutboxMutations(
   ownerId: string,
   now: string,
 ): Promise<OutboxMutation[]> {
+  return requeueOutboxRows(port, tx, ownerId, now, "syncing");
+}
+
+/** Manual retry: failed rows become pending again, window and attempts cleared. */
+export async function requeueFailedOutboxMutations(
+  port: DatabasePort,
+  tx: LocalDatabaseTransaction | undefined,
+  ownerId: string,
+  now: string,
+): Promise<OutboxMutation[]> {
+  return requeueOutboxRows(port, tx, ownerId, now, "failed");
+}
+
+async function requeueOutboxRows(
+  port: DatabasePort,
+  tx: LocalDatabaseTransaction | undefined,
+  ownerId: string,
+  now: string,
+  status: "syncing" | "failed",
+): Promise<OutboxMutation[]> {
   return runInLocalTransaction(port, tx, async (active) => {
     const rows = await listOutboxRowsByOwner(active, ownerId);
-    const interrupted = rows.filter((row) => row.status === "syncing");
+    const pending = rows.filter((row) => row.status === status);
     const requeued: OutboxMutation[] = [];
 
-    for (const row of interrupted) {
+    for (const row of pending) {
       const next = await transitionOutboxMutation(
         port,
         active,
         ownerId,
         row.clientMutationId,
-        (current) => ({ ...current, status: "pending", updatedAt: now }),
+        (current) => ({
+          ...current,
+          status: "pending",
+          attempts: 0,
+          nextAttemptAt: null,
+          lastErrorCode: null,
+          updatedAt: now,
+        }),
       );
       requeued.push(next);
     }
 
     return requeued;
+  });
+}
+
+/**
+ * "Keep mine": the user accepts their local payload on top of the remote
+ * revision. The state machine only allows this from a conflicted row.
+ */
+export async function rebaseOutboxMutation(
+  port: DatabasePort,
+  tx: LocalDatabaseTransaction | undefined,
+  ownerId: string,
+  clientMutationId: string,
+  input: {
+    operation: OutboxMutation["operation"];
+    baseRevision: number;
+    serverSnapshot: Record<string, unknown>;
+    localSnapshot?: Record<string, unknown>;
+    now: string;
+  },
+): Promise<OutboxMutation> {
+  return runInLocalTransaction(port, tx, async (active) => {
+    const current = await readOutboxMutation(active, ownerId, clientMutationId);
+    assertOutboxTransition(current.status, "pending");
+
+    const next: OutboxMutation = {
+      ...current,
+      operation: input.operation,
+      baseRevision: input.baseRevision,
+      serverSnapshot: input.serverSnapshot,
+      localSnapshot: input.localSnapshot ?? current.localSnapshot,
+      status: "pending",
+      attempts: 0,
+      nextAttemptAt: null,
+      lastErrorCode: null,
+      updatedAt: input.now,
+    };
+
+    await active.upsert(OUTBOX_TABLE, outboxMutationToRow(next));
+
+    return next;
   });
 }

@@ -3,6 +3,7 @@ import { View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { NotificationsBell } from "@/features/notifications/components/notifications-bell";
+import { SyncStatusButton } from "@/features/sync/components/sync-status-button";
 
 import { dashboardStyles } from "../styles/dashboard.styles";
 
@@ -35,9 +36,12 @@ export function DashboardHeader({
           {t("subtitle")}
         </ThemedText>
       </View>
-      {onOpenNotifications ? (
-        <NotificationsBell count={unreadCount} onPress={onOpenNotifications} />
-      ) : null}
+      <View style={dashboardStyles.headerActions}>
+        <SyncStatusButton />
+        {onOpenNotifications ? (
+          <NotificationsBell count={unreadCount} onPress={onOpenNotifications} />
+        ) : null}
+      </View>
     </View>
   );
 }

@@ -97,7 +97,7 @@ describe("updateTransactionOperation", () => {
       snapshot("wallet-2", walletDocument({ balance: 190 })),
     );
 
-    await run({ ...validDto, walletId: "wallet-2", amount: 10 });
+    const result = await run({ ...validDto, walletId: "wallet-2", amount: 10 });
 
     expect(transactionUpdate).toHaveBeenCalledWith(
       { kind: "wallet", id: "wallet-1" },
@@ -107,6 +107,11 @@ describe("updateTransactionOperation", () => {
       { kind: "wallet", id: "wallet-2" },
       expect.objectContaining({ balance: 190 }),
     );
+    // Both sides are returned so a sync push refreshes both server balances.
+    expect(result.wallets).toEqual([
+      expect.objectContaining({ id: "wallet-1", balance: 100 }),
+      expect.objectContaining({ id: "wallet-2", balance: 190 }),
+    ]);
   });
 
   it("applies a new wallet without reverting an orphaned previous one", async () => {

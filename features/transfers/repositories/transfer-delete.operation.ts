@@ -1,30 +1,51 @@
 import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper";
 import { Wallet } from "@/features/wallets/types/wallet.types";
-import { isOrphanedWalletId } from "@/features/wallets/utils/deleted-wallet";
-import { roundMoney } from "@/shared/utils/money";
 import { nextRevision } from "@/shared/utils/revision";
+import {
+  assertExpectedRevision,
+  writeAppliedMutation,
+  type SyncMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
 
 import { TransferOperationError } from "../services/transfer.errors";
 import { Transfer } from "../types/transfer.types";
 import { mapTransferDocument } from "./transfer.mapper";
-import { toWalletBalance } from "./transfer-firestore.utils";
+import { readTransferReplay } from "./transfer-mutation.replay";
+import { revertTransferWallets } from "./transfer-delete.revert";
 import { TransferMutationResult } from "./transfer.repository";
 
 /** Soft-deletes a transfer and reverts the balance on both wallets. */
 export async function deleteTransferOperation(
   ownerId: string,
   transferId: string,
+  mutation?: SyncMutationContext,
 ): Promise<TransferMutationResult> {
   const now = new Date().toISOString();
   const transferRef = doc(db, "transfers", transferId);
 
   let deletedTransfer: Transfer | null = null;
   let updatedWallets: Wallet[] = [];
+  let replayedWallets: Wallet[] = [];
+  let replayed = false;
 
   await runTransaction(db, async (firestoreTransaction) => {
+    if (mutation) {
+      const replay = await readTransferReplay(
+        firestoreTransaction,
+        transferRef,
+        ownerId,
+        mutation,
+      );
+      if (replay.replayed) {
+        replayed = true;
+        deletedTransfer = replay.transfer;
+        replayedWallets = replay.wallets;
+        return;
+      }
+    }
+
     const transferSnapshot = await firestoreTransaction.get(transferRef);
     if (!transferSnapshot.exists()) {
       throw new TransferOperationError("TRANSFER_NOT_FOUND");
@@ -40,81 +61,25 @@ export async function deleteTransferOperation(
       throw new TransferOperationError("TRANSFER_INVALID");
     }
     if (previous.deletedAt) {
+      // The server is already in the state a queued delete wants; only the
+      // online path keeps reporting the record as not found.
+      if (mutation) {
+        replayed = true;
+        deletedTransfer = previous;
+        return;
+      }
+
       throw new TransferOperationError("TRANSFER_NOT_FOUND");
     }
 
-    updatedWallets = [];
+    if (mutation) assertExpectedRevision(transferData, mutation);
 
-    if (!isOrphanedWalletId(previous.fromWalletId)) {
-      const fromWalletRef = doc(db, "wallets", previous.fromWalletId);
-      const fromWalletSnapshot = await firestoreTransaction.get(fromWalletRef);
-      if (!fromWalletSnapshot.exists()) {
-        throw new TransferOperationError("FROM_WALLET_NOT_FOUND");
-      }
-
-      const fromWalletData =
-        fromWalletSnapshot.data() as Record<string, unknown>;
-      if (fromWalletData.ownerId !== ownerId) {
-        throw new TransferOperationError("WALLET_NOT_OWNED");
-      }
-
-      const fromBalance = roundMoney(
-        toWalletBalance(fromWalletData) + previous.amount,
-      );
-      const fromRevision = nextRevision(fromWalletData);
-      firestoreTransaction.update(fromWalletRef, {
-        balance: fromBalance,
-        updatedAt: now,
-        revision: fromRevision,
-      });
-
-      const updatedFromWallet = mapWalletDocument(
-        previous.fromWalletId,
-        {
-          ...fromWalletData,
-          balance: fromBalance,
-          updatedAt: now,
-          revision: fromRevision,
-        },
-        ownerId,
-      );
-      if (updatedFromWallet) updatedWallets.push(updatedFromWallet);
-    }
-
-    if (!isOrphanedWalletId(previous.toWalletId)) {
-      const toWalletRef = doc(db, "wallets", previous.toWalletId);
-      const toWalletSnapshot = await firestoreTransaction.get(toWalletRef);
-      if (!toWalletSnapshot.exists()) {
-        throw new TransferOperationError("TO_WALLET_NOT_FOUND");
-      }
-
-      const toWalletData = toWalletSnapshot.data() as Record<string, unknown>;
-      if (toWalletData.ownerId !== ownerId) {
-        throw new TransferOperationError("WALLET_NOT_OWNED");
-      }
-
-      const toBalance = roundMoney(
-        toWalletBalance(toWalletData) - previous.amount,
-      );
-      const toRevision = nextRevision(toWalletData);
-      firestoreTransaction.update(toWalletRef, {
-        balance: toBalance,
-        updatedAt: now,
-        revision: toRevision,
-      });
-
-      const updatedToWallet = mapWalletDocument(
-        previous.toWalletId,
-        {
-          ...toWalletData,
-          balance: toBalance,
-          updatedAt: now,
-          revision: toRevision,
-        },
-        ownerId,
-      );
-      if (updatedToWallet) updatedWallets.push(updatedToWallet);
-    }
+    updatedWallets = await revertTransferWallets({
+      firestoreTransaction,
+      ownerId,
+      now,
+      previous,
+    });
 
     const revision = nextRevision(previous);
     firestoreTransaction.update(transferRef, {
@@ -129,11 +94,24 @@ export async function deleteTransferOperation(
       updatedAt: now,
       revision,
     };
+
+    if (mutation) {
+      writeAppliedMutation(firestoreTransaction, {
+        ownerId,
+        context: mutation,
+        entityType: "transfer",
+        entityId: transferId,
+        revisionAfter: revision,
+        now,
+      });
+    }
   });
 
   if (!deletedTransfer) {
     throw new TransferOperationError("TRANSFER_NOT_FOUND");
   }
+
+  if (replayed) return { transfer: deletedTransfer, wallets: replayedWallets };
 
   return { transfer: deletedTransfer, wallets: updatedWallets };
 }

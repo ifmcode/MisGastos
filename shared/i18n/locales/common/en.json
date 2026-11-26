@@ -50,6 +50,11 @@
     "title": "This is a modal",
     "goHome": "Go to home screen"
   },
+  "devLog": {
+    "warning": "Development warning",
+    "error": "Development error",
+    "dismiss": "Dismiss the notice"
+  },
   "accessibility": {
     "closeForm": "Close form",
     "closeDetail": "Close detail",

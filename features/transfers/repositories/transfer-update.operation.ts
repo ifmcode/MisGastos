@@ -3,24 +3,27 @@ import { deleteField, doc, runTransaction } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toIsoTimestamp } from "@/shared/utils/date";
 import { nextRevision } from "@/shared/utils/revision";
+import {
+  assertExpectedRevision,
+  writeAppliedMutation,
+  type SyncMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 
 import { TransferOperationError } from "../services/transfer.errors";
 import { Transfer, UpdateTransferDto } from "../types/transfer.types";
 import { mapTransferDocument } from "./transfer.mapper";
-import {
-  addBalanceAdjustment,
-  buildTransfer,
-  loadTransferWallets,
-  toTransferData,
-} from "./transfer-firestore.utils";
-import { applyTransferBalanceUpdates } from "./transfer-update.balances";
+import { readTransferReplay } from "./transfer-mutation.replay";
+import { buildTransfer, toTransferData } from "./transfer-firestore.utils";
+import { applyTransferUpdate } from "./transfer-update.apply";
 import { TransferMutationResult } from "./transfer.repository";
 
 export interface UpdateTransferOperationOptions {
   ownerId: string;
   transferId: string;
   dto: UpdateTransferDto;
+  /** Present only when the sync engine pushes a queued mutation. */
+  mutation?: SyncMutationContext;
 }
 
 /** Replaces a transfer, reverting the previous balances before applying it. */
@@ -28,14 +31,32 @@ export async function updateTransferOperation({
   ownerId,
   transferId,
   dto,
+  mutation,
 }: UpdateTransferOperationOptions): Promise<TransferMutationResult> {
   const now = new Date().toISOString();
   const transferRef = doc(db, "transfers", transferId);
 
   let updatedTransfer: Transfer | null = null;
   let updatedWallets: Wallet[] = [];
+  let replayedWallets: Wallet[] = [];
+  let replayed = false;
 
   await runTransaction(db, async (firestoreTransaction) => {
+    if (mutation) {
+      const replay = await readTransferReplay(
+        firestoreTransaction,
+        transferRef,
+        ownerId,
+        mutation,
+      );
+      if (replay.replayed) {
+        replayed = true;
+        updatedTransfer = replay.transfer;
+        replayedWallets = replay.wallets;
+        return;
+      }
+    }
+
     if (dto.fromWalletId === dto.toWalletId) {
       throw new TransferOperationError("SAME_WALLET");
     }
@@ -61,54 +82,16 @@ export async function updateTransferOperation({
       throw new TransferOperationError("TRANSFER_NOT_FOUND");
     }
 
+    if (mutation) assertExpectedRevision(transferData, mutation);
+
     const previousCreatedAt = toIsoTimestamp(previous.createdAt) ?? now;
 
-    const walletIds = Array.from(
-      new Set([
-        previous.fromWalletId,
-        previous.toWalletId,
-        dto.fromWalletId,
-        dto.toWalletId,
-      ]),
-    );
-
-    const walletDataById = await loadTransferWallets({
-      transaction: firestoreTransaction,
-      ownerId,
-      walletIds,
-      fromWalletId: dto.fromWalletId,
-      toWalletId: dto.toWalletId,
-      previousFromWalletId: previous.fromWalletId,
-    });
-
-    const nextFromWallet = walletDataById.get(dto.fromWalletId) ?? {};
-    const nextToWallet = walletDataById.get(dto.toWalletId) ?? {};
-
-    if (
-      nextFromWallet.currency !== dto.currency ||
-      nextToWallet.currency !== dto.currency
-    ) {
-      throw new TransferOperationError("CURRENCY_MISMATCH");
-    }
-
-    const adjustments = new Map<string, number>();
-    addBalanceAdjustment(adjustments, previous.fromWalletId, previous.amount);
-    addBalanceAdjustment(
-      adjustments,
-      previous.toWalletId,
-      -previous.amount,
-    );
-    addBalanceAdjustment(adjustments, dto.fromWalletId, -dto.amount);
-    addBalanceAdjustment(adjustments, dto.toWalletId, dto.amount);
-
-    updatedWallets = applyTransferBalanceUpdates({
-      transaction: firestoreTransaction,
+    updatedWallets = await applyTransferUpdate({
+      firestoreTransaction,
       ownerId,
       now,
-      walletIds,
-      walletDataById,
-      adjustments,
-      fromWalletId: dto.fromWalletId,
+      previous,
+      dto,
     });
 
     const revision = nextRevision(previous);
@@ -128,11 +111,24 @@ export async function updateTransferOperation({
       now,
       revision,
     );
+
+    if (mutation) {
+      writeAppliedMutation(firestoreTransaction, {
+        ownerId,
+        context: mutation,
+        entityType: "transfer",
+        entityId: transferId,
+        revisionAfter: revision,
+        now,
+      });
+    }
   });
 
   if (!updatedTransfer) {
     throw new TransferOperationError("TRANSFER_NOT_FOUND");
   }
+
+  if (replayed) return { transfer: updatedTransfer, wallets: replayedWallets };
 
   return { transfer: updatedTransfer, wallets: updatedWallets };
 }

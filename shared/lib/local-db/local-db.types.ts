@@ -66,6 +66,7 @@ export type OutboxMutation = {
   serverSnapshot: Record<string, unknown>;
   dependsOn: OutboxDependency[];
   status: OutboxStatus;
+  /** Pushes started. A coalesced payload resets it: it is a new mutation. */
   attempts: number;
   nextAttemptAt: string | null;
   lastErrorCode: string | null;
@@ -99,6 +100,48 @@ export type LocalSyncState = {
   lastPushAt: string | null;
   lastFullSyncAt: string | null;
   lastErrorCode: string | null;
+};
+
+/**
+ * Stable conflict kinds stored in `conflicts` (ADR §7). They are codes, never
+ * user-facing sentences: the UI translates them.
+ */
+export type LocalConflictKind =
+  | "REMOTE_CHANGED"
+  | "DELETED_REMOTELY"
+  | "WALLET_UNAVAILABLE"
+  | "INSUFFICIENT_FUNDS"
+  | "INVALID";
+
+/** Explicit user decision that closes a conflict. */
+export type LocalConflictResolution = "keep-mine" | "keep-remote";
+
+/** One stopped mutation with both snapshots, kept until the user decides. */
+export type LocalConflict = {
+  id: string;
+  ownerId: string;
+  clientMutationId: string;
+  entityType: OutboxEntityType;
+  entityId: string;
+  kind: LocalConflictKind;
+  localSnapshot: Record<string, unknown>;
+  remoteSnapshot: Record<string, unknown>;
+  detectedAt: string;
+  resolvedAt: string | null;
+  resolution: LocalConflictResolution | null;
+};
+
+/** What the sync engine hands to the conflicts repository. */
+export type LocalConflictInput = {
+  id?: string;
+  ownerId: string;
+  clientMutationId: string;
+  entityType: OutboxEntityType;
+  entityId: string;
+  kind: LocalConflictKind;
+  localSnapshot: Record<string, unknown>;
+  remoteSnapshot: Record<string, unknown>;
+  detectedAt: string;
 };
 
 /** Descriptor of one schema version; statements are DDL only. */

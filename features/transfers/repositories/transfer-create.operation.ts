@@ -1,132 +1,90 @@
-import {
-  collection,
-  doc,
-  runTransaction,
-} from "firebase/firestore";
+import { collection, doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { readClientDocumentId } from "@/shared/utils/client-id";
-import { INITIAL_REVISION, nextRevision } from "@/shared/utils/revision";
-import { mapWalletDocument } from "@/features/wallets/repositories/wallet.mapper";
+import { INITIAL_REVISION } from "@/shared/utils/revision";
+import {
+  writeAppliedMutation,
+  type SyncMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 
 import { TransferOperationError } from "../services/transfer.errors";
-import { CreateTransferDto } from "../types/transfer.types";
-import { applyTransferToBalances, hasSufficientBalance } from "../utils/transfer-balance";
-import {
-  buildTransfer,
-  toTransferData,
-  toWalletBalance,
-} from "./transfer-firestore.utils";
+import { CreateTransferDto, Transfer } from "../types/transfer.types";
+import { applyTransferCreation } from "./transfer-create.balances";
+import { buildTransfer, toTransferData } from "./transfer-firestore.utils";
+import { readTransferReplay } from "./transfer-mutation.replay";
 import { TransferMutationResult } from "./transfer.repository";
 
-/** Creates a transfer and moves the balance between both wallets atomically. */
+/**
+ * Creates a transfer and moves the balance between both wallets atomically.
+ * With a `mutation` context the operation is replay-safe against the
+ * `appliedMutations` marker.
+ */
 export async function createTransferOperation(
   ownerId: string,
   dto: CreateTransferDto,
+  mutation?: SyncMutationContext,
 ): Promise<TransferMutationResult> {
   const now = new Date().toISOString();
-  const transfersRef = collection(db, "transfers");
-  const fromWalletRef = doc(db, "wallets", dto.fromWalletId);
-  const toWalletRef = doc(db, "wallets", dto.toWalletId);
+  const providedId = readClientDocumentId(dto.id);
+  const transferRef = providedId
+    ? doc(db, "transfers", providedId)
+    : doc(collection(db, "transfers"));
 
-  let createdId = "";
+  let replayed = false;
+  let replayedTransfer: Transfer | null = null;
+  let replayedWallets: Wallet[] = [];
   let updatedWallets: Wallet[] = [];
 
   await runTransaction(db, async (firestoreTransaction) => {
-    if (dto.fromWalletId === dto.toWalletId) {
-      throw new TransferOperationError("SAME_WALLET");
+    if (mutation) {
+      const replay = await readTransferReplay(
+        firestoreTransaction,
+        transferRef,
+        ownerId,
+        mutation,
+      );
+      if (replay.replayed) {
+        replayed = true;
+        replayedTransfer = replay.transfer;
+        replayedWallets = replay.wallets;
+        return;
+      }
     }
-    if (!Number.isFinite(dto.amount) || dto.amount <= 0) {
+
+    updatedWallets = await applyTransferCreation({
+      firestoreTransaction,
+      ownerId,
+      dto,
+      now,
+    });
+
+    firestoreTransaction.set(transferRef, toTransferData(ownerId, dto, now));
+
+    if (mutation) {
+      writeAppliedMutation(firestoreTransaction, {
+        ownerId,
+        context: mutation,
+        entityType: "transfer",
+        entityId: transferRef.id,
+        revisionAfter: INITIAL_REVISION,
+        now,
+      });
+    }
+  });
+
+  if (replayed) {
+    if (!replayedTransfer) {
       throw new TransferOperationError("TRANSFER_INVALID");
     }
 
-    const fromWalletSnapshot = await firestoreTransaction.get(fromWalletRef);
-    if (!fromWalletSnapshot.exists()) {
-      throw new TransferOperationError("FROM_WALLET_NOT_FOUND");
-    }
-
-    const toWalletSnapshot = await firestoreTransaction.get(toWalletRef);
-    if (!toWalletSnapshot.exists()) {
-      throw new TransferOperationError("TO_WALLET_NOT_FOUND");
-    }
-
-    const fromWalletData =
-      fromWalletSnapshot.data() as Record<string, unknown>;
-    const toWalletData = toWalletSnapshot.data() as Record<string, unknown>;
-
-    if (
-      fromWalletData.ownerId !== ownerId ||
-      toWalletData.ownerId !== ownerId
-    ) {
-      throw new TransferOperationError("WALLET_NOT_OWNED");
-    }
-
-    if (
-      fromWalletData.currency !== dto.currency ||
-      toWalletData.currency !== dto.currency
-    ) {
-      throw new TransferOperationError("CURRENCY_MISMATCH");
-    }
-
-    const fromBalance = toWalletBalance(fromWalletData);
-    if (!hasSufficientBalance(fromBalance, dto.amount)) {
-      throw new TransferOperationError("INSUFFICIENT_FUNDS");
-    }
-
-    const nextBalances = applyTransferToBalances(
-      fromBalance,
-      toWalletBalance(toWalletData),
-      dto.amount,
-    );
-
-    const updatedFromWallet = mapWalletDocument(
-      dto.fromWalletId,
-      {
-        ...fromWalletData,
-        balance: nextBalances.fromBalance,
-        updatedAt: now,
-        revision: nextRevision(fromWalletData),
-      },
-      ownerId,
-    );
-    const updatedToWallet = mapWalletDocument(
-      dto.toWalletId,
-      {
-        ...toWalletData,
-        balance: nextBalances.toBalance,
-        updatedAt: now,
-        revision: nextRevision(toWalletData),
-      },
-      ownerId,
-    );
-
-    updatedWallets = [];
-    if (updatedFromWallet) updatedWallets.push(updatedFromWallet);
-    if (updatedToWallet) updatedWallets.push(updatedToWallet);
-
-    const providedId = readClientDocumentId(dto.id);
-    const transferRef = providedId
-      ? doc(db, "transfers", providedId)
-      : doc(transfersRef);
-    createdId = transferRef.id;
-
-    firestoreTransaction.set(transferRef, toTransferData(ownerId, dto, now));
-    firestoreTransaction.update(fromWalletRef, {
-      balance: nextBalances.fromBalance,
-      updatedAt: now,
-      revision: nextRevision(fromWalletData),
-    });
-    firestoreTransaction.update(toWalletRef, {
-      balance: nextBalances.toBalance,
-      updatedAt: now,
-      revision: nextRevision(toWalletData),
-    });
-  });
+    return { transfer: replayedTransfer, wallets: replayedWallets };
+  }
 
   return {
     transfer: buildTransfer(
-      createdId,
+      transferRef.id,
       ownerId,
       dto,
       now,

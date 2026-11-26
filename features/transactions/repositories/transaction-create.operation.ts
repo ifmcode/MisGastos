@@ -5,6 +5,10 @@ import { readClientDocumentId } from "@/shared/utils/client-id";
 import { INITIAL_REVISION, nextRevision } from "@/shared/utils/revision";
 import { Wallet } from "@/features/wallets/types/wallet.types";
 import { roundMoney } from "@/shared/utils/money";
+import {
+  writeAppliedMutation,
+  type SyncMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
 
 import { TransactionOperationError } from "../services/transaction.errors";
 import {
@@ -12,6 +16,7 @@ import {
   Transaction,
 } from "../types/transaction.types";
 import { getSignedTransactionAmount } from "@/shared/utils/transaction-balance";
+import { readTransactionReplay } from "./transaction-mutation.replay";
 import {
   buildTransaction,
   getMappedWallet,
@@ -20,18 +25,43 @@ import {
 } from "./transaction-firestore.utils";
 import { TransactionMutationResult } from "./transaction.repository";
 
-/** Creates a transaction and applies its signed amount to the wallet balance. */
+/**
+ * Creates a transaction and applies its signed amount to the wallet balance.
+ * With a `mutation` context the operation is replay-safe and writes the
+ * idempotency marker atomically; the online path passes no context.
+ */
 export async function createTransactionOperation(
   ownerId: string,
   dto: CreateTransactionDto,
+  mutation?: SyncMutationContext,
 ): Promise<TransactionMutationResult> {
   const now = new Date().toISOString();
-  const transactionsRef = collection(db, "transactions");
   const walletRef = doc(db, "wallets", dto.walletId);
+  const providedId = readClientDocumentId(dto.id);
+  const transactionRef = providedId
+    ? doc(db, "transactions", providedId)
+    : doc(collection(db, "transactions"));
 
-  let createdId = "";
+  let replayed = false;
+  let replayedTransaction: Transaction | null = null;
+  let replayedWallets: Wallet[] = [];
 
   await runTransaction(db, async (firestoreTransaction) => {
+    if (mutation) {
+      const replay = await readTransactionReplay(
+        firestoreTransaction,
+        transactionRef,
+        ownerId,
+        mutation,
+      );
+      if (replay.replayed) {
+        replayed = true;
+        replayedTransaction = replay.transaction;
+        replayedWallets = replay.wallets;
+        return;
+      }
+    }
+
     const walletSnapshot = await firestoreTransaction.get(walletRef);
     if (!walletSnapshot.exists()) {
       throw new TransactionOperationError("WALLET_NOT_FOUND");
@@ -51,12 +81,6 @@ export async function createTransactionOperation(
         getSignedTransactionAmount({ type: dto.type, amount: dto.amount }),
     );
 
-    const providedId = readClientDocumentId(dto.id);
-    const transactionRef = providedId
-      ? doc(db, "transactions", providedId)
-      : doc(transactionsRef);
-    createdId = transactionRef.id;
-
     firestoreTransaction.set(
       transactionRef,
       toTransactionData(ownerId, dto, now, INITIAL_REVISION),
@@ -66,14 +90,33 @@ export async function createTransactionOperation(
       updatedAt: now,
       revision: nextRevision(walletData),
     });
+
+    if (mutation) {
+      writeAppliedMutation(firestoreTransaction, {
+        ownerId,
+        context: mutation,
+        entityType: "transaction",
+        entityId: transactionRef.id,
+        revisionAfter: INITIAL_REVISION,
+        now,
+      });
+    }
   });
+
+  if (replayed) {
+    if (!replayedTransaction) {
+      throw new TransactionOperationError("TRANSACTION_INVALID");
+    }
+
+    return { transaction: replayedTransaction, wallets: replayedWallets };
+  }
 
   const updatedWallet = await getMappedWallet(walletRef, ownerId);
   const wallets: Wallet[] = updatedWallet ? [updatedWallet] : [];
 
   return {
     transaction: buildTransaction(
-      createdId,
+      transactionRef.id,
       ownerId,
       dto,
       now,

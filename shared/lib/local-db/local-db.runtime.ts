@@ -2,6 +2,7 @@ import type { DatabasePort } from "./database.port";
 import { migrateLocalDatabase } from "./database";
 import { LOCAL_DB_ERROR_CODES, LocalDbError } from "./local-db.errors";
 import { isOfflineFirstEnabled } from "./offline-first.flag";
+import { createSerializedDatabasePort } from "./serialized.database";
 
 export type LocalDatabaseOpener = () => Promise<DatabasePort>;
 
@@ -34,7 +35,13 @@ export async function getLocalDatabase(): Promise<DatabasePort | null> {
   if (override) return override.port;
   if (!isOfflineFirstEnabled()) return null;
 
-  if (!opening) opening = openLocalDatabasePort(openExpoSQLiteDatabase);
+  if (!opening) {
+    // Every transaction of every caller (read cache, offline writes, sync
+    // engine) goes through one port, so they must not run concurrently.
+    opening = openLocalDatabasePort(openExpoSQLiteDatabase).then((port) =>
+      port ? createSerializedDatabasePort(port) : null,
+    );
+  }
 
   const port = await opening;
   if (!port) opening = null;

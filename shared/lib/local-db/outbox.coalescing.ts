@@ -45,21 +45,24 @@ export function buildOutboxMutation(
 }
 
 /**
- * Merges a queued mutation with a newer one for the same record. One outbox
- * row per entity: the identity, `seq` and `baseRevision` (the revision the
- * server knows) are kept, the local snapshot is the newest one, the dependency
- * guard survives when the edit omits it, and the retry state restarts.
+ * Merges a queued mutation with a newer one for the same record.
+ *
+ * `clientMutationId` identifies one immutable payload: it can never be reused
+ * for a different one, because the server marker would report the new payload as
+ * already applied. Every coalesce therefore takes the incoming id and resets the
+ * retry state. `seq`, `baseRevision` and `serverSnapshot` (the revision the
+ * server knows) survive so the new payload is guarded against concurrent edits.
  */
 export function coalesceOutboxMutation(
   existing: OutboxMutation,
   incoming: OutboxMutationInput,
 ): OutboxMutation | null {
-  const operation = COALESCE_MATRIX[existing.operation][incoming.operation];
+  const operation = resolveCoalescedOperation(existing, incoming);
 
   if (operation === null) return null;
 
   return {
-    clientMutationId: existing.clientMutationId,
+    clientMutationId: incoming.clientMutationId,
     ownerId: existing.ownerId,
     seq: existing.seq,
     entityType: existing.entityType,
@@ -76,4 +79,22 @@ export function coalesceOutboxMutation(
     createdAt: existing.createdAt,
     updatedAt: incoming.now,
   };
+}
+
+/**
+ * A create that was already attempted may exist on the server, so merging an
+ * edit into it cannot stay a create: it becomes an update (and the revision
+ * guard reports a conflict if the document is not there) and a delete becomes a
+ * real delete. Before any attempt the plain matrix applies, including the
+ * create+delete cancellation.
+ */
+function resolveCoalescedOperation(
+  existing: OutboxMutation,
+  incoming: OutboxMutationInput,
+): OutboxOperation | null {
+  if (existing.operation === "create" && existing.attempts > 0) {
+    return incoming.operation === "delete" ? "delete" : "update";
+  }
+
+  return COALESCE_MATRIX[existing.operation][incoming.operation];
 }

@@ -50,6 +50,11 @@
     "title": "Esto es un modal",
     "goHome": "Ir a la pantalla de inicio"
   },
+  "devLog": {
+    "warning": "Aviso de desarrollo",
+    "error": "Error de desarrollo",
+    "dismiss": "Cerrar el aviso"
+  },
   "accessibility": {
     "closeForm": "Cerrar formulario",
     "closeDetail": "Cerrar detalle",
