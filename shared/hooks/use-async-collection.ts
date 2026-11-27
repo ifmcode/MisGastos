@@ -9,6 +9,7 @@ import {
 
 import { useNetworkStatus } from "@/shared/hooks/use-network-status";
 import { isOfflineFirstEnabled } from "@/shared/lib/local-db/offline-first.flag";
+import { resolveRefreshFailure } from "@/shared/utils/async-collection-refresh";
 
 type LoadMode = "initial" | "refresh";
 
@@ -53,6 +54,11 @@ export function useAsyncCollection<T>({
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const itemsRef = useRef<T[]>([]);
+
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   const reconnectRefreshEnabled =
     refreshOnReconnect && isOfflineFirstEnabled();
@@ -90,7 +96,19 @@ export function useAsyncCollection<T>({
         try {
           setItems(await load(ownerId));
         } catch (loadError: unknown) {
-          setError(describeError(loadError));
+          // A background refresh (tab focus, reconnect, after a mutation) must
+          // never replace data the screen already shows with an error.
+          const cached =
+            itemsRef.current.length > 0
+              ? null
+              : await readCachedSafely(ownerId);
+          const resolution = resolveRefreshFailure(itemsRef.current, cached);
+
+          if (resolution.action === "use-cache") {
+            setItems(resolution.items);
+          } else if (resolution.action === "report-error") {
+            setError(describeError(loadError));
+          }
         } finally {
           setRefreshing(false);
         }
