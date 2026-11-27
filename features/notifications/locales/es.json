@@ -70,7 +70,7 @@
     "NOT_OWNER": "Esta notificación no te pertenece.",
     "LOAD_FAILED": "No se pudieron cargar las notificaciones. Inténtalo de nuevo.",
     "SAVE_FAILED": "No se pudo actualizar la notificación. Inténtalo de nuevo.",
-    "PERMISSION_DENIED": "No tienes permiso para realizar esta operación.",
+    "PERMISSION_DENIED": "El servidor ha rechazado esta operación por permisos. Comprueba que sigues con la sesión iniciada en la cuenta correcta e inténtalo de nuevo.",
     "NETWORK": "No hay conexión. Revisa tu red e inténtalo de nuevo."
   }
 }

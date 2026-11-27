@@ -107,7 +107,7 @@
   },
   "errors": {
     "VALIDATION": "Check the wallet details.",
-    "PERMISSION_DENIED": "You do not have permission to perform this operation.",
+    "PERMISSION_DENIED": "The server rejected this operation for permission reasons. Check that you are still signed in with the correct account and try again.",
     "NETWORK": "No connection. Check your network and try again.",
     "CREATE_FAILED": "Could not create the wallet. Try again.",
     "UPDATE_FAILED": "Could not update the wallet. Try again.",

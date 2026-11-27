@@ -33,7 +33,7 @@
     "AMOUNT_LOCKED": "El importe no se puede editar porque el otro amigo ya vinculó su cartera.",
     "ALREADY_DELETED": "Esta liquidación ya se eliminó.",
     "VALIDATION": "Revisa los datos del formulario.",
-    "PERMISSION_DENIED": "No tienes permiso para realizar esta operación.",
+    "PERMISSION_DENIED": "El servidor ha rechazado esta operación por permisos. Comprueba que sigues con la sesión iniciada en la cuenta correcta e inténtalo de nuevo.",
     "NETWORK": "No hay conexión. Revisa tu red e inténtalo de nuevo.",
     "LOAD_FAILED": "No se pudieron cargar las liquidaciones. Inténtalo de nuevo.",
     "SAVE_FAILED": "No se pudo guardar la liquidación. Inténtalo de nuevo.",

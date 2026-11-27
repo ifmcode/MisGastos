@@ -70,7 +70,7 @@
     "NOT_OWNER": "This notification does not belong to you.",
     "LOAD_FAILED": "Could not load the notifications. Try again.",
     "SAVE_FAILED": "Could not update the notification. Try again.",
-    "PERMISSION_DENIED": "You do not have permission to perform this operation.",
+    "PERMISSION_DENIED": "The server rejected this operation for permission reasons. Check that you are still signed in with the correct account and try again.",
     "NETWORK": "No connection. Check your network and try again."
   }
 }

@@ -366,7 +366,7 @@
     "JOIN_REQUEST_ALREADY_PENDING": "Ya tienes una solicitud pendiente para este grupo.",
     "JOIN_REQUEST_RESOLVED": "Ya has enviado una solicitud a este grupo. Prueba con otro código.",
     "JOIN_CODE_NOT_AVAILABLE": "No se pudo generar el código del grupo. Inténtalo de nuevo.",
-    "PERMISSION_DENIED": "No tienes permisos para realizar esta operación.",
+    "PERMISSION_DENIED": "El servidor ha rechazado esta operación por permisos. Comprueba que sigues con la sesión iniciada en la cuenta correcta e inténtalo de nuevo.",
     "NETWORK": "No hay conexión. Comprueba tu red e inténtalo de nuevo.",
     "LOAD_FAILED": "No se pudieron cargar los grupos. Inténtalo de nuevo.",
     "SAVE_FAILED": "No se pudo guardar el grupo. Inténtalo de nuevo.",

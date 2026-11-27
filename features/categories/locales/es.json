@@ -63,7 +63,7 @@
   },
   "errors": {
     "VALIDATION": "Revisa los datos de la categoría.",
-    "PERMISSION_DENIED": "No tienes permisos para realizar esta operación.",
+    "PERMISSION_DENIED": "El servidor ha rechazado esta operación por permisos. Comprueba que sigues con la sesión iniciada en la cuenta correcta e inténtalo de nuevo.",
     "NETWORK": "No hay conexión. Comprueba tu red e inténtalo de nuevo.",
     "LOAD_FAILED": "No se pudieron cargar las categorías. Inténtalo de nuevo.",
     "CREATE_FAILED": "No se pudo crear la categoría. Inténtalo de nuevo.",

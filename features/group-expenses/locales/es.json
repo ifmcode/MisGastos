@@ -305,7 +305,7 @@
     "EXPENSE_HAS_FORMER_MEMBERS": "Este gasto incluye a alguien que ya no está en el grupo y no se puede editar.",
     "SIGN_IN_REQUIRED": "Debes iniciar sesión para gestionar gastos del grupo.",
     "VALIDATION": "Revisa los datos del formulario.",
-    "PERMISSION_DENIED": "No tienes permisos para realizar esta operación.",
+    "PERMISSION_DENIED": "El servidor ha rechazado esta operación por permisos. Comprueba que sigues con la sesión iniciada en la cuenta correcta e inténtalo de nuevo.",
     "NETWORK": "No hay conexión. Comprueba tu red e inténtalo de nuevo.",
     "LOAD_FAILED": "No se pudieron cargar los gastos del grupo. Inténtalo de nuevo.",
     "SAVE_FAILED": "No se pudo guardar el gasto del grupo. Inténtalo de nuevo.",

@@ -67,7 +67,7 @@
   },
   "errors": {
     "VALIDATION": "Check the transfer details.",
-    "PERMISSION_DENIED": "You do not have permission to perform this operation.",
+    "PERMISSION_DENIED": "The server rejected this operation for permission reasons. Check that you are still signed in with the correct account and try again.",
     "NETWORK": "No connection. Check your network and try again.",
     "LOAD_FAILED": "Could not load transfers. Try again.",
     "SAVE_FAILED": "Could not create the transfer. Try again.",

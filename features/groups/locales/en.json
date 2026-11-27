@@ -366,7 +366,7 @@
     "JOIN_REQUEST_ALREADY_PENDING": "You already have a pending request for this group.",
     "JOIN_REQUEST_RESOLVED": "You already sent a request to this group. Try another code.",
     "JOIN_CODE_NOT_AVAILABLE": "Could not generate the group code. Try again.",
-    "PERMISSION_DENIED": "You do not have permission to perform this operation.",
+    "PERMISSION_DENIED": "The server rejected this operation for permission reasons. Check that you are still signed in with the correct account and try again.",
     "NETWORK": "No connection. Check your network and try again.",
     "LOAD_FAILED": "Could not load the groups. Try again.",
     "SAVE_FAILED": "Could not save the group. Try again.",
