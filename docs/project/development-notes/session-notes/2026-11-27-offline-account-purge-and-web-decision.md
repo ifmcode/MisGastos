@@ -108,6 +108,11 @@ added because no epic criterion requires them.
   because a static import breaks the Node-based `shared/lib/local-db` suites;
   the failure is no longer memoized, so a transient load error cannot disable
   the web guard for the rest of the process.
+- `expo-sqlite.database.web.ts` stubs the opener so `expo-sqlite` and its WASM
+  worker stay out of the web bundle. The dynamic `import()` in
+  `local-db.runtime.ts` still enters Metro's module graph on web, so the runtime
+  flag alone was not enough: `npx expo export --platform web` failed resolving
+  `./wa-sqlite/wa-sqlite.wasm` until the web variant existed.
 - TICKET-076 records the future web parity work (storage choice, adapter,
   encryption stance and manual checklist) and stays post-V1.
 
