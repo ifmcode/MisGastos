@@ -25,6 +25,7 @@ describe("mapGroupExpenseDocument", () => {
       createdAt: CREATED_AT,
       updatedAt: CREATED_AT,
       deletedAt: null,
+      revision: 0,
     });
   });
 

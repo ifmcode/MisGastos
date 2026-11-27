@@ -1,6 +1,7 @@
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { assertServerSnapshot } from "@/shared/lib/local-db/offline-read";
 
 import type { GroupSettlement } from "../types/group-settlement.types";
 import { mapGroupSettlementDocument } from "./group-settlements.mapper";
@@ -48,6 +49,7 @@ export async function getGroupSettlementsOperation(
       where("groupId", "==", groupId),
     ),
   );
+  assertServerSnapshot(snapshot);
 
   const settlements: GroupSettlement[] = [];
 

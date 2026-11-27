@@ -29,6 +29,7 @@ describe("mapGroupSettlementDocument", () => {
       receiverWalletId: null,
       receiverCategoryId: null,
       receiverTransactionId: null,
+      revision: 0,
     });
   });
 
@@ -161,6 +162,7 @@ describe("group settlement document data", () => {
   it("writes every key of a new settlement, nulls included", () => {
     expect(toGroupSettlementData(dto)).toEqual({
       ...dto,
+      revision: 0,
     });
   });
 

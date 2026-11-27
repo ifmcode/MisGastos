@@ -25,6 +25,7 @@ export function buildSharedExpense(
     createdAt: "2026-11-10T20:00:00.000Z",
     updatedAt: "2026-11-10T20:00:00.000Z",
     deletedAt: null,
+    revision: 0,
     ...overrides,
   };
 }

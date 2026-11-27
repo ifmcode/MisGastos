@@ -6,12 +6,19 @@ import type {
   OutboxEntityType,
   OutboxMutation,
 } from "@/shared/lib/local-db/local-db.types";
-import type { SyncMutationContext } from "@/shared/services/sync/firestore-idempotency";
+import type {
+  SocialMutationContext,
+  SyncMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
 import type { RemoteWalletBalance } from "@/shared/services/sync/sync.types";
 
 const COLLECTION_BY_ENTITY: Partial<Record<OutboxEntityType, string>> = {
   transaction: "transactions",
   transfer: "transfers",
+  "shared-expense": "sharedExpenses",
+  settlement: "settlements",
+  "group-expense": "groupExpenses",
+  "group-settlement": "groupSettlements",
 };
 
 export function toMutationContext(
@@ -20,6 +27,17 @@ export function toMutationContext(
   return {
     clientMutationId: mutation.clientMutationId,
     baseRevision: mutation.baseRevision,
+  };
+}
+
+/** Social records are shared: the marker belongs to the account that queued. */
+export function toSocialContext(
+  mutation: OutboxMutation,
+): SocialMutationContext {
+  return {
+    clientMutationId: mutation.clientMutationId,
+    baseRevision: mutation.baseRevision,
+    ownerId: mutation.ownerId,
   };
 }
 

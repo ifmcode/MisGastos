@@ -1,6 +1,7 @@
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { assertServerSnapshot } from "@/shared/lib/local-db/offline-read";
 
 import type { Group, GroupInvitation } from "../types/group.types";
 import {
@@ -56,6 +57,7 @@ export async function getGroupsOperation(
       where("memberIds", "array-contains", memberId),
     ),
   );
+  assertServerSnapshot(snapshot);
 
   const groups: Group[] = [];
 
@@ -97,6 +99,7 @@ export async function getGroupInvitationsOperation(
       where("groupId", "==", groupId),
     ),
   );
+  assertServerSnapshot(snapshot);
 
   const invitations: GroupInvitation[] = [];
 
@@ -121,6 +124,7 @@ export async function getPendingInvitationsOperation(
       where("inviteeId", "==", inviteeId),
     ),
   );
+  assertServerSnapshot(snapshot);
 
   const invitations: GroupInvitation[] = [];
 

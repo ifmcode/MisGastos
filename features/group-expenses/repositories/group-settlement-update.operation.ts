@@ -2,6 +2,14 @@ import { runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { addGroupActivity } from "@/features/groups/repositories/group-activity.writes";
+import {
+  assertExpectedRevision,
+  readAppliedRevision,
+  writeAppliedMutation,
+  type SocialMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
+import { SyncMutationError } from "@/shared/services/sync/sync.errors";
+import { nextRevision } from "@/shared/utils/revision";
 import { FirebaseSettlementMovementPort } from "@/features/settlements/repositories/firebase-settlement-movement.port";
 import type { ISettlementMovementPort } from "@/features/settlements/repositories/settlement-movement.port";
 import {
@@ -43,6 +51,7 @@ export async function updateGroupSettlementOperation(
     settlementId,
     update,
     notification,
+    sync,
   }: UpdateGroupSettlementOperationOptions,
   port: ISettlementMovementPort = new FirebaseSettlementMovementPort(),
 ): Promise<GroupSettlement> {
@@ -51,15 +60,41 @@ export async function updateGroupSettlementOperation(
   const now = update.updatedAt;
   const reference = groupSettlementRef(settlementId);
   let result: GroupSettlement | null = null;
+  let applied = false;
 
   await runTransaction(db, async (transaction) => {
-    const stored = readGroupSettlementDocument(
-      settlementId,
-      await transaction.get(reference),
-    );
+    if (sync) {
+      const replay = await readAppliedRevision(
+        transaction,
+        sync.ownerId,
+        sync,
+      );
+
+      if (replay !== null) {
+        const snapshot = await transaction.get(reference);
+        result = snapshot.exists()
+          ? mapGroupSettlementDocument(
+              settlementId,
+              snapshot.data() as Record<string, unknown>,
+            )
+          : null;
+        return;
+      }
+    }
+
+    const storedSnapshot = await transaction.get(reference);
+    if (sync && !storedSnapshot.exists()) {
+      throw new SyncMutationError("DELETED_REMOTELY");
+    }
+
+    if (sync) assertExpectedRevision(storedSnapshot.data() ?? {}, sync);
+
+    const stored = readGroupSettlementDocument(settlementId, storedSnapshot);
 
     if (stored.deletedAt !== null) {
-      throw new GroupExpenseOperationError("ALREADY_DELETED");
+      throw sync
+        ? new SyncMutationError("DELETED_REMOTELY")
+        : new GroupExpenseOperationError("ALREADY_DELETED");
     }
 
     const viewerIsCreditor = stored.toUserId === viewerUid;
@@ -117,12 +152,15 @@ export async function updateGroupSettlementOperation(
       }
     }
 
-    const patch = toGroupSettlementUpdateData({
-      ...update,
-      receiverWalletId: edit.destinationWalletId,
-      receiverCategoryId: edit.destinationCategoryId,
-      receiverTransactionId: linkedId,
-    });
+    const patch = {
+      ...toGroupSettlementUpdateData({
+        ...update,
+        receiverWalletId: edit.destinationWalletId,
+        receiverCategoryId: edit.destinationCategoryId,
+        receiverTransactionId: linkedId,
+      }),
+      revision: nextRevision(storedSnapshot.data()),
+    };
 
     transaction.update(reference, patch);
     addGroupActivity(transaction, {
@@ -138,11 +176,23 @@ export async function updateGroupSettlementOperation(
       createdAt: now,
     });
     result = mapGroupSettlementDocument(settlementId, { ...stored, ...patch });
+    applied = true;
+
+    if (sync) {
+      writeAppliedMutation(transaction, {
+        ownerId: sync.ownerId,
+        context: sync,
+        entityType: "group-settlement",
+        entityId: settlementId,
+        revisionAfter: patch.revision,
+        now,
+      });
+    }
   });
 
   if (!result) throw new GroupExpenseOperationError("SETTLEMENT_NOT_FOUND");
 
-  await writeGroupSettlementNotification(notification);
+  if (applied) await writeGroupSettlementNotification(notification);
 
   return result;
 }

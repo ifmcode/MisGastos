@@ -62,19 +62,28 @@ function buildFields(
   walletNames: ReadonlyMap<string, string> | undefined,
 ): SyncConflictField[] {
   const fields: SyncConflictField[] = [];
-  const amount = snapshot.amount;
+  const amountCents = snapshot.amountCents;
+  const amount =
+    typeof amountCents === "number" && Number.isFinite(amountCents)
+      ? amountCents / 100
+      : snapshot.amount;
   const currency = snapshot.currency;
 
   if (typeof amount === "number" && isCurrencyCode(currency)) {
     fields.push({ key: "amount", value: formatMoney(amount, currency) });
   }
 
-  const concept = readString(snapshot, "concept");
+  const concept =
+    readString(snapshot, "concept") ??
+    readString(snapshot, "description") ??
+    readString(snapshot, "note");
   if (concept) fields.push({ key: "concept", value: concept });
 
   const fromWalletId = readString(snapshot, "fromWalletId");
   const toWalletId = readString(snapshot, "toWalletId");
-  const walletId = readString(snapshot, "walletId");
+  const walletId =
+    readString(snapshot, "walletId") ??
+    readString(snapshot, "receiverWalletId");
   const label = (id: string) => walletNames?.get(id) ?? id;
 
   if (fromWalletId && toWalletId) {

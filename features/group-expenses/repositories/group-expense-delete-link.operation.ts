@@ -1,7 +1,14 @@
 import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import { nextRevision } from "@/shared/utils/revision";
+import { nextRevision, readStoredRevision } from "@/shared/utils/revision";
+import {
+  assertExpectedRevision,
+  readAppliedRevision,
+  writeAppliedMutation,
+  type SocialMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
+import { SyncMutationError } from "@/shared/services/sync/sync.errors";
 import { FirebaseLinkedMovementPort } from "@/features/shared-expenses/repositories/firebase-linked-movement.port";
 import type { ILinkedMovementPort } from "@/features/shared-expenses/repositories/linked-movement.port";
 import { movementRef } from "@/features/shared-expenses/repositories/shared-expense-movement-ref";
@@ -20,6 +27,8 @@ export interface SoftDeleteGroupExpenseLinkOptions {
   viewerUid: string;
   expenseId: string;
   deletedAt: string;
+  /** Present only while draining the outbox. */
+  sync?: SocialMutationContext;
 }
 
 /**
@@ -28,16 +37,45 @@ export interface SoftDeleteGroupExpenseLinkOptions {
  * movement is soft-deleted and the expense keeps its audit trail.
  */
 export async function softDeleteGroupExpenseLinkOperation(
-  { viewerUid, expenseId, deletedAt }: SoftDeleteGroupExpenseLinkOptions,
+  { viewerUid, expenseId, deletedAt, sync }: SoftDeleteGroupExpenseLinkOptions,
   port: ILinkedMovementPort = new FirebaseLinkedMovementPort(),
 ): Promise<void> {
   const expenseRef = doc(db, GROUP_EXPENSES_COLLECTION, expenseId);
 
   await runTransaction(db, async (transaction) => {
-    const expenseSnapshot = await transaction.get(expenseRef);
-    const stored = readGroupExpenseDocument(expenseId, expenseSnapshot);
+    if (sync) {
+      const replay = await readAppliedRevision(
+        transaction,
+        sync.ownerId,
+        sync,
+      );
 
-    if (stored.deletedAt !== null) return;
+      if (replay !== null) return;
+    }
+
+    const expenseSnapshot = await transaction.get(expenseRef);
+    if (sync && !expenseSnapshot.exists()) {
+      throw new SyncMutationError("DELETED_REMOTELY");
+    }
+
+    const stored = readGroupExpenseDocument(expenseId, expenseSnapshot);
+    const revision = nextRevision(expenseSnapshot.data());
+
+    if (stored.deletedAt !== null) {
+      if (sync) {
+        writeAppliedMutation(transaction, {
+          ownerId: sync.ownerId,
+          context: sync,
+          entityType: "group-expense",
+          entityId: expenseId,
+          revisionAfter: readStoredRevision(stored),
+          now: deletedAt,
+        });
+      }
+      return;
+    }
+
+    if (sync) assertExpectedRevision(expenseSnapshot.data() ?? {}, sync);
 
     // The movement belongs to the payer. Checking the stored record first keeps
     // a non-payer from reading a movement the rules would deny, and returns the
@@ -54,6 +92,7 @@ export async function softDeleteGroupExpenseLinkOperation(
     const patch: Record<string, unknown> = {
       deletedAt,
       updatedAt: deletedAt,
+      revision,
     };
     const previous = await readStoredMovement(transaction, stored, port);
     const active = readActiveMovement(previous);
@@ -102,5 +141,16 @@ export async function softDeleteGroupExpenseLinkOperation(
       description: stored.description,
       createdAt: deletedAt,
     });
+
+    if (sync) {
+      writeAppliedMutation(transaction, {
+        ownerId: sync.ownerId,
+        context: sync,
+        entityType: "group-expense",
+        entityId: expenseId,
+        revisionAfter: revision,
+        now: deletedAt,
+      });
+    }
   });
 }

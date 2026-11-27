@@ -190,6 +190,7 @@ describe("read helpers", () => {
         receiverWalletId: null,
         receiverCategoryId: null,
         receiverTransactionId: null,
+        revision: 0,
       },
       {
         id: "newer",
@@ -208,6 +209,7 @@ describe("read helpers", () => {
         receiverWalletId: null,
         receiverCategoryId: null,
         receiverTransactionId: null,
+        revision: 0,
       },
     ];
 

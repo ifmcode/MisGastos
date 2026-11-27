@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { assertServerSnapshot } from "@/shared/lib/local-db/offline-read";
 
 import type { Friendship } from "../types/friend.types";
 import { mapFriendshipDocument } from "./friends.mapper";
@@ -37,6 +38,7 @@ export async function getFriendshipsOperation(
       where("memberIds", "array-contains", uid),
     ),
   );
+  assertServerSnapshot(snapshot);
 
   const friendships: Friendship[] = [];
 

@@ -12,6 +12,15 @@ export type LocalTableName =
   | "categories"
   | "transactions"
   | "transfers"
+  | "friendships"
+  | "friendRequests"
+  | "publicProfiles"
+  | "groups"
+  | "groupInvitations"
+  | "sharedExpenses"
+  | "settlements"
+  | "groupExpenses"
+  | "groupSettlements"
   | "outbox"
   | "outboxSeq"
   | "conflicts"
@@ -19,14 +28,24 @@ export type LocalTableName =
   | "cacheMeta";
 
 /**
- * Personal collections mirrored into the local read cache. Shared/social data
- * is intentionally absent: phase 3 only caches what the personal screens list.
+ * Collections mirrored into the local read cache. Phase 7 adds the social
+ * lookups and movements so the group/friend screens and their forms work
+ * without a connection.
  */
 export type LocalCacheCollection =
   | "wallets"
   | "categories"
   | "transactions"
-  | "transfers";
+  | "transfers"
+  | "friendships"
+  | "friendRequests"
+  | "publicProfiles"
+  | "groups"
+  | "groupInvitations"
+  | "sharedExpenses"
+  | "settlements"
+  | "groupExpenses"
+  | "groupSettlements";
 
 /** Sync status carried by every record table (see ADR §4). */
 export type LocalRecordSyncStatus =
@@ -40,7 +59,11 @@ export type OutboxEntityType =
   | "wallet"
   | "category"
   | "transaction"
-  | "transfer";
+  | "transfer"
+  | "shared-expense"
+  | "settlement"
+  | "group-expense"
+  | "group-settlement";
 
 export type OutboxOperation = "create" | "update" | "delete";
 

@@ -20,6 +20,23 @@ jest.mock("../composed-friend-ledger.repository", () => ({
   ComposedFriendLedgerRepository: mockComposed,
 }));
 
+jest.mock(
+  "@/features/shared-expenses/repositories/firebase-shared-expenses.repository",
+  () => ({ FirebaseSharedExpensesRepository: jest.fn(() => ({ kind: "remote-expenses" })) }),
+);
+jest.mock(
+  "@/features/settlements/repositories/firebase-settlements.repository",
+  () => ({ FirebaseSettlementsRepository: jest.fn(() => ({ kind: "remote-settlements" })) }),
+);
+jest.mock(
+  "@/features/shared-expenses/repositories/cached-shared-expenses.repository",
+  () => ({ CachedSharedExpensesRepository: jest.fn(() => ({ kind: "cached-expenses" })) }),
+);
+jest.mock(
+  "@/features/settlements/repositories/cached-settlements.repository",
+  () => ({ CachedSettlementsRepository: jest.fn(() => ({ kind: "cached-settlements" })) }),
+);
+
 import { SharedExpenseLedgerRepository } from "@/features/shared-expenses/repositories/shared-expense-ledger.repository";
 import { SettlementLedgerRepository } from "@/features/settlements/repositories/settlement-ledger.repository";
 import { ComposedFriendLedgerRepository } from "../composed-friend-ledger.repository";

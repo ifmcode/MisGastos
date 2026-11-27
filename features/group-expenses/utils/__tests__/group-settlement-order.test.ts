@@ -22,6 +22,7 @@ function build(overrides: Partial<GroupSettlement>): GroupSettlement {
     receiverWalletId: null,
     receiverCategoryId: null,
     receiverTransactionId: null,
+    revision: 0,
     ...overrides,
   };
 }

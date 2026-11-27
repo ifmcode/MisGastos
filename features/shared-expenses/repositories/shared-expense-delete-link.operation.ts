@@ -1,7 +1,14 @@
 import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import { nextRevision } from "@/shared/utils/revision";
+import { nextRevision, readStoredRevision } from "@/shared/utils/revision";
+import {
+  assertExpectedRevision,
+  readAppliedRevision,
+  writeAppliedMutation,
+  type SocialMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
+import { SyncMutationError } from "@/shared/services/sync/sync.errors";
 
 import { SharedExpenseOperationError } from "../services/shared-expense.errors";
 import { FirebaseLinkedMovementPort } from "./firebase-linked-movement.port";
@@ -19,6 +26,8 @@ export interface SoftDeleteSharedExpenseLinkOptions {
   viewerUid: string;
   expenseId: string;
   deletedAt: string;
+  /** Present only while draining the outbox. */
+  sync?: SocialMutationContext;
 }
 
 /**
@@ -26,20 +35,50 @@ export interface SoftDeleteSharedExpenseLinkOptions {
  * touching the balance, so a repeated request can never revert twice.
  */
 export async function softDeleteSharedExpenseLinkOperation(
-  { viewerUid, expenseId, deletedAt }: SoftDeleteSharedExpenseLinkOptions,
+  { viewerUid, expenseId, deletedAt, sync }: SoftDeleteSharedExpenseLinkOptions,
   port: ILinkedMovementPort = new FirebaseLinkedMovementPort(),
 ): Promise<void> {
   const expenseRef = doc(db, SHARED_EXPENSES_COLLECTION, expenseId);
 
   await runTransaction(db, async (transaction) => {
-    const expenseSnapshot = await transaction.get(expenseRef);
-    const stored = readExpenseDocument(expenseId, expenseSnapshot);
+    if (sync) {
+      const replay = await readAppliedRevision(
+        transaction,
+        sync.ownerId,
+        sync,
+      );
 
-    if (stored.deletedAt !== null) return;
+      if (replay !== null) return;
+    }
+
+    const expenseSnapshot = await transaction.get(expenseRef);
+    if (sync && !expenseSnapshot.exists()) {
+      throw new SyncMutationError("DELETED_REMOTELY");
+    }
+
+    const stored = readExpenseDocument(expenseId, expenseSnapshot);
+    const revision = nextRevision(stored);
+
+    if (stored.deletedAt !== null) {
+      if (sync) {
+        writeAppliedMutation(transaction, {
+          ownerId: sync.ownerId,
+          context: sync,
+          entityType: "shared-expense",
+          entityId: expenseId,
+          revisionAfter: readStoredRevision(stored),
+          now: deletedAt,
+        });
+      }
+      return;
+    }
+
+    if (sync) assertExpectedRevision(expenseSnapshot.data() ?? {}, sync);
 
     const patch: Record<string, unknown> = {
       deletedAt,
       updatedAt: deletedAt,
+      revision,
     };
     const previous = await readStoredMovement(transaction, stored, port);
     const active = readActiveMovement(previous);
@@ -68,5 +107,16 @@ export async function softDeleteSharedExpenseLinkOperation(
     if (stored.linkedTransactionId) patch.linkedTransactionId = null;
 
     transaction.update(expenseRef, patch);
+
+    if (sync) {
+      writeAppliedMutation(transaction, {
+        ownerId: sync.ownerId,
+        context: sync,
+        entityType: "shared-expense",
+        entityId: expenseId,
+        revisionAfter: revision,
+        now: deletedAt,
+      });
+    }
   });
 }

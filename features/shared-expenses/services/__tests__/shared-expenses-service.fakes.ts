@@ -58,6 +58,7 @@ export class FakeSharedExpensesRepository
     const expense: SharedExpense = {
       id: `expense-${this.createCalls.length}`,
       ...dto,
+      revision: 0,
     };
     this.expenses.set(expense.id, expense);
 
@@ -127,7 +128,11 @@ export class FakeSharedExpenseLinkRepository
     this.guard();
     this.createCalls.push(dto);
 
-    const expense: SharedExpense = { id: "expense-link-1", ...dto };
+    const expense: SharedExpense = {
+      id: "expense-link-1",
+      ...dto,
+      revision: 0,
+    };
     this.expenses.set(expense.id, expense);
 
     return expense;

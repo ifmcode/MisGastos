@@ -133,6 +133,7 @@ describe("softDeleteSettlementOperation - debtor and idempotency", () => {
     expect(lastWriteOf(transactionUpdate, settlementRef(SETTLEMENT_ID))).toEqual({
       deletedAt: NOW,
       updatedAt: NOW,
+      revision: 1,
     });
   });
 

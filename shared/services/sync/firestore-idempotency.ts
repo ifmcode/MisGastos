@@ -12,6 +12,15 @@ export type SyncMutationContext = {
   baseRevision: number;
 };
 
+/**
+ * Context of a queued **social** mutation. Social records belong to several
+ * users, so the marker is scoped to the account that queued it (the outbox
+ * owner), never to the record creator.
+ */
+export type SocialMutationContext = SyncMutationContext & {
+  ownerId: string;
+};
+
 export type AppliedMutationInput = {
   ownerId: string;
   context: SyncMutationContext;

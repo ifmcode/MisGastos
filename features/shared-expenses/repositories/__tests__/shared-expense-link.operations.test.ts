@@ -155,6 +155,7 @@ describe("softDeleteSharedExpenseLinkOperation", () => {
       deletedAt: NOW,
       updatedAt: NOW,
       linkedTransactionId: null,
+      revision: 1,
     });
   });
 
@@ -189,6 +190,7 @@ describe("softDeleteSharedExpenseLinkOperation", () => {
       deletedAt: NOW,
       updatedAt: NOW,
       linkedTransactionId: null,
+      revision: 1,
     });
   });
 

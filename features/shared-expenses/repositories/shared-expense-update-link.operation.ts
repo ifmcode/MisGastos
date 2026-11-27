@@ -2,6 +2,13 @@ import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { nextRevision } from "@/shared/utils/revision";
+import {
+  assertExpectedRevision,
+  readAppliedRevision,
+  writeAppliedMutation,
+  type SocialMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
+import { SyncMutationError } from "@/shared/services/sync/sync.errors";
 
 import { SharedExpenseOperationError } from "../services/shared-expense.errors";
 import type {
@@ -26,6 +33,8 @@ export interface UpdateSharedExpenseLinkOptions {
   viewerUid: string;
   expenseId: string;
   update: UpdateSharedExpenseDto;
+  /** Present only while draining the outbox. */
+  sync?: SocialMutationContext;
 }
 
 /**
@@ -34,7 +43,7 @@ export interface UpdateSharedExpenseLinkOptions {
  * a repeated edit with no effective change never double-counts the balance.
  */
 export async function updateSharedExpenseLinkOperation(
-  { viewerUid, expenseId, update }: UpdateSharedExpenseLinkOptions,
+  { viewerUid, expenseId, update, sync }: UpdateSharedExpenseLinkOptions,
   port: ILinkedMovementPort = new FirebaseLinkedMovementPort(),
 ): Promise<SharedExpense> {
   const now = update.updatedAt;
@@ -42,8 +51,39 @@ export async function updateSharedExpenseLinkOperation(
   let result: SharedExpense | null = null;
 
   await runTransaction(db, async (transaction) => {
+    if (sync) {
+      const replay = await readAppliedRevision(
+        transaction,
+        sync.ownerId,
+        sync,
+      );
+
+      if (replay !== null) {
+        const snapshot = await transaction.get(expenseRef);
+        result = snapshot.exists()
+          ? mapSharedExpenseDocument(
+              expenseId,
+              snapshot.data() as Record<string, unknown>,
+            )
+          : null;
+        return;
+      }
+    }
+
     const expenseSnapshot = await transaction.get(expenseRef);
+    if (sync && !expenseSnapshot.exists()) {
+      throw new SyncMutationError("DELETED_REMOTELY");
+    }
+
+    if (sync) assertExpectedRevision(expenseSnapshot.data() ?? {}, sync);
+
     const stored = readExpenseDocument(expenseId, expenseSnapshot);
+
+    if (stored.deletedAt !== null) {
+      throw sync
+        ? new SyncMutationError("DELETED_REMOTELY")
+        : new SharedExpenseOperationError("ALREADY_DELETED");
+    }
 
     // A movement the friend created is owner-only: the viewer cannot revert it.
     // Taking over as payer would charge a second wallet and leave the friend's
@@ -103,9 +143,22 @@ export async function updateSharedExpenseLinkOperation(
     const patch = {
       ...toExpenseUpdateData(update),
       linkedTransactionId: linkedId,
+      revision: nextRevision(stored),
     };
 
     transaction.update(expenseRef, patch);
+
+    if (sync) {
+      writeAppliedMutation(transaction, {
+        ownerId: sync.ownerId,
+        context: sync,
+        entityType: "shared-expense",
+        entityId: expenseId,
+        revisionAfter: patch.revision,
+        now,
+      });
+    }
+
     result = mapSharedExpenseDocument(expenseId, { ...stored, ...patch });
 
     if (!result) throw new SharedExpenseOperationError("EXPENSE_NOT_FOUND");

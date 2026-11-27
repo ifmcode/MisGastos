@@ -1,6 +1,7 @@
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { assertServerSnapshot } from "@/shared/lib/local-db/offline-read";
 
 import type { Settlement } from "../types/settlement.types";
 import { mapSettlementDocument } from "./settlements.mapper";
@@ -38,6 +39,7 @@ export async function getSettlementsOperation(
       where("participantIds", "array-contains", viewerUid),
     ),
   );
+  assertServerSnapshot(snapshot);
 
   const settlements: Settlement[] = [];
 

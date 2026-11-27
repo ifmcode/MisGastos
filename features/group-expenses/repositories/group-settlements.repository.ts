@@ -1,4 +1,5 @@
 import type { NotificationWrite } from "@/features/notifications/types/notification.types";
+import type { SocialMutationContext } from "@/shared/services/sync/firestore-idempotency";
 
 import type {
   CreateGroupSettlementDto,
@@ -20,6 +21,8 @@ export interface UpdateGroupSettlementOperationOptions {
   settlementId: string;
   update: UpdateGroupSettlementDto;
   notification: NotificationWrite;
+  /** Present only while draining the outbox. */
+  sync?: SocialMutationContext;
 }
 
 /**

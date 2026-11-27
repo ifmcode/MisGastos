@@ -1,8 +1,14 @@
-import { runTransaction } from "firebase/firestore";
+import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import { nextRevision } from "@/shared/utils/revision";
+import { INITIAL_REVISION, nextRevision } from "@/shared/utils/revision";
 import { addGroupActivity } from "@/features/groups/repositories/group-activity.writes";
+import {
+  readAppliedRevision,
+  writeAppliedMutation,
+  type SocialMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
+import { SyncMutationError } from "@/shared/services/sync/sync.errors";
 
 import { GroupExpenseOperationError } from "../services/group-expense.errors";
 import type {
@@ -23,8 +29,17 @@ import {
   readGroupSettlementWallet,
 } from "./group-settlement-link.helpers";
 import { writeGroupSettlementNotification } from "./group-settlement-notification-write";
-import { newGroupSettlementRef } from "./group-settlements.operations";
+import {
+  GROUP_SETTLEMENTS_COLLECTION,
+  newGroupSettlementRef,
+} from "./group-settlements.operations";
 import type { GroupSettlementNotificationBuilder } from "./group-settlements.repository";
+
+/** Inputs the sync executor adds to the otherwise unchanged server operation. */
+export interface GroupSettlementMutationOptions {
+  id?: string;
+  sync?: SocialMutationContext;
+}
 
 /**
  * Creates the group settlement, its optional creditor income and the wallet
@@ -36,11 +51,14 @@ export async function createGroupSettlementOperation(
   dto: CreateGroupSettlementDto,
   notification: GroupSettlementNotificationBuilder,
   port: ISettlementMovementPort = new FirebaseSettlementMovementPort(),
+  options: GroupSettlementMutationOptions = {},
 ): Promise<GroupSettlement> {
   assertGroupSettlementLinkShape(dto.receiverWalletId, dto.receiverCategoryId);
 
   const now = dto.updatedAt;
-  const settlementDocument = newGroupSettlementRef();
+  const settlementDocument = options.id
+    ? doc(db, GROUP_SETTLEMENTS_COLLECTION, options.id)
+    : newGroupSettlementRef();
   const walletId = dto.receiverWalletId;
   const movementDocument =
     walletId === null ? null : newSettlementMovementRef();
@@ -49,10 +67,25 @@ export async function createGroupSettlementOperation(
     id: settlementDocument.id,
     ...dto,
     receiverTransactionId: movementDocument ? movementDocument.id : null,
+    revision: 0,
   };
   const event = notification(settlement);
+  let replayed = false;
 
   await runTransaction(db, async (transaction) => {
+    if (options.sync) {
+      const replay = await readAppliedRevision(
+        transaction,
+        options.sync.ownerId,
+        options.sync,
+      );
+
+      if (replay !== null) {
+        replayed = true;
+        return;
+      }
+    }
+
     const walletSnapshot =
       walletId === null
         ? null
@@ -99,9 +132,20 @@ export async function createGroupSettlementOperation(
         revision: nextRevision(walletSnapshot?.data()),
       });
     }
+
+    if (options.sync) {
+      writeAppliedMutation(transaction, {
+        ownerId: options.sync.ownerId,
+        context: options.sync,
+        entityType: "group-settlement",
+        entityId: settlement.id,
+        revisionAfter: INITIAL_REVISION,
+        now,
+      });
+    }
   });
 
-  await writeGroupSettlementNotification(event);
+  if (!replayed) await writeGroupSettlementNotification(event);
 
   const created = mapGroupSettlementDocument(settlement.id, {
     ...toGroupSettlementData(settlement),

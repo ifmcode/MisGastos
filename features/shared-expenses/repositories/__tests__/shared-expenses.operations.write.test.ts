@@ -99,6 +99,7 @@ describe("updateSharedExpenseOperation", () => {
         walletId: null,
         categoryId: null,
         updatedAt: "2026-11-11T10:00:00.000Z",
+        revision: 1,
       },
     );
     expect(expense).toMatchObject({ id: "expense-1", amountCents: 2000 });
@@ -111,6 +112,19 @@ describe("updateSharedExpenseOperation", () => {
     await expect(
       updateSharedExpenseOperation("expense-1", updateDto),
     ).rejects.toMatchObject({ code: "EXPENSE_NOT_FOUND" });
+  });
+
+  it("rejects an already deleted expense", async () => {
+    mockGetDoc.mockResolvedValue(
+      documentSnapshot(
+        "expense-1",
+        buildExpenseDocument({ deletedAt: "2026-11-10T20:00:00.000Z" }),
+      ),
+    );
+
+    await expect(
+      updateSharedExpenseOperation("expense-1", updateDto),
+    ).rejects.toMatchObject({ code: "ALREADY_DELETED" });
   });
 
   it("writes the link id only when the caller supplies it", async () => {
@@ -145,6 +159,7 @@ describe("softDeleteSharedExpenseOperation", () => {
       {
         deletedAt: "2026-11-11T10:00:00.000Z",
         updatedAt: "2026-11-11T10:00:00.000Z",
+        revision: 1,
       },
     );
   });

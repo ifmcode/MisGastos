@@ -2,13 +2,16 @@ import type { LocalDatabaseTransaction } from "./database.port";
 import type {
   LocalCacheCollection,
   LocalRow,
+  LocalWhere,
 } from "./local-db.types";
 import { readLocalRowId } from "./local-row.readers";
 
 export type CacheMirrorInput = {
-  /** Personal collection being mirrored (never a shared/social table). */
+  /** Collection being mirrored (personal or social). */
   table: LocalCacheCollection;
   ownerId: string;
+  /** Extra equality filters for a per-parent collection (e.g. groupId). */
+  scope?: LocalWhere;
   /** Entities from the remote list read, already converted to local rows. */
   rows: readonly LocalRow[];
   /** Single time source for rows that arrive without an `updatedAt`. */
@@ -63,9 +66,10 @@ function buildSyncedRow(row: LocalRow, ownerId: string, now: string): LocalRow {
  */
 export async function mirrorOwnerRows(
   tx: LocalDatabaseTransaction,
-  { table, ownerId, rows, now }: CacheMirrorInput,
+  { table, ownerId, scope, rows, now }: CacheMirrorInput,
 ): Promise<void> {
-  const existing = await tx.select<LocalRow>(table, { where: { ownerId } });
+  const where: LocalWhere = scope ? { ownerId, ...scope } : { ownerId };
+  const existing = await tx.select<LocalRow>(table, { where });
   const existingById = new Map<string, LocalRow>();
 
   for (const row of existing) {

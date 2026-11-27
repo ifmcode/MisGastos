@@ -2,6 +2,14 @@ import { runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import {
+  assertExpectedRevision,
+  readAppliedRevision,
+  writeAppliedMutation,
+  type SocialMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
+import { SyncMutationError } from "@/shared/services/sync/sync.errors";
+import { nextRevision } from "@/shared/utils/revision";
+import {
   createNotificationDocumentId,
   toNotificationData,
 } from "@/features/notifications/repositories/notifications.data";
@@ -41,6 +49,8 @@ export interface UpdateSettlementOperationOptions {
   settlementId: string;
   update: UpdateSettlementDto;
   notification: NotificationWrite;
+  /** Present only while draining the outbox. */
+  sync?: SocialMutationContext;
 }
 
 /**
@@ -54,6 +64,7 @@ export async function updateSettlementOperation(
     settlementId,
     update,
     notification,
+    sync,
   }: UpdateSettlementOperationOptions,
   port: ISettlementMovementPort = new FirebaseSettlementMovementPort(),
 ): Promise<Settlement> {
@@ -67,13 +78,38 @@ export async function updateSettlementOperation(
   let result: Settlement | null = null;
 
   await runTransaction(db, async (transaction) => {
-    const stored = readSettlementDocument(
-      settlementId,
-      await transaction.get(reference),
-    );
+    if (sync) {
+      const replay = await readAppliedRevision(
+        transaction,
+        sync.ownerId,
+        sync,
+      );
+
+      if (replay !== null) {
+        const snapshot = await transaction.get(reference);
+        result = snapshot.exists()
+          ? mapSettlementDocument(
+              settlementId,
+              snapshot.data() as Record<string, unknown>,
+            )
+          : null;
+        return;
+      }
+    }
+
+    const storedSnapshot = await transaction.get(reference);
+    if (sync && !storedSnapshot.exists()) {
+      throw new SyncMutationError("DELETED_REMOTELY");
+    }
+
+    if (sync) assertExpectedRevision(storedSnapshot.data() ?? {}, sync);
+
+    const stored = readSettlementDocument(settlementId, storedSnapshot);
 
     if (stored.deletedAt !== null) {
-      throw new SettlementOperationError("ALREADY_DELETED");
+      throw sync
+        ? new SyncMutationError("DELETED_REMOTELY")
+        : new SettlementOperationError("ALREADY_DELETED");
     }
 
     const viewerIsCreditor = stored.toUserId === viewerUid;
@@ -125,17 +161,31 @@ export async function updateSettlementOperation(
       }
     }
 
-    const patch = toSettlementUpdateData({
-      ...update,
-      receiverWalletId: edit.destinationWalletId,
-      receiverCategoryId: edit.destinationCategoryId,
-      receiverTransactionId: linkedId,
-    });
+    const patch = {
+      ...toSettlementUpdateData({
+        ...update,
+        receiverWalletId: edit.destinationWalletId,
+        receiverCategoryId: edit.destinationCategoryId,
+        receiverTransactionId: linkedId,
+      }),
+      revision: nextRevision(stored),
+    };
     transaction.update(reference, patch);
     result = mapSettlementDocument(settlementId, { ...stored, ...patch });
 
     if (!notificationSnapshot.exists()) {
       transaction.set(notificationDocument, toNotificationData(notification));
+    }
+
+    if (sync) {
+      writeAppliedMutation(transaction, {
+        ownerId: sync.ownerId,
+        context: sync,
+        entityType: "settlement",
+        entityId: settlementId,
+        revisionAfter: patch.revision,
+        now,
+      });
     }
   });
 

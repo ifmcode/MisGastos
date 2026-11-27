@@ -1,5 +1,6 @@
 import { isCurrencyCode } from "@/shared/constants/currencies";
 import { parseDateInput } from "@/shared/utils/date";
+import { readStoredRevision } from "@/shared/utils/revision";
 
 import { isExpenseSplitMode } from "@/features/shared-expenses/utils/expense-split";
 
@@ -149,5 +150,6 @@ export function mapGroupExpenseDocument(
     createdAt,
     updatedAt: readText(data.updatedAt),
     deletedAt: readTextOrNull(data.deletedAt),
+    revision: readStoredRevision(data),
   };
 }

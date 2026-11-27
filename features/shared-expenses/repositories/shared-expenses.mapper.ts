@@ -1,4 +1,5 @@
 import { isCurrencyCode } from "@/shared/constants/currencies";
+import { readStoredRevision } from "@/shared/utils/revision";
 import {
   createFriendPairId,
   isValidFriendPair,
@@ -137,5 +138,6 @@ export function mapSharedExpenseDocument(
     createdAt: readText(data.createdAt),
     updatedAt: readText(data.updatedAt),
     deletedAt: readTextOrNull(data.deletedAt),
+    revision: readStoredRevision(data),
   };
 }

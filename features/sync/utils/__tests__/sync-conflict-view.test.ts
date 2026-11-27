@@ -110,6 +110,37 @@ describe("toSyncConflictView", () => {
     expect(view.remote).toContainEqual({ key: "wallet", value: "Ahorro" });
   });
 
+  it("describes a social movement by its cents, description and receiver wallet", () => {
+    const view = toSyncConflictView(
+      buildConflict({
+        entityType: "settlement",
+        localSnapshot: {
+          amountCents: 1050,
+          currency: "EUR",
+          note: "Cena",
+          receiverWalletId: "wallet-1",
+          date: "2026-11-26",
+        },
+        remoteSnapshot: {
+          amountCents: 2000,
+          currency: "EUR",
+          description: "Lunch",
+          receiverWalletId: "wallet-2",
+        },
+      }),
+      new Map([["wallet-1", "Cuenta principal"]]),
+    );
+
+    expect(view.mine).toEqual([
+      { key: "amount", value: formatMoney(10.5, "EUR") },
+      { key: "concept", value: "Cena" },
+      { key: "wallet", value: "Cuenta principal" },
+      { key: "date", value: "2026-11-26" },
+    ]);
+    expect(view.remote).toContainEqual({ key: "concept", value: "Lunch" });
+    expect(view.remote).toContainEqual({ key: "wallet", value: "wallet-2" });
+  });
+
   it("ignores malformed snapshots instead of throwing", () => {
     const view = toSyncConflictView(
       buildConflict({ localSnapshot: {}, remoteSnapshot: {} }),

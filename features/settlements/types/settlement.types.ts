@@ -53,10 +53,12 @@ export interface Settlement {
   receiverWalletId: string | null;
   receiverCategoryId: string | null;
   receiverTransactionId: string | null;
+  /** Optimistic-concurrency counter; legacy documents map to 0. */
+  revision: number;
 }
 
 /** Payload the repository persists for a new settlement; the id is generated there. */
-export type CreateSettlementDto = Omit<Settlement, "id">;
+export type CreateSettlementDto = Omit<Settlement, "id" | "revision">;
 
 /**
  * Mutable fields of a settlement. `participantIds`, `pairId`, `fromUserId`,

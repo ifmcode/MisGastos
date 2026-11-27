@@ -3,6 +3,7 @@ import type {
   SharedExpenseParticipant,
   UpdateGroupExpenseDto,
 } from "../types/group-expense.types";
+import { INITIAL_REVISION } from "@/shared/utils/revision";
 
 /** Drops `undefined` optionals: Firestore rejects undefined field values. */
 function toParticipantData(
@@ -40,6 +41,7 @@ export function toGroupExpenseData(
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
     deletedAt: dto.deletedAt,
+    revision: INITIAL_REVISION,
   };
 }
 

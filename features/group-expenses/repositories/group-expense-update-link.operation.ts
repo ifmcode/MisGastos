@@ -2,6 +2,13 @@ import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { nextRevision } from "@/shared/utils/revision";
+import {
+  assertExpectedRevision,
+  readAppliedRevision,
+  writeAppliedMutation,
+  type SocialMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
+import { SyncMutationError } from "@/shared/services/sync/sync.errors";
 import { FirebaseLinkedMovementPort } from "@/features/shared-expenses/repositories/firebase-linked-movement.port";
 import type { ILinkedMovementPort } from "@/features/shared-expenses/repositories/linked-movement.port";
 import { movementRef } from "@/features/shared-expenses/repositories/shared-expense-movement-ref";
@@ -27,6 +34,8 @@ export interface UpdateGroupExpenseLinkOptions {
   viewerUid: string;
   expenseId: string;
   update: UpdateGroupExpenseDto;
+  /** Present only while draining the outbox. */
+  sync?: SocialMutationContext;
 }
 
 /**
@@ -38,7 +47,7 @@ export interface UpdateGroupExpenseLinkOptions {
  * rejecting the save.
  */
 export async function updateGroupExpenseLinkOperation(
-  { viewerUid, expenseId, update }: UpdateGroupExpenseLinkOptions,
+  { viewerUid, expenseId, update, sync }: UpdateGroupExpenseLinkOptions,
   port: ILinkedMovementPort = new FirebaseLinkedMovementPort(),
 ): Promise<GroupExpense> {
   const now = update.updatedAt;
@@ -46,8 +55,39 @@ export async function updateGroupExpenseLinkOperation(
   let result: GroupExpense | null = null;
 
   await runTransaction(db, async (transaction) => {
+    if (sync) {
+      const replay = await readAppliedRevision(
+        transaction,
+        sync.ownerId,
+        sync,
+      );
+
+      if (replay !== null) {
+        const snapshot = await transaction.get(expenseRef);
+        result = snapshot.exists()
+          ? mapGroupExpenseDocument(
+              expenseId,
+              snapshot.data() as Record<string, unknown>,
+            )
+          : null;
+        return;
+      }
+    }
+
     const expenseSnapshot = await transaction.get(expenseRef);
+    if (sync && !expenseSnapshot.exists()) {
+      throw new SyncMutationError("DELETED_REMOTELY");
+    }
+
+    if (sync) assertExpectedRevision(expenseSnapshot.data() ?? {}, sync);
+
     const stored = readGroupExpenseDocument(expenseId, expenseSnapshot);
+
+    if (stored.deletedAt !== null) {
+      throw sync
+        ? new SyncMutationError("DELETED_REMOTELY")
+        : new GroupExpenseOperationError("ALREADY_DELETED");
+    }
 
     // The movement belongs to the payer; another member cannot revert it, so
     // the write is rejected instead of silently losing money from that wallet.
@@ -105,6 +145,7 @@ export async function updateGroupExpenseLinkOperation(
     const patch = {
       ...toGroupExpenseUpdateData(update),
       linkedTransactionId: linkedId,
+      revision: nextRevision(expenseSnapshot.data()),
     };
 
     transaction.update(expenseRef, patch);
@@ -124,6 +165,17 @@ export async function updateGroupExpenseLinkOperation(
       ...(expenseSnapshot.data() ?? {}),
       ...patch,
     });
+
+    if (sync) {
+      writeAppliedMutation(transaction, {
+        ownerId: sync.ownerId,
+        context: sync,
+        entityType: "group-expense",
+        entityId: expenseId,
+        revisionAfter: patch.revision,
+        now,
+      });
+    }
   });
 
   if (!result) throw new GroupExpenseOperationError("EXPENSE_NOT_FOUND");

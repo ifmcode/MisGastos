@@ -1,5 +1,6 @@
 import { isCurrencyCode } from "@/shared/constants/currencies";
 import { parseDateInput } from "@/shared/utils/date";
+import { readStoredRevision } from "@/shared/utils/revision";
 
 import { SETTLEMENT_AMOUNT_MAX_CENTS } from "../schemas/group-settlement-validation.types";
 import type { GroupSettlement } from "../types/group-settlement.types";
@@ -130,5 +131,6 @@ export function mapGroupSettlementDocument(
     receiverWalletId,
     receiverCategoryId,
     receiverTransactionId,
+    revision: readStoredRevision(data),
   };
 }

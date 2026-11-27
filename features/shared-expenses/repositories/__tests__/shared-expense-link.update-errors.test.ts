@@ -66,6 +66,18 @@ describe("updateSharedExpenseLinkOperation - failures", () => {
     expect(transactionUpdate).not.toHaveBeenCalled();
   });
 
+  it("rejects an already deleted expense", async () => {
+    transactionGet.mockResolvedValueOnce(
+      snapshot(
+        EXPENSE_ID,
+        storedLinkedExpense({ deletedAt: "2026-11-10T20:00:00.000Z" }),
+      ),
+    );
+
+    await expect(run({})).rejects.toMatchObject({ code: "ALREADY_DELETED" });
+    expect(transactionUpdate).not.toHaveBeenCalled();
+  });
+
   it("rejects a currency change that would orphan the linked movement", async () => {
     mockLinkedExpense();
 

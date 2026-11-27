@@ -54,6 +54,7 @@ export function buildExpense(
     createdAt: NOW,
     updatedAt: NOW,
     deletedAt: null,
+    revision: 0,
     ...overrides,
   };
 }
@@ -103,6 +104,7 @@ export class FakeGroupExpensesRepository implements IGroupExpensesRepository {
     const expense: GroupExpense = {
       id: `expense-${this.createCalls.length}`,
       ...dto,
+      revision: 0,
     };
     this.expenses.set(expense.id, expense);
 
@@ -176,6 +178,7 @@ export class FakeGroupExpenseLinkRepository
       id: "expense-link-1",
       ...dto,
       linkedTransactionId: "movement-1",
+      revision: 0,
     };
     this.expenses.set(expense.id, expense);
 

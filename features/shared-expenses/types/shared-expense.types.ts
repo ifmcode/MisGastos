@@ -111,10 +111,15 @@ export interface SharedExpense {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  /** Optimistic-concurrency counter; legacy documents map to 0. */
+  revision: number;
 }
 
 /** Payload the repository persists for a new expense; the id is generated there. */
-export type CreateSharedExpenseDto = Omit<SharedExpense, "id"> & {
+export type CreateSharedExpenseDto = Omit<
+  SharedExpense,
+  "id" | "revision"
+> & {
   deletedAt: null;
 };
 

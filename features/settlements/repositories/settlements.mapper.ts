@@ -1,4 +1,5 @@
 import { isCurrencyCode } from "@/shared/constants/currencies";
+import { readStoredRevision } from "@/shared/utils/revision";
 import {
   createFriendPairId,
   isValidFriendPair,
@@ -106,5 +107,6 @@ export function mapSettlementDocument(
     receiverWalletId,
     receiverCategoryId,
     receiverTransactionId,
+    revision: readStoredRevision(data),
   };
 }

@@ -183,7 +183,9 @@ service cloud.firestore {
     function isExpenseSoftDelete(previous, next) {
       return previous.deletedAt == null
         && next.deletedAt is string
-        && next.diff(previous).affectedKeys().hasOnly(['deletedAt', 'updatedAt']);
+        && next.diff(previous).affectedKeys().hasOnly(
+             ['deletedAt', 'updatedAt', 'revision']
+           );
     }
 
     function hasExpenseFields(data) {
@@ -204,7 +206,8 @@ service cloud.firestore {
           'createdBy',
           'createdAt',
           'updatedAt',
-          'deletedAt'
+          'deletedAt',
+          'revision'
         ]
       );
     }
@@ -343,7 +346,8 @@ service cloud.firestore {
           'createdBy',
           'createdAt',
           'updatedAt',
-          'deletedAt'
+          'deletedAt',
+          'revision'
         ]
       );
     }
@@ -364,11 +368,12 @@ service cloud.firestore {
                ? [
                    'deletedAt',
                    'updatedAt',
+                   'revision',
                    'receiverWalletId',
                    'receiverCategoryId',
                    'receiverTransactionId'
                  ]
-               : ['deletedAt', 'updatedAt']
+               : ['deletedAt', 'updatedAt', 'revision']
            );
     }
 
@@ -1466,7 +1471,16 @@ service cloud.firestore {
         && request.resource.data.clientMutationId.size() <= 200
         && markerId == request.resource.data.ownerId + '__' + request.resource.data.clientMutationId
         && request.resource.data.entityType in
-             ['wallet', 'transaction', 'transfer', 'category']
+             [
+               'wallet',
+               'transaction',
+               'transfer',
+               'category',
+               'shared-expense',
+               'settlement',
+               'group-expense',
+               'group-settlement'
+             ]
         && request.resource.data.entityId is string
         && request.resource.data.entityId.size() > 0
         && request.resource.data.revisionAfter is int
@@ -1658,7 +1672,13 @@ service cloud.firestore {
     // No composite index: `getSharedExpensesOperation` filters only with
     // `where('participantIds', 'array-contains', uid)` and sorts client-side.
     match /sharedExpenses/{expenseId} {
-      allow get, list: if isExpenseParticipant(resource.data);
+      allow get: if isSignedIn()
+        && (
+          !exists(/databases/$(database)/documents/sharedExpenses/$(expenseId))
+          || isExpenseParticipant(resource.data)
+        );
+
+      allow list: if isExpenseParticipant(resource.data);
 
       allow create: if isSignedIn()
         && request.resource.data.createdBy == request.auth.uid
@@ -1672,6 +1692,7 @@ service cloud.firestore {
         && request.resource.data.createdAt is string
         && request.resource.data.updatedAt is string
         && request.resource.data.deletedAt == null
+        && isInitialRevision(request.resource.data)
         && exists(
              /databases/$(database)/documents/friendships/$(request.resource.data.pairId)
            );
@@ -1691,7 +1712,8 @@ service cloud.firestore {
             || hasExpenseLinkCoherence(request.resource.data))
         && request.resource.data.currency is string
         && request.resource.data.updatedAt is string
-        && isExpenseDeletedAt(request.resource.data.deletedAt);
+        && isExpenseDeletedAt(request.resource.data.deletedAt)
+        && isRevisionBump(resource.data, request.resource.data);
 
       allow delete: if false;
     }
@@ -1706,7 +1728,13 @@ service cloud.firestore {
     // No composite index: `getSettlementsOperation` filters only with
     // `where('participantIds', 'array-contains', uid)` and sorts client-side.
     match /settlements/{settlementId} {
-      allow get, list: if isSettlementParticipant(resource.data);
+      allow get: if isSignedIn()
+        && (
+          !exists(/databases/$(database)/documents/settlements/$(settlementId))
+          || isSettlementParticipant(resource.data)
+        );
+
+      allow list: if isSettlementParticipant(resource.data);
 
       allow create: if isSignedIn()
         && request.resource.data.createdBy == request.auth.uid
@@ -1717,6 +1745,7 @@ service cloud.firestore {
         && request.resource.data.createdAt is string
         && request.resource.data.updatedAt is string
         && request.resource.data.deletedAt == null
+        && isInitialRevision(request.resource.data)
         // Only the creditor ever links the income, so a debtor create is always
         // social-only.
         && (
@@ -1741,6 +1770,7 @@ service cloud.firestore {
         && hasSettlementFields(request.resource.data)
         && hasSettlementLinkShape(request.resource.data)
         && request.resource.data.updatedAt is string
+        && isRevisionBump(resource.data, request.resource.data)
         && (
           isSettlementSoftDelete(resource.data, request.resource.data)
           || isSettlementEdit(resource.data, request.resource.data)
@@ -1906,7 +1936,8 @@ service cloud.firestore {
           'createdBy',
           'createdAt',
           'updatedAt',
-          'deletedAt'
+          'deletedAt',
+          'revision'
         ]
       );
     }
@@ -1959,7 +1990,9 @@ service cloud.firestore {
     // The unlinked soft delete touches nothing but the two deletion stamps.
     function isGroupExpenseSoftDelete(previous, next) {
       return next.deletedAt is string
-        && next.diff(previous).affectedKeys().hasOnly(['deletedAt', 'updatedAt']);
+        && next.diff(previous).affectedKeys().hasOnly(
+             ['deletedAt', 'updatedAt', 'revision']
+           );
     }
 
     // The linked soft delete clears the whole link as a unit: wallet, category
@@ -1971,6 +2004,7 @@ service cloud.firestore {
              [
                'deletedAt',
                'updatedAt',
+               'revision',
                'walletId',
                'categoryId',
                'linkedTransactionId'
@@ -1997,7 +2031,8 @@ service cloud.firestore {
                'walletId',
                'categoryId',
                'linkedTransactionId',
-               'updatedAt'
+               'updatedAt',
+               'revision'
              ]
            );
     }
@@ -2078,7 +2113,8 @@ service cloud.firestore {
                'createdBy',
                'createdAt',
                'updatedAt',
-               'deletedAt'
+               'deletedAt',
+               'revision'
              ]
            );
     }
@@ -2114,11 +2150,12 @@ service cloud.firestore {
                ? [
                    'deletedAt',
                    'updatedAt',
+                   'revision',
                    'receiverWalletId',
                    'receiverCategoryId',
                    'receiverTransactionId'
                  ]
-               : ['deletedAt', 'updatedAt']
+               : ['deletedAt', 'updatedAt', 'revision']
            );
     }
 
@@ -2144,7 +2181,13 @@ service cloud.firestore {
     }
 
     match /groupExpenses/{expenseId} {
-      allow get, list: if isGroupExpenseMember(resource.data);
+      allow get: if isSignedIn()
+        && (
+          !exists(/databases/$(database)/documents/groupExpenses/$(expenseId))
+          || isGroupExpenseMember(resource.data)
+        );
+
+      allow list: if isGroupExpenseMember(resource.data);
 
       allow create: if isSignedIn()
         && isGroupExpenseCreateTarget(
@@ -2157,7 +2200,8 @@ service cloud.firestore {
         && hasGroupExpenseLinks(request.resource.data)
         && hasGroupExpenseLinkCoherence(request.resource.data)
         && hasGroupExpenseIdentity(request.resource.data)
-        && request.resource.data.deletedAt == null;
+        && request.resource.data.deletedAt == null
+        && isInitialRevision(request.resource.data);
 
       allow update: if isSignedIn()
         && isGroupExpenseUpdateTarget(
@@ -2170,6 +2214,7 @@ service cloud.firestore {
         && hasGroupExpenseFields(request.resource.data)
         && hasGroupExpenseLinks(request.resource.data)
         && hasGroupExpenseIdentity(request.resource.data)
+        && isRevisionBump(resource.data, request.resource.data)
         && (
           isGroupExpenseSoftDelete(resource.data, request.resource.data)
           || isGroupExpenseLinkedSoftDelete(
@@ -2199,7 +2244,13 @@ service cloud.firestore {
     // No composite index: `getGroupSettlementsOperation` filters only with
     // `where('groupId', '==', groupId)` and sorts client-side.
     match /groupSettlements/{settlementId} {
-      allow get, list: if isGroupSettlementMember(resource.data);
+      allow get: if isSignedIn()
+        && (
+          !exists(/databases/$(database)/documents/groupSettlements/$(settlementId))
+          || isGroupSettlementMember(resource.data)
+        );
+
+      allow list: if isGroupSettlementMember(resource.data);
 
       allow create: if isSignedIn()
         && request.resource.data.createdBy == request.auth.uid
@@ -2212,6 +2263,7 @@ service cloud.firestore {
         && hasGroupSettlementFields(request.resource.data)
         && hasGroupSettlementLinkShape(request.resource.data)
         && request.resource.data.deletedAt == null
+        && isInitialRevision(request.resource.data)
         // Only the creditor ever links the income, so a debtor create is always
         // social-only.
         && (
@@ -2234,6 +2286,7 @@ service cloud.firestore {
         && hasGroupSettlementFields(request.resource.data)
         && hasGroupSettlementLinkShape(request.resource.data)
         && request.resource.data.updatedAt is string
+        && isRevisionBump(resource.data, request.resource.data)
         && (
           isGroupSettlementSoftDelete(resource.data, request.resource.data)
           || isGroupSettlementEdit(resource.data, request.resource.data)

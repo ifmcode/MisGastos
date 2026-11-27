@@ -48,6 +48,51 @@ const REQUIRED_COLUMNS: Record<LocalTableName, readonly string[]> = {
     "ownerId", "lastPullAt", "lastPushAt", "lastFullSyncAt", "lastErrorCode",
   ],
   cacheMeta: ["ownerId", "collection", "fetchedAt"],
+  friendships: [
+    "id", "ownerId", "memberIds", "requesterId", "recipientId", "createdAt",
+    "updatedAt", "syncStatus",
+  ],
+  friendRequests: [
+    "id", "ownerId", "requesterId", "recipientId", "participantIds", "status",
+    "createdAt", "updatedAt", "syncStatus",
+  ],
+  publicProfiles: [
+    "id", "ownerId", "displayName", "email", "createdAt", "updatedAt",
+    "syncStatus",
+  ],
+  groups: [
+    "id", "ownerId", "groupOwnerId", "createdBy", "memberIds", "name",
+    "description", "defaultCurrency", "joinCode", "simplifyDebts", "createdAt",
+    "updatedAt", "syncStatus",
+  ],
+  groupInvitations: [
+    "id", "ownerId", "groupId", "groupName", "inviterId", "inviteeId",
+    "pairId", "status", "createdAt", "updatedAt", "syncStatus",
+  ],
+  sharedExpenses: [
+    "id", "ownerId", "participantIds", "pairId", "payerId", "amountCents",
+    "currency", "splitMode", "participants", "description", "date", "walletId",
+    "categoryId", "linkedTransactionId", "createdBy", "createdAt", "updatedAt",
+    "deletedAt", "revision", "syncStatus",
+  ],
+  settlements: [
+    "id", "ownerId", "participantIds", "pairId", "fromUserId", "toUserId",
+    "amountCents", "currency", "date", "note", "createdBy", "createdAt",
+    "updatedAt", "deletedAt", "receiverWalletId", "receiverCategoryId",
+    "receiverTransactionId", "revision", "syncStatus",
+  ],
+  groupExpenses: [
+    "id", "ownerId", "groupId", "payerId", "amountCents", "currency",
+    "splitMode", "participants", "description", "date", "walletId",
+    "categoryId", "linkedTransactionId", "createdBy", "createdAt", "updatedAt",
+    "deletedAt", "revision", "syncStatus",
+  ],
+  groupSettlements: [
+    "id", "ownerId", "groupId", "participantIds", "pairId", "fromUserId",
+    "toUserId", "amountCents", "currency", "date", "note", "createdBy",
+    "createdAt", "updatedAt", "deletedAt", "receiverWalletId",
+    "receiverCategoryId", "receiverTransactionId", "revision", "syncStatus",
+  ],
 };
 
 const REQUIRED_INDEXES = [
@@ -56,6 +101,14 @@ const REQUIRED_INDEXES = [
   "ON transactions (ownerId, walletId)",
   "ON outbox (ownerId, seq)",
   "ON conflicts (ownerId)",
+  "ON sharedExpenses (ownerId)",
+  "ON settlements (ownerId)",
+  "ON groupExpenses (ownerId, groupId)",
+  "ON groupSettlements (ownerId, groupId)",
+  "ON friendships (ownerId)",
+  "ON friendRequests (ownerId)",
+  "ON groups (ownerId)",
+  "ON groupInvitations (ownerId)",
 ];
 
 function tableStatement(table: LocalTableName): string {

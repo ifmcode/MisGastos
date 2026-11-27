@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { assertServerSnapshot } from "@/shared/lib/local-db/offline-read";
 
 import { FriendOperationError } from "../services/friend.errors";
 import type {
@@ -44,6 +45,7 @@ export async function getFriendRequestsOperation(
       where("participantIds", "array-contains", uid),
     ),
   );
+  assertServerSnapshot(snapshot);
 
   const requests: FriendRequest[] = [];
 

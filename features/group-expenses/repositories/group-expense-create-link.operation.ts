@@ -2,6 +2,10 @@ import { collection, doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { nextRevision } from "@/shared/utils/revision";
+import {
+  readAppliedRevision,
+  writeAppliedMutation,
+} from "@/shared/services/sync/firestore-idempotency";
 import { FirebaseLinkedMovementPort } from "@/features/shared-expenses/repositories/firebase-linked-movement.port";
 import type { ILinkedMovementPort } from "@/features/shared-expenses/repositories/linked-movement.port";
 import {
@@ -21,7 +25,10 @@ import {
 } from "./group-expense-link.helpers";
 import { toGroupExpenseData } from "./group-expenses.data";
 import { mapGroupExpenseDocument } from "./group-expenses.mapper";
-import { GROUP_EXPENSES_COLLECTION } from "./group-expenses.operations";
+import {
+  GROUP_EXPENSES_COLLECTION,
+  type GroupExpenseMutationOptions,
+} from "./group-expenses.operations";
 
 /**
  * Creates the group expense and its linked personal movement in one
@@ -32,6 +39,7 @@ import { GROUP_EXPENSES_COLLECTION } from "./group-expenses.operations";
 export async function createGroupExpenseLinkOperation(
   dto: CreateGroupExpenseDto,
   port: ILinkedMovementPort = new FirebaseLinkedMovementPort(),
+  options: GroupExpenseMutationOptions = {},
 ): Promise<GroupExpense> {
   const walletId = dto.walletId ?? "";
 
@@ -48,10 +56,31 @@ export async function createGroupExpenseLinkOperation(
   const now = dto.updatedAt;
   const wallet = walletRef(walletId);
   const movement = newMovementRef();
-  const expense = doc(collection(db, GROUP_EXPENSES_COLLECTION));
+  const expense = options.id
+    ? doc(db, GROUP_EXPENSES_COLLECTION, options.id)
+    : doc(collection(db, GROUP_EXPENSES_COLLECTION));
   let created: GroupExpense | null = null;
 
   await runTransaction(db, async (transaction) => {
+    if (options.sync) {
+      const replay = await readAppliedRevision(
+        transaction,
+        options.sync.ownerId,
+        options.sync,
+      );
+
+      if (replay !== null) {
+        const snapshot = await transaction.get(expense);
+        created = snapshot.exists()
+          ? mapGroupExpenseDocument(
+              expense.id,
+              snapshot.data() as Record<string, unknown>,
+            )
+          : null;
+        return;
+      }
+    }
+
     const walletSnapshot = await transaction.get(wallet);
     const balance = readWalletBalance(walletSnapshot, dto.payerId, dto.currency);
     const nextBalance = port.applyAmountToBalance(balance, dto.amountCents);
@@ -94,6 +123,17 @@ export async function createGroupExpenseLinkOperation(
       description: dto.description,
       createdAt: now,
     });
+
+    if (options.sync) {
+      writeAppliedMutation(transaction, {
+        ownerId: options.sync.ownerId,
+        context: options.sync,
+        entityType: "group-expense",
+        entityId: expense.id,
+        revisionAfter: 0,
+        now,
+      });
+    }
 
     created = mapGroupExpenseDocument(expense.id, expenseData);
   });

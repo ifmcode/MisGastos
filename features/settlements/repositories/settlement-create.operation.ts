@@ -1,7 +1,13 @@
-import { runTransaction } from "firebase/firestore";
+import { doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import { nextRevision } from "@/shared/utils/revision";
+import { INITIAL_REVISION, nextRevision } from "@/shared/utils/revision";
+import {
+  readAppliedRevision,
+  writeAppliedMutation,
+  type SocialMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
+import { SyncMutationError } from "@/shared/services/sync/sync.errors";
 import {
   createNotificationDocumentId,
   toNotificationData,
@@ -26,8 +32,14 @@ import {
 } from "./settlement-wallet.helpers";
 import { toSettlementData } from "./settlements.data";
 import { mapSettlementDocument } from "./settlements.mapper";
-import { newSettlementRef } from "./settlements.operations";
+import { SETTLEMENTS_COLLECTION, newSettlementRef } from "./settlements.operations";
 import type { SettlementNotificationBuilder } from "./settlements.repository";
+
+/** Inputs the sync executor adds to the otherwise unchanged server operation. */
+export interface SettlementMutationOptions {
+  id?: string;
+  sync?: SocialMutationContext;
+}
 
 /**
  * Creates the settlement, its optional creditor income and the counterpart
@@ -41,11 +53,14 @@ export async function createSettlementOperation(
   dto: CreateSettlementDto,
   notification: SettlementNotificationBuilder,
   port: ISettlementMovementPort = new FirebaseSettlementMovementPort(),
+  options: SettlementMutationOptions = {},
 ): Promise<Settlement> {
   assertSettlementLinkShape(dto.receiverWalletId, dto.receiverCategoryId);
 
   const now = dto.updatedAt;
-  const settlementDocument = newSettlementRef();
+  const settlementDocument = options.id
+    ? doc(db, SETTLEMENTS_COLLECTION, options.id)
+    : newSettlementRef();
   const walletId = dto.receiverWalletId;
   const movementDocument =
     walletId === null ? null : newSettlementMovementRef();
@@ -54,6 +69,7 @@ export async function createSettlementOperation(
     id: settlementDocument.id,
     ...dto,
     receiverTransactionId: movementDocument ? movementDocument.id : null,
+    revision: 0,
   };
   const event = notification(settlement);
   const notificationDocument = notificationRef(
@@ -63,6 +79,25 @@ export async function createSettlementOperation(
   let created: Settlement | null = null;
 
   await runTransaction(db, async (transaction) => {
+    if (options.sync) {
+      const replay = await readAppliedRevision(
+        transaction,
+        options.sync.ownerId,
+        options.sync,
+      );
+
+      if (replay !== null) {
+        const snapshot = await transaction.get(settlementDocument);
+        created = snapshot.exists()
+          ? mapSettlementDocument(
+              settlementDocument.id,
+              snapshot.data() as Record<string, unknown>,
+            )
+          : null;
+        return;
+      }
+    }
+
     const notificationSnapshot = await transaction.get(notificationDocument);
     const walletSnapshot =
       walletId === null
@@ -102,6 +137,17 @@ export async function createSettlementOperation(
 
     if (!notificationSnapshot.exists()) {
       transaction.set(notificationDocument, toNotificationData(event));
+    }
+
+    if (options.sync) {
+      writeAppliedMutation(transaction, {
+        ownerId: options.sync.ownerId,
+        context: options.sync,
+        entityType: "settlement",
+        entityId: settlement.id,
+        revisionAfter: INITIAL_REVISION,
+        now,
+      });
     }
 
     created = mapSettlementDocument(settlement.id, data);

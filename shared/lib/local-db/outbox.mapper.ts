@@ -8,7 +8,16 @@ import type {
   OutboxStatus,
 } from "./local-db.types";
 
-const ENTITY_TYPES = ["wallet", "category", "transaction", "transfer"] as const;
+const ENTITY_TYPES = [
+  "wallet",
+  "category",
+  "transaction",
+  "transfer",
+  "shared-expense",
+  "settlement",
+  "group-expense",
+  "group-settlement",
+] as const;
 const OPERATIONS = ["create", "update", "delete"] as const;
 const STATUSES = ["pending", "syncing", "failed", "conflict"] as const;
 

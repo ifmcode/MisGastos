@@ -4,6 +4,8 @@ import * as firebaseAuth from "firebase/auth";
 import type { Auth, Persistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
+import { registerCurrentOwnerResolver } from "@/shared/lib/local-db/current-owner";
+
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -40,3 +42,7 @@ function createAuth(): Auth {
 
 export const auth = createAuth();
 export const db = getFirestore(app);
+
+// The social cache scopes rows by account and the group repositories do not take
+// the viewer as an argument, so the auth singleton is the only source of truth.
+registerCurrentOwnerResolver(() => auth.currentUser?.uid ?? null);

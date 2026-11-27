@@ -1,7 +1,14 @@
 import { runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import { nextRevision } from "@/shared/utils/revision";
+import { nextRevision, readStoredRevision } from "@/shared/utils/revision";
+import {
+  assertExpectedRevision,
+  readAppliedRevision,
+  writeAppliedMutation,
+  type SocialMutationContext,
+} from "@/shared/services/sync/firestore-idempotency";
+import { SyncMutationError } from "@/shared/services/sync/sync.errors";
 import {
   createNotificationDocumentId,
   toNotificationData,
@@ -26,6 +33,8 @@ export interface SoftDeleteSettlementOperationOptions {
   settlementId: string;
   deletedAt: string;
   notification: NotificationWrite;
+  /** Present only while draining the outbox. */
+  sync?: SocialMutationContext;
 }
 
 /**
@@ -42,6 +51,7 @@ export async function softDeleteSettlementOperation(
     settlementId,
     deletedAt,
     notification,
+    sync,
   }: SoftDeleteSettlementOperationOptions,
   port: ISettlementMovementPort = new FirebaseSettlementMovementPort(),
 ): Promise<void> {
@@ -51,12 +61,39 @@ export async function softDeleteSettlementOperation(
   );
 
   await runTransaction(db, async (transaction) => {
-    const stored = readSettlementDocument(
-      settlementId,
-      await transaction.get(reference),
-    );
+    if (sync) {
+      const replay = await readAppliedRevision(
+        transaction,
+        sync.ownerId,
+        sync,
+      );
 
-    if (stored.deletedAt !== null) return;
+      if (replay !== null) return;
+    }
+
+    const storedSnapshot = await transaction.get(reference);
+    if (sync && !storedSnapshot.exists()) {
+      throw new SyncMutationError("DELETED_REMOTELY");
+    }
+
+    const stored = readSettlementDocument(settlementId, storedSnapshot);
+    const revision = nextRevision(stored);
+
+    if (stored.deletedAt !== null) {
+      if (sync) {
+        writeAppliedMutation(transaction, {
+          ownerId: sync.ownerId,
+          context: sync,
+          entityType: "settlement",
+          entityId: settlementId,
+          revisionAfter: readStoredRevision(stored),
+          now: deletedAt,
+        });
+      }
+      return;
+    }
+
+    if (sync) assertExpectedRevision(storedSnapshot.data() ?? {}, sync);
 
     const viewerIsCreditor = stored.toUserId === viewerUid;
 
@@ -89,6 +126,7 @@ export async function softDeleteSettlementOperation(
     const patch: Record<string, unknown> = {
       deletedAt,
       updatedAt: deletedAt,
+      revision,
     };
 
     // Only the creditor can clear the receiver link; the debtor's delete always
@@ -103,6 +141,17 @@ export async function softDeleteSettlementOperation(
 
     if (!notificationSnapshot.exists()) {
       transaction.set(notificationDocument, toNotificationData(notification));
+    }
+
+    if (sync) {
+      writeAppliedMutation(transaction, {
+        ownerId: sync.ownerId,
+        context: sync,
+        entityType: "settlement",
+        entityId: settlementId,
+        revisionAfter: revision,
+        now: deletedAt,
+      });
     }
   });
 }

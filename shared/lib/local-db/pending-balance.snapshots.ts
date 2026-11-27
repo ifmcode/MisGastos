@@ -14,6 +14,12 @@ export interface TransferEffect {
   amount: number;
 }
 
+/** Wallet effect of a social movement with an optional personal mirror. */
+export interface SocialWalletEffect {
+  walletId: string;
+  signedAmount: number;
+}
+
 export function isSnapshotRecord(
   value: unknown,
 ): value is Record<string, unknown> {
@@ -70,4 +76,42 @@ export function readTransferEffect(
   if (fromWalletId === toWalletId) return null;
 
   return { fromWalletId, toWalletId, amount };
+}
+
+function readCents(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    return null;
+  }
+
+  return roundMoney(value);
+}
+
+/**
+ * A shared or group expense debits the payer's wallet by `amountCents`. The
+ * wallet is the payer's own; an expense without a wallet link has no effect.
+ */
+export function readSocialExpenseEffect(
+  snapshot: Record<string, unknown>,
+): SocialWalletEffect | null {
+  const walletId = readWalletId(snapshot, "walletId");
+  const amountCents = readCents(snapshot.amountCents);
+
+  if (!walletId || amountCents === null) return null;
+
+  return { walletId, signedAmount: roundMoney(-amountCents / 100) };
+}
+
+/**
+ * A settlement credits the receiver's wallet by `amountCents`; `receive` is
+ * used for a delete so the reverted sign stays explicit.
+ */
+export function readSocialSettlementEffect(
+  snapshot: Record<string, unknown>,
+): SocialWalletEffect | null {
+  const walletId = readWalletId(snapshot, "receiverWalletId");
+  const amountCents = readCents(snapshot.amountCents);
+
+  if (!walletId || amountCents === null) return null;
+
+  return { walletId, signedAmount: roundMoney(amountCents / 100) };
 }

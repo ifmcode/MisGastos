@@ -62,6 +62,7 @@ describe("softDeleteGroupExpenseLinkOperation", () => {
       walletId: null,
       categoryId: null,
       linkedTransactionId: null,
+      revision: 1,
     });
   });
 
@@ -98,6 +99,7 @@ describe("softDeleteGroupExpenseLinkOperation", () => {
       walletId: null,
       categoryId: null,
       linkedTransactionId: null,
+      revision: 1,
     });
   });
 
@@ -160,6 +162,7 @@ describe("softDeleteGroupExpenseLinkOperation", () => {
       walletId: null,
       categoryId: null,
       linkedTransactionId: null,
+      revision: 1,
     });
     expect(transactionSet).toHaveBeenCalledWith(
       activityRef("activity-new"),
@@ -199,6 +202,7 @@ describe("softDeleteGroupExpenseLinkOperation", () => {
       walletId: null,
       categoryId: null,
       linkedTransactionId: null,
+      revision: 1,
     });
   });
 });

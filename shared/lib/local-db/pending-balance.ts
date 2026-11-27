@@ -3,8 +3,11 @@ import { roundMoney } from "@/shared/utils/money";
 import type { OutboxMutation } from "./local-db.types";
 import {
   isSnapshotRecord,
+  readSocialExpenseEffect,
+  readSocialSettlementEffect,
   readTransactionEffect,
   readTransferEffect,
+  type SocialWalletEffect,
   type TransactionEffect,
   type TransferEffect,
 } from "./pending-balance.snapshots";
@@ -35,6 +38,36 @@ function applyTransferEffect(
 
   addDelta(deltas, effect.fromWalletId, roundMoney(-effect.amount * sign));
   addDelta(deltas, effect.toWalletId, roundMoney(effect.amount * sign));
+}
+
+function applySocialEffect(
+  deltas: Map<string, number>,
+  effect: SocialWalletEffect | null,
+  sign: 1 | -1,
+): void {
+  if (!effect) return;
+  addDelta(deltas, effect.walletId, roundMoney(effect.signedAmount * sign));
+}
+
+/** Same create/update/delete matrix for every social movement. */
+function applySocialMutation(
+  deltas: Map<string, number>,
+  mutation: OutboxMutation,
+  local: SocialWalletEffect | null,
+  server: SocialWalletEffect | null,
+): void {
+  if (mutation.operation === "create") {
+    applySocialEffect(deltas, local, 1);
+    return;
+  }
+
+  if (mutation.operation === "update") {
+    applySocialEffect(deltas, local, 1);
+    applySocialEffect(deltas, server, -1);
+    return;
+  }
+
+  applySocialEffect(deltas, server ?? local, -1);
 }
 
 function applyTransactionMutation(
@@ -110,6 +143,26 @@ export function readOutboxWalletDeltas(
       applyTransactionMutation(deltas, mutation, localSnapshot, serverSnapshot);
     } else if (mutation.entityType === "transfer") {
       applyTransferMutation(deltas, mutation, localSnapshot, serverSnapshot);
+    } else if (
+      mutation.entityType === "shared-expense" ||
+      mutation.entityType === "group-expense"
+    ) {
+      applySocialMutation(
+        deltas,
+        mutation,
+        readSocialExpenseEffect(localSnapshot),
+        readSocialExpenseEffect(serverSnapshot),
+      );
+    } else if (
+      mutation.entityType === "settlement" ||
+      mutation.entityType === "group-settlement"
+    ) {
+      applySocialMutation(
+        deltas,
+        mutation,
+        readSocialSettlementEffect(localSnapshot),
+        readSocialSettlementEffect(serverSnapshot),
+      );
     }
   }
 

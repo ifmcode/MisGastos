@@ -10,6 +10,12 @@ export const mockDoc = jest.fn<(...args: unknown[]) => unknown>();
 export const mockCollection = jest.fn<(...args: unknown[]) => unknown>();
 export const mockQuery = jest.fn<(...args: unknown[]) => unknown>();
 export const mockWhere = jest.fn<(...args: unknown[]) => unknown>();
+export const mockRunTransaction = jest.fn<
+  (
+    db: unknown,
+    callback: (transaction: unknown) => Promise<unknown>,
+  ) => Promise<unknown>
+>();
 
 export const GENERATED_EXPENSE_ID = "expense-generated";
 
@@ -22,6 +28,10 @@ jest.mock("firebase/firestore", () => ({
   collection: (...args: unknown[]) => mockCollection(...args),
   query: (...args: unknown[]) => mockQuery(...args),
   where: (...args: unknown[]) => mockWhere(...args),
+  runTransaction: (
+    database: unknown,
+    callback: (transaction: unknown) => Promise<unknown>,
+  ) => mockRunTransaction(database, callback),
 }));
 
 jest.mock("@/lib/firebase", () => ({
@@ -47,6 +57,13 @@ export function setupSharedExpensesRepositoryMocks() {
       path: `${String(args[1])}/${String(args[2])}`,
     };
   });
+  mockRunTransaction.mockImplementation(async (_db, callback) =>
+    callback({
+      get: (...args: unknown[]) => mockGetDoc(...args),
+      set: (...args: unknown[]) => mockSetDoc(...args),
+      update: (...args: unknown[]) => mockUpdateDoc(...args),
+    }),
+  );
 }
 
 export function documentSnapshot(

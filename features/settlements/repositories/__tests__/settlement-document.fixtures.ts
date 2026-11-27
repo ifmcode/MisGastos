@@ -46,6 +46,7 @@ export function buildSettlement(overrides: Partial<Settlement> = {}): Settlement
     receiverWalletId: null,
     receiverCategoryId: null,
     receiverTransactionId: null,
+    revision: 0,
     ...overrides,
   };
 }

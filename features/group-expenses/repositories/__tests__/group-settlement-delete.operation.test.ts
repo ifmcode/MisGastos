@@ -86,6 +86,7 @@ describe("softDeleteGroupSettlementOperation", () => {
       receiverWalletId: null,
       receiverCategoryId: null,
       receiverTransactionId: null,
+      revision: 1,
     });
     expect(
       notificationWriteOf(notificationRef(buildNotification("user-c", "user-b").dedupeKey)),
@@ -113,6 +114,7 @@ describe("softDeleteGroupSettlementOperation", () => {
     expect(lastWriteOf(transactionUpdate, settlementRef(SETTLEMENT_ID))).toEqual({
       deletedAt: DELETED_AT,
       updatedAt: DELETED_AT,
+      revision: 1,
     });
   });
 

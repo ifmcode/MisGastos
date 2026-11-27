@@ -63,6 +63,7 @@ function buildSettlement(
     receiverWalletId: null,
     receiverCategoryId: null,
     receiverTransactionId: null,
+    revision: 0,
     ...overrides,
   };
 }

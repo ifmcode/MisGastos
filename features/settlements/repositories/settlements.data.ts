@@ -2,6 +2,7 @@ import type {
   CreateSettlementDto,
   UpdateSettlementDto,
 } from "../types/settlement.types";
+import { INITIAL_REVISION } from "@/shared/utils/revision";
 
 /** Full document of a new settlement; every optional link stays explicit. */
 export function toSettlementData(
@@ -23,6 +24,7 @@ export function toSettlementData(
     receiverWalletId: dto.receiverWalletId,
     receiverCategoryId: dto.receiverCategoryId,
     receiverTransactionId: dto.receiverTransactionId,
+    revision: INITIAL_REVISION,
   };
 }
 

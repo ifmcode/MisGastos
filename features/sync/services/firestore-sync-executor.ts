@@ -5,6 +5,10 @@ import type {
   RemoteMutationOutcome,
 } from "@/shared/services/sync/sync.types";
 
+import { executeGroupExpenseMutation } from "./firestore-group-expense-mutations";
+import { executeGroupSettlementMutation } from "./firestore-group-settlement-mutations";
+import { executeSettlementMutation } from "./firestore-settlement-mutations";
+import { executeSharedExpenseMutation } from "./firestore-shared-expense-mutations";
 import { executeTransactionMutation } from "./firestore-transaction-mutations";
 import { executeTransferMutation } from "./firestore-transfer-mutations";
 import { readRemoteSnapshot } from "./sync-executor.helpers";
@@ -22,6 +26,18 @@ export class FirestoreSyncExecutor implements RemoteMutationExecutor {
       }
       if (mutation.entityType === "transfer") {
         return await executeTransferMutation(mutation);
+      }
+      if (mutation.entityType === "shared-expense") {
+        return await executeSharedExpenseMutation(mutation);
+      }
+      if (mutation.entityType === "settlement") {
+        return await executeSettlementMutation(mutation);
+      }
+      if (mutation.entityType === "group-expense") {
+        return await executeGroupExpenseMutation(mutation);
+      }
+      if (mutation.entityType === "group-settlement") {
+        return await executeGroupSettlementMutation(mutation);
       }
 
       return { status: "failed", errorCode: "SYNC_UNSUPPORTED_ENTITY" };

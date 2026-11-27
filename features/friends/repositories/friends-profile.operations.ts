@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { assertServerSnapshot } from "@/shared/lib/local-db/offline-read";
 
 import type { PublicProfile, PublicProfileInput } from "../types/friend.types";
 import { mapPublicProfileDocument } from "./friends.mapper";

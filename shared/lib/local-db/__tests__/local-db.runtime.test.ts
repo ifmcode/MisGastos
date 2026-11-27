@@ -9,6 +9,7 @@ import {
 } from "../local-db.runtime";
 import { InMemoryDatabase } from "../in-memory.database";
 import { LOCAL_DB_ERROR_CODES } from "../local-db.errors";
+import { LATEST_SCHEMA_VERSION } from "../migrations";
 
 const FLAG = "EXPO_PUBLIC_OFFLINE_FIRST";
 
@@ -65,7 +66,7 @@ describe("local database runtime", () => {
     const port = await openLocalDatabasePort(async () => db);
 
     expect(port).toBe(db);
-    await expect(db.getSchemaVersion()).resolves.toBe(2);
+    await expect(db.getSchemaVersion()).resolves.toBe(LATEST_SCHEMA_VERSION);
   });
 
   it("resolves null and logs the open failure code", async () => {

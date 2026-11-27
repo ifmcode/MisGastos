@@ -3,7 +3,6 @@ import type {
   LocalDatabaseTransaction,
 } from "./database.port";
 import type {
-  LocalCacheCollection,
   LocalRow,
 } from "./local-db.types";
 import { runInLocalTransaction } from "./local-transaction";
@@ -14,7 +13,7 @@ export interface ICacheMetaRepository {
   /** Last successful fetch for this owner and collection, or null when never. */
   getFetchedAt(
     ownerId: string,
-    collection: LocalCacheCollection,
+    collection: string,
   ): Promise<string | null>;
   /**
    * Stamps a successful fetch. Pass `tx` to join the caller's transaction, omit
@@ -22,7 +21,7 @@ export interface ICacheMetaRepository {
    */
   markFetched(
     ownerId: string,
-    collection: LocalCacheCollection,
+    collection: string,
     fetchedAt: string,
     tx?: LocalDatabaseTransaction,
   ): Promise<void>;
@@ -30,7 +29,7 @@ export interface ICacheMetaRepository {
 
 function toRow(
   ownerId: string,
-  collection: LocalCacheCollection,
+  collection: string,
   fetchedAt: string,
 ): LocalRow {
   return { ownerId, collection, fetchedAt };
@@ -41,7 +40,7 @@ export class LocalCacheMetaRepository implements ICacheMetaRepository {
 
   async getFetchedAt(
     ownerId: string,
-    collection: LocalCacheCollection,
+    collection: string,
   ): Promise<string | null> {
     const rows = await this.port.select<LocalRow>(TABLE, {
       where: { ownerId, collection },
@@ -54,7 +53,7 @@ export class LocalCacheMetaRepository implements ICacheMetaRepository {
 
   async markFetched(
     ownerId: string,
-    collection: LocalCacheCollection,
+    collection: string,
     fetchedAt: string,
     tx?: LocalDatabaseTransaction,
   ): Promise<void> {

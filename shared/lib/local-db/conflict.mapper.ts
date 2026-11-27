@@ -7,7 +7,16 @@ import type {
   OutboxEntityType,
 } from "./local-db.types";
 
-const ENTITY_TYPES = ["wallet", "category", "transaction", "transfer"] as const;
+const ENTITY_TYPES = [
+  "wallet",
+  "category",
+  "transaction",
+  "transfer",
+  "shared-expense",
+  "settlement",
+  "group-expense",
+  "group-settlement",
+] as const;
 const CONFLICT_KINDS = [
   "REMOTE_CHANGED",
   "DELETED_REMOTELY",

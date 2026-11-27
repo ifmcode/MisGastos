@@ -119,6 +119,7 @@ describe("updateGroupExpenseOperation", () => {
         walletId: null,
         categoryId: null,
         updatedAt: "2026-11-11T10:00:00.000Z",
+        revision: 1,
       },
     );
     expect(mockTransactionSet).toHaveBeenCalledWith(
@@ -132,6 +133,19 @@ describe("updateGroupExpenseOperation", () => {
       }),
     );
     expect(expense).toMatchObject({ id: "expense-1", amountCents: 2000 });
+  });
+
+  it("rejects an already deleted expense", async () => {
+    mockTransactionGet.mockResolvedValue(
+      documentSnapshot(
+        "expense-1",
+        buildDocument({ deletedAt: "2026-11-10T20:00:00.000Z" }),
+      ),
+    );
+
+    await expect(
+      updateGroupExpenseOperation("expense-1", updateDto, "user-a"),
+    ).rejects.toMatchObject({ code: "ALREADY_DELETED" });
   });
 
   it("fails when the stored document is missing", async () => {
@@ -161,6 +175,7 @@ describe("softDeleteGroupExpenseOperation", () => {
       {
         deletedAt: "2026-11-11T10:00:00.000Z",
         updatedAt: "2026-11-11T10:00:00.000Z",
+        revision: 1,
       },
     );
     expect(mockTransactionSet).toHaveBeenCalledWith(

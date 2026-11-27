@@ -2,6 +2,7 @@ import type {
   CreateGroupSettlementDto,
   UpdateGroupSettlementDto,
 } from "../types/group-settlement.types";
+import { INITIAL_REVISION } from "@/shared/utils/revision";
 
 /** Full document of a new group settlement; every optional link stays explicit. */
 export function toGroupSettlementData(
@@ -24,6 +25,7 @@ export function toGroupSettlementData(
     receiverWalletId: dto.receiverWalletId,
     receiverCategoryId: dto.receiverCategoryId,
     receiverTransactionId: dto.receiverTransactionId,
+    revision: INITIAL_REVISION,
   };
 }
 

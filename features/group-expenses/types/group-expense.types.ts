@@ -98,10 +98,15 @@ export interface GroupExpense {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  /** Optimistic-concurrency counter; legacy documents map to 0. */
+  revision: number;
 }
 
 /** Payload the repository persists for a new expense; the id is generated there. */
-export type CreateGroupExpenseDto = Omit<GroupExpense, "id"> & {
+export type CreateGroupExpenseDto = Omit<
+  GroupExpense,
+  "id" | "revision"
+> & {
   deletedAt: null;
 };
 

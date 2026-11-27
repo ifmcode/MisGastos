@@ -30,6 +30,9 @@ jest.mock("@/features/transfers/repositories/firebase-transfer.repository", () =
 jest.mock("@/features/transfers/repositories/local-transfer.cache", () => ({
   cacheTransfers: (...args: unknown[]) => mockCacheTransfers(...args),
 }));
+jest.mock("../sync-social-pull", () => ({
+  pullSocialData: jest.fn(() => Promise.resolve()),
+}));
 
 import { pullOwnerData } from "../sync-pull";
 

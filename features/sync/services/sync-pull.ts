@@ -5,6 +5,8 @@ import { cacheTransfers } from "@/features/transfers/repositories/local-transfer
 import { FirebaseWalletRepository } from "@/features/wallets/repositories/firebase-wallet.repository";
 import { cacheWallets } from "@/features/wallets/repositories/local-wallet.cache";
 
+import { pullSocialData } from "./sync-social-pull";
+
 /**
  * Owner-scoped full pull (ADR §5.4): re-read the personal collections and
  * mirror them into SQLite. It runs after the push cycle, so the freshly applied
@@ -23,4 +25,5 @@ export async function pullOwnerData(ownerId: string): Promise<void> {
   await cacheWallets(ownerId, wallets, now);
   await cacheTransactions(ownerId, transactions, now);
   await cacheTransfers(ownerId, transfers, now);
+  await pullSocialData(ownerId);
 }

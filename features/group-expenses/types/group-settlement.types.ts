@@ -69,10 +69,15 @@ export interface GroupSettlement {
   receiverWalletId: string | null;
   receiverCategoryId: string | null;
   receiverTransactionId: string | null;
+  /** Optimistic-concurrency counter; legacy documents map to 0. */
+  revision: number;
 }
 
 /** Payload the repository persists for a new settlement; the id is generated there. */
-export type CreateGroupSettlementDto = Omit<GroupSettlement, "id">;
+export type CreateGroupSettlementDto = Omit<
+  GroupSettlement,
+  "id" | "revision"
+>;
 
 /**
  * Mutable fields of a settlement. `groupId`, `participantIds`, `pairId`,

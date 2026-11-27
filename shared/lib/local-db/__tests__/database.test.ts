@@ -8,7 +8,7 @@ import {
   LOCAL_DB_MIGRATIONS,
 } from "../migrations";
 import { MIGRATION_002 } from "../migrations/migration-002";
-import { buildRow } from "./db.fixtures";
+import { MIGRATION_003 } from "../migrations/migration-003";import { buildRow } from "./db.fixtures";
 
 describe("migrateLocalDatabase", () => {
   let db: InMemoryDatabase;
@@ -43,19 +43,24 @@ describe("migrateLocalDatabase", () => {
     expect(db.executedStatements).toHaveLength(0);
   });
 
-  it("upgrades version 1 to version 2 without losing rows", async () => {
+  it("upgrades version 1 to the latest version without losing rows", async () => {
     await db.setSchemaVersion(1);
     db.seed("wallets", [
       buildRow({ id: "wallet-1", ownerId: "owner-1", name: "Cash" }),
     ]);
 
-    await expect(migrateLocalDatabase(db)).resolves.toBe(1);
+    await expect(migrateLocalDatabase(db)).resolves.toBe(
+      LATEST_SCHEMA_VERSION - 1,
+    );
 
-    await expect(db.getSchemaVersion()).resolves.toBe(2);
+    await expect(db.getSchemaVersion()).resolves.toBe(LATEST_SCHEMA_VERSION);
     await expect(
       db.select("wallets", { where: { id: "wallet-1" } }),
     ).resolves.toHaveLength(1);
-    expect(db.executedStatements).toEqual([...MIGRATION_002.statements]);
+    expect(db.executedStatements).toEqual([
+      ...MIGRATION_002.statements,
+      ...MIGRATION_003.statements,
+    ]);
   });
 
   it("adds the read-cache columns and metadata table in version 2", () => {

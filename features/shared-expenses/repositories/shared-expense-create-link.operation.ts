@@ -2,6 +2,10 @@ import { collection, doc, runTransaction } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { nextRevision } from "@/shared/utils/revision";
+import {
+  readAppliedRevision,
+  writeAppliedMutation,
+} from "@/shared/services/sync/firestore-idempotency";
 
 import { SharedExpenseOperationError } from "../services/shared-expense.errors";
 import type {
@@ -16,7 +20,10 @@ import {
 } from "./shared-expense-link.helpers";
 import { mapSharedExpenseDocument } from "./shared-expenses.mapper";
 import { toExpenseData } from "./shared-expenses.data";
-import { SHARED_EXPENSES_COLLECTION } from "./shared-expenses.operations";
+import {
+  SHARED_EXPENSES_COLLECTION,
+  type SharedExpenseMutationOptions,
+} from "./shared-expenses.operations";
 import { newMovementRef, walletRef } from "./shared-expense-movement-ref";
 
 /**
@@ -27,6 +34,7 @@ import { newMovementRef, walletRef } from "./shared-expense-movement-ref";
 export async function createSharedExpenseLinkOperation(
   dto: CreateSharedExpenseDto,
   port: ILinkedMovementPort = new FirebaseLinkedMovementPort(),
+  options: SharedExpenseMutationOptions = {},
 ): Promise<SharedExpense> {
   const walletId = dto.walletId ?? "";
 
@@ -37,10 +45,31 @@ export async function createSharedExpenseLinkOperation(
   const now = dto.updatedAt;
   const wallet = walletRef(walletId);
   const movement = newMovementRef();
-  const expense = doc(collection(db, SHARED_EXPENSES_COLLECTION));
+  const expense = options.id
+    ? doc(db, SHARED_EXPENSES_COLLECTION, options.id)
+    : doc(collection(db, SHARED_EXPENSES_COLLECTION));
   let created: SharedExpense | null = null;
 
   await runTransaction(db, async (transaction) => {
+    if (options.sync) {
+      const replay = await readAppliedRevision(
+        transaction,
+        options.sync.ownerId,
+        options.sync,
+      );
+
+      if (replay !== null) {
+        const snapshot = await transaction.get(expense);
+        created = snapshot.exists()
+          ? mapSharedExpenseDocument(
+              expense.id,
+              snapshot.data() as Record<string, unknown>,
+            )
+          : null;
+        return;
+      }
+    }
+
     const walletSnapshot = await transaction.get(wallet);
     const balance = readWalletBalance(walletSnapshot, dto.payerId, dto.currency);
     const nextBalance = port.applyAmountToBalance(balance, dto.amountCents);
@@ -73,6 +102,17 @@ export async function createSharedExpenseLinkOperation(
       updatedAt: now,
       revision: nextRevision(walletSnapshot.data()),
     });
+
+    if (options.sync) {
+      writeAppliedMutation(transaction, {
+        ownerId: options.sync.ownerId,
+        context: options.sync,
+        entityType: "shared-expense",
+        entityId: expense.id,
+        revisionAfter: 0,
+        now,
+      });
+    }
 
     created = mapSharedExpenseDocument(expense.id, expenseData);
   });
