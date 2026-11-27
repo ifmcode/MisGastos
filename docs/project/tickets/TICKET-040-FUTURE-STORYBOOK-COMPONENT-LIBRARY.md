@@ -20,7 +20,7 @@ Set up Storybook as a living catalog of the shared component layer plus the reus
 - [ ] Define the story location/naming convention and the rule that a new shared component needs a story before it is considered done
 - [ ] Keep stories out of the production bundle, the Jest coverage scope and the copy audit (or use translated copy)
 - [ ] Document how to add a story and how to run the catalog on device and web
-- [ ] Leave visual regression (Chromatic or screenshot diffing) as an explicit follow-up, not part of this ticket
+- [ ] Leave visual regression (Chromatic or screenshot diffing) as an explicit follow-up, not part of this ticket; the follow-up is TICKET-079
 
 ## Acceptance Criteria
 - [ ] The documented command opens the catalog and renders the shared components in both themes and both languages

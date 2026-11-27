@@ -212,7 +212,9 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - [ ] TICKET-054 Google Drive backup and restore
 - [ ] TICKET-076 web offline mode
 - [ ] TICKET-077 editable group-expense conflicts from the sync center
-- The Phase 9 tickets above are also post-V1, as are TICKET-076 and TICKET-077. These are intentionally outside V1.0 scope, listed so their order and dependencies stay visible, and they start only after V1 ships.
+- [ ] TICKET-078 FullStory session replay and product analytics (after the visual redesign and Storybook)
+- [ ] TICKET-079 Chromatic visual regression on every commit (after Storybook; needs Storybook v9+)
+- The Phase 9 tickets above are also post-V1, as are TICKET-076, TICKET-077, TICKET-078 and TICKET-079. These are intentionally outside V1.0 scope, listed so their order and dependencies stay visible, and they start only after V1 ships.
 
 ## Ordering Rules
 - **Recommended:** 0-3 → 4 → 5 → 6 → 7 → 8 (V1) → 9

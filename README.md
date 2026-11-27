@@ -311,6 +311,8 @@ líneas**, y `npm run check:copy` audita **358 archivos TSX**.
 - [ ] Copia de seguridad manual y restauración en Google Drive (**post-V1**)
 - [ ] Soporte offline en la web, evaluando IndexedDB/OPFS frente a `expo-sqlite` detrás de `DatabasePort` (**post-V1**, TICKET-076)
 - [ ] Conflictos de gasto de grupo editables desde el centro de sync: motivo concreto, miembro que ya no está y edición que resuelve el conflicto y reencola la subida (**post-V1**, TICKET-077)
+- [ ] Sesiones reales con FullStory para depurar y ver mapas de interacción, con textos y importes enmascarados (**post-V1**, TICKET-078)
+- [ ] Regresión visual automática en cada commit con Chromatic sobre el Storybook nativo: snapshots en simulador iOS y emulador Android, con el check en la pull request (**post-V1**, TICKET-079)
 
 Consulta el roadmap completo en
 [`docs/project/development-notes/roadmap.md`](docs/project/development-notes/roadmap.md).
