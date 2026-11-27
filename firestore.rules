@@ -16,9 +16,9 @@ service cloud.firestore {
     // update writes 1; a malformed stored value is treated the same way so a
     // damaged document stays recoverable instead of frozen.
     function isRevisionBump(stored, next) {
-      return next is int
-        && next >= 1
-        && next == (
+      return next.revision is int
+        && next.revision >= 1
+        && next.revision == (
              (('revision' in stored)
                && stored.revision is int
                && stored.revision >= 0)
