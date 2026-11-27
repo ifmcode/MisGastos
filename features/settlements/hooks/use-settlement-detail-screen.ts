@@ -59,7 +59,7 @@ export interface SettlementDetailScreenController {
 /**
  * Composition root of the settlement detail. The id only selects from the
  * viewer's participant-scoped list, so an unknown or deleted id resolves to the
- * safe missing state. Delete leaves without refreshing: the friend detail
+ * safe missing state. Delete leaves without a reload: the friend detail
  * reloads its own list and balances on focus.
  */
 export function useSettlementDetailScreen({

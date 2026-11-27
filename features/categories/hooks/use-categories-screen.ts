@@ -13,10 +13,8 @@ export function useCategoriesScreen() {
     categories,
     setCategories,
     loading,
-    refreshing,
     error,
     reload,
-    refresh,
   } = useCategories();
   const {
     mutating,
@@ -87,10 +85,8 @@ export function useCategoriesScreen() {
     typeFilter,
     setTypeFilter,
     loading,
-    refreshing,
     error,
     reload,
-    refresh,
     mutating,
     mutationError,
     mutationFieldErrors,

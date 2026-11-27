@@ -26,7 +26,6 @@ export interface TransferHistoryScreenController {
   activeWallets: Wallet[];
   walletMap: ReadonlyMap<string, Wallet>;
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   mutating: boolean;
   createError: string | null;
@@ -37,7 +36,6 @@ export interface TransferHistoryScreenController {
   editFromDetail: TransferDialogActions["editFromDetail"];
   deleteTransfer: (transferId: string) => Promise<boolean>;
   reload: () => void;
-  refresh: () => void;
 }
 
 /** Coordinates the transfer history list with the shared transfer form. */
@@ -45,21 +43,17 @@ export function useTransferHistoryScreen(): TransferHistoryScreenController {
   const {
     wallets,
     loading: walletsLoading,
-    refreshing: walletsRefreshing,
     error: walletsError,
     reload: reloadWallets,
-    refresh: refreshWallets,
   } = useWallets();
   const {
     transfers,
     loading: transfersLoading,
-    refreshing: transfersRefreshing,
     mutating,
     error: transfersError,
     createError,
     createFieldErrors,
     reload,
-    refresh,
     createTransfer,
     updateTransfer,
     deleteTransfer,
@@ -106,7 +100,6 @@ export function useTransferHistoryScreen(): TransferHistoryScreenController {
     activeWallets,
     walletMap,
     loading: transfersLoading || walletsLoading,
-    refreshing: transfersRefreshing || walletsRefreshing,
     error: transfersError ?? walletsError,
     mutating,
     createError,
@@ -118,10 +111,6 @@ export function useTransferHistoryScreen(): TransferHistoryScreenController {
     reload: () => {
       void reload();
       void reloadWallets();
-    },
-    refresh: () => {
-      void refresh();
-      void refreshWallets();
     },
   };
 }

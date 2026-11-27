@@ -19,7 +19,6 @@ import { getPendingRequests } from "../utils/pending-requests";
 
 export interface RequestsScreenController {
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   actionError: string | null;
   pendingId: string | null;
@@ -36,7 +35,6 @@ export interface RequestsScreenController {
   groupPendingAction: GroupInvitationResponse | null;
   ownerJoinRequests: OwnerJoinRequestsController;
   reload: () => void;
-  refresh: () => void;
   reloadGroups: () => void;
   acceptRequest: (requestId: string) => void;
   rejectRequest: (requestId: string) => void;
@@ -52,7 +50,7 @@ export interface RequestsScreenController {
 export function useRequestsScreen(): RequestsScreenController {
   const { user } = useAuth();
   const viewerUid = user?.uid;
-  const { overview, loading, refreshing, error, reload, refresh } =
+  const { overview, loading, error, reload, refresh } =
     useFriendsOverview({ viewerUid });
   const actions = useFriendActions({ viewerUid, onChanged: refresh });
   const groupInvitations = useGroupInvitations({ viewerUid });
@@ -61,7 +59,7 @@ export function useRequestsScreen(): RequestsScreenController {
     viewerUid,
     onResponded: removeInvitation,
   });
-  const { reload: reloadGroups, refresh: refreshGroups } = groupInvitations;
+  const { reload: reloadGroups } = groupInvitations;
   const ownerJoinRequests = useOwnerJoinRequests({ viewerUid });
   const pending = useMemo(
     () => getPendingRequests(overview, ownerJoinRequests.count),
@@ -69,8 +67,7 @@ export function useRequestsScreen(): RequestsScreenController {
   );
   const { acceptRequest: accept, rejectRequest: reject, cancelRequest: cancel } =
     actions;
-  const { reload: reloadOwnerQueue, refresh: refreshOwnerQueue } =
-    ownerJoinRequests;
+  const { reload: reloadOwnerQueue } = ownerJoinRequests;
 
   const acceptRequest = useCallback(
     (requestId: string) => {
@@ -99,16 +96,8 @@ export function useRequestsScreen(): RequestsScreenController {
     void reloadOwnerQueue();
   }, [reload, reloadGroups, reloadOwnerQueue]);
 
-  const refreshAll = useCallback(() => {
-    void refresh();
-    void refreshGroups();
-    void refreshOwnerQueue();
-  }, [refresh, refreshGroups, refreshOwnerQueue]);
-
   return {
     loading: loading || ownerJoinRequests.loading,
-    refreshing:
-      refreshing || groupInvitations.refreshing || ownerJoinRequests.refreshing,
     error,
     actionError: actions.error,
     pendingId: actions.pendingId,
@@ -125,7 +114,6 @@ export function useRequestsScreen(): RequestsScreenController {
     groupPendingAction: groupActions.pendingAction,
     ownerJoinRequests,
     reload: reloadAll,
-    refresh: refreshAll,
     reloadGroups: () => {
       void reloadGroups();
     },

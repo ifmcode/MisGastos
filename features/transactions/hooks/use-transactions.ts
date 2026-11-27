@@ -28,7 +28,6 @@ export interface UseTransactionsResult {
   filters: TransactionFilters;
   activeFilterCount: number;
   loading: boolean;
-  refreshing: boolean;
   mutating: boolean;
   error: string | null;
   mutationError: string | null;
@@ -74,7 +73,6 @@ export function useTransactions({
     items: transactions,
     setItems: setTransactions,
     loading,
-    refreshing,
     error,
     reload,
     refresh,
@@ -116,7 +114,6 @@ export function useTransactions({
     filters,
     activeFilterCount,
     loading,
-    refreshing,
     error,
     reload,
     refresh,

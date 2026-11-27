@@ -15,7 +15,7 @@ import { NotificationsSegmentControl } from "./notifications-segment-control";
 
 /**
  * Two-segment inbox: Pendientes / Vistas with their counts, the active list and
- * the loading, error and refresh states. Every rule lives in the hook.
+ * the loading and error states. Every rule lives in the hook.
  */
 export function NotificationsScreen() {
   const insets = useSafeAreaInsets();
@@ -60,10 +60,8 @@ export function NotificationsScreen() {
         <NotificationsList
           rows={screen.rows}
           segment={screen.segment}
-          refreshing={screen.refreshing}
           actionError={screen.actionError}
           canMarkAllRead={screen.canMarkAllRead}
-          onRefresh={screen.refresh}
           onMarkAllRead={screen.markAllRead}
           onOpenRow={screen.openRow}
         />

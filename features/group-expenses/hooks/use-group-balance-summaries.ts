@@ -20,7 +20,6 @@ export interface GroupBalanceSummariesController {
   /** Viewer nets by group id; an empty map is a valid "nothing owed" state. */
   summaries: Map<string, ViewerGroupBalance[]>;
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   reload: () => void;
   refresh: () => Promise<void>;
@@ -45,7 +44,6 @@ export function useGroupBalanceSummaries({
     () => new Map(),
   );
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestRef = useRef(0);
 
@@ -55,18 +53,14 @@ export function useGroupBalanceSummaries({
         setSummaries(new Map());
         setError(null);
         setLoading(false);
-        setRefreshing(false);
         return;
       }
 
       requestRef.current += 1;
       const request = requestRef.current;
+      const isInitialLoad = mode === "initial";
 
-      if (mode === "refresh") {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      if (isInitialLoad) setLoading(true);
       setError(null);
 
       try {
@@ -81,11 +75,7 @@ export function useGroupBalanceSummaries({
         }
       } finally {
         if (requestRef.current === request) {
-          if (mode === "refresh") {
-            setRefreshing(false);
-          } else {
-            setLoading(false);
-          }
+          setLoading(false);
         }
       }
     },
@@ -115,7 +105,7 @@ export function useGroupBalanceSummaries({
   const refresh = useCallback(() => load("refresh"), [load]);
 
   return useMemo(
-    () => ({ summaries, loading, refreshing, error, reload, refresh }),
-    [error, loading, refresh, refreshing, reload, summaries],
+    () => ({ summaries, loading, error, reload, refresh }),
+    [error, loading, refresh, reload, summaries],
   );
 }

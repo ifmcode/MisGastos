@@ -26,7 +26,6 @@ export interface GroupDetailScreenController
   friends: Friend[];
   isOwner: boolean;
   error: string | null;
-  refreshing: boolean;
   detailsVisible: boolean;
   editor: GroupEditorController;
   expenses: GroupDetailExpensesController;
@@ -35,7 +34,6 @@ export interface GroupDetailScreenController
   activity: GroupActivityFeedController;
   invite: GroupInviteMembersController;
   reload: () => void;
-  refresh: () => void;
   openDetails: () => void;
   closeDetails: () => void;
 }

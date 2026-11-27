@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { RefreshControl, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
@@ -11,7 +11,6 @@ import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
 import { Fab } from "@/shared/components/molecules/fab";
 import { LoadingState } from "@/shared/components/molecules/loading-state";
-import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useFriendDetailScreen } from "../hooks/use-friend-detail-screen";
 import { friendDetailStyles as styles } from "../styles/friend-detail.styles";
@@ -31,7 +30,6 @@ function readUid(value: string | string[] | undefined): string {
 export function FriendDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const theme = useFormTheme();
   const { t } = useTranslation(["social", "common"]);
   const params = useLocalSearchParams<{ uid?: string | string[] }>();
   const screen = useFriendDetailScreen({ uid: readUid(params.uid) });
@@ -89,14 +87,6 @@ export function FriendDetailScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={screen.refreshing}
-              onRefresh={screen.refresh}
-              tintColor={theme.primary}
-              colors={[theme.primary]}
-            />
-          }
         >
           <ErrorBanner message={screen.error} />
 

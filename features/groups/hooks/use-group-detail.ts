@@ -20,11 +20,9 @@ export interface UseGroupDetailOptions {
 export interface GroupDetailController {
   detail: GroupDetail | null;
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   missing: boolean;
   reload: () => void;
-  refresh: () => Promise<void>;
 }
 
 /** Loads one group detail with missing-state detection and focus refresh. */
@@ -36,7 +34,6 @@ export function useGroupDetail({
   const { tr } = useScopedTranslation("groups");
   const [detail, setDetail] = useState<GroupDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [missing, setMissing] = useState(false);
   const requestRef = useRef(0);
@@ -48,18 +45,14 @@ export function useGroupDetail({
         setMissing(true);
         setError(null);
         setLoading(false);
-        setRefreshing(false);
         return;
       }
 
       requestRef.current += 1;
       const request = requestRef.current;
+      const isInitialLoad = mode === "initial";
 
-      if (mode === "refresh") {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      if (isInitialLoad) setLoading(true);
       setError(null);
 
       try {
@@ -82,8 +75,7 @@ export function useGroupDetail({
         }
       } finally {
         if (requestRef.current === request) {
-          if (mode === "refresh") setRefreshing(false);
-          else setLoading(false);
+          setLoading(false);
         }
       }
     },
@@ -111,7 +103,5 @@ export function useGroupDetail({
     void load("initial");
   }, [load]);
 
-  const refresh = useCallback(() => load("refresh"), [load]);
-
-  return { detail, loading, refreshing, error, missing, reload, refresh };
+  return { detail, loading, error, missing, reload };
 }

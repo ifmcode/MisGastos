@@ -17,7 +17,6 @@ export interface GroupInvitationsController {
   invitations: PendingGroupInvitationItem[];
   count: number;
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   /** Drops a row that was just accepted or rejected without a full reload. */
   removeInvitation: (invitationId: string) => void;
@@ -35,7 +34,6 @@ export function useGroupInvitations({
     [],
   );
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestRef = useRef(0);
 
@@ -45,18 +43,14 @@ export function useGroupInvitations({
         setInvitations([]);
         setError(null);
         setLoading(false);
-        setRefreshing(false);
         return;
       }
 
       requestRef.current += 1;
       const request = requestRef.current;
+      const isInitialLoad = mode === "initial";
 
-      if (mode === "refresh") {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      if (isInitialLoad) setLoading(true);
       setError(null);
 
       try {
@@ -75,11 +69,7 @@ export function useGroupInvitations({
         }
       } finally {
         if (requestRef.current === request) {
-          if (mode === "refresh") {
-            setRefreshing(false);
-          } else {
-            setLoading(false);
-          }
+          setLoading(false);
         }
       }
     },
@@ -116,7 +106,6 @@ export function useGroupInvitations({
     invitations,
     count: invitations.length,
     loading,
-    refreshing,
     error,
     removeInvitation,
     reload,

@@ -24,7 +24,6 @@ export interface UseWalletsResult extends WalletMutations {
   archivedWallets: Wallet[];
   totals: WalletTotal[];
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   reload: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -49,7 +48,6 @@ export function useWallets(): UseWalletsResult {
     items: wallets,
     setItems: setWallets,
     loading,
-    refreshing,
     error,
     reload,
     refresh,
@@ -76,7 +74,6 @@ export function useWallets(): UseWalletsResult {
     archivedWallets,
     totals,
     loading,
-    refreshing,
     error,
     reload,
     refresh,

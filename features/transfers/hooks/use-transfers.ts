@@ -18,7 +18,6 @@ import { useTransferService } from "./use-transfer-service";
 export interface UseTransfersResult {
   transfers: Transfer[];
   loading: boolean;
-  refreshing: boolean;
   mutating: boolean;
   error: string | null;
   createError: string | null;
@@ -58,7 +57,6 @@ export function useTransfers(): UseTransfersResult {
     items: transfers,
     setItems: setTransfers,
     loading,
-    refreshing,
     error,
     reload,
     refresh,
@@ -75,7 +73,6 @@ export function useTransfers(): UseTransfersResult {
   return {
     transfers,
     loading,
-    refreshing,
     error,
     reload,
     refresh,

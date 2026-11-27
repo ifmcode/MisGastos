@@ -35,7 +35,6 @@ export function useGroupActivityFeed({
   const { tr } = useScopedTranslation("groups");
   const [items, setItems] = useState<GroupActivity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] =
@@ -52,12 +51,10 @@ export function useGroupActivityFeed({
         setItems([]);
         setNextCursor(null);
         setLoading(false);
-        setRefreshing(false);
         return;
       }
 
-      if (mode === "refresh") setRefreshing(true);
-      else setLoading(true);
+      if (mode === "initial") setLoading(true);
       setError(null);
       // The previous page's cursor never survives a reload of the first page.
       setNextCursor(null);
@@ -75,7 +72,6 @@ export function useGroupActivityFeed({
       } finally {
         if (requestRef.current === request) {
           setLoading(false);
-          setRefreshing(false);
         }
       }
     },
@@ -133,17 +129,13 @@ export function useGroupActivityFeed({
     void load("initial");
   }, [load]);
 
-  const refresh = useCallback(() => load("refresh"), [load]);
-
   return {
     items,
     loading,
-    refreshing,
     loadingMore,
     error,
     hasMore: nextCursor !== null,
     reload,
-    refresh,
     loadMore,
   };
 }

@@ -15,12 +15,10 @@ export interface CategoriesListProps {
   categories: Category[];
   visibleCategories: Category[];
   typeFilter: CategoryType;
-  refreshing: boolean;
   reorder: CategoryReorder;
   onSelectFilter: (filter: CategoryType) => void;
   onSelectCategory: (category: Category) => void;
   onCreateCategory: () => void;
-  onRefresh: () => void;
 }
 
 function CategorySeparator() {
@@ -31,12 +29,10 @@ export function CategoriesList({
   categories,
   visibleCategories,
   typeFilter,
-  refreshing,
   reorder,
   onSelectFilter,
   onSelectCategory,
   onCreateCategory,
-  onRefresh,
 }: CategoriesListProps) {
   const { t } = useTranslation("categories");
   const tr = asTranslate(t);
@@ -95,8 +91,6 @@ export function CategoriesList({
         styles.listContent,
         categories.length === 0 && styles.emptyListContent,
       ]}
-      refreshing={refreshing}
-      onRefresh={onRefresh}
       showsVerticalScrollIndicator={false}
     />
   );

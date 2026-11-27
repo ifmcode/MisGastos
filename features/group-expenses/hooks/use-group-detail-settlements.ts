@@ -27,8 +27,7 @@ export interface GroupDetailSettlementsController {
 /**
  * Settlement list of one group inside the group detail. It refreshes when the
  * screen regains focus, so returning from the settle route (create, edit or a
- * delete on the detail route) always shows the new ledger without a manual
- * pull-to-refresh.
+ * delete on the detail route) always shows the new ledger.
  */
 export function useGroupDetailSettlements({
   viewerUid,

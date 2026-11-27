@@ -21,7 +21,6 @@ import {
 export interface SocialScreenController {
   viewerUid: string;
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   friends: Friend[];
   friendsLoading: boolean;
@@ -34,7 +33,6 @@ export interface SocialScreenController {
   groups: SocialGroupsController;
   editor: GroupEditorController;
   reload: () => void;
-  refresh: () => void;
 }
 
 /** Composition root of the Social hub; owns the segment and the FAB menu. */
@@ -45,7 +43,6 @@ export function useSocialScreen(): SocialScreenController {
   const {
     overview,
     loading,
-    refreshing,
     error,
     reload,
     refresh,
@@ -74,7 +71,8 @@ export function useSocialScreen(): SocialScreenController {
     [overview, groups.invitationsCount, groups.joinRequestsCount],
   );
 
-  // One pull-to-refresh flag: friends, groups and received invitations.
+  // Friends, groups and received invitations reload together after the
+  // requests routes report a change.
   const refreshAll = useCallback(() => {
     void refresh();
     refreshGroups();
@@ -101,7 +99,6 @@ export function useSocialScreen(): SocialScreenController {
   return {
     viewerUid: viewerUid ?? "",
     loading,
-    refreshing: refreshing || groups.refreshing,
     error,
     friends: overview.friends,
     friendsLoading: loading,
@@ -114,6 +111,5 @@ export function useSocialScreen(): SocialScreenController {
     groups,
     editor,
     reload: reloadAll,
-    refresh: refreshAll,
   };
 }

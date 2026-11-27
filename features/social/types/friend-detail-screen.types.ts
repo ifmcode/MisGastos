@@ -20,9 +20,7 @@ export interface FriendDetailScreenController {
   friends: Friend[];
   /** Overview error: full-screen without a friend, banner otherwise. */
   error: string | null;
-  refreshing: boolean;
   reload: () => void;
-  refresh: () => void;
   /** Open cycle: pair entries created after the settled boundary. */
   timelineCurrent: FriendTimelineEntry[];
   /** Settled history: pair entries created at or before the boundary. */

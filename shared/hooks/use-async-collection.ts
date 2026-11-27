@@ -21,7 +21,7 @@ export interface UseAsyncCollectionOptions<T> {
   /**
    * Local read cache. When it returns a list, the initial load shows it first
    * and then replaces it with the remote result; a cold cache (null) keeps the
-   * usual loading/error behaviour. Pull-to-refresh stays remote-only.
+   * usual loading/error behaviour. A background refresh stays remote-only.
    */
   readCached?: (ownerId: string) => Promise<T[] | null>;
   /**
@@ -36,13 +36,12 @@ export interface AsyncCollection<T> {
   items: T[];
   setItems: Dispatch<SetStateAction<T[]>>;
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   reload: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
-/** Loads an owner-scoped collection with initial loading and pull-to-refresh. */
+/** Loads an owner-scoped collection with initial loading and background refresh. */
 export function useAsyncCollection<T>({
   ownerId,
   load,
@@ -52,7 +51,6 @@ export function useAsyncCollection<T>({
 }: UseAsyncCollectionOptions<T>): AsyncCollection<T> {
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const itemsRef = useRef<T[]>([]);
 
@@ -85,12 +83,10 @@ export function useAsyncCollection<T>({
         setItems([]);
         setError(null);
         setLoading(false);
-        setRefreshing(false);
         return;
       }
 
       if (mode === "refresh") {
-        setRefreshing(true);
         setError(null);
 
         try {
@@ -109,8 +105,6 @@ export function useAsyncCollection<T>({
           } else if (resolution.action === "report-error") {
             setError(describeError(loadError));
           }
-        } finally {
-          setRefreshing(false);
         }
 
         return;
@@ -156,5 +150,5 @@ export function useAsyncCollection<T>({
     if (cameBackOnline) void refresh();
   }, [isOffline, reconnectRefreshEnabled, refresh]);
 
-  return { items, setItems, loading, refreshing, error, reload, refresh };
+  return { items, setItems, loading, error, reload, refresh };
 }

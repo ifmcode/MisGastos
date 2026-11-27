@@ -17,8 +17,6 @@ export interface TransactionsListProps {
   categories: readonly Category[];
   hasFilters: boolean;
   activeFilterCount: number;
-  refreshing: boolean;
-  onRefresh: () => void;
   onOpenDetail: (transaction: Transaction) => void;
   onCreate: () => void;
   onClearFilters: () => void;
@@ -34,8 +32,6 @@ export function TransactionsList({
   categories,
   hasFilters,
   activeFilterCount,
-  refreshing,
-  onRefresh,
   onOpenDetail,
   onCreate,
   onClearFilters,
@@ -94,8 +90,6 @@ export function TransactionsList({
         styles.listContent,
         transactions.length === 0 && styles.emptyListContent,
       ]}
-      refreshing={refreshing}
-      onRefresh={onRefresh}
       showsVerticalScrollIndicator={false}
     />
   );

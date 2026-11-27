@@ -82,7 +82,7 @@ export function useTransactionsCreateMenu({
   const closeMenu = useCallback(() => setMenuVisible(false), []);
 
   // Cached lists win over a failed background refresh: data already loaded must
-  // not disable an action just because refreshing it failed.
+  // not disable an action just because its refresh failed.
   const friendsState: MovementsFriendsState =
     friends.length > 0
       ? "ready"

@@ -23,10 +23,8 @@ export function CategoriesScreen() {
     typeFilter,
     setTypeFilter,
     loading,
-    refreshing,
     error,
     reload,
-    refresh,
     mutating,
     mutationError,
     mutationFieldErrors,
@@ -66,12 +64,10 @@ export function CategoriesScreen() {
           categories={categories}
           visibleCategories={visibleCategories}
           typeFilter={typeFilter}
-          refreshing={refreshing}
           reorder={reorder}
           onSelectFilter={setTypeFilter}
           onSelectCategory={openEdit}
           onCreateCategory={openCreate}
-          onRefresh={() => void refresh()}
         />
       )}
 

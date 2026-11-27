@@ -26,7 +26,6 @@ export interface FriendDetailExpensesController {
   loading: boolean;
   error: string | null;
   reload: () => void;
-  refresh: () => Promise<void>;
   editor: SharedExpenseEditorController;
 }
 
@@ -69,7 +68,6 @@ export function useFriendDetailExpenses({
     loading: list.loading,
     error: list.error,
     reload: list.reload,
-    refresh: list.refresh,
     editor,
   };
 }

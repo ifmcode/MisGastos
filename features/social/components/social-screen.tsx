@@ -1,6 +1,6 @@
 import { useRouter, type Href } from "expo-router";
 import { useCallback } from "react";
-import { RefreshControl, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
@@ -8,7 +8,6 @@ import type { Friend } from "@/features/friends/types/friend.types";
 import { GroupFormModal } from "@/features/groups/components/group-form-modal";
 import type { Group } from "@/features/groups/types/group.types";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
-import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useSocialScreen } from "../hooks/use-social-screen";
 import { socialStyles as styles } from "../styles/social.styles";
@@ -25,7 +24,6 @@ import { SocialSegmentControl } from "./social-segment-control";
 export function SocialScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const theme = useFormTheme();
   const screen = useSocialScreen();
   const { editor } = screen;
   const friendsFailed = !!screen.error && screen.friends.length === 0;
@@ -55,14 +53,6 @@ export function SocialScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={screen.refreshing}
-            onRefresh={screen.refresh}
-            tintColor={theme.primary}
-            colors={[theme.primary]}
-          />
-        }
       >
         {friendsFailed ? null : <ErrorBanner message={screen.error} />}
 

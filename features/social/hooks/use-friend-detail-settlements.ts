@@ -14,7 +14,6 @@ export interface FriendDetailSettlementsController {
   settlements: Settlement[];
   loading: boolean;
   error: string | null;
-  refresh: () => Promise<void>;
   reload: () => void;
 }
 
@@ -39,7 +38,6 @@ export function useFriendDetailSettlements({
     settlements,
     loading: list.loading,
     error: list.error,
-    refresh: list.refresh,
     reload: list.reload,
   };
 }

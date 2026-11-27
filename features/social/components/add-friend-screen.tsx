@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { RefreshControl, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
@@ -9,7 +9,6 @@ import { FriendSearchForm } from "@/features/friends/components/friend-search-fo
 import { FriendSearchResult } from "@/features/friends/components/friend-search-result";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
-import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useAddFriendScreen } from "../hooks/use-add-friend-screen";
 import { socialStyles as styles } from "../styles/social.styles";
@@ -24,7 +23,6 @@ export interface AddFriendScreenProps {
 export function AddFriendScreen({ onRequestSent }: AddFriendScreenProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const theme = useFormTheme();
   const { t } = useTranslation(["social", "common"]);
   const screen = useAddFriendScreen({ onRequestSent });
   const { search } = screen;
@@ -41,16 +39,6 @@ export function AddFriendScreen({ onRequestSent }: AddFriendScreenProps) {
         contentContainerStyle={styles.routeScrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          screen.canRefresh ? (
-            <RefreshControl
-              refreshing={screen.refreshing}
-              onRefresh={screen.refresh}
-              tintColor={theme.primary}
-              colors={[theme.primary]}
-            />
-          ) : undefined
-        }
       >
         <FriendSearchForm
           email={search.email}

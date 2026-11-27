@@ -76,13 +76,11 @@ export function GroupDetailScreen() {
           detail={detail}
           viewerUid={screen.viewerUid}
           isOwner={screen.isOwner}
-          refreshing={screen.refreshing}
           error={screen.error}
           balances={balances}
           settlements={settlements}
           expenses={expenses}
           activity={activity}
-          onRefresh={screen.refresh}
           onBack={leave}
           onOpenDetails={screen.openDetails}
           onInvite={invite.open}

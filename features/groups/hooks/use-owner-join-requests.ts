@@ -26,7 +26,6 @@ export interface OwnerJoinRequestsController
   items: OwnerJoinRequestItem[];
   count: number;
   loading: boolean;
-  refreshing: boolean;
   /** Load failure of the queue itself. */
   error: string | null;
   /** Failure of the last accept/reject; the answered row stays on screen. */
@@ -44,7 +43,6 @@ export function useOwnerJoinRequests({
   const { tr } = useScopedTranslation("groups");
   const [items, setItems] = useState<OwnerJoinRequestItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestRef = useRef(0);
 
@@ -54,18 +52,14 @@ export function useOwnerJoinRequests({
         setItems([]);
         setError(null);
         setLoading(false);
-        setRefreshing(false);
         return;
       }
 
       requestRef.current += 1;
       const request = requestRef.current;
+      const isInitialLoad = mode === "initial";
 
-      if (mode === "refresh") {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      if (isInitialLoad) setLoading(true);
       setError(null);
 
       try {
@@ -77,11 +71,7 @@ export function useOwnerJoinRequests({
         }
       } finally {
         if (requestRef.current === request) {
-          if (mode === "refresh") {
-            setRefreshing(false);
-          } else {
-            setLoading(false);
-          }
+          setLoading(false);
         }
       }
     },
@@ -128,7 +118,6 @@ export function useOwnerJoinRequests({
     items,
     count: items.length,
     loading,
-    refreshing,
     error,
     actionError: actions.error,
     pendingId: actions.pendingId,

@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { RefreshControl, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
@@ -10,7 +10,6 @@ import { EmptyState } from "@/shared/components/molecules/empty-state";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
 import { LoadingState } from "@/shared/components/molecules/loading-state";
-import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { useRequestsScreen } from "../hooks/use-requests-screen";
 import { socialStyles as styles } from "../styles/social.styles";
@@ -24,7 +23,6 @@ import { SocialRouteHeader } from "./social-route-header";
 export function RequestsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const theme = useFormTheme();
   const { t } = useTranslation(["social", "friends", "common"]);
   const screen = useRequestsScreen();
   const owner = screen.ownerJoinRequests;
@@ -66,14 +64,6 @@ export function RequestsScreen() {
         <ScrollView
           contentContainerStyle={styles.routeScrollContent}
           showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={screen.refreshing}
-              onRefresh={screen.refresh}
-              tintColor={theme.primary}
-              colors={[theme.primary]}
-            />
-          }
         >
           <ErrorBanner message={screen.error} />
           <ErrorBanner message={screen.actionError} />

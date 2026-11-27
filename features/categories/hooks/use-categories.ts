@@ -13,7 +13,6 @@ export interface UseCategoriesResult {
   categories: Category[];
   setCategories: Dispatch<SetStateAction<Category[]>>;
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   reload: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -36,7 +35,7 @@ export function useCategories(): UseCategoriesResult {
     [tr],
   );
 
-  const { items, setItems, loading, refreshing, error, reload, refresh } =
+  const { items, setItems, loading, error, reload, refresh } =
     useAsyncCollection<Category>({
       ownerId: user?.uid,
       load: loadCategories,
@@ -56,7 +55,6 @@ export function useCategories(): UseCategoriesResult {
     categories: items,
     setCategories: setItems,
     loading,
-    refreshing,
     error,
     reload,
     refresh,

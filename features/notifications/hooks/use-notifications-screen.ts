@@ -30,14 +30,12 @@ export interface NotificationsScreenController {
   segmentCounts: NotificationSegmentCounts;
   /** Rows of the active segment only. */
   rows: NotificationRowModel[];
-  refreshing: boolean;
   error: string | null;
   actionError: string | null;
   /** Mark-all-read lives in Pendientes and needs at least one unread row. */
   canMarkAllRead: boolean;
   changeSegment: (segment: NotificationSegment) => void;
   reload: () => void;
-  refresh: () => void;
   markAllRead: () => Promise<void>;
   /** Marks the row read and opens the target derived from `type` + payload. */
   openRow: (notificationId: string) => void;
@@ -56,7 +54,6 @@ export function useNotificationsScreen(): NotificationsScreenController {
   const inbox = useNotifications({ viewerUid: user?.uid });
   const overview = useFriendsOverview({ viewerUid: user?.uid });
   const [segment, setSegment] = useState<NotificationSegment>("pending");
-  const [refreshing, setRefreshing] = useState(false);
 
   const segments = useMemo(
     () => getNotificationSegments(inbox.notifications),
@@ -101,13 +98,6 @@ export function useNotificationsScreen(): NotificationsScreenController {
     void overview.reload();
   }, [inbox.reload, overview.reload]);
 
-  const refresh = useCallback(() => {
-    setRefreshing(true);
-    void Promise.all([inbox.refresh(), overview.refresh()]).finally(() => {
-      setRefreshing(false);
-    });
-  }, [inbox.refresh, overview.refresh]);
-
   const status: NotificationsScreenStatus = inbox.loading
     ? "loading"
     : inbox.error
@@ -122,14 +112,12 @@ export function useNotificationsScreen(): NotificationsScreenController {
       viewed: segments.viewed.length,
     },
     rows,
-    refreshing,
     error: inbox.error,
     actionError: inbox.actionError,
     canMarkAllRead:
       segment === "pending" && segments.pending.some(isUnreadNotification),
     changeSegment: setSegment,
     reload,
-    refresh,
     markAllRead,
     openRow,
   };

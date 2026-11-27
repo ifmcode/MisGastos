@@ -5,17 +5,15 @@ export interface UseGroupActivityFeedOptions {
   groupId: string;
 }
 
-/** Feed state consumed by the history route; the detail lives in its hook. */
+/** Feed state consumed by the group detail activity section. */
 export interface GroupActivityFeedController {
   items: GroupActivity[];
   /** First page still resolving. */
   loading: boolean;
-  refreshing: boolean;
   loadingMore: boolean;
   /** Banner copy that keeps the loaded feed on screen. */
   error: string | null;
   hasMore: boolean;
   reload: () => void;
-  refresh: () => Promise<void>;
   loadMore: () => void;
 }

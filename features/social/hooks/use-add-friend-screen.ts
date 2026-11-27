@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 import { useFriendActions } from "@/features/friends/hooks/use-friend-actions";
 import {
@@ -18,11 +18,7 @@ export interface AddFriendScreenController {
   search: FriendSearchController;
   pendingId: string | null;
   actionError: string | null;
-  refreshing: boolean;
-  /** There is something to refresh only after the viewer typed an email. */
-  canRefresh: boolean;
   sendToResult: (recipientUid: string) => Promise<void>;
-  refresh: () => Promise<void>;
   retrySearch: () => void;
 }
 
@@ -38,9 +34,8 @@ export function useAddFriendScreen(
     viewerUid,
     onChanged: onRequestSent ?? noop,
   });
-  const [refreshing, setRefreshing] = useState(false);
 
-  const { markRelation, search: runSearch, email } = search;
+  const { markRelation, search: runSearch } = search;
   const { sendRequest } = actions;
 
   const sendToResult = useCallback(
@@ -52,18 +47,6 @@ export function useAddFriendScreen(
     [sendRequest, markRelation],
   );
 
-  // Pull-to-refresh only makes sense once the viewer searched something.
-  const refresh = useCallback(async () => {
-    if (email.trim().length === 0) return;
-
-    setRefreshing(true);
-    try {
-      await runSearch();
-    } finally {
-      setRefreshing(false);
-    }
-  }, [email, runSearch]);
-
   const retrySearch = useCallback(() => {
     void runSearch();
   }, [runSearch]);
@@ -72,10 +55,7 @@ export function useAddFriendScreen(
     search,
     pendingId: actions.pendingId,
     actionError: actions.error,
-    refreshing,
-    canRefresh: email.trim().length > 0,
     sendToResult,
-    refresh,
     retrySearch,
   };
 }

@@ -28,11 +28,9 @@ export function TransactionsScreen() {
         categories={screen.categories}
         hasFilters={screen.hasFilters}
         activeFilterCount={screen.activeFilterCount}
-        refreshing={screen.refreshing}
         loading={screen.screenLoading}
         error={screen.screenError}
         onRetry={screen.retryLoad}
-        onRefresh={screen.refreshAll}
         onOpenDetail={screen.openDetail}
         onCreate={screen.createMenu.openMenu}
         onClearFilters={screen.clearFilters}

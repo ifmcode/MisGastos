@@ -21,16 +21,6 @@ describe("refreshDashboardSources", () => {
     expect(sources.transactions).toHaveBeenCalledTimes(1);
   });
 
-  it("also refreshes categories on pull-to-refresh", () => {
-    const sources = createBaseSources();
-    const categories = jest.fn<() => void>();
-
-    refreshDashboardSources({ ...sources, categories });
-
-    expect(categories).toHaveBeenCalledTimes(1);
-    expect(sources.transactions).toHaveBeenCalledTimes(1);
-  });
-
   it("accepts sources that return a promise", () => {
     const wallets = jest.fn<() => Promise<void>>(async () => undefined);
     const transfers = jest.fn<() => Promise<void>>(async () => undefined);

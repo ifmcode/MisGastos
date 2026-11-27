@@ -19,7 +19,6 @@ export interface GroupExpensesController {
   /** Active expenses only, newest first: soft-deleted rows keep no UI presence. */
   expenses: GroupExpense[];
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   reload: () => void;
   refresh: () => Promise<void>;
@@ -34,7 +33,6 @@ export function useGroupExpenses({
   const { tr } = useScopedTranslation("groupExpenses");
   const [stored, setStored] = useState<GroupExpense[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestRef = useRef(0);
 
@@ -44,18 +42,14 @@ export function useGroupExpenses({
         setStored([]);
         setError(null);
         setLoading(false);
-        setRefreshing(false);
         return;
       }
 
       requestRef.current += 1;
       const request = requestRef.current;
+      const isInitialLoad = mode === "initial";
 
-      if (mode === "refresh") {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      if (isInitialLoad) setLoading(true);
       setError(null);
 
       try {
@@ -69,11 +63,7 @@ export function useGroupExpenses({
         }
       } finally {
         if (requestRef.current === request) {
-          if (mode === "refresh") {
-            setRefreshing(false);
-          } else {
-            setLoading(false);
-          }
+          setLoading(false);
         }
       }
     },
@@ -106,5 +96,5 @@ export function useGroupExpenses({
   const refresh = useCallback(() => load("refresh"), [load]);
   const expenses = useMemo(() => filterActiveGroupExpenses(stored), [stored]);
 
-  return { expenses, loading, refreshing, error, reload, refresh };
+  return { expenses, loading, error, reload, refresh };
 }

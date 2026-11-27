@@ -14,11 +14,9 @@ export interface TransactionsBodyProps {
   categories: readonly Category[];
   hasFilters: boolean;
   activeFilterCount: number;
-  refreshing: boolean;
   loading: boolean;
   error: string | null;
   onRetry: () => void;
-  onRefresh: () => void;
   onOpenDetail: (transaction: Transaction) => void;
   onCreate: () => void;
   onClearFilters: () => void;
@@ -31,11 +29,9 @@ export function TransactionsBody({
   categories,
   hasFilters,
   activeFilterCount,
-  refreshing,
   loading,
   error,
   onRetry,
-  onRefresh,
   onOpenDetail,
   onCreate,
   onClearFilters,
@@ -63,8 +59,6 @@ export function TransactionsBody({
       categories={categories}
       hasFilters={hasFilters}
       activeFilterCount={activeFilterCount}
-      refreshing={refreshing}
-      onRefresh={onRefresh}
       onOpenDetail={onOpenDetail}
       onCreate={onCreate}
       onClearFilters={onClearFilters}

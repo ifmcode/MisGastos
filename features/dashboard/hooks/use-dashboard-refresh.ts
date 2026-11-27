@@ -4,7 +4,6 @@ import { useFocusEffect } from "expo-router";
 import { refreshDashboardSources } from "../utils/dashboard-refresh";
 
 export interface DashboardRefreshSource {
-  refreshing: boolean;
   refresh: () => Promise<void>;
   reload: () => Promise<void>;
 }
@@ -13,14 +12,9 @@ export interface UseDashboardRefreshOptions {
   wallets: DashboardRefreshSource;
   transfers: DashboardRefreshSource;
   transactions: DashboardRefreshSource;
-  categories: DashboardRefreshSource;
 }
 
 export interface DashboardRefresh {
-  /** Any collection refreshing, used by the pull-to-refresh spinner. */
-  refreshing: boolean;
-  /** Reloads every collection, categories included. */
-  refreshAll: () => void;
   /** Retries the recent-movements load after an inline error. */
   retryMovements: () => void;
 }
@@ -34,23 +28,13 @@ export function useDashboardRefresh({
   wallets,
   transfers,
   transactions,
-  categories,
 }: UseDashboardRefreshOptions): DashboardRefresh {
   const hasFocusedOnce = useRef(false);
 
-  const { refresh: refreshWallets, refreshing: walletsRefreshing } = wallets;
-  const { refresh: refreshTransfers, refreshing: transfersRefreshing } =
-    transfers;
-  const {
-    refresh: refreshTransactions,
-    reload: reloadTransactions,
-    refreshing: transactionsRefreshing,
-  } = transactions;
-  const {
-    refresh: refreshCategories,
-    reload: reloadCategories,
-    refreshing: categoriesRefreshing,
-  } = categories;
+  const { refresh: refreshWallets } = wallets;
+  const { refresh: refreshTransfers } = transfers;
+  const { refresh: refreshTransactions, reload: reloadTransactions } =
+    transactions;
 
   useFocusEffect(
     useCallback(() => {
@@ -67,32 +51,9 @@ export function useDashboardRefresh({
     }, [refreshWallets, refreshTransfers, refreshTransactions]),
   );
 
-  const refreshAll = useCallback(() => {
-    refreshDashboardSources({
-      wallets: refreshWallets,
-      transfers: refreshTransfers,
-      transactions: refreshTransactions,
-      categories: refreshCategories,
-    });
-  }, [
-    refreshWallets,
-    refreshTransfers,
-    refreshTransactions,
-    refreshCategories,
-  ]);
-
   const retryMovements = useCallback(() => {
     void reloadTransactions();
-    void reloadCategories();
-  }, [reloadTransactions, reloadCategories]);
+  }, [reloadTransactions]);
 
-  return {
-    refreshing:
-      walletsRefreshing ||
-      transfersRefreshing ||
-      transactionsRefreshing ||
-      categoriesRefreshing,
-    refreshAll,
-    retryMovements,
-  };
+  return { retryMovements };
 }

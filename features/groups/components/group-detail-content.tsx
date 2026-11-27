@@ -1,11 +1,10 @@
 import { useCallback } from "react";
-import { RefreshControl, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 
 import { GroupBalancesSection } from "@/features/group-expenses/components/group-balances-section";
 import type { GroupBalancesController } from "@/features/group-expenses/hooks/use-group-balances";
 import type { GroupDetailSettlementsController } from "@/features/group-expenses/hooks/use-group-detail-settlements";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
-import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import type { GroupActivityFeedController } from "../hooks/use-group-activity-feed";
 import type { GroupDetailExpensesController } from "../hooks/use-group-detail-expenses";
@@ -18,13 +17,11 @@ export interface GroupDetailContentProps {
   detail: GroupDetail;
   viewerUid: string;
   isOwner: boolean;
-  refreshing: boolean;
   error: string | null;
   balances: GroupBalancesController;
   settlements: GroupDetailSettlementsController;
   expenses: GroupDetailExpensesController;
   activity: GroupActivityFeedController;
-  onRefresh: () => void;
   onBack: () => void;
   onOpenDetails: () => void;
   onInvite: () => void;
@@ -42,13 +39,11 @@ export function GroupDetailContent({
   detail,
   viewerUid,
   isOwner,
-  refreshing,
   error,
   balances,
   settlements,
   expenses,
   activity,
-  onRefresh,
   onBack,
   onOpenDetails,
   onInvite,
@@ -56,7 +51,6 @@ export function GroupDetailContent({
   onOpenSettle,
   onOpenSettlement,
 }: GroupDetailContentProps) {
-  const theme = useFormTheme();
   const settled =
     balances.balances !== null && balances.balances.debts.length === 0;
   const retryActivity = useCallback(() => {
@@ -69,14 +63,6 @@ export function GroupDetailContent({
     <ScrollView
       contentContainerStyle={styles.detailScrollContent}
       showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={theme.primary}
-          colors={[theme.primary]}
-        />
-      }
     >
       <ErrorBanner message={error} />
 

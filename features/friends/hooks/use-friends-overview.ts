@@ -22,13 +22,12 @@ export interface UseFriendsOverviewOptions {
 export interface FriendsOverviewController {
   overview: FriendsOverview;
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   reload: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
-/** Loads friends, incoming and outgoing requests with pull-to-refresh. */
+/** Loads friends, incoming and outgoing requests with a background refresh. */
 export function useFriendsOverview({
   viewerUid,
 }: UseFriendsOverviewOptions): FriendsOverviewController {
@@ -36,7 +35,6 @@ export function useFriendsOverview({
   const { tr } = useScopedTranslation("friends");
   const [overview, setOverview] = useState<FriendsOverview>(EMPTY_OVERVIEW);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestRef = useRef(0);
 
@@ -46,18 +44,14 @@ export function useFriendsOverview({
         setOverview(EMPTY_OVERVIEW);
         setError(null);
         setLoading(false);
-        setRefreshing(false);
         return;
       }
 
       requestRef.current += 1;
       const request = requestRef.current;
+      const isInitialLoad = mode === "initial";
 
-      if (mode === "refresh") {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      if (isInitialLoad) setLoading(true);
       setError(null);
 
       try {
@@ -69,11 +63,7 @@ export function useFriendsOverview({
         }
       } finally {
         if (requestRef.current === request) {
-          if (mode === "refresh") {
-            setRefreshing(false);
-          } else {
-            setLoading(false);
-          }
+          setLoading(false);
         }
       }
     },
@@ -101,5 +91,5 @@ export function useFriendsOverview({
   const reload = useCallback(() => load("initial"), [load]);
   const refresh = useCallback(() => load("refresh"), [load]);
 
-  return { overview, loading, refreshing, error, reload, refresh };
+  return { overview, loading, error, reload, refresh };
 }

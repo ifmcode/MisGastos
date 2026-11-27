@@ -47,8 +47,8 @@ export function useTransactionsScreen() {
     [wallets],
   );
   const activeWallets = useMemo(() => getActiveWallets(wallets), [wallets]);
-  // A linked movement created from the shared-expense form must appear without
-  // a manual pull-to-refresh, so both sources reload after any create.
+  // A linked movement created from the shared-expense form must appear right
+  // away, so both sources reload after any create.
   const refreshAfterCreate = useCallback(() => {
     void transactionsState.refresh();
     void refreshWallets();
@@ -76,11 +76,6 @@ export function useTransactionsScreen() {
   function retryLoad() {
     void transactionsState.reload();
     void categoriesState.reload();
-  }
-
-  function refreshAll() {
-    void transactionsState.refresh();
-    void categoriesState.refresh();
   }
 
   function applyFilters(filters: TransactionFilters) {
@@ -119,7 +114,6 @@ export function useTransactionsScreen() {
     filteredTransactions: transactionsState.filteredTransactions,
     filters: transactionsState.filters,
     activeFilterCount: transactionsState.activeFilterCount,
-    refreshing: transactionsState.refreshing,
     mutating: transactionsState.mutating,
     mutationError: transactionsState.mutationError,
     mutationFieldErrors: transactionsState.mutationFieldErrors,
@@ -134,7 +128,6 @@ export function useTransactionsScreen() {
     openFilters: () => setFiltersVisible(true),
     closeFilters: () => setFiltersVisible(false),
     retryLoad,
-    refreshAll,
     applyFilters,
     clearFilters,
     openDetail,

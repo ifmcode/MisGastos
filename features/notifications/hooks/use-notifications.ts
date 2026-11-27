@@ -19,7 +19,6 @@ export interface NotificationsController {
   /** Failure of a stamp, announced without breaking the list. */
   actionError: string | null;
   reload: () => void;
-  refresh: () => Promise<void>;
   /** Banner dismissed or timed out: only `seenAt`, the row stays unread. */
   markSeen: (notificationId: string) => Promise<void>;
   /** Opened: both stamps in one service write. */
@@ -139,7 +138,6 @@ export function useNotifications({
     error: store.error,
     actionError,
     reload: store.reload,
-    refresh: store.refresh,
     markSeen,
     markRead,
     markAllRead,

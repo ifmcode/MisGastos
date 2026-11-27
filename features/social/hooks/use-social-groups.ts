@@ -19,7 +19,6 @@ export interface SocialGroupsController {
   /** Pending join requests of the groups the viewer owns. */
   joinRequestsCount: number;
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   reload: () => void;
   refresh: () => void;
@@ -28,8 +27,8 @@ export interface SocialGroupsController {
 /**
  * Groups, their viewer balances, received invitations and the owner join-request
  * queue of the Social tab. All live in the groups feature; this hook only
- * composes them so the segment and the pull-to-refresh stay independent from the
- * friends source.
+ * composes them so the segment and the background refresh stay independent from
+ * the friends source.
  */
 export function useSocialGroups({
   viewerUid,
@@ -75,11 +74,6 @@ export function useSocialGroups({
       joinRequestsCount: joinRequests.count,
       // The list never waits for the summaries: an empty map renders "En paz".
       loading: groups.loading || joinRequests.loading,
-      refreshing:
-        groups.refreshing ||
-        balances.refreshing ||
-        invitations.refreshing ||
-        joinRequests.refreshing,
       error: groups.error ?? balances.error ?? invitations.error ?? joinRequests.error,
       reload,
       refresh,
@@ -87,17 +81,13 @@ export function useSocialGroups({
     [
       groups.groups,
       groups.loading,
-      groups.refreshing,
       groups.error,
       balances.summaries,
-      balances.refreshing,
       balances.error,
       invitations.count,
-      invitations.refreshing,
       invitations.error,
       joinRequests.count,
       joinRequests.loading,
-      joinRequests.refreshing,
       joinRequests.error,
       reload,
       refresh,

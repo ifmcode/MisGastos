@@ -16,19 +16,17 @@ export interface UseGroupsOptions {
 export interface GroupsController {
   groups: Group[];
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   reload: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
-/** Groups the viewer belongs to, with initial loading and pull-to-refresh. */
+/** Groups the viewer belongs to, with initial loading and focus refresh. */
 export function useGroups({ viewerUid }: UseGroupsOptions): GroupsController {
   const service = useGroupsService();
   const { tr } = useScopedTranslation("groups");
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestRef = useRef(0);
 
@@ -38,18 +36,14 @@ export function useGroups({ viewerUid }: UseGroupsOptions): GroupsController {
         setGroups([]);
         setError(null);
         setLoading(false);
-        setRefreshing(false);
         return;
       }
 
       requestRef.current += 1;
       const request = requestRef.current;
+      const isInitialLoad = mode === "initial";
 
-      if (mode === "refresh") {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      if (isInitialLoad) setLoading(true);
       setError(null);
 
       try {
@@ -61,11 +55,7 @@ export function useGroups({ viewerUid }: UseGroupsOptions): GroupsController {
         }
       } finally {
         if (requestRef.current === request) {
-          if (mode === "refresh") {
-            setRefreshing(false);
-          } else {
-            setLoading(false);
-          }
+          setLoading(false);
         }
       }
     },
@@ -93,5 +83,5 @@ export function useGroups({ viewerUid }: UseGroupsOptions): GroupsController {
   const reload = useCallback(() => load("initial"), [load]);
   const refresh = useCallback(() => load("refresh"), [load]);
 
-  return { groups, loading, refreshing, error, reload, refresh };
+  return { groups, loading, error, reload, refresh };
 }

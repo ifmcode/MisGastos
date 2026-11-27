@@ -38,7 +38,6 @@ export function TransferHistoryScreen() {
     activeWallets,
     walletMap,
     loading,
-    refreshing,
     error,
     mutating,
     createError,
@@ -49,7 +48,6 @@ export function TransferHistoryScreen() {
     editFromDetail,
     deleteTransfer,
     reload,
-    refresh,
   } = useTransferHistoryScreen();
 
   function renderTransfer({ item }: { item: Transfer }) {
@@ -95,8 +93,6 @@ export function TransferHistoryScreen() {
             styles.listContent,
             transfers.length === 0 && styles.emptyListContent,
           ]}
-          refreshing={refreshing}
-          onRefresh={refresh}
           showsVerticalScrollIndicator={false}
         />
       )}

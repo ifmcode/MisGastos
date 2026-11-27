@@ -82,7 +82,7 @@ export function useGroupExpenseDetailScreen({
   });
 
   // The detail closes right after a successful delete, so the caller only needs
-  // the boolean; refreshing here would flash the missing state.
+  // the boolean; a reload here would flash the missing state.
   const deletion = useGroupExpenseDeletion({
     viewerUid,
     onDeleted: () => undefined,

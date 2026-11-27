@@ -47,7 +47,6 @@ export function DashboardScreen() {
     wallets: walletsState,
     transfers: transfersState,
     transactions: transactionsState,
-    categories: categoriesState,
   });
 
   const activeWallets = useMemo(() => getActiveWallets(walletsState.wallets), [walletsState.wallets]);
@@ -113,7 +112,10 @@ export function DashboardScreen() {
             loading: transactionsState.loading || categoriesState.loading,
             error: transactionsState.error ?? categoriesState.error,
             hasMore: overview.hasMoreMovements,
-            onRetry: dashboardRefresh.retryMovements,
+            onRetry: () => {
+              dashboardRefresh.retryMovements();
+              void categoriesState.reload();
+            },
             onOpenMovements: navigation.openMovements,
             onPressMovement: movementDialogs.openDetail,
           }}
@@ -128,8 +130,6 @@ export function DashboardScreen() {
             onOpenHistory: navigation.openTransferHistory,
             onPressTransfer: transferDialogs.openDetail,
           }}
-          refreshing={dashboardRefresh.refreshing}
-          onRefresh={dashboardRefresh.refreshAll}
         />
       )}
 

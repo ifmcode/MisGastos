@@ -17,7 +17,6 @@ export interface UseGroupBalancesOptions {
 export interface GroupBalancesController {
   balances: GroupBalances | null;
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   reload: () => void;
   refresh: () => Promise<void>;
@@ -32,7 +31,6 @@ export function useGroupBalances({
   const { tr } = useScopedTranslation("groups");
   const [balances, setBalances] = useState<GroupBalances | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestRef = useRef(0);
 
@@ -42,18 +40,14 @@ export function useGroupBalances({
         setBalances(null);
         setError(null);
         setLoading(false);
-        setRefreshing(false);
         return;
       }
 
       requestRef.current += 1;
       const request = requestRef.current;
+      const isInitialLoad = mode === "initial";
 
-      if (mode === "refresh") {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      if (isInitialLoad) setLoading(true);
       setError(null);
 
       try {
@@ -68,11 +62,7 @@ export function useGroupBalances({
         }
       } finally {
         if (requestRef.current === request) {
-          if (mode === "refresh") {
-            setRefreshing(false);
-          } else {
-            setLoading(false);
-          }
+          setLoading(false);
         }
       }
     },
@@ -106,7 +96,6 @@ export function useGroupBalances({
   return {
     balances,
     loading,
-    refreshing,
     error,
     reload,
     refresh,

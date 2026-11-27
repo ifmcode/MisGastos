@@ -36,17 +36,14 @@ export function useGroupDetailScreen({
   const viewerUid = user?.uid;
   const { profile } = useProfile();
   const friendsOverview = useFriendsOverview({ viewerUid });
-  const friendsRefresh = friendsOverview.refresh;
   const groupDetail = useGroupDetail({ viewerUid, groupId });
   const { detail, reload } = groupDetail;
-  const detailRefresh = groupDetail.refresh;
   const balances = useGroupBalances({ viewerUid, groupId });
   const refreshBalances = balances.refresh;
   const settlements = useGroupDetailSettlements({ viewerUid, groupId });
   const refreshSettlements = settlements.refresh;
   const activity = useGroupActivityFeed({ viewerUid, groupId });
   const reloadActivity = activity.reload;
-  const refreshActivity = activity.refresh;
   const preferredCurrency = profile?.preferredCurrency ?? DEFAULT_CURRENCY;
   const sheet = useGroupDetailSheetController({ onLeft, onOpenSettle });
 
@@ -74,24 +71,6 @@ export function useGroupDetailScreen({
     void expensesRefresh();
     void refreshSettlements();
   }, [expensesRefresh, onGroupChanged, refreshSettlements]);
-
-  const refresh = useCallback(() => {
-    void Promise.all([
-      detailRefresh(),
-      friendsRefresh(),
-      expensesRefresh(),
-      refreshBalances(),
-      refreshSettlements(),
-      refreshActivity(),
-    ]);
-  }, [
-    detailRefresh,
-    expensesRefresh,
-    friendsRefresh,
-    refreshActivity,
-    refreshBalances,
-    refreshSettlements,
-  ]);
 
   const editor = useGroupEditor({
     viewerUid,
@@ -129,11 +108,6 @@ export function useGroupDetailScreen({
     friends: friendsOverview.overview.friends,
     isOwner: detail ? detail.group.ownerId === viewerUid : false,
     error: groupDetail.error,
-    refreshing:
-      groupDetail.refreshing ||
-      friendsOverview.refreshing ||
-      balances.refreshing ||
-      activity.refreshing,
     detailsVisible: sheet.detailsVisible,
     editor,
     expenses,
@@ -142,7 +116,6 @@ export function useGroupDetailScreen({
     activity,
     invite,
     reload,
-    refresh,
     openDetails: sheet.openDetails,
     closeDetails: sheet.closeDetails,
   };

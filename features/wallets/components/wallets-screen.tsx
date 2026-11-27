@@ -75,10 +75,8 @@ export function WalletsScreen() {
         archivedWallets={wallets.archivedWallets}
         totals={wallets.totals}
         loading={wallets.loading}
-        refreshing={wallets.refreshing}
         error={wallets.error}
         onReload={() => void wallets.reload()}
-        onRefresh={() => void wallets.refresh()}
         onCreate={screen.openCreate}
         onWalletPress={screen.openActions}
       />

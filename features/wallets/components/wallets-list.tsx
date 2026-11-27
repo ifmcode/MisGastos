@@ -18,10 +18,8 @@ export interface WalletsListProps {
   archivedWallets: readonly Wallet[];
   totals: WalletTotal[];
   loading: boolean;
-  refreshing: boolean;
   error: string | null;
   onReload: () => void;
-  onRefresh: () => void;
   onCreate: () => void;
   onWalletPress: (wallet: Wallet) => void;
 }
@@ -37,10 +35,8 @@ export function WalletsList({
   archivedWallets,
   totals,
   loading,
-  refreshing,
   error,
   onReload,
-  onRefresh,
   onCreate,
   onWalletPress,
 }: WalletsListProps) {
@@ -96,8 +92,6 @@ export function WalletsList({
         walletsStyles.listContent,
         wallets.length === 0 && walletsStyles.emptyListContent,
       ]}
-      refreshing={refreshing}
-      onRefresh={onRefresh}
       showsVerticalScrollIndicator={false}
     />
   );

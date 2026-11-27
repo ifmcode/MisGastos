@@ -30,7 +30,6 @@ export function useFriendDetailScreen({
   const viewerUid = user?.uid;
   const { profile } = useProfile();
   const overview = useFriendsOverview({ viewerUid });
-  const [refreshing, setRefreshing] = useState(false);
 
   const friend = useMemo(
     () => findFriendByUid(overview.overview.friends, uid),
@@ -101,19 +100,6 @@ export function useFriendDetailScreen({
     settlements.reload();
   }, [expenses.reload, overview.reload, settlements.reload]);
 
-  // One pull-to-refresh flag for all sources: `useSharedExpenseList` exposes
-  // `refresh` but not its own refreshing state.
-  const refresh = useCallback(() => {
-    setRefreshing(true);
-    void Promise.all([
-      overview.refresh(),
-      expenses.refresh(),
-      settlements.refresh(),
-    ]).finally(() => {
-      setRefreshing(false);
-    });
-  }, [expenses.refresh, overview.refresh, settlements.refresh]);
-
   // Only the overview decides whether the uid exists: an expense failure must
   // not turn a removed/unknown friend into a full load error.
   const status: FriendDetailStatus = header
@@ -125,9 +111,7 @@ export function useFriendDetailScreen({
     header,
     friends: overview.overview.friends,
     error: overview.error,
-    refreshing,
     reload,
-    refresh,
     timelineCurrent: groups.current,
     timelineSettled: groups.settled,
     timelineLoading: expenses.loading || settlements.loading,
