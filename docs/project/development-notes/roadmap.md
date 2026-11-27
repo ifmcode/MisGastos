@@ -20,7 +20,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Status:** 🚧 In progress
 - **Last completed:** TICKET-073 - Group activity in the group detail (24/11/2026)
 - **Queued:** Phase 8 V1 closeout (TICKET-075, TICKET-052, TICKET-074, TICKET-040)
-- **Next:** continue TICKET-023 with offline group/friend movements (phase 6)
+- **Next:** continue TICKET-023 with offline UX, observability, account purge and the web decision
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -186,7 +186,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
   - [x] Local read cache for personal data and offline banner ✅ 24/11/2026
   - [x] Offline write queue for expenses, incomes and transfers with local balance derivation ✅ 26/11/2026
   - [x] Sync engine, retry/backoff, exactly-once and conflict UI ✅ 26/11/2026
-  - [ ] Offline group/friend movements (after Phase 6)
+  - [x] Offline group/friend movements (after Phase 6) ✅ 26/11/2026
   - [ ] Offline UX, observability, account purge on logout/switch and web decision
 - If offline is a launch requirement, move this phase before Phase 6
 - Do not retrofit offline after groups without the Phase 4 decisions; the current Firestore transaction-based balance model may need to change

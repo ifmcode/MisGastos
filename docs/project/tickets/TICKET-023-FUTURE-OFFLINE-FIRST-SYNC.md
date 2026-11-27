@@ -3,7 +3,7 @@
 **Type:** Epic / Architecture  
 **Priority:** High  
 **Status:** 🚧 In progress  
-**Design spike:** ✅ Accepted (14/11/2026) — implementation started 24/11/2026 (foundations, write prerequisites, read cache and write queue)  
+**Design spike:** ✅ Accepted (14/11/2026) — implementation started 24/11/2026 (foundations, prerequisites, read cache, write queue, sync engine and offline social movements)  
 **Related:** PM-023; TICKET-002, TICKET-003, TICKET-007, TICKET-009, TICKET-010  
 **Sprint:** Platform / Post-MVP  
 
@@ -12,12 +12,12 @@ Make the app usable without an internet connection. The user must be able to cre
 
 ## Requirements
 - [x] Choose the local persistence and sync architecture before implementation — decided on 14/11/2026 (see **Design Spike**)
-- [ ] Persist wallets, transactions, transfers, categories, friends, groups, shared expenses and settlements locally
+- [x] Persist wallets, transactions, transfers, categories, friends, groups, shared expenses and settlements locally
 - [x] Allow creating, editing and deleting expenses/incomes and transfers while offline
-- [ ] Allow creating group expenses and settlements while offline
+- [x] Allow creating group expenses and settlements while offline
 - [x] Queue offline mutations with idempotency keys, retry and backoff
 - [x] Sync on app start and on reconnect, preserving mutation order and dependencies
-- [ ] Recalculate wallet balances and group debts locally with the same rules as the online path
+- [x] Recalculate wallet balances and group debts locally with the same rules as the online path
 - [x] Define conflict resolution for edits made on multiple devices
 - [x] Surface conflicts to the user instead of silently overwriting money data
 - [x] Show offline state, pending changes, last sync time and a manual retry action
@@ -27,7 +27,7 @@ Make the app usable without an internet connection. The user must be able to cre
 ## Acceptance Criteria
 - [x] Creating an expense, income or transfer offline works and survives an app restart
 - [x] Reconnecting syncs each queued mutation exactly once, with no duplicates
-- [ ] Offline group/friend movements sync and balances remain correct
+- [x] Offline group/friend movements sync and balances remain correct
 - [x] A conflicting edit is reported and never silently discards one user's data
 - [x] The user can see what is pending and retry a failed sync
 - [x] The app remains usable when Firebase is temporarily unavailable
@@ -268,6 +268,74 @@ logout/account-switch purge.
 
 **Detail:** [`session-notes/2026-11-26-offline-sync-engine.md`](../development-notes/session-notes/2026-11-26-offline-sync-engine.md)
 
+### Sixth slice — offline group and friend movements (26/11/2026)
+
+This slice closes the local persistence of social data, the offline
+create/edit/delete of the four social movement types, their sync and the local
+wallet/ledger derivation, with the three requirements and the one acceptance
+criterion marked above. The epic stays `🚧 In progress` for the logout and
+account-switch purge, the offline UX/observability work and the web decision.
+
+Scope agreed with the user: **full movement parity** and **no offline group
+creation** — creating a group, inviting, joining and friend management stay
+online-only.
+
+**Delivered:** schema v3 (`migrations/migration-003.ts`) with nine social tables
+(`friendships`, `friendRequests`, `publicProfiles`, `groups`, `groupInvitations`
+and the four movements), all scoped by `ownerId` and keyed by `(ownerId, id)` so
+two accounts can cache the same shared document; `LocalCacheCollection`,
+`OutboxEntityType` (`shared-expense`, `settlement`, `group-expense`,
+`group-settlement`) and `LOCAL_DB_PRIMARY_KEYS` extended, with the outbox and
+conflict mappers knowing the new entity types; a social read cache (mapper,
+cache and cached repository per entity, `social-cache.ts`, a scoped
+`mirrorOwnerRows`, cache-first reads with remote refresh, `assertServerSnapshot`
+on the social lists and an empty-list fallback for requests and invitations);
+`sync-social-pull.ts`, which pulls friendships, requests, profiles, groups, the
+shared expenses, the settlements and every group's expenses and settlements
+after the personal pull (`pullGroupMovements` with `Promise.allSettled`);
+`revision` and idempotency in the four social create/update/delete operations and
+their linked variants (`appliedMutations` inside the same transaction, replay
+without re-applying, `baseRevision` guard, `DELETED_REMOTELY` on a stale soft
+delete and the notification stored in the outbox snapshot); local write
+repositories backed by `social-write.ts` (record + coalesced outbox row in one
+local transaction, create+delete cancellation, server-known revision); a pending
+wallet delta for linked social movements (`pending-balance.snapshots.ts` plus the
+existing `pending-balance.ts` matrix), so the displayed balance already includes
+a queued social movement or link change; executor modules for the four social
+types that always call the **linked** update/delete and return no wallets (the
+following pull refreshes `serverBalance`); a conflict view that understands
+`amountCents`, `description`/`note` and `receiverWalletId`; factories wiring
+`Offline(Cached(Firebase))` for the four movements, groups, friends and the
+friend ledger behind `EXPO_PUBLIC_OFFLINE_FIRST`. Rules: `revision` bumps on the
+four collections, the field/diff allowlists include it, `appliedMutations`
+accepts the four social entity types, and `get` was split from `list` so a
+missing document resolves to not-found instead of permission-denied.
+
+**Scope decision:** no offline group creation (creating a group, inviting,
+joining and friend management stay online); the movement parity is the phase-6
+exit criterion.
+
+**Review:** the first read-only pass returned `changes requested` for a stale
+`deletedAt` gap (an edit over a record deleted on another device passed the local
+snapshot and was denied as a permanent error); fixed in the four update paths
+with `DELETED_REMOTELY`/`ALREADY_DELETED`. The second pass returned `approve with
+nits`; the two actionable nits were fixed (a replayed group-settlement update no
+longer rewrites its notification, and an already-deleted delete stores the
+stored revision instead of the next one). The pre-existing block on deleting a
+group expense whose payer left the group stays a documented limitation.
+
+**Verification (26/11/2026):** `npx tsc --noEmit`, `npx expo lint` and
+`npm run check:copy` clean (357 TSX); `npx jest` → **469 suites / 3195 tests**;
+`npm run test:coverage` → global **96.53 % statements, 90.23 % branches, 97.52 %
+functions, 97.55 % lines**; `npx firebase deploy --only firestore:rules --dry-run`
+compiles (nothing deployed).
+
+**Still open:** the logout/account-switch purge, the offline UX/observability
+work and the web offline decision (ADR phase 7); the new rules and the social
+flows still need a device walkthrough.
+
+**Detail:** [`session-notes/2026-11-26-offline-social-movements.md`](../development-notes/session-notes/2026-11-26-offline-social-movements.md)
+
 ## Design Spike (14/11/2026)
 
 **Status:** ✅ Accepted. **No app code changed** in this session; the epic stays in progress until the
@@ -316,7 +384,7 @@ implementation phases below are delivered.
 | 3 | Local read cache for personal data | Phase 7 ✅ 24/11/2026 |
 | 4 | Offline write queue for expenses, incomes and transfers | Phase 7 ✅ 26/11/2026 |
 | 5 | Sync engine, retry, exactly-once and conflicts | Phase 7 ✅ 26/11/2026 |
-| 6 | Offline group/friend movements | Phase 7 (after TICKET-009/010) |
+| 6 | Offline group/friend movements | Phase 7 ✅ 26/11/2026 |
 | 7 | Offline UX, observability, account purge and web decision | Phase 7 |
 
 ### Acceptance criteria mapping
