@@ -57,10 +57,12 @@ export function SyncStatusBlock() {
       </ThemedText>
 
       <View style={styles.blockActions}>
-        <SyncRetryButton
-          syncing={sync.status === "syncing"}
-          onPress={sync.retry}
-        />
+        {sync.pendingCount > 0 ? (
+          <SyncRetryButton
+            syncing={sync.status === "syncing"}
+            onPress={sync.retry}
+          />
+        ) : null}
 
         <Pressable
           accessibilityRole="button"
