@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
+import { Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -18,42 +19,58 @@ import { SettingsThemeToggle } from "./settings-theme-toggle";
 export function SettingsScreen() {
   const router = useRouter();
   const theme = useFormTheme();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation("settings");
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
-        {t("title")}
-      </ThemedText>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: insets.top + 16,
+            paddingBottom: insets.bottom + 32,
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <ThemedText type="title" style={styles.title}>
+          {t("title")}
+        </ThemedText>
 
-      <ThemedView style={styles.profileSection}>
-        <SettingsProfileLink />
-      </ThemedView>
+        <View style={styles.profileSection}>
+          <SettingsProfileLink />
+        </View>
 
-      <ThemedView style={styles.menu}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("manageCategories")}
-          onPress={() => router.push("/categories")}
-          style={[
-            styles.menuItem,
-            { borderColor: theme.border, backgroundColor: theme.surface },
-          ]}
-        >
-          <Ionicons name="pricetags-outline" size={20} color={theme.primary} />
-          <ThemedText type="defaultSemiBold" style={styles.menuLabel}>
-            {t("categories")}
-          </ThemedText>
-          <Ionicons name="chevron-forward" size={18} color={theme.muted} />
-        </Pressable>
+        <View style={styles.menu}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("manageCategories")}
+            onPress={() => router.push("/categories")}
+            style={[
+              styles.menuItem,
+              { borderColor: theme.border, backgroundColor: theme.surface },
+            ]}
+          >
+            <Ionicons
+              name="pricetags-outline"
+              size={20}
+              color={theme.primary}
+            />
+            <ThemedText type="defaultSemiBold" style={styles.menuLabel}>
+              {t("categories")}
+            </ThemedText>
+            <Ionicons name="chevron-forward" size={18} color={theme.muted} />
+          </Pressable>
 
-        <SettingsThemeToggle />
-        <SettingsLanguageSelector />
-        <SettingsSharedExpenseToggle />
-        <SyncStatusBlock />
-      </ThemedView>
+          <SettingsThemeToggle />
+          <SettingsLanguageSelector />
+          <SettingsSharedExpenseToggle />
+          <SyncStatusBlock />
+        </View>
 
-      <SettingsLogoutSection />
+        <SettingsLogoutSection />
+      </ScrollView>
     </ThemedView>
   );
 }

@@ -8,7 +8,10 @@ export const settingsPalette = {
 export const settingsStyles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+  },
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 32,
   },
   title: {
     marginBottom: 24,

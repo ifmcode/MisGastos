@@ -12,7 +12,6 @@ export const fabActionMenuStyles = StyleSheet.create({
     ...absoluteFill,
     justifyContent: "flex-end",
     paddingHorizontal: 16,
-    paddingBottom: 8,
   },
   backdrop: {
     ...absoluteFill,
@@ -25,6 +24,7 @@ export const fabActionMenuStyles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 20,
     paddingTop: 16,
+    paddingBottom: 16,
     gap: 10,
     boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.25)",
   },

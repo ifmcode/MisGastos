@@ -53,7 +53,7 @@ export function GroupMemberRow({
               {
                 backgroundColor: isOwner
                   ? theme.primarySoft
-                  : theme.background,
+                  : "transparent",
               },
             ]}
           >

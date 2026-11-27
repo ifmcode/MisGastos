@@ -46,7 +46,7 @@ export function CategoryCard({
         { borderColor: theme.border, backgroundColor: theme.surface },
       ]}
     >
-      <ThemedView
+      <View
         style={[
           categoriesStyles.iconWrapper,
           { backgroundColor: `${category.color}1A` },
@@ -57,16 +57,16 @@ export function CategoryCard({
           size={22}
           color={category.color}
         />
-      </ThemedView>
+      </View>
 
-      <ThemedView style={categoriesStyles.cardDetails}>
+      <View style={categoriesStyles.cardDetails}>
         <ThemedText type="defaultSemiBold" numberOfLines={1}>
           {category.name}
         </ThemedText>
         <ThemedText style={categoriesStyles.cardMeta} numberOfLines={1}>
           {tr(getCategoryTypeKey(category.type))}
         </ThemedText>
-      </ThemedView>
+      </View>
 
       {reorder ? (
         <CategoryReorderActions

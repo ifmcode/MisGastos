@@ -212,11 +212,14 @@ export const groupsStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "baseline",
     justifyContent: "space-between",
+    flexWrap: "wrap",
     gap: 12,
   },
   inviteesCount: {
+    flexShrink: 1,
     fontSize: 12,
     fontWeight: "700",
+    textAlign: "right",
   },
   inviteeList: {
     gap: 8,

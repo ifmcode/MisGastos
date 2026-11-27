@@ -55,7 +55,12 @@ export function FabActionMenu({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
+      <View
+        style={[
+          styles.overlay,
+          { paddingBottom: Math.max(insets.bottom, 8) + 8 },
+        ]}
+      >
         <Pressable
           accessible={false}
           onPress={onClose}
@@ -73,7 +78,6 @@ export function FabActionMenu({
             {
               backgroundColor: theme.surface,
               borderColor: theme.border,
-              paddingBottom: insets.bottom + 16,
             },
           ]}
         >
