@@ -63,4 +63,16 @@ describe("getAuthRedirect", () => {
     expect(getAuthRedirect({ user, segment: "(tabs)" })).toBeNull();
     expect(getAuthRedirect({ user, segment: "login" })).toBe("/(tabs)");
   });
+
+  it("keeps a signed-in user on the sync center", () => {
+    const verified = createAuthUser({ emailVerified: true });
+    const google = createAuthUser({
+      providerIds: ["google.com"],
+      emailVerified: false,
+    });
+
+    expect(getAuthRedirect({ user: verified, segment: "sync" })).toBeNull();
+    expect(getAuthRedirect({ user: google, segment: "sync" })).toBeNull();
+    expect(getAuthRedirect({ user: null, segment: "sync" })).toBe("/login");
+  });
 });

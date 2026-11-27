@@ -8,6 +8,7 @@ const PRIVATE_SEGMENTS = new Set([
   "profile",
   "social",
   "notifications",
+  "sync",
 ]);
 const VERIFY_SEGMENT = "verify-email";
 
