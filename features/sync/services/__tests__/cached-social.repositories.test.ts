@@ -15,9 +15,15 @@ import { buildGroupExpense } from "@/features/group-expenses/utils/__tests__/gro
 import { buildGroupSettlement } from "@/features/group-expenses/services/__tests__/group-settlements-service.fakes";
 import { buildSettlement } from "@/features/settlements/utils/__tests__/settlement.fixtures";
 import { buildSharedExpense } from "@/features/shared-expenses/utils/__tests__/shared-expense.fixtures";
+import { toGroupExpenseLocalRow } from "@/features/group-expenses/repositories/local-group-expense.mapper";
+import { toGroupSettlementLocalRow } from "@/features/group-expenses/repositories/local-group-settlement.mapper";
+import { toSettlementLocalRow } from "@/features/settlements/repositories/local-settlement.mapper";
+import { toSharedExpenseLocalRow } from "@/features/shared-expenses/repositories/local-shared-expense.mapper";
 
 const OWNER = "user-a";
 const NOW = "2026-11-26T10:00:00.000Z";
+
+let db: InMemoryDatabase;
 
 function sharedRemote() {
   return {
@@ -75,7 +81,7 @@ const notification = {
 
 beforeEach(async () => {
   process.env.EXPO_PUBLIC_OFFLINE_FIRST = "true";
-  const db = new InMemoryDatabase();
+  db = new InMemoryDatabase();
   await migrateLocalDatabase(db);
   setLocalDatabasePort(db);
   registerCurrentOwnerResolver(() => OWNER);
@@ -95,6 +101,22 @@ describe("CachedSharedExpensesRepository", () => {
 
     remote.getExpenses.mockRejectedValueOnce(new Error("offline"));
     await expect(repository.getExpenses(OWNER)).resolves.toHaveLength(1);
+  });
+
+  it("keeps an expense created offline visible after the remote list", async () => {
+    const remote = sharedRemote();
+    const repository = new CachedSharedExpensesRepository(remote as never);
+    const pending = buildSharedExpense({ id: "local-expense" });
+    await db.upsert(
+      "sharedExpenses",
+      toSharedExpenseLocalRow(pending, OWNER, "pending"),
+    );
+
+    const expenses = await repository.getExpenses(OWNER);
+
+    expect(expenses.map((expense) => expense.id)).toEqual(
+      expect.arrayContaining(["expense-1", "local-expense"]),
+    );
   });
 
   it("mirrors one expense and falls back to the cached copy", async () => {
@@ -125,6 +147,22 @@ describe("CachedSharedExpensesRepository", () => {
 });
 
 describe("CachedSettlementsRepository", () => {
+  it("keeps a settlement created offline visible after the remote list", async () => {
+    const remote = settlementRemote();
+    const repository = new CachedSettlementsRepository(remote as never);
+    const pending = buildSettlement({ id: "local-settlement" });
+    await db.upsert(
+      "settlements",
+      toSettlementLocalRow(pending, OWNER, "pending"),
+    );
+
+    const settlements = await repository.getSettlements(OWNER);
+
+    expect(settlements.map((settlement) => settlement.id)).toEqual(
+      expect.arrayContaining(["settlement-1", "local-settlement"]),
+    );
+  });
+
   it("mirrors lists, one record and mutations", async () => {
     const remote = settlementRemote();
     const repository = new CachedSettlementsRepository(remote as never);
@@ -145,6 +183,22 @@ describe("CachedSettlementsRepository", () => {
 });
 
 describe("CachedGroupExpensesRepository", () => {
+  it("keeps a group expense created offline visible after the remote list", async () => {
+    const remote = groupExpenseRemote();
+    const repository = new CachedGroupExpensesRepository(remote as never);
+    const pending = buildGroupExpense({ id: "local-expense" });
+    await db.upsert(
+      "groupExpenses",
+      toGroupExpenseLocalRow(pending, OWNER, "pending"),
+    );
+
+    const expenses = await repository.getGroupExpenses(pending.groupId);
+
+    expect(expenses.map((expense) => expense.id)).toEqual(
+      expect.arrayContaining(["expense-1", "local-expense"]),
+    );
+  });
+
   it("mirrors one group and falls back to it", async () => {
     const remote = groupExpenseRemote();
     const repository = new CachedGroupExpensesRepository(remote as never);
@@ -177,6 +231,22 @@ describe("CachedGroupExpensesRepository", () => {
 });
 
 describe("CachedGroupSettlementsRepository", () => {
+  it("keeps a group settlement created offline visible after the remote list", async () => {
+    const remote = groupSettlementRemote();
+    const repository = new CachedGroupSettlementsRepository(remote as never);
+    const pending = buildGroupSettlement({ id: "local-settlement" });
+    await db.upsert(
+      "groupSettlements",
+      toGroupSettlementLocalRow(pending, OWNER, "pending"),
+    );
+
+    const settlements = await repository.getGroupSettlements(pending.groupId);
+
+    expect(settlements.map((settlement) => settlement.id)).toEqual(
+      expect.arrayContaining(["group-settlement-1", "local-settlement"]),
+    );
+  });
+
   it("mirrors lists, records and mutations", async () => {
     const remote = groupSettlementRemote();
     const repository = new CachedGroupSettlementsRepository(remote as never);

@@ -3,9 +3,14 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 jest.mock("../local-transfer.cache", () => ({
   cacheTransfers: jest.fn(),
   cacheTransfer: jest.fn(),
+  readCachedTransfers: jest.fn(async () => null),
 }));
 
-import { cacheTransfer, cacheTransfers } from "../local-transfer.cache";
+import {
+  cacheTransfer,
+  cacheTransfers,
+  readCachedTransfers,
+} from "../local-transfer.cache";
 import { CachedTransferRepository } from "../cached-transfer.repository";
 import {
   ITransferRepository,
@@ -19,6 +24,7 @@ import { buildTransfer } from "./local-transfer.fixtures";
 
 const listMock = jest.mocked(cacheTransfers);
 const singleMock = jest.mocked(cacheTransfer);
+const readMock = jest.mocked(readCachedTransfers);
 
 function createRemote(): jest.Mocked<ITransferRepository> {
   return {
@@ -64,6 +70,18 @@ describe("CachedTransferRepository", () => {
       transfers,
       expect.any(String),
     );
+  });
+
+  it("returns the merged cache so a pending local row survives a stale remote read", async () => {
+    const remoteList = [buildTransfer({ id: "server-1" })];
+    const merged = [
+      buildTransfer({ id: "server-1" }),
+      buildTransfer({ id: "local-pending" }),
+    ];
+    remote.getTransfers.mockResolvedValue(remoteList);
+    readMock.mockResolvedValueOnce(merged);
+
+    await expect(repository.getTransfers("owner-1")).resolves.toBe(merged);
   });
 
   it("does not reject when the list cache write fails", async () => {

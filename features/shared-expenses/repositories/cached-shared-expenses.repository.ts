@@ -51,8 +51,14 @@ export class CachedSharedExpensesRepository
   async getExpenses(viewerUid: string): Promise<SharedExpense[]> {
     try {
       const expenses = await this.remote.getExpenses(viewerUid);
-      await this.cacheList(viewerUid, expenses);
-      return expenses;
+      const mirrored = await this.cacheList(viewerUid, expenses);
+
+      // Pending local rows are not on the server yet. Return the merged cache
+      // so an expense created offline shows up (and counts in balances) even
+      // when Firestore answers from its own stale cache.
+      if (!mirrored) return expenses;
+
+      return (await readCachedSharedExpenses(viewerUid)) ?? expenses;
     } catch (error) {
       const cached = await this.readCached();
       if (cached) return cached;
@@ -109,11 +115,13 @@ export class CachedSharedExpensesRepository
   private async cacheList(
     viewerUid: string,
     expenses: readonly SharedExpense[],
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       await cacheSharedExpenses(viewerUid, expenses, new Date().toISOString());
+      return true;
     } catch {
       // Best effort: the online read already succeeded.
+      return false;
     }
   }
 

@@ -6,6 +6,7 @@ import {
 import {
   cacheTransaction,
   cacheTransactions,
+  readCachedTransactions,
 } from "./local-transaction.cache";
 import {
   ITransactionRepository,
@@ -32,9 +33,12 @@ export class CachedTransactionRepository implements ITransactionRepository {
       );
     } catch {
       // Best effort: the online read already succeeded.
+      return transactions;
     }
 
-    return transactions;
+    // Pending local rows are not on the server yet: return the merged cache so
+    // a movement created offline does not disappear behind a stale SDK read.
+    return (await readCachedTransactions(ownerId)) ?? transactions;
   }
 
   async createTransaction(

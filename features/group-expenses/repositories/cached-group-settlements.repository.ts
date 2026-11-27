@@ -53,8 +53,18 @@ export class CachedGroupSettlementsRepository
   async getGroupSettlements(groupId: string): Promise<GroupSettlement[]> {
     try {
       const settlements = await this.remote.getGroupSettlements(groupId);
-      await this.cacheList(groupId, settlements);
-      return settlements;
+      const mirrored = await this.cacheList(groupId, settlements);
+
+      // Same merge as the other movement lists: a group settlement created
+      // offline must count before it reaches the server.
+      if (!mirrored) return settlements;
+
+      const ownerId = readCurrentOwnerId();
+      if (!ownerId) return settlements;
+
+      return (
+        (await readCachedGroupSettlements(ownerId, groupId)) ?? settlements
+      );
     } catch (error) {
       const ownerId = readCurrentOwnerId();
       if (!ownerId) throw error;
@@ -108,9 +118,9 @@ export class CachedGroupSettlementsRepository
   private async cacheList(
     groupId: string,
     settlements: readonly GroupSettlement[],
-  ): Promise<void> {
+  ): Promise<boolean> {
     const ownerId = readCurrentOwnerId();
-    if (!ownerId) return;
+    if (!ownerId) return false;
 
     try {
       await cacheGroupSettlements(
@@ -119,8 +129,10 @@ export class CachedGroupSettlementsRepository
         settlements,
         new Date().toISOString(),
       );
+      return true;
     } catch {
       // Best effort: the online read already succeeded.
+      return false;
     }
   }
 

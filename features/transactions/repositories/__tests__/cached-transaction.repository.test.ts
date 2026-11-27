@@ -3,11 +3,13 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 jest.mock("../local-transaction.cache", () => ({
   cacheTransactions: jest.fn(),
   cacheTransaction: jest.fn(),
+  readCachedTransactions: jest.fn(async () => null),
 }));
 
 import {
   cacheTransaction,
   cacheTransactions,
+  readCachedTransactions,
 } from "../local-transaction.cache";
 import { CachedTransactionRepository } from "../cached-transaction.repository";
 import {
@@ -22,6 +24,7 @@ import { buildTransaction } from "./local-transaction.fixtures";
 
 const listMock = jest.mocked(cacheTransactions);
 const singleMock = jest.mocked(cacheTransaction);
+const readMock = jest.mocked(readCachedTransactions);
 
 function createRemote(): jest.Mocked<ITransactionRepository> {
   return {
@@ -70,6 +73,18 @@ describe("CachedTransactionRepository", () => {
       transactions,
       expect.any(String),
     );
+  });
+
+  it("returns the merged cache so a pending local row survives a stale remote read", async () => {
+    const remoteList = [buildTransaction({ id: "server-1" })];
+    const merged = [
+      buildTransaction({ id: "server-1" }),
+      buildTransaction({ id: "local-pending" }),
+    ];
+    remote.getTransactions.mockResolvedValue(remoteList);
+    readMock.mockResolvedValueOnce(merged);
+
+    await expect(repository.getTransactions("owner-1")).resolves.toBe(merged);
   });
 
   it("does not reject when the list cache write fails", async () => {

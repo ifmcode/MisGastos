@@ -3,7 +3,11 @@ import {
   Transfer,
   UpdateTransferDto,
 } from "../types/transfer.types";
-import { cacheTransfer, cacheTransfers } from "./local-transfer.cache";
+import {
+  cacheTransfer,
+  cacheTransfers,
+  readCachedTransfers,
+} from "./local-transfer.cache";
 import {
   ITransferRepository,
   TransferMutationResult,
@@ -25,9 +29,11 @@ export class CachedTransferRepository implements ITransferRepository {
       await cacheTransfers(ownerId, transfers, new Date().toISOString());
     } catch {
       // Best effort: the online read already succeeded.
+      return transfers;
     }
 
-    return transfers;
+    // Same merge as transactions: keep a transfer created offline visible.
+    return (await readCachedTransfers(ownerId)) ?? transfers;
   }
 
   getTransfer(ownerId: string, transferId: string): Promise<Transfer | null> {

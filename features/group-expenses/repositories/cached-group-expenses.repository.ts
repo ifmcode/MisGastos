@@ -53,8 +53,16 @@ export class CachedGroupExpensesRepository
   async getGroupExpenses(groupId: string): Promise<GroupExpense[]> {
     try {
       const expenses = await this.remote.getGroupExpenses(groupId);
-      await this.cacheList(groupId, expenses);
-      return expenses;
+      const mirrored = await this.cacheList(groupId, expenses);
+
+      // Pending local rows are not on the server yet: return the merged group
+      // cache so an offline expense shows up and counts in the balances.
+      if (!mirrored) return expenses;
+
+      const ownerId = readCurrentOwnerId();
+      if (!ownerId) return expenses;
+
+      return (await readCachedGroupExpenses(ownerId, groupId)) ?? expenses;
     } catch (error) {
       const ownerId = readCurrentOwnerId();
       if (!ownerId) throw error;
@@ -114,9 +122,9 @@ export class CachedGroupExpensesRepository
   private async cacheList(
     groupId: string,
     expenses: readonly GroupExpense[],
-  ): Promise<void> {
+  ): Promise<boolean> {
     const ownerId = readCurrentOwnerId();
-    if (!ownerId) return;
+    if (!ownerId) return false;
 
     try {
       await cacheGroupExpenses(
@@ -125,8 +133,10 @@ export class CachedGroupExpensesRepository
         expenses,
         new Date().toISOString(),
       );
+      return true;
     } catch {
       // Best effort: the online read already succeeded.
+      return false;
     }
   }
 

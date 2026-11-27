@@ -42,8 +42,13 @@ export class CachedSettlementsRepository implements ISettlementsRepository {
   async getSettlements(viewerUid: string): Promise<Settlement[]> {
     try {
       const settlements = await this.remote.getSettlements(viewerUid);
-      await this.cacheList(viewerUid, settlements);
-      return settlements;
+      const mirrored = await this.cacheList(viewerUid, settlements);
+
+      // Same merge as shared expenses: a settlement created offline must be
+      // visible and count in the balances before the server sees it.
+      if (!mirrored) return settlements;
+
+      return (await readCachedSettlements(viewerUid)) ?? settlements;
     } catch (error) {
       const cached = await this.readCached();
       if (cached) return cached;
@@ -99,11 +104,13 @@ export class CachedSettlementsRepository implements ISettlementsRepository {
   private async cacheList(
     viewerUid: string,
     settlements: readonly Settlement[],
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       await cacheSettlements(viewerUid, settlements, new Date().toISOString());
+      return true;
     } catch {
       // Best effort: the online read already succeeded.
+      return false;
     }
   }
 
