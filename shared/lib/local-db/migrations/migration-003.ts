@@ -17,7 +17,7 @@ export const MIGRATION_003: LocalDbMigration = {
       recipientId TEXT NOT NULL,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL,
-      syncStatus TEXT NOT NULL DEFAULT 'synced'
+      syncStatus TEXT NOT NULL DEFAULT 'synced',
       PRIMARY KEY (ownerId, id)
     )`,
     `CREATE TABLE IF NOT EXISTS friendRequests (
@@ -29,7 +29,7 @@ export const MIGRATION_003: LocalDbMigration = {
       status TEXT NOT NULL,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL,
-      syncStatus TEXT NOT NULL DEFAULT 'synced'
+      syncStatus TEXT NOT NULL DEFAULT 'synced',
       PRIMARY KEY (ownerId, id)
     )`,
     `CREATE TABLE IF NOT EXISTS publicProfiles (
@@ -39,7 +39,7 @@ export const MIGRATION_003: LocalDbMigration = {
       email TEXT NOT NULL,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL,
-      syncStatus TEXT NOT NULL DEFAULT 'synced'
+      syncStatus TEXT NOT NULL DEFAULT 'synced',
       PRIMARY KEY (ownerId, id)
     )`,
     `CREATE TABLE IF NOT EXISTS groups (
@@ -55,7 +55,7 @@ export const MIGRATION_003: LocalDbMigration = {
       simplifyDebts INTEGER NOT NULL DEFAULT 1,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL,
-      syncStatus TEXT NOT NULL DEFAULT 'synced'
+      syncStatus TEXT NOT NULL DEFAULT 'synced',
       PRIMARY KEY (ownerId, id)
     )`,
     `CREATE TABLE IF NOT EXISTS groupInvitations (
@@ -69,7 +69,7 @@ export const MIGRATION_003: LocalDbMigration = {
       status TEXT NOT NULL,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL,
-      syncStatus TEXT NOT NULL DEFAULT 'synced'
+      syncStatus TEXT NOT NULL DEFAULT 'synced',
       PRIMARY KEY (ownerId, id)
     )`,
     `CREATE TABLE IF NOT EXISTS sharedExpenses (
@@ -92,7 +92,7 @@ export const MIGRATION_003: LocalDbMigration = {
       updatedAt TEXT NOT NULL,
       deletedAt TEXT,
       revision INTEGER NOT NULL DEFAULT 0,
-      syncStatus TEXT NOT NULL DEFAULT 'synced'
+      syncStatus TEXT NOT NULL DEFAULT 'synced',
       PRIMARY KEY (ownerId, id)
     )`,
     `CREATE TABLE IF NOT EXISTS settlements (
@@ -114,7 +114,7 @@ export const MIGRATION_003: LocalDbMigration = {
       receiverCategoryId TEXT,
       receiverTransactionId TEXT,
       revision INTEGER NOT NULL DEFAULT 0,
-      syncStatus TEXT NOT NULL DEFAULT 'synced'
+      syncStatus TEXT NOT NULL DEFAULT 'synced',
       PRIMARY KEY (ownerId, id)
     )`,
     `CREATE TABLE IF NOT EXISTS groupExpenses (
@@ -136,7 +136,7 @@ export const MIGRATION_003: LocalDbMigration = {
       updatedAt TEXT NOT NULL,
       deletedAt TEXT,
       revision INTEGER NOT NULL DEFAULT 0,
-      syncStatus TEXT NOT NULL DEFAULT 'synced'
+      syncStatus TEXT NOT NULL DEFAULT 'synced',
       PRIMARY KEY (ownerId, id)
     )`,
     `CREATE TABLE IF NOT EXISTS groupSettlements (
@@ -159,7 +159,7 @@ export const MIGRATION_003: LocalDbMigration = {
       receiverCategoryId TEXT,
       receiverTransactionId TEXT,
       revision INTEGER NOT NULL DEFAULT 0,
-      syncStatus TEXT NOT NULL DEFAULT 'synced'
+      syncStatus TEXT NOT NULL DEFAULT 'synced',
       PRIMARY KEY (ownerId, id)
     )`,
     `CREATE INDEX IF NOT EXISTS idx_shared_expenses_owner

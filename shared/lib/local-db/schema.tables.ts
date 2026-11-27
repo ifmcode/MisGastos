@@ -89,7 +89,7 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     recipientId TEXT NOT NULL,
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL,
-    syncStatus TEXT NOT NULL DEFAULT 'synced'
+    syncStatus TEXT NOT NULL DEFAULT 'synced',
     PRIMARY KEY (ownerId, id)
   )`,
   `CREATE TABLE IF NOT EXISTS friendRequests (
@@ -101,7 +101,7 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     status TEXT NOT NULL,
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL,
-    syncStatus TEXT NOT NULL DEFAULT 'synced'
+    syncStatus TEXT NOT NULL DEFAULT 'synced',
     PRIMARY KEY (ownerId, id)
   )`,
   `CREATE TABLE IF NOT EXISTS publicProfiles (
@@ -111,7 +111,7 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     email TEXT NOT NULL,
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL,
-    syncStatus TEXT NOT NULL DEFAULT 'synced'
+    syncStatus TEXT NOT NULL DEFAULT 'synced',
     PRIMARY KEY (ownerId, id)
   )`,
   `CREATE TABLE IF NOT EXISTS groups (
@@ -127,7 +127,7 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     simplifyDebts INTEGER NOT NULL DEFAULT 1,
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL,
-    syncStatus TEXT NOT NULL DEFAULT 'synced'
+    syncStatus TEXT NOT NULL DEFAULT 'synced',
     PRIMARY KEY (ownerId, id)
   )`,
   `CREATE TABLE IF NOT EXISTS groupInvitations (
@@ -141,7 +141,7 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     status TEXT NOT NULL,
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL,
-    syncStatus TEXT NOT NULL DEFAULT 'synced'
+    syncStatus TEXT NOT NULL DEFAULT 'synced',
     PRIMARY KEY (ownerId, id)
   )`,
   `CREATE TABLE IF NOT EXISTS sharedExpenses (
@@ -164,7 +164,7 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     updatedAt TEXT NOT NULL,
     deletedAt TEXT,
     revision INTEGER NOT NULL DEFAULT 0,
-    syncStatus TEXT NOT NULL DEFAULT 'synced'
+    syncStatus TEXT NOT NULL DEFAULT 'synced',
     PRIMARY KEY (ownerId, id)
   )`,
   `CREATE TABLE IF NOT EXISTS settlements (
@@ -186,7 +186,7 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     receiverCategoryId TEXT,
     receiverTransactionId TEXT,
     revision INTEGER NOT NULL DEFAULT 0,
-    syncStatus TEXT NOT NULL DEFAULT 'synced'
+    syncStatus TEXT NOT NULL DEFAULT 'synced',
     PRIMARY KEY (ownerId, id)
   )`,
   `CREATE TABLE IF NOT EXISTS groupExpenses (
@@ -208,7 +208,7 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     updatedAt TEXT NOT NULL,
     deletedAt TEXT,
     revision INTEGER NOT NULL DEFAULT 0,
-    syncStatus TEXT NOT NULL DEFAULT 'synced'
+    syncStatus TEXT NOT NULL DEFAULT 'synced',
     PRIMARY KEY (ownerId, id)
   )`,
   `CREATE TABLE IF NOT EXISTS groupSettlements (
@@ -231,7 +231,7 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     receiverCategoryId TEXT,
     receiverTransactionId TEXT,
     revision INTEGER NOT NULL DEFAULT 0,
-    syncStatus TEXT NOT NULL DEFAULT 'synced'
+    syncStatus TEXT NOT NULL DEFAULT 'synced',
     PRIMARY KEY (ownerId, id)
   )`,
   `CREATE TABLE IF NOT EXISTS outbox (
