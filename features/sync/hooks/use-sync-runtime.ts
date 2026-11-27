@@ -28,6 +28,10 @@ const INITIAL_STATE: OverviewState = {
   status: "idle",
 };
 
+/** Grace after reconnect before retrying a pull the SDK deferred as offline. */
+export const SYNC_DEFERRED_RETRY_MS = 3_000;
+const MAX_DEFERRED_RETRIES = 3;
+
 function toNextStatus(
   current: SyncRuntimeStatus,
   pendingCount: number,
@@ -51,7 +55,25 @@ export function useSyncRuntime(
   const [state, setState] = useState<OverviewState>(INITIAL_STATE);
   const running = useRef(false);
   const mounted = useRef(true);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const deferredRetries = useRef(0);
+  const runRef = useRef<(manual?: boolean) => Promise<void>>(async () => undefined);
   const { isOffline } = useNetworkStatus(enabled);
+
+  const clearDeferredRetry = useCallback(() => {
+    if (retryTimer.current === null) return;
+    clearTimeout(retryTimer.current);
+    retryTimer.current = null;
+  }, []);
+
+  const scheduleDeferredRetry = useCallback(() => {
+    if (!mounted.current || retryTimer.current !== null) return;
+
+    retryTimer.current = setTimeout(() => {
+      retryTimer.current = null;
+      void runRef.current(false);
+    }, SYNC_DEFERRED_RETRY_MS);
+  }, []);
 
   const refresh = useCallback(async () => {
     if (!ownerId) return;
@@ -78,7 +100,16 @@ export function useSyncRuntime(
     }
 
     try {
-      await getSyncEngine().sync(ownerId, { manual });
+      const result = await getSyncEngine().sync(ownerId, { manual });
+
+      // The SDK had not reconnected yet when the pull ran: retry shortly
+      // instead of leaving the cache stale, with a bounded number of attempts.
+      if (!result.deferred) {
+        deferredRetries.current = 0;
+      } else if (deferredRetries.current < MAX_DEFERRED_RETRIES) {
+        deferredRetries.current += 1;
+        scheduleDeferredRetry();
+      }
     } finally {
       running.current = false;
       if (mounted.current) {
@@ -86,24 +117,31 @@ export function useSyncRuntime(
       }
       await refresh();
     }
-  }, [ownerId, refresh]);
+  }, [ownerId, refresh, scheduleDeferredRetry]);
+
+  useEffect(() => {
+    runRef.current = run;
+  }, [run]);
 
   useEffect(() => {
     mounted.current = true;
 
     return () => {
       mounted.current = false;
+      clearDeferredRetry();
     };
-  }, []);
+  }, [clearDeferredRetry]);
 
   useEffect(() => {
     if (!enabled || !ownerId) {
+      clearDeferredRetry();
+      deferredRetries.current = 0;
       setState(INITIAL_STATE);
       return;
     }
 
     void refresh();
-  }, [enabled, ownerId, refresh]);
+  }, [enabled, ownerId, refresh, clearDeferredRetry]);
 
   const runNow = useCallback(() => {
     void run();

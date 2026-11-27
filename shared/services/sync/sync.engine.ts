@@ -1,8 +1,11 @@
 import type { DatabasePort } from "@/shared/lib/local-db/database.port";
+import { OFFLINE_READ_CODE } from "@/shared/lib/local-db/offline-read";
 import { LocalOutboxRepository } from "@/shared/lib/local-db/local-outbox.repository";
+import { isOwnerLocalWritesRevoked } from "@/shared/lib/local-db/owner-revocation";
 import { LocalSyncStateRepository } from "@/shared/lib/local-db/sync-state.repository";
 
 import { readSyncErrorCode } from "./sync.errors";
+import { SingleFlight } from "./single-flight";
 import { pushOutbox, type PushCounters } from "./sync.push";
 import type { SyncMutationApplier } from "./sync.applier.types";
 import type { RemoteMutationExecutor, SyncRunResult } from "./sync.types";
@@ -25,38 +28,43 @@ function emptyResult(status: SyncRunResult["status"]): SyncRunResult {
     conflicts: 0,
     failed: 0,
     pulled: false,
+    deferred: false,
     pending: 0,
     errorCode: null,
   };
 }
 
 /**
- * Runs one push-then-pull cycle for one account. Pushing follows the strict
- * `seq` order; a transient error pauses the queue with backoff, while a
- * conflict or a permanent error stops it until the user acts. Runs are
- * single-flight per account, so overlapping triggers cannot push a row twice.
+ * Runs one push-then-pull cycle for one account: push in `seq` order, pause with
+ * backoff on a transient error, stop on a conflict or a permanent error. Runs
+ * are single-flight per account, so overlapping triggers cannot push twice.
  */
 export class SyncEngine {
-  private readonly running = new Map<string, Promise<SyncRunResult>>();
+  private readonly runs = new SingleFlight<SyncRunResult>();
 
   constructor(private readonly deps: SyncEngineDependencies) {}
 
   sync(ownerId: string, options: { manual?: boolean } = {}): Promise<SyncRunResult> {
-    const active = this.running.get(ownerId);
-    if (active) return active;
+    return this.runs.run(ownerId, () =>
+      this.run(ownerId, options.manual === true),
+    );
+  }
 
-    const run = this.run(ownerId, options.manual === true).finally(() => {
-      this.running.delete(ownerId);
-    });
-    this.running.set(ownerId, run);
-
-    return run;
+  /** Resolves when the account has no cycle in flight; a failed run does not reject. */
+  whenIdle(ownerId: string): Promise<void> {
+    return this.runs.whenIdle(ownerId);
   }
 
   private async run(
     ownerId: string,
     manual: boolean,
   ): Promise<SyncRunResult> {
+    // Revoked (sign-out or purge in progress): a cycle now would recreate the
+    // deleted rows; no error is reported because the account is not offline.
+    if (isOwnerLocalWritesRevoked(ownerId)) {
+      return { ...emptyResult("offline"), errorCode: null };
+    }
+
     const port = await this.deps.getPort();
     if (!port) return { ...emptyResult("offline"), errorCode: "SYNC_OFFLINE" };
 
@@ -80,7 +88,7 @@ export class SyncEngine {
 
     const blocked = stopped;
     const pulled = transient
-      ? { pulled: false, errorCode: null }
+      ? { pulled: false, errorCode: null, deferred: false }
       : await this.pull(ownerId);
     errorCode = errorCode ?? pulled.errorCode;
 
@@ -98,6 +106,7 @@ export class SyncEngine {
       conflicts: counters.conflicts,
       failed: counters.failed,
       pulled: pulled.pulled,
+      deferred: pulled.deferred,
       pending: await this.countPending(outbox, ownerId),
       errorCode,
     };
@@ -105,12 +114,21 @@ export class SyncEngine {
 
   private async pull(
     ownerId: string,
-  ): Promise<{ pulled: boolean; errorCode: string | null }> {
+  ): Promise<{ pulled: boolean; errorCode: string | null; deferred: boolean }> {
     try {
       await this.deps.pull(ownerId);
-      return { pulled: true, errorCode: null };
+      return { pulled: true, errorCode: null, deferred: false };
     } catch (error) {
-      return { pulled: false, errorCode: readSyncErrorCode(error) };
+      const errorCode = readSyncErrorCode(error);
+
+      // An empty snapshot served from the SDK cache means Firestore had not
+      // reconnected yet. It is not a sync failure: report it as deferred so the
+      // caller retries the pull shortly instead of painting an error.
+      if (errorCode === OFFLINE_READ_CODE) {
+        return { pulled: false, errorCode: null, deferred: true };
+      }
+
+      return { pulled: false, errorCode, deferred: false };
     }
   }
 

@@ -3,6 +3,8 @@ import { describe, expect, it, jest } from "@jest/globals";
 import type { OutboxMutation } from "@/shared/lib/local-db/local-db.types";
 import { InMemoryDatabase } from "@/shared/lib/local-db/in-memory.database";
 import { LocalOutboxRepository } from "@/shared/lib/local-db/local-outbox.repository";
+import { OfflineReadError } from "@/shared/lib/local-db/offline-read";
+import { LocalSyncStateRepository } from "@/shared/lib/local-db/sync-state.repository";
 import {
   buildInput,
   NOW,
@@ -166,8 +168,26 @@ describe("SyncEngine", () => {
     });
   });
 
-  it("keeps a permanent failure manual (no retry window)", async () => {
-    const context = setup([{ status: "failed", errorCode: "permission-denied" }]);
+  it("defers the pull instead of failing when Firestore serves a cached empty snapshot", async () => {
+    const context = setup([]);
+    context.pull.mockRejectedValueOnce(new OfflineReadError());
+
+    const result = await context.engine.sync("owner-1");
+
+    expect(result).toMatchObject({
+      status: "done",
+      pulled: false,
+      deferred: true,
+      errorCode: null,
+    });
+
+    // The technical code is never persisted, so the sync center cannot paint it.
+    const state = await new LocalSyncStateRepository(context.db).get("owner-1");
+    expect(state.lastErrorCode).toBeNull();
+    expect(state.lastPullAt).toBeNull();
+  });
+
+  it("keeps a permanent failure manual (no retry window)", async () => {    const context = setup([{ status: "failed", errorCode: "permission-denied" }]);
     await seed(context.outbox, 1);
 
     const result = await context.engine.sync("owner-1");

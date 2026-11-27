@@ -47,6 +47,11 @@ export type SyncRunResult = {
   conflicts: number;
   failed: number;
   pulled: boolean;
+  /**
+   * The pull was skipped because Firestore still had no server connection
+   * (it served a cached, empty snapshot). Not an error: retry shortly.
+   */
+  deferred: boolean;
   pending: number;
   errorCode: string | null;
 };
