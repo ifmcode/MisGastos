@@ -2,7 +2,7 @@
 
 > Date: 24/11/2026
 > Status: Delivered — foundations only. TICKET-023 stays `🚧 In progress`.
-> Related: `roadmap.md` Phase 7, `tickets/TICKET-023-FUTURE-OFFLINE-FIRST-SYNC.md`,
+> Related: `roadmap.md` Phase 7, `tickets/[DONE] TICKET-023-FUTURE-OFFLINE-FIRST-SYNC.md`,
 > the accepted ADR [`2026-11-14-offline-first-architecture.md`](2026-11-14-offline-first-architecture.md),
 > `guidelines/architecture-and-solid.md`, `testing/test-guide.md`
 

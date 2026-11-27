@@ -1,7 +1,7 @@
 # Roadmap - MisGastos
 
 > Development guide: V1 scope, phase order, ticket order and the current ticket.
-> **Last reviewed:** 26/11/2026
+> **Last reviewed:** 27/11/2026
 
 ## Scope of this file
 - This file answers **what to build next and in which order**, plus the rules for doing it.
@@ -15,12 +15,12 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ## Current Focus
 - **Milestone:** M4 - Offline and V1 closeout
-- **Phase:** 7 - Offline-first implementation
-- **Current ticket:** TICKET-023 - Offline-first implementation (full epic)
-- **Status:** 🚧 In progress
-- **Last completed:** TICKET-073 - Group activity in the group detail (24/11/2026)
-- **Queued:** Phase 8 V1 closeout (TICKET-075, TICKET-052, TICKET-074, TICKET-040)
-- **Next:** continue TICKET-023 with offline UX, observability, account purge and the web decision
+- **Phase:** 8 - V1 closeout
+- **Current ticket:** TICKET-075 - Remove Pull-to-Refresh from Every List
+- **Status:** ⏳ Queued
+- **Last completed:** TICKET-023 - Offline-first implementation (27/11/2026)
+- **Queued:** TICKET-052, TICKET-074, TICKET-040
+- **Next:** TICKET-075
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
 
 ## V1.0 Scope
@@ -43,7 +43,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 | 4 | Architecture and workflow spike | ✅ Done |
 | 5 | Social vertical slice | ✅ Done |
 | 6 | Groups | ✅ Done |
-| 7 | Offline-first implementation | 🚧 In progress |
+| 7 | Offline-first implementation | ✅ Done |
 | 8 | V1 closeout | ⏳ Queued |
 | 9 | Post-V1 retention and enhancements | ⏳ Queued |
 
@@ -180,14 +180,14 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ### 6.4 Group activity in the detail (COMPLETED)
 - [x] TICKET-073: merge the group activity into the group detail as **Actividad del grupo** and remove the separate history route of TICKET-011 ✅ 24/11/2026
 
-## Phase 7: Offline-first implementation (IN PROGRESS)
-- [ ] Full TICKET-023 (design accepted in Phase 4)
+## Phase 7: Offline-first implementation (COMPLETED)
+- [x] Full TICKET-023 - offline-first implementation (design accepted in Phase 4) ✅ 27/11/2026
   - [x] Foundations: local SQLite DB, client-generated ids, `revision`/`deletedAt`/`appliedMutations` and rules ✅ 24/11/2026
   - [x] Local read cache for personal data and offline banner ✅ 24/11/2026
   - [x] Offline write queue for expenses, incomes and transfers with local balance derivation ✅ 26/11/2026
   - [x] Sync engine, retry/backoff, exactly-once and conflict UI ✅ 26/11/2026
   - [x] Offline group/friend movements (after Phase 6) ✅ 26/11/2026
-  - [ ] Offline UX, observability, account purge on logout/switch and web decision
+  - [x] Offline UX, observability, account purge on logout/switch and web decision ✅ 27/11/2026
 - If offline is a launch requirement, move this phase before Phase 6
 - Do not retrofit offline after groups without the Phase 4 decisions; the current Firestore transaction-based balance model may need to change
 
@@ -210,7 +210,9 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 ## Post-V1 backlog (NOT in V1 scope)
 - [ ] TICKET-053 account data import
 - [ ] TICKET-054 Google Drive backup and restore
-- The Phase 9 tickets above are also post-V1. These are intentionally outside V1.0 scope, listed so their order and dependencies stay visible, and they start only after V1 ships.
+- [ ] TICKET-076 web offline mode
+- [ ] TICKET-077 editable group-expense conflicts from the sync center
+- The Phase 9 tickets above are also post-V1, as are TICKET-076 and TICKET-077. These are intentionally outside V1.0 scope, listed so their order and dependencies stay visible, and they start only after V1 ships.
 
 ## Ordering Rules
 - **Recommended:** 0-3 → 4 → 5 → 6 → 7 → 8 (V1) → 9

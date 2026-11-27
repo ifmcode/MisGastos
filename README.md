@@ -57,7 +57,7 @@ simplicidad de uso.
 - 🌍 **Internacionalización** español/inglés con selector en Ajustes y preferencia persistida.
 - 🌗 **Soporte de tema claro/oscuro** según la preferencia del sistema o un ajuste manual.
 - 🧩 **Componentes compartidos** reutilizados por carteras, movimientos, transferencias, categorías, dashboard y Social: estados de carga/error/vacío, cabeceras y acciones de formulario, campos de importe/notas/fecha, modales page-sheet, tarjetas de fila, botón flotante centrado, el menú de acciones del FAB (`FabActionMenu`), que hoy usan los FAB de Social y de Movimientos, y el botón de icono con insignia de contador (`IconBadgeButton`), que comparten la campana del dashboard y la cabecera de Social con una sola insignia destacada y el tope `99+`.
-- 📴 **Sincronización offline** detrás de `EXPO_PUBLIC_OFFLINE_FIRST` (apagado por defecto): con la marca activa, crear, editar y borrar gastos, ingresos y transferencias funciona sin conexión y sobrevive al reinicio, con el saldo mostrado como `serverBalance + cambios pendientes`. Al volver la conexión, el motor envía la cola en orden estricto **exactamente una vez** (marcadores `appliedMutations` en la misma transacción que el cambio de dinero), reintenta los fallos transitorios con backoff exponencial (1 s → 5 min con jitter) y reintenta a mano los fallos permanentes con **Reintentar ahora**. Los conflictos por ediciones simultáneas en varios dispositivos (`REMOTE_CHANGED`, `DELETED_REMOTELY`, `WALLET_UNAVAILABLE`, `INSUFFICIENT_FUNDS`, `INVALID`) nunca se resuelven solos: un icono de sync en la cabecera de **Inicio**, **Carteras**, **Movimientos** y **Social** (a la izquierda de la campana o de las acciones) muestra sin conexión, pendientes y conflictos con insignia y abre el centro `/sync`, donde se ven los cambios sin subir, el último sync y se resuelve cada conflicto comparando **Tu cambio** con **Cambio de otro dispositivo**; el bloque **Sincronización** de Ajustes ofrece el mismo estado y **Reintentar ahora**. Incluye pull completo al arrancar, al reconectar, al volver a primer plano y tras cada escritura (debounce). Los movimientos sociales funcionan igual: gastos compartidos, liquidaciones, gastos de grupo y liquidaciones de grupo se crean, editan y borran sin conexión, con amigos, grupos y los movimientos compartidos y de grupo cacheados, los saldos calculados con lo cacheado más lo pendiente y los mismos conflictos por edición simultánea; crear un grupo, invitar, unirse y gestionar amigos siguen necesitando conexión. Las reglas nuevas (`appliedMutations`, el `get` de `transactions`/`transfers` y de las cuatro colecciones sociales sobre documento inexistente, y el `revision` de las colecciones sociales) están **pendientes de despliegue**.
+- 📴 **Sincronización offline** detrás de `EXPO_PUBLIC_OFFLINE_FIRST` (apagado por defecto): con la marca activa, crear, editar y borrar gastos, ingresos y transferencias funciona sin conexión y sobrevive al reinicio, con el saldo mostrado como `serverBalance + cambios pendientes`. Al volver la conexión, el motor envía la cola en orden estricto **exactamente una vez** (marcadores `appliedMutations` en la misma transacción que el cambio de dinero), reintenta los fallos transitorios con backoff exponencial (1 s → 5 min con jitter) y reintenta a mano los fallos permanentes con **Reintentar ahora**. Los conflictos por ediciones simultáneas en varios dispositivos (`REMOTE_CHANGED`, `DELETED_REMOTELY`, `WALLET_UNAVAILABLE`, `INSUFFICIENT_FUNDS`, `INVALID`) nunca se resuelven solos: un icono de sync en la cabecera de **Inicio**, **Carteras**, **Movimientos** y **Social** (a la izquierda de la campana o de las acciones) muestra sin conexión, pendientes y conflictos con insignia y abre el centro `/sync`, donde se ven los cambios sin subir, el último sync y se resuelve cada conflicto comparando **Tu cambio** con **Cambio de otro dispositivo**; el bloque **Sincronización** de Ajustes ofrece el mismo estado y **Reintentar ahora**. Incluye pull completo al arrancar, al reconectar, al volver a primer plano y tras cada escritura (debounce). Los movimientos sociales funcionan igual: gastos compartidos, liquidaciones, gastos de grupo y liquidaciones de grupo se crean, editan y borran sin conexión, con amigos, grupos y los movimientos compartidos y de grupo cacheados, los saldos calculados con lo cacheado más lo pendiente y los mismos conflictos por edición simultánea; crear un grupo, invitar, unirse y gestionar amigos siguen necesitando conexión. Las reglas nuevas (`appliedMutations`, el `get` de `transactions`/`transfers` y de las cuatro colecciones sociales sobre documento inexistente, y el `revision` de las colecciones sociales) están **pendientes de despliegue**. Al cerrar sesión se avisa si hay cambios pendientes o conflictos (con una lectura fresca del estado), se revoca la cuenta antes de `signOut` y se purga su base local en una transacción; si `signOut` falla, la revocación se restaura, y volver a iniciar sesión reactiva la cuenta, de modo que el motor nunca arranca para una cuenta revocada. En web el flag queda desactivado (`Platform.OS === "web"`): la web es online-only y la paridad está en TICKET-076.
 
 ## 🛠️ Stack tecnológico
 
@@ -158,6 +158,24 @@ npm run ios        # iOS (requiere macOS)
 npm run web        # Navegador
 ```
 
+#### Comprobar en un móvil físico
+
+```bash
+npm run mobile:status        # flag offline efectivo y comandos recomendados
+npm run mobile:refresh       # solo JS/estilos/copy: reinicia Metro con caché limpia
+npm run mobile:android       # recompila, instala el build debug y arranca Metro
+npm run mobile:ios           # iPhone (Xcode y firma)
+npm run mobile:android:clean # build nativo limpio si el incremental falla
+```
+
+> `mobile:refresh` basta para cambios de JavaScript, estilos o traducciones. Solo
+> recompilas con `mobile:android`/`mobile:ios` si cambian dependencias nativas,
+> `app.json`/plugins o `android/`. El flag `EXPO_PUBLIC_OFFLINE_FIRST` se inlinea
+> en el bundle: reinicia Metro después de cambiarlo. Puedes forzarlo sin tocar
+> `.env` con `npm run mobile:refresh:offline`, `npm run mobile:refresh:online` o
+> pasando `--offline`/`--online` a cualquier comando
+> (`npm run mobile:android -- --offline`).
+
 > En Android hace falta una **development build** (`npm run android` la compila e instala) y Metro
 > sirviendo el JS en el puerto 8081; Expo Go no carga los módulos nativos. Flujo diario y
 > diagnóstico del entorno en
@@ -202,6 +220,13 @@ npm run firestore-update-rules     # inicia sesión en Firebase y luego desplieg
 | `npm start` | Inicia el servidor de desarrollo de Expo. |
 | `npm run android` | Abre la app en Android. |
 | `npm run ios` | Abre la app en iOS. |
+| `npm run mobile:status` | Muestra el flag offline efectivo y los comandos para el móvil físico. |
+| `npm run mobile:refresh` | Reinicia Metro con caché limpia (solo JS; sin rebuild nativo). |
+| `npm run mobile:refresh:offline` | Igual, forzando el offline-first activado sin editar `.env`. |
+| `npm run mobile:refresh:online` | Igual, forzando el offline-first desactivado sin editar `.env`. |
+| `npm run mobile:android` | Compila, instala el build debug en un Android físico y arranca Metro. |
+| `npm run mobile:android:clean` | Igual, limpiando la caché nativa de Gradle. |
+| `npm run mobile:ios` | Compila e instala en un iPhone (requiere Xcode y firma). |
 | `npm run web` | Abre la app en el navegador. |
 | `npm run lint` | Ejecuta ESLint. |
 | `npm test` | Ejecuta la suite de Jest. |
@@ -232,9 +257,9 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
-Estado actual (26/11/2026): **469 suites / 3195 tests**; la cobertura global está en
-**96,53 % de sentencias, 90,23 % de ramas, 97,52 % de funciones y 97,55 % de
-líneas**, y `npm run check:copy` audita **357 archivos TSX**.
+Estado actual (27/11/2026): **475 suites / 3235 tests**; la cobertura global está en
+**96,56 % de sentencias, 90,26 % de ramas, 97,54 % de funciones y 97,56 % de
+líneas**, y `npm run check:copy` audita **359 archivos TSX**.
 
 ## 🗺️ Roadmap
 
@@ -275,7 +300,7 @@ líneas**, y `npm run check:copy` audita **357 archivos TSX**.
 - [x] Registrar opcionalmente el gasto de grupo en una cartera personal del pagador (TICKET-069) ✅ 22/11/2026
 - [x] Gestionar las solicitudes para unirse a grupos desde Social (TICKET-070) ✅ 23/11/2026
 - [x] Simplificar el formulario de gasto de grupo: sin **Todos** y solo **Igual**/**Importe**, manteniendo editables los modos antiguos (TICKET-071) ✅ 23/11/2026
-- [ ] Funcionamiento offline (arquitectura decidida: SQLite + cola de sincronización). Fase 7 **en curso**: base local `shared/lib/local-db` entregada el 24/11/2026 (DatabasePort, esquema y migraciones, outbox con estados y `sync-state`), prerrequisitos de escritura entregados el 24/11/2026 (ids de cliente opcionales, `revision` en carteras/movimientos/transferencias/categorías, borrado lógico de movimientos y reglas de `appliedMutations`), caché de lectura personal con aviso sin conexión entregada el 24/11/2026 (carteras, categorías, movimientos y transferencias en SQLite detrás de `EXPO_PUBLIC_OFFLINE_FIRST`), cola de escritura local entregada el 26/11/2026 (gastos, ingresos y transferencias escriben la fila SQLite y una fila de outbox en la misma transacción local, saldo mostrado `serverBalance + delta pendiente`, validación de transferencias contra el saldo derivado y un solo envío por mutación) y **motor de sincronización, exactly-once, reintentos y conflictos entregado el 26/11/2026** (push en orden por `seq`, markers `appliedMutations`, backoff exponencial, reintento manual, conflictos con **Tu cambio** vs **Cambio de otro dispositivo**, pull completo y centro `/sync`), más **movimientos offline de grupo y amigo entregados el 26/11/2026** (gastos compartidos, liquidaciones, gastos de grupo y liquidaciones de grupo creados, editados y borrados sin conexión, con amigos, grupos y movimientos cacheados, saldos locales y los mismos conflictos); solo quedan la purga local al cerrar sesión o cambiar de cuenta, la UX y observabilidad offline y la decisión sobre web, además del **despliegue de las reglas** antes de activar el flag. Con `EXPO_PUBLIC_OFFLINE_FIRST` activo las escrituras ya se sincronizan.
+- [x] Funcionamiento offline (SQLite + cola de sincronización) ✅ 27/11/2026: base local, prerrequisitos de escritura, caché de lectura con aviso sin conexión, cola de escritura con saldo derivado, motor de sincronización con exactly-once/reintentos/conflictos, movimientos offline de grupo y amigo, y cierre de la fase con purga local por cuenta al cerrar sesión (con aviso de cambios pendientes en Ajustes), UX/observabilidad offline y decisión web online-only (TICKET-076). Quedan el **despliegue de las reglas** de las entregas anteriores y la validación en dispositivo del checklist de `test-guide.md` antes de activar el flag.
 - [x] Especialización del flujo de desarrollo con agentes y skills de OpenCode
 - [ ] Quitar el pull-to-refresh de todas las listas (TICKET-075) (V1, antes de las notificaciones push)
 - [ ] Notificaciones push con la app cerrada (V1, después del offline y del pull-to-refresh)
@@ -284,6 +309,8 @@ líneas**, y `npm run check:copy` audita **357 archivos TSX**.
 - [ ] Exportar los datos de la cuenta en JSON versionado, por cartera o completa y sin datos compartidos ni de grupo (**post-V1**)
 - [ ] Importar los datos de la cuenta (**post-V1**)
 - [ ] Copia de seguridad manual y restauración en Google Drive (**post-V1**)
+- [ ] Soporte offline en la web, evaluando IndexedDB/OPFS frente a `expo-sqlite` detrás de `DatabasePort` (**post-V1**, TICKET-076)
+- [ ] Conflictos de gasto de grupo editables desde el centro de sync: motivo concreto, miembro que ya no está y edición que resuelve el conflicto y reencola la subida (**post-V1**, TICKET-077)
 
 Consulta el roadmap completo en
 [`docs/project/development-notes/roadmap.md`](docs/project/development-notes/roadmap.md).
@@ -334,6 +361,7 @@ Consulta el roadmap completo en
 - [Cola de escritura offline y saldo derivado (TICKET-023, cuarta entrega, 26/11/2026)](docs/project/development-notes/session-notes/2026-11-26-offline-write-queue.md): escritura local de gastos, ingresos y transferencias con fila SQLite + outbox en una sola transacción, saldo mostrado `serverBalance + delta pendiente` recalculado desde el outbox, validación de transferencias contra el saldo derivado, cancelación de create+delete, paridad de movimientos huérfanos, fallback de lectura de carteras y categorías, y un solo envío por mutación; el push llega en la fase 5 y el flag activo aún no envía nada.
 - [Motor de sincronización, exactly-once y conflictos (TICKET-023, quinta entrega, 26/11/2026)](docs/project/development-notes/session-notes/2026-11-26-offline-sync-engine.md): push en orden estricto con single-flight por cuenta, markers `appliedMutations` atómicos con el cambio de dinero, `clientMutationId` inmutable por payload y coalescing con id nuevo, backoff exponencial con reintento manual, conflictos tipados con resolución atómica (`keep-mine`/`keep-remote`), pull completo, serialización de transacciones locales, UI de icono de cabecera/Ajustes/centro `/sync` y reglas `list`/`get` pendientes de despliegue.
 - [Movimientos sociales offline (TICKET-023, sexta entrega, 26/11/2026)](docs/project/development-notes/session-notes/2026-11-26-offline-social-movements.md): esquema v3 con nueve tablas sociales por `(ownerId, id)`, caché de lectura social y pull con `allSettled` por grupo, `revision` e idempotencia en las cuatro operaciones sociales y sus enlaces, escritura local con saldo pendiente, ejecutor que siempre usa la operación enlazada, conflicto de moneda/importe/receptor, reglas pendientes de despliegue y sin creación de grupos offline.
+- [Purga local al cerrar sesión y decisión web (TICKET-023, séptima entrega, 27/11/2026)](docs/project/development-notes/session-notes/2026-11-27-offline-account-purge-and-web-decision.md): purga en una transacción de las 18 tablas con `ownerId`, revocación de escrituras antes de `signOut` y restauración si falla, motor que no arranca para cuentas revocadas, aviso con lectura fresca de pendientes/conflictos y web online-only con TICKET-076 para la paridad futura.
 - [Decisiones de gastos de grupo y membresía (20/11/2026)](docs/project/development-notes/session-notes/2026-11-20-group-expenses-and-membership-decisions.md): saldo neto pagado − cuota, selección de participantes, simplificación de deudas con ajuste por grupo, permisos de edición, salida con deuda saldada y transferencia de propiedad.
 - [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)

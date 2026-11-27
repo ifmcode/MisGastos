@@ -118,7 +118,10 @@ screenshots and computed-style results. Keep visual evidence in
 
 Run this on a device with `EXPO_PUBLIC_OFFLINE_FIRST=true` and the current
 `firestore.rules` deployed (the `appliedMutations` contract and the
-`transactions`/`transfers` `get`/`list` split).
+`transactions`/`transfers` `get`/`list` split). `npm run mobile:status` shows
+the effective flag, `npm run mobile:refresh` restarts Metro with a clean cache
+and `npm run mobile:android` rebuilds and installs the native app on a USB
+device.
 
 1. **Cache cold start**: open Wallets, Movements and Transfers online once, then
    enable airplane mode and open each list. They render the saved data and the
@@ -151,6 +154,15 @@ Run this on a device with `EXPO_PUBLIC_OFFLINE_FIRST=true` and the current
    not appear on any route.
 10. **No regression online**: with the flag off, creating, editing and deleting
     movements and transfers behaves exactly as before.
+11. **Logout purge**: with pending changes, signing out shows the warning and, on
+    confirmation, that account disappears from the device (no rows for that
+    `ownerId` remain); signing in again downloads the confirmed data.
+12. **Local data purge**: the **Borrar datos locales** action in Settings asks for
+    confirmation, removes the stored data and the pending changes of that
+    account and leaves the other accounts untouched.
+13. **Web**: with the web build open, the app runs online and the offline flag
+    does not turn on even with `EXPO_PUBLIC_OFFLINE_FIRST=true` (V1 decision, see
+    TICKET-076).
 
 ## 12. Dev log overlay and the custom entry
 

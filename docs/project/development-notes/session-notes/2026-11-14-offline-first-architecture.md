@@ -2,7 +2,7 @@
 
 > Date: 14/11/2026
 > Status: Accepted (design only — implementation is Phase 7)
-> Related: `roadmap.md` phases 4 and 7, `tickets/TICKET-023-FUTURE-OFFLINE-FIRST-SYNC.md`,
+> Related: `roadmap.md` phases 4 and 7, `tickets/[DONE] TICKET-023-FUTURE-OFFLINE-FIRST-SYNC.md`,
 > TICKET-002/003 (movements and transfers), TICKET-007/009/010 (friends, shared expenses, balances),
 > `guidelines/architecture-and-solid.md`, `testing/test-guide.md`
 
@@ -286,6 +286,11 @@ Rules:
   app-private sandbox). SQLCipher is not part of the design; if it becomes a requirement, use a
   dev-client build (`op-sqlite`/SQLCipher) behind the same `DatabasePort`.
 - Web: OPFS/IndexedDB is origin-scoped but not encrypted; web offline is a later phase.
+- **Implementation (27/11/2026):** the purge deletes the 18 owner-scoped tables in one transaction, an
+  in-memory revocation blocks cache mirrors from `signOut` until the next login (restored if `signOut`
+  fails) and the sync engine refuses to run for a revoked owner. The manual **Borrar datos locales**
+  purges and re-allows the signed-in account in a `finally`. The web build keeps the flag off
+  (`Platform.OS === "web"`); TICKET-076 tracks parity.
 
 ## 10. Constraints this imposes on the social phase
 
@@ -325,7 +330,7 @@ without a rewrite:
 | 4. Offline write queue | Local create/edit/delete for expenses, incomes and transfers + local balance derivation | Offline writes survive a restart; balances match the online rules |
 | 5. Sync, retry, conflicts | Push/pull engine, idempotency, backoff, revision conflicts | Exactly-once verified; conflicts surfaced and resolvable |
 | 6. Offline social | Friends, groups, shared expenses and settlements on the same outbox/ledger | Offline group movements sync; balances correct |
-| 7. Polish and observability | Sync center, manual retry, account-switch purge, web decision | Acceptance criteria of TICKET-023 met; online path not regressed |
+| 7. Polish and observability | Sync center, manual retry, account-switch purge, web decision | ✅ Phase 7 (27/11/2026): acceptance criteria of TICKET-023 met; online path not regressed; web online-only with TICKET-076 for parity |
 
 Feature flag `offline_first` (Settings → developer entry or env) lets Phase 3-5 ship behind a switch
 until the full flow is verified.

@@ -1,9 +1,9 @@
-# TICKET-023 - Future Epic: Offline-First and Sync
+# [DONE] TICKET-023 - Future Epic: Offline-First and Sync
 
 **Type:** Epic / Architecture  
 **Priority:** High  
-**Status:** 🚧 In progress  
-**Design spike:** ✅ Accepted (14/11/2026) — implementation started 24/11/2026 (foundations, prerequisites, read cache, write queue, sync engine and offline social movements)  
+**Status:** ✅ Done (27/11/2026)  
+**Design spike:** ✅ Accepted (14/11/2026) — implementation completed 27/11/2026 (foundations, prerequisites, read cache, write queue, sync engine, offline social movements, account purge, offline UX and web decision)  
 **Related:** PM-023; TICKET-002, TICKET-003, TICKET-007, TICKET-009, TICKET-010  
 **Sprint:** Platform / Post-MVP  
 
@@ -21,7 +21,7 @@ Make the app usable without an internet connection. The user must be able to cre
 - [x] Define conflict resolution for edits made on multiple devices
 - [x] Surface conflicts to the user instead of silently overwriting money data
 - [x] Show offline state, pending changes, last sync time and a manual retry action
-- [ ] Clear or isolate local data on logout and account switching
+- [x] Clear or isolate local data on logout and account switching
 - [x] Add unit tests for the queue/conflict logic and integration tests for offline -> online flows
 
 ## Acceptance Criteria
@@ -31,7 +31,7 @@ Make the app usable without an internet connection. The user must be able to cre
 - [x] A conflicting edit is reported and never silently discards one user's data
 - [x] The user can see what is pending and retry a failed sync
 - [x] The app remains usable when Firebase is temporarily unavailable
-- [ ] Logging out removes local access to the previous account's data
+- [x] Logging out removes local access to the previous account's data
 - [x] Existing online behaviour and balance rules do not regress
 
 ## Progress (24/11/2026)
@@ -336,10 +336,113 @@ flows still need a device walkthrough.
 
 **Detail:** [`session-notes/2026-11-26-offline-social-movements.md`](../development-notes/session-notes/2026-11-26-offline-social-movements.md)
 
+### Seventh slice — offline UX, observability, account purge and web decision (27/11/2026)
+
+This slice closes the last open requirement and the last open acceptance
+criterion: `Clear or isolate local data on logout and account switching` and
+`Logging out removes local access to the previous account's data`. With them the
+epic is complete.
+
+**Delivered:**
+
+- **Account purge on logout and switch.** `purgeOwnerLocalData`
+  (`shared/lib/local-db/owner-purge.ts`) deletes the owner's rows from the 18
+  tables that declare `ownerId` — the personal and social records, `outbox`,
+  `conflicts`, `syncState`, `cacheMeta` and `outboxSeq` — inside one local
+  transaction, so a logout never leaves a half-purged account. The outbox and the
+  open conflicts of that account go with the data.
+- **Revocation before logout.** `owner-revocation.ts` marks the account as
+  revoked **before** `signOut` is called, so an in-flight read cannot repopulate
+  the cache between the purge and the auth change. If `signOut` fails the
+  revocation is restored (the account keeps its local data and stays usable), and
+  a successful login lifts the revocation, so the same account works again.
+- **Engine guard.** The sync engine is single-flight per account and refuses to
+  start for a revoked account; the runtime therefore cannot push or pull rows
+  after the account was revoked.
+- **Warning with fresh data.** Logging out with local data present reads the
+  overview again (pending and conflicts) instead of trusting the rendered state,
+  and asks for confirmation when changes are pending or conflicted.
+- **Manual purge.** `Borrar datos locales` in the Settings **Sincronización**
+  block purges the account whose session is active, with confirmation, and
+  re-activates it so the app keeps working in the same session; when there is no
+  local database it reports `localData.unavailable` instead of failing silently.
+- **Context refresh.** The sync context exposes `refresh`, so the overview is
+  re-read after a purge, a retry or a logout attempt without remounting the
+  provider.
+- **Web decision.** `isOfflineFirstEnabled()` returns `false` when
+  `Platform.OS === "web"`, so web stays online-only even with
+  `EXPO_PUBLIC_OFFLINE_FIRST=true`. Future parity is tracked in TICKET-076.
+- **Hardening.** `mirrorSingleRow` filters by `ownerId`, the flag reader no
+  longer latches a failure, and a contract test compares
+  `OWNER_SCOPED_LOCAL_TABLES` with the schema tables that declare `ownerId`, so a
+  new table cannot silently escape the purge. The revocation and purge tests
+  include the social case (a shared document owned by two accounts) and restore
+  their mocks.
+
+**Isolation decision:** rows stay scoped by `ownerId` and are physically purged
+for that owner on logout; the local database is never shared or "handed over"
+between accounts. The purge is transactional and idempotent, and the manual
+action reuses it. The web build keeps the online path (TICKET-076).
+
+**Review:** the read-only `reviewer` returned `approve with nits`, with no
+blockers and no majors. Minors 2-6 and nits 3 and 6 were applied.
+
+**Accepted debt:**
+
+- The new hooks (`use-settings-logout`, `use-local-data-purge`) have no unit test:
+  there is no React renderer and hooks are outside the coverage gate.
+- The `Modal` + `ConfirmDialog` pattern is duplicated between Settings and the
+  sync block; it is small and stable.
+- Device and dark-mode validation of the new surfaces is still pending.
+
+**Verification (27/11/2026):** `npx tsc --noEmit` clean; `npx expo lint` clean;
+`npx jest` → **475 suites / 3235 tests**; `npm run test:coverage` → global
+**96.56 % statements, 90.26 % branches, 97.54 % functions, 97.56 % lines**;
+`npm run check:copy` → **359 TSX**. No change to `firestore.rules`, indexes,
+mappers or money arithmetic, so there is nothing new to deploy from this slice.
+
+**Pending manual steps (not blocking this closure):** deploy the rules of the
+previous slices **before** enabling the flag, and walk the §11 checklist of
+`test-guide.md` on a device, including logout purge, **Borrar datos locales** and
+web online-only.
+
+**Detail:** [`session-notes/2026-11-27-offline-account-purge-and-web-decision.md`](../development-notes/session-notes/2026-11-27-offline-account-purge-and-web-decision.md)
+
+## Implemented (27/11/2026)
+
+The epic delivers an offline-first client behind `EXPO_PUBLIC_OFFLINE_FIRST`
+(default off): SQLite as the on-device store, a coalesced outbox per account, a
+single-flight sync engine with exponential backoff and exactly-once
+`appliedMutations` markers, revision-based conflicts with an explicit resolution
+UI and a local read cache for personal and social data, plus per-account purge
+and the web online-only decision.
+
+Files touched by the closing slice:
+
+- `shared/lib/local-db/owner-purge.ts`, `owner-revocation.ts`,
+  `cache-mirror.ts`, `offline-first.flag.ts`
+- `shared/services/sync/sync.engine.ts`, `shared/services/sync/single-flight.ts`
+- `features/sync/services/account-local-data.ts`,
+  `features/sync/providers/sync-context.ts`,
+  `features/sync/hooks/use-sync-runtime.ts`,
+  `features/sync/hooks/use-local-data-purge.ts`,
+  `features/sync/components/sync-status-block.tsx`,
+  `features/sync/components/sync-local-data-action.tsx`,
+  `features/sync/locales/{es,en}.json`
+- `features/settings/hooks/use-settings-logout.ts`,
+  `features/settings/components/settings-screen.tsx`,
+  `features/settings/components/settings-logout-section.tsx`,
+  `features/settings/locales/{es,en}.json`
+- `features/auth/providers/auth-provider.tsx`,
+  `features/auth/repositories/auth.repository.ts`,
+  `features/auth/repositories/firebase-auth.repository.ts`,
+  `features/auth/services/auth.service.ts`, `features/auth/services/auth.factory.ts`
+- Colocated `__tests__/` for the new modules.
+
 ## Design Spike (14/11/2026)
 
-**Status:** ✅ Accepted. **No app code changed** in this session; the epic stays in progress until the
-implementation phases below are delivered.
+**Status:** ✅ Accepted (14/11/2026) and implemented on 27/11/2026.
+The decisions below were delivered in the phases listed in *Delivery phases*.
 
 **Full document:** [`docs/project/development-notes/session-notes/2026-11-14-offline-first-architecture.md`](../development-notes/session-notes/2026-11-14-offline-first-architecture.md)
 
@@ -385,7 +488,7 @@ implementation phases below are delivered.
 | 4 | Offline write queue for expenses, incomes and transfers | Phase 7 ✅ 26/11/2026 |
 | 5 | Sync engine, retry, exactly-once and conflicts | Phase 7 ✅ 26/11/2026 |
 | 6 | Offline group/friend movements | Phase 7 ✅ 26/11/2026 |
-| 7 | Offline UX, observability, account purge and web decision | Phase 7 |
+| 7 | Offline UX, observability, account purge and web decision | Phase 7 ✅ 27/11/2026 |
 
 ### Acceptance criteria mapping
 
@@ -397,7 +500,7 @@ implementation phases below are delivered.
 | Conflicting edit reported, never silently discarded | 5 |
 | User sees pending changes and can retry a failed sync | 5 (header icon; basic strip in 3) |
 | App usable while Firebase is unavailable | 3-4 |
-| Logout removes local access to the previous account's data | 7 |
+| Logout removes local access to the previous account's data | 7 (delivered 27/11/2026) |
 | Existing online behaviour and balance rules do not regress | 2 + parity tests in every phase |
 
 ## Technical Notes
