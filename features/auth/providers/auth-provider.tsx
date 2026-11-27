@@ -2,6 +2,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import { auth } from "@/lib/firebase";
+import { allowOwnerLocalWrites } from "@/shared/lib/local-db/owner-revocation";
 
 import { AuthContext } from "../context/auth-context";
 import type { AuthContextValue } from "../context/auth-context";
@@ -20,6 +21,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     return onAuthStateChanged(auth, (firebaseUser) => {
+      // A fresh session lifts the revocation left by the previous sign-out.
+      if (firebaseUser) allowOwnerLocalWrites(firebaseUser.uid);
+
       setUser(toAuthUser(firebaseUser));
       setLoading(false);
     });

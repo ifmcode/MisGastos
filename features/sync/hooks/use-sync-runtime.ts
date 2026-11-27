@@ -176,6 +176,7 @@ export function useSyncRuntime(
     isOffline,
     ...state,
     retry,
+    refresh,
     resolveConflict,
   };
 }

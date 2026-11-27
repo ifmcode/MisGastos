@@ -5,6 +5,7 @@ import type {
   LocalWhere,
 } from "./local-db.types";
 import { readLocalRowId } from "./local-row.readers";
+import { isOwnerLocalWritesRevoked } from "./owner-revocation";
 
 export type CacheMirrorInput = {
   /** Collection being mirrored (personal or social). */
@@ -63,11 +64,16 @@ function buildSyncedRow(row: LocalRow, ownerId: string, now: string): LocalRow {
  *   id is protected by a pending mutation;
  * - rows that disappeared from the remote list are deleted only when they are
  *   still `synced`, so pending/syncing/failed/conflict rows survive a pull.
+ *
+ * A revoked owner (signed out, purge in progress) writes nothing: its remote
+ * read may still be in flight and must not repopulate the deleted cache.
  */
 export async function mirrorOwnerRows(
   tx: LocalDatabaseTransaction,
   { table, ownerId, scope, rows, now }: CacheMirrorInput,
 ): Promise<void> {
+  if (isOwnerLocalWritesRevoked(ownerId)) return;
+
   const where: LocalWhere = scope ? { ownerId, ...scope } : { ownerId };
   const existing = await tx.select<LocalRow>(table, { where });
   const existingById = new Map<string, LocalRow>();
@@ -105,16 +111,21 @@ export async function mirrorOwnerRows(
  * It upserts the row as `synced` unless a local row with the same id is
  * protected by a pending mutation. It never deletes other rows and never
  * stamps `cacheMeta`: one record does not mean the collection was fetched.
+ * The lookup is scoped to the owner: social tables use `(ownerId, id)` as the
+ * primary key, so another account may legitimately hold the same id.
+ * A revoked owner writes nothing, for the same reason as `mirrorOwnerRows`.
  */
 export async function mirrorSingleRow(
   tx: LocalDatabaseTransaction,
   { table, ownerId, row, now }: CacheSingleRowInput,
 ): Promise<void> {
+  if (isOwnerLocalWritesRevoked(ownerId)) return;
+
   const id = readLocalRowId(row);
   if (!id) return;
 
   const existing = await tx.select<LocalRow>(table, {
-    where: { id },
+    where: { id, ownerId },
     limit: 1,
   });
   if (existing[0] && isProtected(existing[0])) return;

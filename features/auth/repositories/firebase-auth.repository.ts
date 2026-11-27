@@ -121,4 +121,8 @@ export class FirebaseAuthRepository implements IAuthRepository {
   async signOut(): Promise<void> {
     await signOut(auth);
   }
+
+  getCurrentUserId(): string | null {
+    return auth.currentUser?.uid ?? null;
+  }
 }

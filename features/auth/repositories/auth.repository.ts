@@ -13,4 +13,6 @@ export interface IAuthRepository extends IEmailVerificationRepository {
   updateDisplayName(name: string): Promise<void>;
   sendPasswordReset(email: Email): Promise<void>;
   signOut(): Promise<void>;
+  /** Uid of the signed-in session, read before `signOut` clears it. */
+  getCurrentUserId(): string | null;
 }

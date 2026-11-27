@@ -1,31 +1,15 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { User } from "firebase/auth";
 
-import type { Email } from "../../types/auth.types";
-import type { IAuthRepository } from "../../repositories/auth.repository";
 import {
   consumePendingVerificationEmail,
   markPendingVerificationEmail,
   resetPendingVerificationEmail,
 } from "../../utils/verification-email-store";
 import { AuthService } from "../auth.service";
-
-const email = "user@example.com" as Email;
+import { createRepository, email } from "./auth.service.fixtures";
 
 beforeEach(resetPendingVerificationEmail);
-
-function createRepository(): IAuthRepository {
-  return {
-    signInWithGoogle: jest.fn(async () => null),
-    signInWithEmail: jest.fn(async () => null),
-    registerWithEmail: jest.fn(async () => null),
-    updateDisplayName: jest.fn(async () => undefined),
-    sendPasswordReset: jest.fn(async () => undefined),
-    sendVerificationEmail: jest.fn(async () => undefined),
-    reloadCurrentUser: jest.fn(async () => null),
-    signOut: jest.fn(async () => undefined),
-  };
-}
 
 describe("AuthService", () => {
   it("delegates Google, email and registration flows", async () => {
@@ -87,14 +71,5 @@ describe("AuthService", () => {
     await service.register("Name", email, "secret123");
 
     expect(consumePendingVerificationEmail("user-1")).toBe(true);
-  });
-
-  it("clears a pending verification email on logout", async () => {
-    const service = new AuthService(createRepository());
-    markPendingVerificationEmail("user-1");
-
-    await service.logout();
-
-    expect(consumePendingVerificationEmail("user-1")).toBe(false);
   });
 });

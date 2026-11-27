@@ -30,6 +30,11 @@ export const mockWhere = jest.fn<(...args: unknown[]) => unknown>();
 
 export const mockAuth: { currentUser: unknown } = { currentUser: null };
 
+/** Seeds the signed-in user read by `getCurrentUserId`. */
+export function setCurrentUser(uid: string | null): void {
+  mockAuth.currentUser = uid === null ? null : { uid };
+}
+
 jest.mock("firebase/auth", () => ({
   GoogleAuthProvider: jest.fn(),
   signInWithPopup: (...args: unknown[]) => mockSignInWithPopup(...args),

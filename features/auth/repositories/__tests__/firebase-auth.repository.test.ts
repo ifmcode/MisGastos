@@ -12,6 +12,7 @@ import {
   mockSignInWithGoogle,
   mockSignOut,
   mockUpdateProfile,
+  setCurrentUser,
   setupAuthMocks,
 } from "./auth.test-helpers";
 import { FirebaseAuthRepository } from "../firebase-auth.repository";
@@ -177,5 +178,19 @@ describe("FirebaseAuthRepository.session", () => {
     await expect(
       new FirebaseAuthRepository().updateDisplayName("Ada"),
     ).rejects.toThrow("No authenticated user to update.");
+  });
+});
+
+describe("FirebaseAuthRepository.currentUser", () => {
+  it("returns the uid of the signed-in session", () => {
+    setCurrentUser("123");
+
+    expect(new FirebaseAuthRepository().getCurrentUserId()).toBe("123");
+  });
+
+  it("returns null without a session", () => {
+    setCurrentUser(null);
+
+    expect(new FirebaseAuthRepository().getCurrentUserId()).toBeNull();
   });
 });

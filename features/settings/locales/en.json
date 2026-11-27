@@ -26,5 +26,18 @@
     "accessibility": "Register new shared expenses in a wallet",
     "hint": "When you create a shared expense you paid for, the wallet and the category start turned on.",
     "saveError": "The preference could not be saved. Try again."
+  },
+  "logoutWarning": {
+    "title": "Sign out with unsynced changes",
+    "pending_one": "{{count}} change waiting to upload",
+    "pending_other": "{{count}} changes waiting to upload",
+    "conflicts_one": "{{count}} unresolved conflict",
+    "conflicts_other": "{{count}} unresolved conflicts",
+    "message": "Signing out will discard the changes that have not been uploaded from this device: {{details}}.",
+    "hint": "Warns you about changes that have not been uploaded before signing out.",
+    "busy": "Signing out…",
+    "confirm": "Sign out and discard",
+    "cancel": "Cancel",
+    "error": "The session could not be closed. Try again."
   }
 }

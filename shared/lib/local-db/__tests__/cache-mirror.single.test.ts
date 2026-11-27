@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { mirrorSingleRow } from "../cache-mirror";
 import { migrateLocalDatabase } from "../database";
 import { InMemoryDatabase } from "../in-memory.database";
-import type { LocalRow } from "../local-db.types";
+import type { LocalCacheCollection, LocalRow } from "../local-db.types";
 import { buildRow } from "./db.fixtures";
 import { NOW } from "./outbox.fixtures";
 
@@ -26,10 +26,13 @@ describe("mirrorSingleRow", () => {
     await migrateLocalDatabase(db);
   });
 
-  async function mirror(rowToMirror: LocalRow): Promise<void> {
+  async function mirror(
+    rowToMirror: LocalRow,
+    table: LocalCacheCollection = "wallets",
+  ): Promise<void> {
     await db.transaction((tx) =>
       mirrorSingleRow(tx, {
-        table: "wallets",
+        table,
         ownerId: OWNER,
         row: rowToMirror,
         now: NOW,
@@ -70,5 +73,28 @@ describe("mirrorSingleRow", () => {
     await mirror({ ownerId: OWNER, name: "No id" });
 
     await expect(db.count("wallets")).resolves.toBe(0);
+  });
+
+  it("does not let another owner's protected row with the same id block the mirror", async () => {
+    db.seed("groups", [
+      row({
+        id: "group-1",
+        ownerId: "owner-2",
+        name: "Other",
+        syncStatus: "pending",
+      }),
+    ]);
+
+    await mirror(row({ id: "group-1", name: "Mine" }), "groups");
+
+    const [stored] = await db.select<LocalRow>("groups", {
+      where: { ownerId: OWNER },
+    });
+    expect(stored).toMatchObject({ name: "Mine", syncStatus: "synced" });
+
+    const [other] = await db.select<LocalRow>("groups", {
+      where: { ownerId: "owner-2" },
+    });
+    expect(other).toMatchObject({ name: "Other", syncStatus: "pending" });
   });
 });

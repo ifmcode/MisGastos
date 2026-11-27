@@ -26,5 +26,18 @@
     "accessibility": "Registrar los gastos compartidos nuevos en una cartera",
     "hint": "Al crear un gasto compartido en el que pagas tú, la cartera y la categoría aparecen activadas.",
     "saveError": "No se pudo guardar la preferencia. Inténtalo de nuevo."
+  },
+  "logoutWarning": {
+    "title": "Cerrar sesión con cambios sin subir",
+    "pending_one": "{{count}} cambio pendiente de subir",
+    "pending_other": "{{count}} cambios pendientes de subir",
+    "conflicts_one": "{{count}} conflicto sin resolver",
+    "conflicts_other": "{{count}} conflictos sin resolver",
+    "message": "Al cerrar sesión se perderán los cambios sin subir de este dispositivo: {{details}}.",
+    "hint": "Avisa si quedan cambios sin subir antes de cerrar la sesión.",
+    "busy": "Cerrando sesión…",
+    "confirm": "Cerrar sesión y descartar",
+    "cancel": "Cancelar",
+    "error": "No se pudo cerrar sesión. Inténtalo de nuevo."
   }
 }

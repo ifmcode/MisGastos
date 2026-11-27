@@ -58,11 +58,27 @@ export const settingsStyles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
+  logoutSection: {
+    gap: 8,
+  },
+  logoutBusy: {
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: "center",
+  },
   logoutButton: {
     backgroundColor: settingsPalette.danger,
+    minHeight: 48,
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
+    justifyContent: "center",
+  },
+  logoutButtonDisabled: {
+    opacity: 0.5,
+  },
+  logoutButtonPressed: {
+    opacity: 0.8,
   },
   logoutText: {
     color: settingsPalette.onDanger,

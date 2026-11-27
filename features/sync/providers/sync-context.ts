@@ -21,6 +21,8 @@ export interface SyncContextValue {
   conflicts: LocalConflict[];
   /** Manual push + pull cycle. */
   retry: () => void;
+  /** Re-reads the account overview (counters, last cycle, open conflicts). */
+  refresh: () => Promise<void>;
   resolveConflict: (
     conflictId: string,
     choice: LocalConflictResolution,
@@ -37,6 +39,7 @@ export const SYNC_DISABLED_VALUE: SyncContextValue = {
   lastErrorCode: null,
   conflicts: [],
   retry: () => undefined,
+  refresh: async () => undefined,
   resolveConflict: async () => undefined,
 };
 

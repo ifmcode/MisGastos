@@ -5,25 +5,20 @@ import { useTranslation } from "react-i18next";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useAuthService } from "@/features/auth/hooks/use-auth-service";
 import { SyncStatusBlock } from "@/features/sync/components/sync-status-block";
 import { useFormTheme } from "@/shared/hooks/use-form-theme";
 
 import { settingsStyles as styles } from "../styles/settings.styles";
 import { SettingsLanguageSelector } from "./settings-language-selector";
+import { SettingsLogoutSection } from "./settings-logout-section";
 import { SettingsProfileLink } from "./settings-profile-link";
 import { SettingsSharedExpenseToggle } from "./settings-shared-expense-toggle";
 import { SettingsThemeToggle } from "./settings-theme-toggle";
 
 export function SettingsScreen() {
-  const authService = useAuthService();
   const router = useRouter();
   const theme = useFormTheme();
   const { t } = useTranslation("settings");
-
-  const handleLogout = () => {
-    void authService.logout();
-  };
 
   return (
     <ThemedView style={styles.container}>
@@ -58,14 +53,7 @@ export function SettingsScreen() {
         <SyncStatusBlock />
       </ThemedView>
 
-      <Pressable
-        style={[styles.logoutButton, { backgroundColor: theme.danger }]}
-        onPress={handleLogout}
-      >
-        <ThemedText style={[styles.logoutText, { color: theme.onPrimary }]}>
-          {t("logout")}
-        </ThemedText>
-      </Pressable>
+      <SettingsLogoutSection />
     </ThemedView>
   );
 }
