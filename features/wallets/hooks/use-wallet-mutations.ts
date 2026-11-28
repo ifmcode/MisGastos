@@ -7,6 +7,7 @@ import {
   WalletUsage,
 } from "../types/wallet.types";
 import { replaceWallet } from "../utils/wallet-list";
+import { compareWallets } from "../utils/wallet-order";
 import { useWalletMutationState } from "./use-wallet-mutation-state";
 import { useWalletService } from "./use-wallet-service";
 import { useWalletUsage } from "./use-wallet-usage";
@@ -54,7 +55,9 @@ export function useWalletMutations({
             currentOwnerId,
             input,
           );
-          setWallets((current) => [wallet, ...current]);
+          setWallets((current) =>
+            [...current, wallet].sort(compareWallets),
+          );
         },
         "CREATE_FAILED",
         "SIGN_IN_CREATE",

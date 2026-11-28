@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 
 import { useAuth } from "@/hooks/use-auth";
 import { useAsyncCollection } from "@/shared/hooks/use-async-collection";
@@ -20,6 +20,7 @@ import { useWalletService } from "./use-wallet-service";
 
 export interface UseWalletsResult extends WalletMutations {
   wallets: Wallet[];
+  setWallets: Dispatch<SetStateAction<Wallet[]>>;
   activeWallets: Wallet[];
   archivedWallets: Wallet[];
   totals: WalletTotal[];
@@ -70,6 +71,7 @@ export function useWallets(): UseWalletsResult {
 
   return {
     wallets,
+    setWallets,
     activeWallets,
     archivedWallets,
     totals,

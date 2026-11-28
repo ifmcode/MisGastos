@@ -9,11 +9,13 @@ import {
   useWalletManagement,
   WalletManagement,
 } from "./use-wallet-management";
+import { useWalletReorder, WalletReorder } from "./use-wallet-reorder";
 import { useWallets, UseWalletsResult } from "./use-wallets";
 
 export interface WalletScreenController {
   wallets: UseWalletsResult;
   management: WalletManagement;
+  reorder: WalletReorder;
   archiveDialog: ReturnType<typeof useConfirmDialog>;
   canAddWallet: boolean;
   showScreenError: boolean;
@@ -35,21 +37,31 @@ export function useWalletScreen(): WalletScreenController {
   const management = useWalletManagement({
     getWalletUsage: wallets.getWalletUsage,
   });
+  const reorder = useWalletReorder({
+    wallets: wallets.wallets,
+    visibleWallets: wallets.activeWallets,
+    setWallets: wallets.setWallets,
+  });
   const archiveDialog = useConfirmDialog();
 
-  const canAddWallet = !wallets.loading && !wallets.error && wallets.wallets.length > 0;
+  const canAddWallet =
+    !wallets.loading && !wallets.error && wallets.wallets.length > 0;
 
+  /** Reorder mode owns the row taps, so no modal opens while it is active. */
   function openCreate() {
+    if (reorder.reordering) return;
     wallets.clearMutationState();
     management.openCreate();
   }
 
   function openActions(wallet: Wallet) {
+    if (reorder.reordering) return;
     wallets.clearMutationState();
     management.openActions(wallet);
   }
 
   function openEdit(wallet: Wallet) {
+    if (reorder.reordering) return;
     wallets.clearMutationState();
     management.openEdit(wallet);
   }
@@ -117,6 +129,7 @@ export function useWalletScreen(): WalletScreenController {
   return {
     wallets,
     management,
+    reorder,
     archiveDialog,
     canAddWallet,
     showScreenError,

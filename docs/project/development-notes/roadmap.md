@@ -1,7 +1,7 @@
 # Roadmap - MisGastos
 
 > Development guide: V1 scope, phase order, ticket order and the current ticket.
-> **Last reviewed:** 27/11/2026
+> **Last reviewed:** 28/11/2026
 
 ## Scope of this file
 - This file answers **what to build next and in which order**, plus the rules for doing it.
@@ -18,7 +18,7 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 - **Phase:** 8 - V1 closeout
 - **Current ticket:** TICKET-052 - Push Notifications for Background and Closed App
 - **Status:** ⏳ Queued
-- **Last completed:** TICKET-075 - Remove Pull-to-Refresh from Every List (27/11/2026)
+- **Last completed:** TICKET-080 - Wallet Ordering and Home Slider Order (28/11/2026)
 - **Queued:** TICKET-074, TICKET-040
 - **Next:** TICKET-052
 - **Tickets:** `docs/project/tickets/` (completed files use the `[DONE] ` prefix)
@@ -29,9 +29,9 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 | **M1 - Core personal finance (MVP)** | Auth, wallets, movements, transfers, dashboard and history | 0, 2 | ✅ Done |
 | **M2 - Personal finance complete** | UX follow-up, i18n and shared components | 3 | ✅ Done |
 | **M3 - Social and platform** | Architecture spike, friends, shared expenses, balances, groups and group history | 4-6 | ✅ Done |
-| **M4 - Offline and V1 closeout** | Offline-first implementation and V1 closeout: pull-to-refresh removal, push notifications, integral visual redesign and Storybook | 7-8 | 🚧 In progress |
+| **M4 - Offline and V1 closeout** | Offline-first implementation and V1 closeout: pull-to-refresh removal, wallet ordering, push notifications, integral visual redesign and Storybook | 7-8 | 🚧 In progress |
 
-**V1.0 ships when M1-M4 are complete.** The release order is Phase 7 (offline-first) → TICKET-075 (pull-to-refresh removal) → TICKET-052 (push notifications) → TICKET-074 (integral visual redesign and UX alignment) → TICKET-040 (Storybook); V1 ships when TICKET-040 closes. Phase 9 and the post-V1 backlog start only after V1 ships. Phase 1 (foundation) is a completed cross-cutting quality track; its coverage gate stays enforced. Anything outside these phases is post-V1.
+**V1.0 ships when M1-M4 are complete.** The release order is Phase 7 (offline-first) → TICKET-075 (pull-to-refresh removal) → TICKET-080 (wallet ordering) → TICKET-052 (push notifications) → TICKET-074 (integral visual redesign and UX alignment) → TICKET-040 (Storybook); V1 ships when TICKET-040 closes. Phase 9 and the post-V1 backlog start only after V1 ships. Phase 1 (foundation) is a completed cross-cutting quality track; its coverage gate stays enforced. Anything outside these phases is post-V1.
 
 ## Phase Overview
 | Phase | Theme | Status |
@@ -193,7 +193,8 @@ A personal finance manager (wallets, movements, transfers and dashboard) merged 
 
 ## Phase 8: V1 closeout (IN PROGRESS)
 - [x] TICKET-075 disable pull-to-refresh across all lists (pre-V1, before push notifications) ✅ 27/11/2026
-- [ ] TICKET-052 push notifications for background and closed app (after TICKET-075)
+- [x] TICKET-080 wallet ordering in the wallets screen, reused by the home slider (after TICKET-075, before push notifications) ✅ 28/11/2026
+- [ ] TICKET-052 push notifications for background and closed app (after TICKET-080)
 - [ ] TICKET-074 integral visual redesign and UX alignment (after push notifications)
 - [ ] TICKET-040 Storybook component catalog (after the redesign; V1 ships when this closes)
 - These three are the only V1 items left, and their order is the release order.

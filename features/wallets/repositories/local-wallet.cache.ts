@@ -5,6 +5,7 @@ import { getLocalDatabase } from "@/shared/lib/local-db/local-db.runtime";
 import { isOfflineFirstEnabled } from "@/shared/lib/local-db/offline-first.flag";
 
 import { Wallet } from "../types/wallet.types";
+import { compareWallets, type WalletOrderUpdate } from "../utils/wallet-order";
 import {
   applyPendingWalletDeltas,
   readPendingWalletDeltas,
@@ -32,7 +33,6 @@ export async function readCachedWallets(
     const fetchedAt = await meta.getFetchedAt(ownerId, COLLECTION);
     const rows = await port.select<LocalRow>(COLLECTION, {
       where: { ownerId },
-      orderBy: [{ column: "createdAt", direction: "desc" }],
     });
 
     if (fetchedAt === null && rows.length === 0) return null;
@@ -43,7 +43,7 @@ export async function readCachedWallets(
     });
     const deltas = await readPendingWalletDeltas(port, ownerId);
 
-    return applyPendingWalletDeltas(wallets, deltas);
+    return applyPendingWalletDeltas(wallets.sort(compareWallets), deltas);
   } catch {
     return null;
   }
@@ -70,5 +70,32 @@ export async function cacheWallets(
       now,
     });
     await meta.markFetched(ownerId, COLLECTION, now, tx);
+  });
+}
+
+/**
+ * Applies a persisted reorder to the cached rows so the new order survives an
+ * app restart without a connection. Only `sortOrder` changes: balances,
+ * `updatedAt` and `revision` stay as the last server read left them, and the
+ * fetch stamp is not touched because this is not a fresh list read. The
+ * `ownerId` filter keeps another account's rows out of reach.
+ */
+export async function updateCachedWalletOrders(
+  ownerId: string,
+  updates: readonly WalletOrderUpdate[],
+): Promise<void> {
+  if (!isOfflineFirstEnabled() || updates.length === 0) return;
+
+  const port = await getLocalDatabase();
+  if (!port) return;
+
+  await port.transaction(async (tx) => {
+    for (const update of updates) {
+      await tx.update(
+        COLLECTION,
+        { ownerId, id: update.id },
+        { sortOrder: update.sortOrder },
+      );
+    }
   });
 }

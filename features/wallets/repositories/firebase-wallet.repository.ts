@@ -19,9 +19,14 @@ import {
   WalletDeletionResult,
   WalletUsage,
 } from "../types/wallet.types";
+import {
+  compareWallets,
+  type WalletOrderUpdate,
+} from "../utils/wallet-order";
 import { deleteWalletDocument } from "./wallet-deletion.operation";
 import { mapWalletDocument } from "./wallet.mapper";
 import { loadWalletMovements, toWalletUsage } from "./wallet-movements";
+import { reorderWalletDocuments } from "./wallet-order.operation";
 import { seedDefaultWalletDocument } from "./wallet-seed.operation";
 import { IWalletRepository } from "./wallet.repository";
 import {
@@ -48,12 +53,9 @@ export class FirebaseWalletRepository implements IWalletRepository {
     }
 
     // Wallet lists are small; sorting here avoids a composite index for
-    // ownerId + createdAt. Revisit if pagination or shared wallets are added.
-    return wallets.sort(
-      (first, second) =>
-        new Date(second.createdAt).getTime() -
-        new Date(first.createdAt).getTime(),
-    );
+    // ownerId + sortOrder/createdAt. Revisit if pagination or shared wallets
+    // are added.
+    return wallets.sort(compareWallets);
   }
 
   async getWallet(ownerId: string, walletId: string): Promise<Wallet | null> {
@@ -107,5 +109,12 @@ export class FirebaseWalletRepository implements IWalletRepository {
     options: DeleteWalletOptions,
   ): Promise<WalletDeletionResult> {
     return deleteWalletDocument(ownerId, walletId, options);
+  }
+
+  async updateWalletOrders(
+    ownerId: string,
+    updates: readonly WalletOrderUpdate[],
+  ): Promise<void> {
+    return reorderWalletDocuments(ownerId, updates);
   }
 }

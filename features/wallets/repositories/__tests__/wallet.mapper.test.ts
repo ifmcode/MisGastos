@@ -141,6 +141,23 @@ describe("mapWalletDocument", () => {
     expect(wallet && "archivedAt" in wallet).toBe(false);
   });
 
+  it("maps a valid sortOrder and ignores invalid values", () => {
+    expect(
+      mapWalletDocument("wallet-1", { ...baseData, sortOrder: 3 }, "user-1")
+        ?.sortOrder,
+    ).toBe(3);
+    expect(
+      mapWalletDocument("wallet-1", { ...baseData, sortOrder: 2.7 }, "user-1")
+        ?.sortOrder,
+    ).toBe(2);
+
+    for (const sortOrder of [-1, "3", Number.NaN, null]) {
+      expect(
+        mapWalletDocument("wallet-1", { ...baseData, sortOrder }, "user-1"),
+      ).not.toHaveProperty("sortOrder");
+    }
+  });
+
   it("supports Date and Firestore Timestamp-like values", () => {
     const createdAt = new Date("2026-10-28T09:00:00.000Z");
     const updatedAt = { toDate: () => new Date("2026-10-28T12:00:00.000Z") };

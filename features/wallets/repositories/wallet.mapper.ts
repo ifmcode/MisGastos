@@ -92,6 +92,13 @@ export function mapWalletDocument(
   const updatedAt = toIsoDate(data.updatedAt) ?? createdAt;
   const archivedAt = toIsoDate(data.archivedAt) ?? undefined;
 
+  const sortOrder =
+    typeof data.sortOrder === "number" &&
+    Number.isFinite(data.sortOrder) &&
+    data.sortOrder >= 0
+      ? Math.floor(data.sortOrder)
+      : undefined;
+
   return {
     id,
     name,
@@ -108,5 +115,6 @@ export function mapWalletDocument(
     updatedAt,
     ...(description ? { description } : {}),
     ...(archivedAt ? { archivedAt } : {}),
+    ...(sortOrder !== undefined ? { sortOrder } : {}),
   };
 }

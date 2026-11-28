@@ -7,7 +7,12 @@ import {
   WalletDeletionResult,
   WalletUsage,
 } from "../types/wallet.types";
-import { cacheWallets, readCachedWallets } from "./local-wallet.cache";
+import type { WalletOrderUpdate } from "../utils/wallet-order";
+import {
+  cacheWallets,
+  readCachedWallets,
+  updateCachedWalletOrders,
+} from "./local-wallet.cache";
 import { IWalletRepository } from "./wallet.repository";
 
 /**
@@ -84,5 +89,19 @@ export class CachedWalletRepository implements IWalletRepository {
     options: DeleteWalletOptions,
   ): Promise<WalletDeletionResult> {
     return this.remote.deleteWallet(ownerId, walletId, options);
+  }
+
+  async updateWalletOrders(
+    ownerId: string,
+    updates: readonly WalletOrderUpdate[],
+  ): Promise<void> {
+    await this.remote.updateWalletOrders(ownerId, updates);
+
+    try {
+      await updateCachedWalletOrders(ownerId, updates);
+    } catch {
+      // The server write is the source of truth: a failed cache update must
+      // not report a false failure after the order was already persisted.
+    }
   }
 }

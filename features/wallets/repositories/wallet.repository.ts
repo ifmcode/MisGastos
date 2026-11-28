@@ -7,6 +7,7 @@ import {
   WalletDeletionResult,
   WalletUsage,
 } from "../types/wallet.types";
+import type { WalletOrderUpdate } from "../utils/wallet-order";
 
 export interface IWalletRepository {
   getWallets(ownerId: string): Promise<Wallet[]>;
@@ -32,4 +33,8 @@ export interface IWalletRepository {
     walletId: string,
     options: DeleteWalletOptions,
   ): Promise<WalletDeletionResult>;
+  updateWalletOrders(
+    ownerId: string,
+    updates: readonly WalletOrderUpdate[],
+  ): Promise<void>;
 }

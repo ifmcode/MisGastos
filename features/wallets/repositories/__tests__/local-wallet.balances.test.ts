@@ -74,6 +74,36 @@ describe("local wallet pending balances", () => {
     expect(wallets.map((wallet) => wallet.id)).toEqual(["wallet-2"]);
   });
 
+  it("orders explicit sortOrder wallets before the legacy rows", async () => {
+    await db.upsert(
+      "wallets",
+      toWalletLocalRow(
+        buildWallet({
+          id: "wallet-late",
+          sortOrder: 1,
+          createdAt: "2026-10-30T12:00:00.000Z",
+        }),
+      ),
+    );
+    await db.upsert(
+      "wallets",
+      toWalletLocalRow(
+        buildWallet({
+          id: "wallet-early",
+          sortOrder: 0,
+          createdAt: "2026-10-30T09:00:00.000Z",
+        }),
+      ),
+    );
+
+    const wallets = await readWalletsWithPendingBalance(db, LOCAL_TEST_OWNER);
+    const ids = wallets.map((wallet) => wallet.id);
+
+    expect(ids.slice(0, 2)).toEqual(["wallet-early", "wallet-late"]);
+    expect(ids.indexOf("wallet-late")).toBeLessThan(ids.indexOf("wallet-1"));
+    expect(ids.indexOf("wallet-late")).toBeLessThan(ids.indexOf("wallet-2"));
+  });
+
   it("skips a stored row the wallet mapper rejects", async () => {
     await db.upsert("wallets", {
       id: "invalid",

@@ -37,12 +37,14 @@ export type WalletErrorCode =
   | "UPDATE_FAILED"
   | "ARCHIVE_FAILED"
   | "DELETE_FAILED"
+  | "REORDER_FAILED"
   | "LOAD_FAILED"
   | "USAGE_FAILED"
   | "SIGN_IN_CREATE"
   | "SIGN_IN_UPDATE"
   | "SIGN_IN_ARCHIVE"
   | "SIGN_IN_DELETE"
+  | "SIGN_IN_REORDER"
   | "SIGN_IN_USAGE";
 
 export class WalletOperationError extends Error {

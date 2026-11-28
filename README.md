@@ -33,6 +33,7 @@ simplicidad de uso.
 - 🔐 **Autenticación** con email/contraseña, registro, recuperación de contraseña y Google.
 - 👛 **Carteras múltiples** con nombre, moneda, tipo, color, icono y saldo inicial. La creación vive solo en el botón flotante **+**, centrado en la pantalla, así que la cabecera no repite una acción duplicada. El formulario elige la moneda en la misma fila compacta **Moneda: EUR € · Cambiar** que los gastos compartidos, y la bloquea al editar una cartera existente.
 - 👝 **Cartera principal automática**: cada cuenta recibe una única «Cartera principal» en su primera carga autenticada, tanto con email/contraseña como con Google, sin necesidad de abrir **Carteras** y sin bloquear la interfaz. Es una cartera normal: icono, color y tipo por defecto, incluida en el total y con saldo 0, con la moneda preferida del perfil (EUR si aún no hay perfil) y el nombre en el idioma activo en ese momento, que queda guardado y no se vuelve a traducir. Se puede renombrar, archivar y eliminar como cualquier otra. Las cuentas anteriores sin carteras la reciben en la siguiente carga y nunca se vuelve a crear: si borras todas las carteras, la cuenta se queda con cero carteras.
+- 🔀 **Orden manual de carteras**: el encabezado de la lista de **Carteras** tiene un interruptor **Reordenar** que cambia a modo orden y un **Listo** para salir. En ese modo cada cartera activa muestra flechas arriba/abajo con etiqueta accesible, deshabilitadas en los extremos y mientras se guarda; el botón flotante **+** se oculta y tocar una fila ya no abre sus acciones. La posición se guarda por cuenta en `sortOrder`, se aplica de forma optimista y, si el guardado falla, se restaura el orden anterior con un error traducido. El mismo orden lo reutilizan el slider de carteras de **Inicio**, los selectores de cartera, los filtros y los totales, sin una segunda regla de ordenación; las carteras archivadas no se mueven y una cartera nueva se añade al final. Antes del primer reordenamiento la lista mantiene el orden actual (más reciente primero) y el reordenamiento necesita conexión: no hay arrastrar y soltar ni cola offline (TICKET-080).
 - ⚖️ **Inclusión en el total** configurable por cartera.
 - 💸 **Ingresos y gastos** con actualización atómica del saldo de la cartera.
 - 🧾 **Historial de movimientos** con filtros y ordenamiento.
@@ -257,9 +258,9 @@ La meta del proyecto es mantener una cobertura **≥ 90% en la lógica de negoci
 componentes y hooks quedan fuera del umbral hasta incorporar un renderer de React.
 Sigue las convenciones descritas en [`docs/project/guidelines/`](docs/project/guidelines).
 
-Estado actual (27/11/2026): **477 suites / 3245 tests**; la cobertura global está en
-**96,49 % de sentencias, 90,14 % de ramas, 97,54 % de funciones y 97,53 % de
-líneas**, y `npm run check:copy` audita **358 archivos TSX**.
+Estado actual (28/11/2026): **484 suites / 3285 tests**; la cobertura global está en
+**96,49 % de sentencias, 90,23 % de ramas, 97,45 % de funciones y 97,53 % de
+líneas**, y `npm run check:copy` audita **362 archivos TSX**.
 
 ## 🗺️ Roadmap
 
@@ -303,6 +304,7 @@ líneas**, y `npm run check:copy` audita **358 archivos TSX**.
 - [x] Funcionamiento offline (SQLite + cola de sincronización) ✅ 27/11/2026: base local, prerrequisitos de escritura, caché de lectura con aviso sin conexión, cola de escritura con saldo derivado, motor de sincronización con exactly-once/reintentos/conflictos, movimientos offline de grupo y amigo, y cierre de la fase con purga local por cuenta al cerrar sesión (con aviso de cambios pendientes en Ajustes), UX/observabilidad offline y decisión web online-only (TICKET-076). Quedan el **despliegue de las reglas** de las entregas anteriores y la validación en dispositivo del checklist de `test-guide.md` antes de activar el flag.
 - [x] Especialización del flujo de desarrollo con agentes y skills de OpenCode
 - [x] Quitar el pull-to-refresh de todas las listas (TICKET-075) ✅ 27/11/2026
+- [x] Orden manual de carteras con **Reordenar**, reutilizado por el slider de Inicio, selectores y filtros (TICKET-080) ✅ 28/11/2026
 - [ ] Notificaciones push con la app cerrada (V1, después de TICKET-075 y del offline)
 - [ ] Cambio de estética integral y alineación de UX con referencias visuales (TICKET-074) (V1, después de las notificaciones push)
 - [ ] Librería de componentes con Storybook (V1, después del cambio de estética integral; cierra la V1)
@@ -365,6 +367,7 @@ Consulta el roadmap completo en
 - [Movimientos sociales offline (TICKET-023, sexta entrega, 26/11/2026)](docs/project/development-notes/session-notes/2026-11-26-offline-social-movements.md): esquema v3 con nueve tablas sociales por `(ownerId, id)`, caché de lectura social y pull con `allSettled` por grupo, `revision` e idempotencia en las cuatro operaciones sociales y sus enlaces, escritura local con saldo pendiente, ejecutor que siempre usa la operación enlazada, conflicto de moneda/importe/receptor, reglas pendientes de despliegue y sin creación de grupos offline.
 - [Purga local al cerrar sesión y decisión web (TICKET-023, séptima entrega, 27/11/2026)](docs/project/development-notes/session-notes/2026-11-27-offline-account-purge-and-web-decision.md): purga en una transacción de las 18 tablas con `ownerId`, revocación de escrituras antes de `signOut` y restauración si falla, motor que no arranca para cuentas revocadas, aviso con lectura fresca de pendientes/conflictos y web online-only con TICKET-076 para la paridad futura.
 - [Quitar el pull-to-refresh de todas las listas (TICKET-075, 27/11/2026)](docs/project/development-notes/session-notes/2026-11-27-pull-to-refresh-removal.md): gesto eliminado de las once superficies de lista y del `ScrollView` del dashboard sin alternativa manual, `refreshing` fuera de `use-async-collection` y de los hooks que solo lo exponían para el spinner, refresco por foco/reconexión/mutación/reintento intacto, arreglo de la carrera de `loading` en los refrescos de fondo y validación en dispositivo pendiente.
+- [Orden manual de carteras (TICKET-080, 28/11/2026)](docs/project/development-notes/session-notes/2026-11-28-wallet-ordering.md): `Wallet.sortOrder` opcional con `compareWallets` como único comparador (orden explícito y respaldo `createdAt`/`name`), `writeBatch` que solo escribe `sortOrder`/`updatedAt`/`revision`, migración 004 de SQLite con la actualización de la caché que conserva el orden sin conexión, modo **Reordenar** con flechas y rollback optimista, y validación en dispositivo pendiente.
 - [Decisiones de gastos de grupo y membresía (20/11/2026)](docs/project/development-notes/session-notes/2026-11-20-group-expenses-and-membership-decisions.md): saldo neto pagado − cuota, selección de participantes, simplificación de deudas con ajuste por grupo, permisos de edición, salida con deuda saldada y transferencia de propiedad.
 - [Entorno de desarrollo Android (15/11/2026)](docs/project/development-notes/session-notes/2026-11-15-android-dev-environment.md): JDK 21 vía JBR, ninja 1.13.2 para rutas largas en Windows y development build en el emulador.
 - [Guías de arquitectura y SOLID](docs/project/guidelines/architecture-and-solid.md)

@@ -22,6 +22,7 @@ import {
   normalizeOwnerId,
   normalizeWalletId,
 } from "./wallet-owner";
+import { persistWalletOrder } from "./wallet-reorder";
 import { updateWalletWithRepository } from "./wallet-update";
 
 export class WalletService {
@@ -123,6 +124,14 @@ export class WalletService {
       normalizeWalletId(walletId),
       options,
     );
+  }
+
+  /** Persists the requested wallet order; the helper normalises the owner. */
+  async reorderWallets(
+    ownerId: string,
+    orderedIds: readonly string[],
+  ): Promise<void> {
+    await persistWalletOrder(this.walletRepository, ownerId, orderedIds);
   }
 
   private async setArchived(

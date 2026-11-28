@@ -9,6 +9,7 @@ import {
   WalletDeletionResult,
   WalletUsage,
 } from "../../types/wallet.types";
+import type { WalletOrderUpdate } from "../../utils/wallet-order";
 
 export class FakeWalletRepository implements IWalletRepository {
   readonly getCalls: string[] = [];
@@ -30,6 +31,10 @@ export class FakeWalletRepository implements IWalletRepository {
     options: DeleteWalletOptions;
   }> = [];
   readonly usageCalls: Array<{ ownerId: string; walletId: string }> = [];
+  readonly orderCalls: Array<{
+    ownerId: string;
+    updates: WalletOrderUpdate[];
+  }> = [];
   wallets: Wallet[] = [];
   usage: WalletUsage = {
     transactionCount: 0,
@@ -39,6 +44,8 @@ export class FakeWalletRepository implements IWalletRepository {
   deletionResult: WalletDeletionResult | null = null;
   seedResult: DefaultWalletSeedResult = { status: "already-seeded" };
   failure: Error | null = null;
+  /** Failure of the reorder batch only, so reads can still succeed. */
+  orderFailure: Error | null = null;
 
   async getWallets(ownerId: string): Promise<Wallet[]> {
     this.getCalls.push(ownerId);
@@ -151,5 +158,22 @@ export class FakeWalletRepository implements IWalletRepository {
 
     this.wallets = this.wallets.filter((wallet) => wallet.id !== walletId);
     return this.deletionResult ?? { deletedWalletId: walletId };
+  }
+
+  async updateWalletOrders(
+    ownerId: string,
+    updates: readonly WalletOrderUpdate[],
+  ): Promise<void> {
+    this.orderCalls.push({ ownerId, updates: [...updates] });
+    if (this.orderFailure) throw this.orderFailure;
+    if (this.failure) throw this.failure;
+
+    const orderById = new Map(
+      updates.map((update) => [update.id, update.sortOrder]),
+    );
+    this.wallets = this.wallets.map((wallet) => {
+      const sortOrder = orderById.get(wallet.id);
+      return sortOrder === undefined ? wallet : { ...wallet, sortOrder };
+    });
   }
 }

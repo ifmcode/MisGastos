@@ -12,6 +12,15 @@ describe("local wallet mapper", () => {
     expect(fromWalletLocalRow(toWalletLocalRow(wallet))).toEqual(wallet);
   });
 
+  it("round-trips the explicit sortOrder", () => {
+    const wallet = buildWallet({ sortOrder: 3 });
+
+    const row = toWalletLocalRow(wallet);
+
+    expect(row.sortOrder).toBe(3);
+    expect(fromWalletLocalRow(row)?.sortOrder).toBe(3);
+  });
+
   it("stores the balance in serverBalance and marks the row synced", () => {
     const row = toWalletLocalRow(buildWallet({ includeInTotal: false }));
 
@@ -27,6 +36,7 @@ describe("local wallet mapper", () => {
 
     expect(row.description).toBeNull();
     expect(row.archivedAt).toBeNull();
+    expect(row.sortOrder).toBeNull();
     expect(
       fromWalletLocalRow({ ...row, includeInTotal: null })?.includeInTotal,
     ).toBe(true);

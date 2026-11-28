@@ -8,7 +8,10 @@ import {
   LOCAL_DB_MIGRATIONS,
 } from "../migrations";
 import { MIGRATION_002 } from "../migrations/migration-002";
-import { MIGRATION_003 } from "../migrations/migration-003";import { buildRow } from "./db.fixtures";
+import { MIGRATION_003 } from "../migrations/migration-003";
+import { MIGRATION_004 } from "../migrations/migration-004";
+
+import { buildRow } from "./db.fixtures";
 
 describe("migrateLocalDatabase", () => {
   let db: InMemoryDatabase;
@@ -60,6 +63,7 @@ describe("migrateLocalDatabase", () => {
     expect(db.executedStatements).toEqual([
       ...MIGRATION_002.statements,
       ...MIGRATION_003.statements,
+      ...MIGRATION_004.statements,
     ]);
   });
 

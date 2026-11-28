@@ -64,6 +64,29 @@ describe("wallets local cache", () => {
     ]);
   });
 
+  it("returns the persisted explicit order of the cache", async () => {
+    const third = buildWallet({
+      id: "wallet-3",
+      sortOrder: 2,
+      createdAt: "2026-10-29T12:00:00.000Z",
+    });
+    const first = buildWallet({ id: "wallet-1", sortOrder: 0 });
+    const second = buildWallet({
+      id: "wallet-2",
+      sortOrder: 1,
+      createdAt: "2026-10-29T11:00:00.000Z",
+    });
+
+    await cacheWallets(LOCAL_TEST_OWNER, [third, first, second], NOW);
+
+    const cached = await readCachedWallets(LOCAL_TEST_OWNER);
+    expect(cached?.map((wallet) => wallet.id)).toEqual([
+      "wallet-1",
+      "wallet-2",
+      "wallet-3",
+    ]);
+  });
+
   it("skips a stored row the wallet mapper rejects", async () => {
     await cacheWallets(LOCAL_TEST_OWNER, [buildWallet()], NOW);
     await db.upsert("wallets", {

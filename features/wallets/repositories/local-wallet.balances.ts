@@ -9,6 +9,7 @@ import { readOutboxWalletDeltas } from "@/shared/lib/local-db/pending-balance";
 import { roundMoney } from "@/shared/utils/money";
 
 import { Wallet } from "../types/wallet.types";
+import { compareWallets } from "../utils/wallet-order";
 import { fromWalletLocalRow } from "./local-wallet.mapper";
 
 /** Pending wallet deltas derived from the owner's outbox. */
@@ -41,28 +42,33 @@ export function applyPendingWalletDeltas(
   });
 }
 
-async function readWalletRows(
+/**
+ * Maps the owner's rows and returns them in the shared canonical order, with no
+ * SQL `ORDER BY`: explicit `sortOrder` first, then the legacy fallback. When
+ * `walletIds` is present the result is narrowed to those wallets.
+ */
+async function readOrderedWallets(
   port: DatabasePort,
   ownerId: string,
   walletIds: readonly string[] | undefined,
   tx?: LocalDatabaseTransaction,
-): Promise<LocalRow[]> {
+): Promise<Wallet[]> {
   const active = tx ?? port;
-
-  if (!walletIds) {
-    return active.select<LocalRow>("wallets", {
-      where: { ownerId },
-      orderBy: [{ column: "createdAt", direction: "desc" }],
-    });
-  }
-
-  const wanted = new Set(walletIds);
   const rows = await active.select<LocalRow>("wallets", {
     where: { ownerId },
-    orderBy: [{ column: "createdAt", direction: "desc" }],
   });
 
-  return rows.filter((row) => typeof row.id === "string" && wanted.has(row.id));
+  const wallets = rows.flatMap((row) => {
+    const wallet = fromWalletLocalRow(row);
+    return wallet ? [wallet] : [];
+  });
+
+  const wanted = walletIds ? new Set(walletIds) : null;
+  const filtered = wanted
+    ? wallets.filter((wallet) => wanted.has(wallet.id))
+    : wallets;
+
+  return filtered.sort(compareWallets);
 }
 
 /**
@@ -75,11 +81,7 @@ export async function readWalletsWithPendingBalance(
   walletIds?: readonly string[],
   tx?: LocalDatabaseTransaction,
 ): Promise<Wallet[]> {
-  const rows = await readWalletRows(port, ownerId, walletIds, tx);
-  const wallets = rows.flatMap((row) => {
-    const wallet = fromWalletLocalRow(row);
-    return wallet ? [wallet] : [];
-  });
+  const wallets = await readOrderedWallets(port, ownerId, walletIds, tx);
   const deltas = await readPendingWalletDeltas(port, ownerId, tx);
 
   return applyPendingWalletDeltas(wallets, deltas);

@@ -17,6 +17,15 @@
   "outsideTotal": "Fuera del total",
   "manageAccessibility": "Gestionar cartera {{name}}",
   "manageArchivedAccessibility": "Gestionar cartera {{name}}, archivada",
+  "reorder": {
+    "start": "Reordenar",
+    "finish": "Listo",
+    "startAccessibility": "Reordenar carteras",
+    "finishAccessibility": "Terminar de reordenar carteras",
+    "hint": "Usa las flechas para cambiar el orden. Las carteras archivadas no entran en el orden.",
+    "moveUp": "Mover {{name}} hacia arriba",
+    "moveDown": "Mover {{name}} hacia abajo"
+  },
   "quick": {
     "transfer": "Transferir",
     "transferAccessibility": "Nueva transferencia",
@@ -130,6 +139,8 @@
     "TARGET_WALLET_CURRENCY_MISMATCH": "La cartera de destino debe tener la misma moneda.",
     "TARGET_WALLET_INSUFFICIENT_BALANCE": "La cartera de destino no tiene saldo suficiente para asumir las transferencias.",
     "TOO_MANY_MOVEMENTS": "Esta cartera tiene demasiados movimientos para eliminarla de una vez.",
+    "REORDER_FAILED": "No se pudo guardar el orden de las carteras. Inténtalo de nuevo.",
+    "SIGN_IN_REORDER": "Debes iniciar sesión para reordenar tus carteras.",
     "createFailed": "No se pudo crear la cartera. Inténtalo de nuevo.",
     "updateFailed": "No se pudo actualizar la cartera. Inténtalo de nuevo.",
     "archiveFailed": "No se pudo actualizar el estado de la cartera.",

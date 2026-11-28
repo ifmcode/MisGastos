@@ -17,6 +17,15 @@
   "outsideTotal": "Outside the total",
   "manageAccessibility": "Manage wallet {{name}}",
   "manageArchivedAccessibility": "Manage wallet {{name}}, archived",
+  "reorder": {
+    "start": "Reorder",
+    "finish": "Done",
+    "startAccessibility": "Reorder wallets",
+    "finishAccessibility": "Finish reordering wallets",
+    "hint": "Use the arrows to change the order. Archived wallets are not part of the order.",
+    "moveUp": "Move {{name}} up",
+    "moveDown": "Move {{name}} down"
+  },
   "quick": {
     "transfer": "Transfer",
     "transferAccessibility": "New transfer",
@@ -130,6 +139,8 @@
     "TARGET_WALLET_CURRENCY_MISMATCH": "The destination wallet must have the same currency.",
     "TARGET_WALLET_INSUFFICIENT_BALANCE": "The destination wallet does not have enough balance to take on the transfers.",
     "TOO_MANY_MOVEMENTS": "This wallet has too many movements to delete it at once.",
+    "REORDER_FAILED": "Could not save the wallet order. Try again.",
+    "SIGN_IN_REORDER": "You must sign in to reorder your wallets.",
     "createFailed": "Could not create the wallet. Try again.",
     "updateFailed": "Could not update the wallet. Try again.",
     "archiveFailed": "Could not update the wallet status.",

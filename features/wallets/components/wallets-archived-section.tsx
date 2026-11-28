@@ -10,7 +10,8 @@ import { WalletCard } from "./wallet-card";
 
 export interface WalletsArchivedSectionProps {
   wallets: readonly Wallet[];
-  onWalletPress: (wallet: Wallet) => void;
+  /** Omitted in reorder mode, where the archived rows are not interactive. */
+  onWalletPress?: (wallet: Wallet) => void;
 }
 
 /** Archived wallets stay reachable from their own section with a clear badge. */
@@ -33,9 +34,11 @@ export function WalletsArchivedSection({
           {wallets.length}
         </ThemedText>
       </View>
-      <ThemedText style={[styles.sectionHint, { color: theme.muted }]}>
-        {t("archivedHint")}
-      </ThemedText>
+      {onWalletPress ? (
+        <ThemedText style={[styles.sectionHint, { color: theme.muted }]}>
+          {t("archivedHint")}
+        </ThemedText>
+      ) : null}
       <View style={styles.sectionList}>
         {wallets.map((wallet) => (
           <WalletCard

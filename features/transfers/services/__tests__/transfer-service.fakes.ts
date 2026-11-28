@@ -74,6 +74,10 @@ export class FakeWalletRepository implements IWalletRepository {
   ): Promise<WalletDeletionResult> {
     throw new Error("Not used in transfer tests");
   }
+
+  async updateWalletOrders(): Promise<void> {
+    throw new Error("Not used in transfer tests");
+  }
 }
 
 export class FakeTransferRepository implements ITransferRepository {

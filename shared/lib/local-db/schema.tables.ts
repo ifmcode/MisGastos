@@ -1,8 +1,10 @@
 /**
- * Local schema version 3 (ADR 2026-11-14 §4 plus the phase-3 read cache and the
- * phase-6 social cache). ISO dates are TEXT, booleans and counters are INTEGER,
- * money is REAL only as a storage type: every calculation still goes through
- * `roundMoney` and the signed balance helpers.
+ * Local schema version 4 (ADR 2026-11-14 §4 plus the phase-3 read cache, the
+ * phase-6 social cache and the wallet position column). ISO dates are TEXT,
+ * booleans and counters are INTEGER, money is REAL only as a storage type: every
+ * calculation still goes through `roundMoney` and the signed balance helpers.
+ * `wallets.sortOrder` is nullable on purpose: legacy rows keep their previous
+ * `createdAt` order until the owner reorders the list.
  *
  * This is the current shape a fresh install reaches after running every
  * migration. Older versions are frozen in `migrations/`.
@@ -21,6 +23,7 @@ export const SCHEMA_TABLE_STATEMENTS: readonly string[] = [
     includeInTotal INTEGER NOT NULL DEFAULT 1,
     description TEXT,
     archivedAt TEXT,
+    sortOrder INTEGER,
     createdAt TEXT NOT NULL,
     updatedAt TEXT NOT NULL,
     deletedAt TEXT,

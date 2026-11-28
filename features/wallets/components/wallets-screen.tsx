@@ -76,12 +76,13 @@ export function WalletsScreen() {
         totals={wallets.totals}
         loading={wallets.loading}
         error={wallets.error}
+        reorder={screen.reorder}
         onReload={() => void wallets.reload()}
         onCreate={screen.openCreate}
         onWalletPress={screen.openActions}
       />
 
-      {screen.canAddWallet ? (
+      {screen.canAddWallet && !screen.reorder.reordering ? (
         <Fab
           accessibilityLabel={t("add")}
           bottom={insets.bottom + 24}

@@ -99,6 +99,44 @@ describe("FirebaseWalletRepository.getWallets", () => {
     expect(wallets[1]?.id).toBe("wallet-older");
   });
 
+  it("sorts explicit positions before the legacy newest-first wallets", async () => {
+    mockGetDocs.mockResolvedValue({
+      docs: [
+        {
+          id: "legacy",
+          data: () => ({
+            ...validDocumentData,
+            createdAt: "2026-10-28T11:00:00.000Z",
+          }),
+        },
+        {
+          id: "second",
+          data: () => ({ ...validDocumentData, sortOrder: 1 }),
+        },
+        {
+          id: "first",
+          data: () => ({ ...validDocumentData, sortOrder: 0 }),
+        },
+        {
+          id: "invalid",
+          data: () => ({ ...validDocumentData, sortOrder: "0" }),
+        },
+      ],
+    });
+
+    const repository = new FirebaseWalletRepository();
+    const wallets = await repository.getWallets("user-1");
+
+    expect(wallets.map((wallet) => wallet.id)).toEqual([
+      "first",
+      "second",
+      "legacy",
+      "invalid",
+    ]);
+    expect(wallets[0]?.sortOrder).toBe(0);
+    expect(wallets[2]).not.toHaveProperty("sortOrder");
+  });
+
   it("propagates Firestore failures", async () => {
     const failure = new Error("permission-denied");
     mockGetDocs.mockRejectedValue(failure);

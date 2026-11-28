@@ -5,12 +5,13 @@ import { EmptyState } from "@/shared/components/molecules/empty-state";
 import { ErrorState } from "@/shared/components/molecules/error-state";
 import { LoadingState } from "@/shared/components/molecules/loading-state";
 
+import type { WalletReorder } from "../hooks/use-wallet-reorder";
 import { walletsStyles } from "../styles/wallets.styles";
 import { Wallet } from "../types/wallet.types";
 import { WalletTotal } from "../utils/money";
 import { WalletCard } from "./wallet-card";
-import { WalletSummary } from "./wallet-summary";
 import { WalletsArchivedSection } from "./wallets-archived-section";
+import { WalletsListHeader } from "./wallets-list-header";
 
 export interface WalletsListProps {
   wallets: readonly Wallet[];
@@ -19,6 +20,7 @@ export interface WalletsListProps {
   totals: WalletTotal[];
   loading: boolean;
   error: string | null;
+  reorder: WalletReorder;
   onReload: () => void;
   onCreate: () => void;
   onWalletPress: (wallet: Wallet) => void;
@@ -36,6 +38,7 @@ export function WalletsList({
   totals,
   loading,
   error,
+  reorder,
   onReload,
   onCreate,
   onWalletPress,
@@ -60,12 +63,30 @@ export function WalletsList({
     <FlatList
       data={activeWallets}
       keyExtractor={(wallet) => wallet.id}
-      renderItem={({ item }) => (
-        <WalletCard wallet={item} onPress={onWalletPress} />
+      renderItem={({ item, index }) => (
+        <WalletCard
+          wallet={item}
+          onPress={reorder.reordering ? undefined : onWalletPress}
+          reorder={
+            reorder.reordering
+              ? {
+                  canMoveUp: index > 0,
+                  canMoveDown: index < activeWallets.length - 1,
+                  disabled: reorder.saving,
+                  onMoveUp: () => reorder.move(item.id, "up"),
+                  onMoveDown: () => reorder.move(item.id, "down"),
+                }
+              : undefined
+          }
+        />
       )}
       ItemSeparatorComponent={WalletSeparator}
       ListHeaderComponent={
-        totals.length > 0 ? <WalletSummary totals={totals} /> : undefined
+        <WalletsListHeader
+          totals={totals}
+          canReorder={activeWallets.length > 1}
+          reorder={reorder}
+        />
       }
       ListEmptyComponent={
         wallets.length === 0 ? (
@@ -85,7 +106,7 @@ export function WalletsList({
       ListFooterComponent={
         <WalletsArchivedSection
           wallets={archivedWallets}
-          onWalletPress={onWalletPress}
+          onWalletPress={reorder.reordering ? undefined : onWalletPress}
         />
       }
       contentContainerStyle={[

@@ -18,6 +18,12 @@ export interface Wallet extends BaseEntity {
   description?: string;
   /** Soft-delete marker. Archived wallets keep their history but leave selectors. */
   archivedAt?: string;
+  /**
+   * Owner-chosen display position. Optional: legacy wallets have no value and
+   * fall back to the previous `createdAt` descending order until the owner
+   * reorders the list. Persisted through the reorder batch, never a DTO field.
+   */
+  sortOrder?: number;
 }
 
 export interface CreateWalletDto {

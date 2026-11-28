@@ -26,6 +26,7 @@ function createRemote(): jest.Mocked<IWalletRepository> {
     setWalletArchived: jest.fn(),
     getWalletUsage: jest.fn(),
     deleteWallet: jest.fn(),
+    updateWalletOrders: jest.fn(),
   };
 }
 

@@ -13,8 +13,8 @@ const REQUIRED_COLUMNS: Record<LocalTableName, readonly string[]> = {
   wallets: [
     "id", "ownerId", "name", "currency", "type", "icon", "color",
     "initialBalance", "serverBalance", "includeInTotal", "description",
-    "archivedAt", "createdAt", "updatedAt", "deletedAt", "revision",
-    "syncStatus",
+    "archivedAt", "sortOrder", "createdAt", "updatedAt", "deletedAt",
+    "revision", "syncStatus",
   ],
   categories: [
     "id", "ownerId", "name", "type", "color", "icon", "sortOrder",
@@ -158,6 +158,13 @@ describe("current schema contract", () => {
 
   it("allows a null category sortOrder in the current schema", () => {
     const statement = tableStatement("categories");
+
+    expect(statement).toMatch(/\bsortOrder\s+INTEGER\s*,/);
+    expect(statement).not.toMatch(/\bsortOrder\s+INTEGER\s+NOT NULL/);
+  });
+
+  it("allows a null wallet sortOrder in the current schema", () => {
+    const statement = tableStatement("wallets");
 
     expect(statement).toMatch(/\bsortOrder\s+INTEGER\s*,/);
     expect(statement).not.toMatch(/\bsortOrder\s+INTEGER\s+NOT NULL/);

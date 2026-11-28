@@ -18,6 +18,7 @@ function createRemote(): jest.Mocked<IWalletRepository> {
     setWalletArchived: jest.fn(),
     getWalletUsage: jest.fn(),
     deleteWallet: jest.fn(),
+    updateWalletOrders: jest.fn(),
   };
 }
 
@@ -111,5 +112,15 @@ describe("CachedWalletRepository delegation", () => {
       "wallet-1",
       options,
     );
+  });
+
+  it("delegates updateWalletOrders", async () => {
+    const updates = [{ id: "wallet-1", sortOrder: 0 }];
+    remote.updateWalletOrders.mockResolvedValue(undefined);
+
+    await expect(
+      repository.updateWalletOrders("owner-1", updates),
+    ).resolves.toBeUndefined();
+    expect(remote.updateWalletOrders).toHaveBeenCalledWith("owner-1", updates);
   });
 });
