@@ -7,7 +7,7 @@ import type {
 export interface PendingRequests {
   incoming: FriendRequestItem[];
   outgoing: FriendRequestItem[];
-  /** Single number shared by the pending row and its badge. */
+  /** Single number shared by the requests route and the inbox queue. */
   total: number;
 }
 
@@ -28,7 +28,7 @@ function normalizeCount(count: number): number {
 
 /**
  * Keeps order, drops accepted/rejected/cancelled and counts both directions
- * plus the owner join-request queue of `/social/requests`.
+ * plus the owner join-request queue of the inbox.
  */
 export function getPendingRequests(
   overview: PendingRequestsSource,
@@ -45,11 +45,4 @@ export function getPendingRequests(
       outgoing.length +
       normalizeCount(ownerJoinRequestCount),
   };
-}
-
-export function countPendingRequests(
-  overview: PendingRequestsSource,
-  ownerJoinRequestCount = 0,
-): number {
-  return getPendingRequests(overview, ownerJoinRequestCount).total;
 }

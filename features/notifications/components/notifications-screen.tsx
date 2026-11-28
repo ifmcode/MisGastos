@@ -9,6 +9,7 @@ import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 import { useNotificationsScreen } from "../hooks/use-notifications-screen";
 import { notificationsStyles as styles } from "../styles/notifications.styles";
+import { InboxRequestsBlock } from "./inbox-requests-block";
 import { NotificationsHeader } from "./notifications-header";
 import { NotificationsList } from "./notifications-list";
 import { NotificationsSegmentControl } from "./notifications-segment-control";
@@ -62,6 +63,15 @@ export function NotificationsScreen() {
           segment={screen.segment}
           actionError={screen.actionError}
           canMarkAllRead={screen.canMarkAllRead}
+          header={
+            screen.segment === "pending" ? (
+              <InboxRequestsBlock
+                requests={screen.requests}
+                segment={screen.segment}
+              />
+            ) : null
+          }
+          showEmpty={!screen.hasRequests}
           onMarkAllRead={screen.markAllRead}
           onOpenRow={screen.openRow}
         />

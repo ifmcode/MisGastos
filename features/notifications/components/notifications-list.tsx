@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { FlatList, View } from "react-native";
 
 import { EmptyState } from "@/shared/components/molecules/empty-state";
@@ -15,6 +16,10 @@ export interface NotificationsListProps {
   segment: NotificationSegment;
   actionError: string | null;
   canMarkAllRead: boolean;
+  /** Rendered above the mark-all-read action, inside the list header. */
+  header?: ReactNode;
+  /** Hides the empty state when another block already fills the segment. */
+  showEmpty?: boolean;
   onMarkAllRead: () => Promise<void>;
   onOpenRow: (notificationId: string) => void;
 }
@@ -28,6 +33,8 @@ export function NotificationsList({
   segment,
   actionError,
   canMarkAllRead,
+  header,
+  showEmpty = true,
   onMarkAllRead,
   onOpenRow,
 }: NotificationsListProps) {
@@ -45,6 +52,7 @@ export function NotificationsList({
       showsVerticalScrollIndicator={false}
       ListHeaderComponent={
         <View style={styles.listHeader}>
+          {header}
           <ErrorBanner message={actionError} />
           {canMarkAllRead ? (
             <NotificationsMarkAllRead onPress={onMarkAllRead} />
@@ -52,13 +60,15 @@ export function NotificationsList({
         </View>
       }
       ListEmptyComponent={
-        <EmptyState
-          icon={pending ? "notifications-outline" : "archive-outline"}
-          title={pending ? t("empty.pendingTitle") : t("empty.viewedTitle")}
-          message={
-            pending ? t("empty.pendingMessage") : t("empty.viewedMessage")
-          }
-        />
+        showEmpty ? (
+          <EmptyState
+            icon={pending ? "notifications-outline" : "archive-outline"}
+            title={pending ? t("empty.pendingTitle") : t("empty.viewedTitle")}
+            message={
+              pending ? t("empty.pendingMessage") : t("empty.viewedMessage")
+            }
+          />
+        ) : undefined
       }
     />
   );

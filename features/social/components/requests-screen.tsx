@@ -6,14 +6,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedView } from "@/components/themed-view";
 import { FriendRequestSection } from "@/features/friends/components/friend-request-section";
 import { GroupInvitationsSection } from "@/features/groups/components/group-invitations-section";
+import { useInboxRequests } from "@/features/notifications/hooks/use-inbox-requests";
 import { EmptyState } from "@/shared/components/molecules/empty-state";
 import { ErrorBanner } from "@/shared/components/molecules/error-banner";
 import { ErrorState } from "@/shared/components/molecules/error-state";
 import { LoadingState } from "@/shared/components/molecules/loading-state";
 
-import { useRequestsScreen } from "../hooks/use-requests-screen";
 import { socialStyles as styles } from "../styles/social.styles";
-import { OwnerJoinRequestsSection } from "./owner-join-requests-section";
+import { OwnerJoinRequestsSection } from "@/features/groups/components/owner-join-requests-section";
 import { SocialRouteHeader } from "./social-route-header";
 
 /**
@@ -24,7 +24,7 @@ export function RequestsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { t } = useTranslation(["social", "friends", "common"]);
-  const screen = useRequestsScreen();
+  const screen = useInboxRequests();
   const owner = screen.ownerJoinRequests;
   const hasData = screen.total > 0;
   const loading = screen.loading || screen.groupsLoading || owner.loading;

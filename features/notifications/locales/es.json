@@ -33,8 +33,8 @@
   },
   "bell": {
     "label_zero": "Notificaciones",
-    "label_one": "Notificaciones: {{count}} sin leer",
-    "label_other": "Notificaciones: {{count}} sin leer",
+    "label_one": "Notificaciones: {{count}} pendiente",
+    "label_other": "Notificaciones: {{count}} pendientes",
     "hint": "Abre la bandeja de notificaciones."
   },
   "row": {

@@ -1,26 +1,31 @@
 import { useRouter } from "expo-router";
 import { useCallback } from "react";
 
+import { useInboxRequests } from "@/features/notifications/hooks/use-inbox-requests";
 import { useNotifications } from "@/features/notifications/hooks/use-notifications";
+import { countInboxBadge } from "@/features/notifications/utils/notifications.utils";
 import { useAuth } from "@/hooks/use-auth";
 
 export interface DashboardNotificationsController {
-  unreadCount: number;
+  inboxCount: number;
   openNotifications: () => void;
 }
 
 /**
- * Unread badge of the dashboard header. The inbox refreshes on focus, so
- * returning from `/notifications` updates the count without extra wiring.
+ * Single bell badge of the dashboard header: unread informative notifications
+ * plus the pending requests of the inbox queue. The inbox refreshes on focus,
+ * so returning from `/notifications` updates the count without extra wiring.
  */
 export function useDashboardNotifications(): DashboardNotificationsController {
   const router = useRouter();
   const { user } = useAuth();
-  const { unreadCount } = useNotifications({ viewerUid: user?.uid });
+  const { notifications } = useNotifications({ viewerUid: user?.uid });
+  const requests = useInboxRequests();
+  const inboxCount = countInboxBadge(notifications, requests.total);
 
   const openNotifications = useCallback(() => {
     router.push("/notifications");
   }, [router]);
 
-  return { unreadCount, openNotifications };
+  return { inboxCount, openNotifications };
 }

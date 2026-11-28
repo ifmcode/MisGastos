@@ -4,12 +4,6 @@
   "loading": "Cargando tus amigos…",
   "errorTitle": "No se pudo cargar Social",
   "retryAccessibility": "Reintentar la carga de Social",
-  "pending": {
-    "rowAccessibility_one": "Peticiones pendientes: {{count}} solicitud",
-    "rowAccessibility_other": "Peticiones pendientes: {{count}} solicitudes",
-    "labelZero": "Peticiones pendientes",
-    "hint": "Abre la lista de solicitudes de amistad, invitaciones y peticiones para unirse a tus grupos"
-  },
   "segments": {
     "accessibility": "Secciones de Social",
     "friends": "Tus amigos",

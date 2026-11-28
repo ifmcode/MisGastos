@@ -9,15 +9,15 @@ import { dashboardStyles } from "../styles/dashboard.styles";
 
 export interface DashboardHeaderProps {
   greeting: string;
-  /** Unread notifications of the bell badge. */
-  unreadCount?: number;
+  /** Pending notifications plus requests of the bell badge. */
+  inboxCount?: number;
   /** Opens `/notifications`; the bell is hidden without it. */
   onOpenNotifications?: () => void;
 }
 
 export function DashboardHeader({
   greeting,
-  unreadCount = 0,
+  inboxCount = 0,
   onOpenNotifications,
 }: DashboardHeaderProps) {
   const { t } = useTranslation("dashboard");
@@ -39,7 +39,7 @@ export function DashboardHeader({
       <View style={dashboardStyles.headerActions}>
         <SyncStatusButton />
         {onOpenNotifications ? (
-          <NotificationsBell count={unreadCount} onPress={onOpenNotifications} />
+          <NotificationsBell count={inboxCount} onPress={onOpenNotifications} />
         ) : null}
       </View>
     </View>

@@ -4,12 +4,6 @@
   "loading": "Loading your friends…",
   "errorTitle": "Could not load Social",
   "retryAccessibility": "Retry loading Social",
-  "pending": {
-    "rowAccessibility_one": "Pending requests: {{count}} request",
-    "rowAccessibility_other": "Pending requests: {{count}} requests",
-    "labelZero": "Pending requests",
-    "hint": "Open the list of friend requests, group invitations and requests to join your groups"
-  },
   "segments": {
     "accessibility": "Social sections",
     "friends": "Your friends",

@@ -80,7 +80,7 @@ export function DashboardScreen() {
     >
       <DashboardHeader
         greeting={greeting}
-        unreadCount={notificationsState.unreadCount}
+        inboxCount={notificationsState.inboxCount}
         onOpenNotifications={notificationsState.openNotifications}
       />
 

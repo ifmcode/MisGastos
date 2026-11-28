@@ -5,10 +5,7 @@ import type {
   FriendRequestStatus,
 } from "@/features/friends/types/friend.types";
 
-import {
-  countPendingRequests,
-  getPendingRequests,
-} from "../pending-requests";
+import { getPendingRequests } from "../pending-requests";
 
 const createdAt = "2026-11-14T10:00:00.000Z";
 
@@ -36,7 +33,6 @@ describe("getPendingRequests", () => {
     const pending = getPendingRequests({ incoming: [], outgoing: [] });
 
     expect(pending).toEqual({ incoming: [], outgoing: [], total: 0 });
-    expect(countPendingRequests({ incoming: [], outgoing: [] })).toBe(0);
   });
 
   it("counts only the incoming direction when that is all there is", () => {
@@ -68,7 +64,6 @@ describe("getPendingRequests", () => {
       "out-1",
     ]);
     expect(pending.total).toBe(3);
-    expect(countPendingRequests(overview)).toBe(3);
   });
 
   it("ignores requests that are no longer pending", () => {
@@ -106,27 +101,24 @@ describe("getPendingRequests", () => {
       "in-1",
     ]);
     expect(pending.total).toBe(3);
-    expect(countPendingRequests(overview, 2)).toBe(3);
   });
 
   it("keeps a zero owner join-request count unchanged", () => {
     const overview = { incoming: [item("in-1", "incoming")], outgoing: [] };
 
     expect(getPendingRequests(overview, 0).total).toBe(1);
-    expect(countPendingRequests(overview, 0)).toBe(1);
   });
 
   it("clamps a negative owner join-request count to zero", () => {
     const overview = { incoming: [item("in-1", "incoming")], outgoing: [] };
 
     expect(getPendingRequests(overview, -4).total).toBe(1);
-    expect(countPendingRequests(overview, -4)).toBe(1);
   });
 
   it("truncates a non-integer owner join-request count", () => {
     const overview = { incoming: [], outgoing: [] };
 
     expect(getPendingRequests(overview, 2.7).total).toBe(2);
-    expect(countPendingRequests(overview, Number.NaN)).toBe(0);
+    expect(getPendingRequests(overview, Number.NaN).total).toBe(0);
   });
 });

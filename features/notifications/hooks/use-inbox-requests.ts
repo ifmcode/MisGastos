@@ -13,11 +13,15 @@ import {
   type OwnerJoinRequestsController,
 } from "@/features/groups/hooks/use-owner-join-requests";
 import type { PendingGroupInvitationItem } from "@/features/groups/types/group.types";
+import { getPendingRequests } from "@/features/social/utils/pending-requests";
 import { useAuth } from "@/hooks/use-auth";
 
-import { getPendingRequests } from "../utils/pending-requests";
+export {
+  hasInboxRequestsContent,
+  type InboxRequestsContentState,
+} from "../utils/inbox-requests-content";
 
-export interface RequestsScreenController {
+export interface InboxRequestsController {
   loading: boolean;
   error: string | null;
   actionError: string | null;
@@ -44,10 +48,11 @@ export interface RequestsScreenController {
 }
 
 /**
- * `social/requests`: the owner join-request queue, received group invitations
- * and friend requests. Each source keeps its own loading and error state.
+ * Pendientes tab of the inbox: the owner join-request queue, received group
+ * invitations and friend requests, mixed with the informative notifications.
+ * Each source keeps its own loading and error state.
  */
-export function useRequestsScreen(): RequestsScreenController {
+export function useInboxRequests(): InboxRequestsController {
   const { user } = useAuth();
   const viewerUid = user?.uid;
   const { overview, loading, error, reload, refresh } =

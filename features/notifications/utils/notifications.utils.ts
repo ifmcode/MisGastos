@@ -9,6 +9,7 @@ import {
   type ReservedNotificationType,
   type SettlementNotificationType,
 } from "../types/notification.types";
+import { isPendingNotification } from "./notification-stamps";
 
 /** The TICKET-061 join-code events; the invite keeps its own copy. */
 export type GroupJoinNotificationType = Exclude<
@@ -24,7 +25,7 @@ const GROUP_JOIN_NOTIFICATION_TYPES: readonly GroupJoinNotificationType[] = [
 
 /**
  * Pure inbox helpers: type guards, the two stamps, the Pendientes/Vistas split
- * and the sort. Targets and hrefs live in `notification-targets.ts` and are
+ * and the sort. Targets, stamps and the badge live in sibling modules and are
  * re-exported here so consumers keep one entry point.
  */
 export {
@@ -32,6 +33,18 @@ export {
   resolveNotificationTarget,
   type NotificationTarget,
 } from "./notification-targets";
+
+export {
+  countInboxBadge,
+  countUnreadNotifications,
+  isInboxActionNotificationType,
+} from "./inbox-badge";
+
+export {
+  isPendingNotification,
+  isUnreadNotification,
+  isViewedNotification,
+} from "./notification-stamps";
 
 /** Readable types: settlements plus the TICKET-047 reserved ones. */
 export function isNotificationType(
@@ -83,25 +96,6 @@ export function isGroupJoinNotificationType(
   );
 }
 
-function hasStamp(value: string | null): boolean {
-  return value !== null && value.length > 0;
-}
-
-/** `readAt == null` (opened?): drives the unread marker in both segments. */
-export function isUnreadNotification(notification: AppNotification): boolean {
-  return !hasStamp(notification.readAt);
-}
-
-/** `seenAt == null` (presented?): Pendiente. */
-export function isPendingNotification(notification: AppNotification): boolean {
-  return !hasStamp(notification.seenAt);
-}
-
-/** Presented at least once: Vista, with or without an unread marker. */
-export function isViewedNotification(notification: AppNotification): boolean {
-  return !isPendingNotification(notification);
-}
-
 /** Newest first, then id ascending: the order never jumps around. */
 export function sortNotificationsNewestFirst(
   notifications: readonly AppNotification[],
@@ -139,10 +133,4 @@ export function getNotificationSegments(
     pending: sortNotificationsNewestFirst(pending),
     viewed: sortNotificationsNewestFirst(viewed),
   };
-}
-
-export function countUnreadNotifications(
-  notifications: readonly AppNotification[],
-): number {
-  return notifications.filter(isUnreadNotification).length;
 }

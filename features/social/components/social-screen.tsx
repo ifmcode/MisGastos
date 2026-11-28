@@ -18,8 +18,8 @@ import { SocialHeader } from "./social-header";
 import { SocialSegmentControl } from "./social-segment-control";
 
 /**
- * Social hub: header with the requests entry point, the friends/groups segments
- * and the action menu.
+ * Social hub: header with the sync status, the friends/groups segments and the
+ * action menu. Request actions live in the `/notifications` inbox.
  */
 export function SocialScreen() {
   const insets = useSafeAreaInsets();
@@ -45,10 +45,7 @@ export function SocialScreen() {
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + 16 }]}>
-      <SocialHeader
-        pendingCount={screen.pendingCount}
-        onOpenRequests={() => router.push("/social/requests" as Href)}
-      />
+      <SocialHeader />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}

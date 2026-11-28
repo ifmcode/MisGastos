@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useFriendsOverview } from "@/features/friends/hooks/use-friends-overview";
 import type { Friend } from "@/features/friends/types/friend.types";
@@ -11,7 +11,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { DEFAULT_CURRENCY } from "@/shared/constants/currencies";
 
 import type { SocialSegment } from "../types/social.types";
-import { countPendingRequests } from "../utils/pending-requests";
 import { subscribeToRequestsRefresh } from "../utils/requests-refresh-store";
 import {
   useSocialGroups,
@@ -24,7 +23,6 @@ export interface SocialScreenController {
   error: string | null;
   friends: Friend[];
   friendsLoading: boolean;
-  pendingCount: number;
   segment: SocialSegment;
   setSegment: (segment: SocialSegment) => void;
   menuVisible: boolean;
@@ -64,13 +62,6 @@ export function useSocialScreen(): SocialScreenController {
     onSaved: handleGroupSaved,
   });
 
-  const pendingCount = useMemo(
-    () =>
-      countPendingRequests(overview, groups.joinRequestsCount) +
-      groups.invitationsCount,
-    [overview, groups.invitationsCount, groups.joinRequestsCount],
-  );
-
   // Friends, groups and received invitations reload together after the
   // requests routes report a change.
   const refreshAll = useCallback(() => {
@@ -102,7 +93,6 @@ export function useSocialScreen(): SocialScreenController {
     error,
     friends: overview.friends,
     friendsLoading: loading,
-    pendingCount,
     segment,
     setSegment,
     menuVisible,

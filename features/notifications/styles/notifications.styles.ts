@@ -120,6 +120,10 @@ export const notificationsStyles = StyleSheet.create({
     gap: 8,
     paddingTop: 2,
   },
+  requestsBlock: {
+    gap: 16,
+    paddingBottom: 4,
+  },
   markAllRow: {
     flexDirection: "row",
     alignItems: "center",

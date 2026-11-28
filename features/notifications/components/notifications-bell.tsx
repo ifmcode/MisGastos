@@ -2,12 +2,12 @@ import { IconBadgeButton } from "@/shared/components/molecules/icon-badge-button
 import { useScopedTranslation } from "@/shared/hooks/use-scoped-translation";
 
 export interface NotificationsBellProps {
-  /** Unread notifications; the badge is hidden when it is zero. */
+  /** Pending items of the inbox (notifications plus requests); hidden at zero. */
   count: number;
   onPress: () => void;
 }
 
-/** Dashboard bell with the unread badge and its screen-reader summary. */
+/** Dashboard bell with the inbox badge and its screen-reader summary. */
 export function NotificationsBell({ count, onPress }: NotificationsBellProps) {
   const { t } = useScopedTranslation("notifications");
 

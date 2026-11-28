@@ -17,9 +17,15 @@ import {
 import {
   buildNotificationTargetHref,
   getNotificationSegments,
+  isInboxActionNotificationType,
   isUnreadNotification,
   resolveNotificationTarget,
 } from "../utils/notifications.utils";
+import {
+  hasInboxRequestsContent,
+  useInboxRequests,
+  type InboxRequestsController,
+} from "./use-inbox-requests";
 import { useNotifications } from "./use-notifications";
 
 export type NotificationsScreenStatus = "loading" | "error" | "ready";
@@ -28,8 +34,11 @@ export interface NotificationsScreenController {
   status: NotificationsScreenStatus;
   segment: NotificationSegment;
   segmentCounts: NotificationSegmentCounts;
-  /** Rows of the active segment only. */
+  /** Rows of the active segment only; action types are never rows. */
   rows: NotificationRowModel[];
+  /** Actionable queue of Pendientes (friend, group and join requests). */
+  requests: InboxRequestsController;
+  hasRequests: boolean;
   error: string | null;
   actionError: string | null;
   /** Mark-all-read lives in Pendientes and needs at least one unread row. */
@@ -42,9 +51,10 @@ export interface NotificationsScreenController {
 }
 
 /**
- * Inbox composition: the two segments, the rows of the active one, the actor
- * names of the friend overview and the target navigation. The list is not
- * blocked by the overview, because a missing friend has its own fallback copy.
+ * Inbox composition: the two segments, the rows of the active one, the action
+ * queue of Pendientes, the actor names of the friend overview and the target
+ * navigation. Action notifications never become rows, so the queue is their
+ * only representation.
  */
 export function useNotificationsScreen(): NotificationsScreenController {
   const router = useRouter();
@@ -52,12 +62,21 @@ export function useNotificationsScreen(): NotificationsScreenController {
   const locale = useAppLocale();
   const { tr } = useScopedTranslation("notifications");
   const inbox = useNotifications({ viewerUid: user?.uid });
+  const requests = useInboxRequests();
   const overview = useFriendsOverview({ viewerUid: user?.uid });
   const [segment, setSegment] = useState<NotificationSegment>("pending");
 
-  const segments = useMemo(
-    () => getNotificationSegments(inbox.notifications),
+  const informational = useMemo(
+    () =>
+      inbox.notifications.filter(
+        (notification) => !isInboxActionNotificationType(notification.type),
+      ),
     [inbox.notifications],
+  );
+
+  const segments = useMemo(
+    () => getNotificationSegments(informational),
+    [informational],
   );
 
   const rows = useMemo(
@@ -95,8 +114,9 @@ export function useNotificationsScreen(): NotificationsScreenController {
 
   const reload = useCallback(() => {
     inbox.reload();
+    requests.reload();
     void overview.reload();
-  }, [inbox.reload, overview.reload]);
+  }, [inbox.reload, overview.reload, requests.reload]);
 
   const status: NotificationsScreenStatus = inbox.loading
     ? "loading"
@@ -108,10 +128,12 @@ export function useNotificationsScreen(): NotificationsScreenController {
     status,
     segment,
     segmentCounts: {
-      pending: segments.pending.length,
+      pending: segments.pending.length + requests.total,
       viewed: segments.viewed.length,
     },
     rows,
+    requests,
+    hasRequests: hasInboxRequestsContent(requests),
     error: inbox.error,
     actionError: inbox.actionError,
     canMarkAllRead:
