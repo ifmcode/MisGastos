@@ -1,13 +1,9 @@
 import type { INotificationsRepository } from "@/features/notifications/repositories/notifications.repository";
 
 import {
-  buildGroupInviteNotification,
   buildGroupJoinOutcomeNotification,
-  buildGroupJoinRequestNotification,
   buildGroupSettlementNotification,
-  type GroupInviteNotificationInput,
   type GroupJoinOutcomeNotificationInput,
-  type GroupJoinRequestNotificationInput,
   type GroupSettlementNotificationInput,
   type IGroupNotificationPort,
 } from "./group-notification.port";
@@ -18,20 +14,6 @@ import {
  */
 export class FirebaseGroupNotificationPort implements IGroupNotificationPort {
   constructor(private readonly notifications: INotificationsRepository) {}
-
-  async notifyGroupInvite(input: GroupInviteNotificationInput): Promise<void> {
-    await this.notifications.createNotification(
-      buildGroupInviteNotification(input),
-    );
-  }
-
-  async notifyJoinRequest(
-    input: GroupJoinRequestNotificationInput,
-  ): Promise<void> {
-    await this.notifications.createNotification(
-      buildGroupJoinRequestNotification(input),
-    );
-  }
 
   async notifyJoinOutcome(
     input: GroupJoinOutcomeNotificationInput,

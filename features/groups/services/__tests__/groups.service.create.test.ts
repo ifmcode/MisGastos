@@ -12,7 +12,7 @@ const input = {
 };
 
 describe("GroupsService.createGroup", () => {
-  it("creates the group for a friend invitee and notifies them", async () => {
+  it("creates the group for a friend invitee without notifying", async () => {
     const { repository, friends, notifications, service } =
       createGroupsHarness();
     seedFriend(friends, "user-b");
@@ -27,14 +27,9 @@ describe("GroupsService.createGroup", () => {
       defaultCurrency: "EUR",
       inviteeIds: ["user-b"],
     });
-    expect(notifications.sent).toEqual([
-      expect.objectContaining({
-        invitationId: `${group.id}__user-b`,
-        groupId: group.id,
-        inviteeId: "user-b",
-        inviterId: "user-a",
-      }),
-    ]);
+    // The pending invitations are actionable cards, not notifications.
+    expect(notifications.joinOutcomes).toEqual([]);
+    expect(notifications.settlements).toEqual([]);
   });
 
   it("rejects an invitee who is not an accepted friend", async () => {
@@ -57,16 +52,6 @@ describe("GroupsService.createGroup", () => {
       service.createGroup("user-a", { ...input, inviteeIds: ["user-b", "user-b"] }),
     ).rejects.toBeInstanceOf(GroupValidationError);
     expect(repository.createInputs).toEqual([]);
-  });
-
-  it("keeps the group when a notification cannot be written", async () => {
-    const { friends, notifications, service } = createGroupsHarness();
-    seedFriend(friends, "user-b");
-    notifications.failure = new Error("notifications unavailable");
-
-    await expect(service.createGroup("user-a", input)).resolves.toMatchObject({
-      ownerId: "user-a",
-    });
   });
 
   it("requires a signed-in owner", async () => {

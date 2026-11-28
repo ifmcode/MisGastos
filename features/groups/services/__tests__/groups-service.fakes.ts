@@ -2,9 +2,7 @@ import { createFriendPairId } from "@/features/friends/utils/friend-pair";
 
 import type { IGroupNotificationPort } from "../../repositories/group-notification.port";
 import type {
-  GroupInviteNotificationInput,
   GroupJoinOutcomeNotificationInput,
-  GroupJoinRequestNotificationInput,
   GroupSettlementNotificationInput,
 } from "../../repositories/group-notification.port";
 import type { IGroupsRepository } from "../../repositories/groups.repository";
@@ -539,23 +537,9 @@ export class FakeGroupsRepository implements IGroupsRepository {
 }
 
 export class FakeGroupNotificationPort implements IGroupNotificationPort {
-  readonly sent: GroupInviteNotificationInput[] = [];
-  readonly joinRequests: GroupJoinRequestNotificationInput[] = [];
   readonly joinOutcomes: GroupJoinOutcomeNotificationInput[] = [];
   readonly settlements: GroupSettlementNotificationInput[] = [];
   failure: Error | null = null;
-
-  async notifyGroupInvite(input: GroupInviteNotificationInput): Promise<void> {
-    this.sent.push(input);
-    if (this.failure) throw this.failure;
-  }
-
-  async notifyJoinRequest(
-    input: GroupJoinRequestNotificationInput,
-  ): Promise<void> {
-    this.joinRequests.push(input);
-    if (this.failure) throw this.failure;
-  }
 
   async notifyJoinOutcome(
     input: GroupJoinOutcomeNotificationInput,

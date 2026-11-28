@@ -403,14 +403,15 @@ service cloud.firestore {
       return isSignedIn() && data.userId == request.auth.uid;
     }
 
+    // Writable today: a pending invite or join request is an actionable card of
+    // its own screen, so only results are written here. The retired
+    // `group-invite`/`group-join-request` rows stay readable.
     function isNotificationType(value) {
       return value in
         [
           'settlement-created',
           'settlement-updated',
           'settlement-deleted',
-          'group-invite',
-          'group-join-request',
           'group-join-accepted',
           'group-join-rejected',
           'group-settlement'
@@ -442,22 +443,8 @@ service cloud.firestore {
         && payload.canLinkWallet is bool;
     }
 
-    // `group-invite` payload (TICKET-008): ids plus the denormalized group name,
-    // so the invitee row never reads the group. `friendUid` is the inviter.
-    function hasGroupInviteNotificationPayload(payload) {
-      return payload is map
-        && payload.keys().hasOnly(
-             ['invitationId', 'groupId', 'groupName', 'friendUid']
-           )
-        && isGroupText(payload.invitationId, 1500)
-        && isGroupText(payload.groupId, 1500)
-        && isGroupText(payload.groupName, 60)
-        && isGroupText(payload.friendUid, 1500);
-    }
-
-    // TICKET-061 payload: request id, group, denormalized name and the actor.
-    // On the request event `friendUid` is the requester; on the outcome it is
-    // the owner. The copy never names them.
+    // TICKET-061 outcome payload: request id, group, denormalized name and the
+    // actor (the owner). The copy never names them.
     function hasGroupJoinNotificationPayload(payload) {
       return payload is map
         && payload.keys().hasOnly(
@@ -494,96 +481,31 @@ service cloud.firestore {
     }
 
     function hasNotificationPayload(data) {
-      return data.type == 'group-invite'
-        ? hasGroupInviteNotificationPayload(data.payload)
+      return (data.type in ['group-join-accepted', 'group-join-rejected'])
+        ? hasGroupJoinNotificationPayload(data.payload)
         : (
-            data.type in
-              [
-                'group-join-request',
-                'group-join-accepted',
-                'group-join-rejected'
-              ]
-              ? hasGroupJoinNotificationPayload(data.payload)
-              : (
-                  data.type == 'group-settlement'
-                    ? hasGroupSettlementNotificationPayload(data.payload)
-                    : hasSettlementNotificationPayload(data.payload)
-                )
+            data.type == 'group-settlement'
+              ? hasGroupSettlementNotificationPayload(data.payload)
+              : hasSettlementNotificationPayload(data.payload)
           );
     }
 
-    // The invitee is the recipient, the actor is the inviter, and the referenced
-    // invitation must agree with the payload. `getAfter` keeps working if a
-    // future producer writes the invitation and the notification together.
-    function isGroupInviteNotificationTarget(data) {
-      return isGroupInviteFor(
+    // TICKET-061 outcome: the owner decides and the requester receives the
+    // result. The event reads the request and the group with `getAfter`, so it
+    // works whether the notification is written after or with the decision. The
+    // deterministic dedupe key is part of the event: a requester cannot mint
+    // extra rows by inventing notification ids for the same request.
+    function isGroupJoinNotificationTarget(data, notificationId) {
+      return isJoinOutcomeNotificationFor(
         getAfter(
           /databases/$(database)/documents/groups/$(data.payload.groupId)
         ).data,
         getAfter(
-          /databases/$(database)/documents/groupInvitations/$(data.payload.invitationId)
+          /databases/$(database)/documents/groupJoinRequests/$(data.payload.requestId)
         ).data,
-        data
+        data,
+        notificationId
       );
-    }
-
-    // The referenced group must belong to the actor: an invitation document
-    // alone cannot authorize a notification for someone else's group. Keyed on
-    // the current `ownerId` (never the id prefix), so a promoted owner can
-    // notify after a TICKET-068 transfer.
-    function isGroupInviteFor(group, invitation, notification) {
-      return group.ownerId == request.auth.uid
-        && invitation.inviteeId == notification.userId
-        && invitation.inviterId == request.auth.uid
-        && invitation.inviterId == notification.payload.friendUid
-        && invitation.groupId == notification.payload.groupId
-        && invitation.groupName == notification.payload.groupName
-        && invitation.status == 'pending';
-    }
-
-    // TICKET-061: the owner receives the request and the requester the outcome.
-    // Both events read the request and the group with `getAfter`, so they work
-    // whether the notification is written after or with the decision. The
-    // deterministic dedupe key is part of the event: a requester cannot mint
-    // extra rows by inventing notification ids for the same request.
-    function isGroupJoinNotificationTarget(data, notificationId) {
-      return data.type == 'group-join-request'
-        ? isJoinRequestNotificationFor(
-            getAfter(
-              /databases/$(database)/documents/groups/$(data.payload.groupId)
-            ).data,
-            getAfter(
-              /databases/$(database)/documents/groupJoinRequests/$(data.payload.requestId)
-            ).data,
-            data,
-            notificationId
-          )
-        : isJoinOutcomeNotificationFor(
-            getAfter(
-              /databases/$(database)/documents/groups/$(data.payload.groupId)
-            ).data,
-            getAfter(
-              /databases/$(database)/documents/groupJoinRequests/$(data.payload.requestId)
-            ).data,
-            data,
-            notificationId
-          );
-    }
-
-    function isJoinRequestNotificationFor(
-      group,
-      request,
-      notification,
-      notificationId
-    ) {
-      return request.groupId == notification.payload.groupId
-        && request.requesterId == request.auth.uid
-        && request.requesterId == notification.payload.friendUid
-        && request.status == 'pending'
-        && group.ownerId == notification.userId
-        && group.name == notification.payload.groupName
-        && notificationId == 'group-join-request:'
-             + notification.payload.requestId + ':' + request.createdAt;
     }
 
     function isJoinOutcomeNotificationFor(
@@ -660,8 +582,8 @@ service cloud.firestore {
       return isSignedIn()
         && data.userId != request.auth.uid
         && data.payload is map
-        // Presence guard: a group-invite payload has no settlementId, and
-        // reading a missing map key would fail the whole get evaluation.
+        // Presence guard: a group-join outcome payload has no settlementId,
+        // and reading a missing map key would fail the whole get evaluation.
         && ('settlementId' in data.payload)
         && data.payload.settlementId is string
         && request.auth.uid in getAfter(
@@ -684,27 +606,13 @@ service cloud.firestore {
            ).data.participantIds;
     }
 
-    // The inviter may read the deterministic `group-invite` document so
-    // `createNotificationOperation` can skip an already written event. The
-    // recipient's readAt stays private because this only matches the actor.
-    function isGroupInviteNotificationActor(data) {
-      return isSignedIn()
-        && data.type == 'group-invite'
-        && data.payload is map
-        && ('friendUid' in data.payload)
-        && data.payload.friendUid == request.auth.uid;
-    }
-
-    // TICKET-061 actor: the requester on the request event and the owner on the
-    // outcome. Same narrow grant as group-invite: only their own dedupe id.
+    // TICKET-061 actor: the owner writes the outcome and may read the
+    // deterministic document so `createNotificationOperation` can skip an
+    // already written event. Only their own dedupe id matches.
     function isGroupJoinNotificationActor(data) {
       return isSignedIn()
         && data.type in
-          [
-            'group-join-request',
-            'group-join-accepted',
-            'group-join-rejected'
-          ]
+          ['group-join-accepted', 'group-join-rejected']
         && data.payload is map
         && ('friendUid' in data.payload)
         && data.payload.friendUid == request.auth.uid;
@@ -2549,27 +2457,27 @@ service cloud.firestore {
     // un-read nor moved from Vistas back to Pendientes.
     //
     // The reserved TICKET-047 types (`friend-request`, `friend-request-accepted`,
-    // `group-expense`, `group-settlement`) are read-compatible on the client but
-    // NOT writable yet: no producer exists. `isNotificationType` allows the
-    // three settlement events, the TICKET-008 `group-invite` producer and the
-    // three TICKET-061 join-code events.
+    // `group-expense`) are read-compatible on the client but NOT writable yet: no
+    // producer exists. `isNotificationType` allows the three settlement events,
+    // the two TICKET-061 join-code outcome events and `group-settlement`. The
+    // retired `group-invite` and `group-join-request` producers wrote a duplicate
+    // badge over the actionable invitation and request cards, so their legacy
+    // rows stay readable but cannot be created.
     //
     // No composite index: `getNotificationsOperation`/`listenNotificationsOperation`
     // filter only with `where('userId', '==', uid)` and sort client-side.
     match /notifications/{notificationId} {
       // The actor needs a single `get` by its deterministic id to make the
-      // settlement transaction (and the group-invite producer) idempotent; the
-      // inbox `list` stays owner-only. A missing id must resolve to not-found
-      // instead of permission-denied so the first write can decide whether to
-      // create it. Same deliberate existence-oracle trade-off as the friend
-      // pair documents.
+      // settlement and outcome transactions idempotent; the inbox `list` stays
+      // owner-only. A missing id must resolve to not-found instead of
+      // permission-denied so the first write can decide whether to create it.
+      // Same deliberate existence-oracle trade-off as the friend pair documents.
       allow get: if isSignedIn()
         && (
           !exists(/databases/$(database)/documents/notifications/$(notificationId))
           || isNotificationOwner(resource.data)
           || isGroupSettlementNotificationActor(resource.data)
           || isSettlementNotificationActor(resource.data)
-          || isGroupInviteNotificationActor(resource.data)
           || isGroupJoinNotificationActor(resource.data)
         );
 
@@ -2591,30 +2499,20 @@ service cloud.firestore {
         && request.resource.data.get('seenAt', null) == null
         && request.resource.data.createdAt is string
         && (
-          request.resource.data.type == 'group-invite'
-            ? isGroupInviteNotificationTarget(request.resource.data)
+          (request.resource.data.type in
+            ['group-join-accepted', 'group-join-rejected'])
+            ? isGroupJoinNotificationTarget(
+                request.resource.data,
+                notificationId
+              )
             : (
-                request.resource.data.type in
-                  [
-                    'group-join-request',
-                    'group-join-accepted',
-                    'group-join-rejected'
-                  ]
-                  ? isGroupJoinNotificationTarget(
-                      request.resource.data,
-                      notificationId
-                    )
-                  : (
-                      request.resource.data.type == 'group-settlement'
-                        ? isGroupSettlementNotificationTarget(
-                            request.resource.data
-                          )
-                        : isNotificationTargetFor(
-                            getAfter(
-                              /databases/$(database)/documents/settlements/$(request.resource.data.payload.settlementId)
-                            ).data,
-                            request.resource.data
-                          )
+                request.resource.data.type == 'group-settlement'
+                  ? isGroupSettlementNotificationTarget(request.resource.data)
+                  : isNotificationTargetFor(
+                      getAfter(
+                        /databases/$(database)/documents/settlements/$(request.resource.data.payload.settlementId)
+                      ).data,
+                      request.resource.data
                     )
               )
         );

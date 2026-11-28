@@ -4,7 +4,6 @@ import type {
 } from "../types/group-join.types";
 import type { GroupWriteDeps } from "./group-deps";
 import { GroupOperationError } from "./group.errors";
-import { notifyGroupJoinRequest } from "./group-notify";
 import { lookupGroupJoinCode } from "./group-join-lookup";
 
 function assertJoinableStatus(status: GroupJoinRequestStatus | null): void {
@@ -17,10 +16,11 @@ function assertJoinableStatus(status: GroupJoinRequestStatus | null): void {
 /**
  * Re-validates everything before writing: a member, a pending request and a
  * resolved (accepted/rejected/cancelled) one each get their own stable code, so
- * nothing is written for them. The owner notification is best-effort.
+ * nothing is written for them. The owner sees the request as an actionable card
+ * of the group detail, so no notification is written.
  */
 export async function requestToJoinGroup(
-  { repository, notifications }: GroupWriteDeps,
+  { repository }: GroupWriteDeps,
   viewerUid: string,
   rawCode: unknown,
 ): Promise<GroupJoinRequest> {
@@ -35,15 +35,6 @@ export async function requestToJoinGroup(
     requesterId: viewerUid,
     joinCode: lookup.code,
     createdAt: new Date().toISOString(),
-  });
-
-  await notifyGroupJoinRequest(notifications, {
-    requestId: request.id,
-    groupId: lookup.groupId,
-    groupName: lookup.groupName,
-    requesterId: viewerUid,
-    ownerId: lookup.ownerId,
-    notifiedAt: request.createdAt,
   });
 
   return request;

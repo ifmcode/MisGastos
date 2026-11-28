@@ -3,7 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 import { createGroupsHarness, seedFriend } from "./groups-service.harness";
 
 describe("GroupsService.inviteMembers", () => {
-  it("invites a friend that is not a member and notifies them", async () => {
+  it("invites a friend that is not a member and not a pending one", async () => {
     const { repository, friends, notifications, service } =
       createGroupsHarness();
     const group = repository.seedGroup();
@@ -20,7 +20,8 @@ describe("GroupsService.inviteMembers", () => {
       inviteeIds: ["user-c"],
     });
     expect(invitations).toHaveLength(1);
-    expect(notifications.sent[0]).toMatchObject({ inviteeId: "user-c" });
+    // The pending invitations are actionable cards, not notifications.
+    expect(notifications.joinOutcomes).toEqual([]);
   });
 
   it("skips current members without writing", async () => {
@@ -109,17 +110,5 @@ describe("GroupsService.inviteMembers", () => {
     await expect(
       service.inviteMembers("user-a", "missing", ["user-b"]),
     ).rejects.toMatchObject({ code: "GROUP_NOT_FOUND" });
-  });
-
-  it("keeps the invitations when a notification fails", async () => {
-    const { repository, friends, notifications, service } =
-      createGroupsHarness();
-    const group = repository.seedGroup();
-    seedFriend(friends, "user-c");
-    notifications.failure = new Error("unavailable");
-
-    await expect(
-      service.inviteMembers("user-a", group.id, ["user-c"]),
-    ).resolves.toHaveLength(1);
   });
 });

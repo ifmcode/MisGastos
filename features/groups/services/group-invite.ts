@@ -4,16 +4,17 @@ import { normalizeGroupInviteeIds } from "../utils/group-membership";
 import type { GroupWriteDeps } from "./group-deps";
 import { GroupOperationError } from "./group.errors";
 import { assertInviteesAreFriends, loadFriendUids } from "./group-friendship";
-import { notifyGroupInvitations } from "./group-notify";
 
 /**
  * Extra invite round. A pending invitation reserves a seat, so the capacity
  * check counts members + pending + new together and the owner can never queue
  * more invitations than the group can honour. Members and friends with a
  * pending invitation are skipped silently; a non-friend is a NOT_FRIEND error.
+ * The invitations screen shows them as actionable cards, so no notification is
+ * written.
  */
 export async function inviteMembersToGroup(
-  { repository, friendsRepository, notifications }: GroupWriteDeps,
+  { repository, friendsRepository }: GroupWriteDeps,
   viewerUid: string,
   group: Group,
   inviteeIds: readonly string[],
@@ -43,8 +44,6 @@ export async function inviteMembersToGroup(
     inviteeIds: candidates,
     updatedAt: new Date().toISOString(),
   });
-
-  await notifyGroupInvitations(notifications, invitations);
 
   return invitations;
 }

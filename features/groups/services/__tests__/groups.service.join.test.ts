@@ -54,7 +54,7 @@ describe("GroupsService.lookupJoinCode", () => {
 });
 
 describe("GroupsService.requestToJoin", () => {
-  it("creates the pending request and notifies the owner", async () => {
+  it("creates the pending request without writing a notification", async () => {
     const { repository, notifications, service } = createGroupsHarness();
     const group = repository.seedGroup();
     repository.seedCode(group);
@@ -72,15 +72,8 @@ describe("GroupsService.requestToJoin", () => {
       requesterId: "user-b",
       joinCode: "ABCD2345",
     });
-    expect(notifications.joinRequests).toEqual([
-      expect.objectContaining({
-        requestId: request.id,
-        groupId: group.id,
-        groupName: "Viaje",
-        requesterId: "user-b",
-        ownerId: "user-a",
-      }),
-    ]);
+    // The group detail shows the request as an actionable card.
+    expect(notifications.joinOutcomes).toEqual([]);
   });
 
   it("rejects a member, a pending request and a resolved one", async () => {
@@ -111,17 +104,6 @@ describe("GroupsService.requestToJoin", () => {
     ).rejects.toMatchObject({ code: "JOIN_REQUEST_RESOLVED" });
 
     expect(repository.joinRequestInputs).toEqual([]);
-  });
-
-  it("keeps the request when the notification cannot be written", async () => {
-    const { repository, notifications, service } = createGroupsHarness();
-    const group = repository.seedGroup();
-    repository.seedCode(group);
-    notifications.failure = new Error("notifications unavailable");
-
-    await expect(service.requestToJoin("user-b", "ABCD2345")).resolves.toMatchObject(
-      { status: "pending" },
-    );
   });
 });
 
